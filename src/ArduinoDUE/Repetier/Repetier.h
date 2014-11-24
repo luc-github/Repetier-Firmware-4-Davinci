@@ -325,6 +325,9 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define MENU_MODE_SD_PAUSED 4
 #define MENU_MODE_FAN_RUNNING 8
 #define MENU_MODE_PRINTING 16
+#define MENU_MODE_STOP_REQUESTED 32
+#define MENU_MODE_STOP_DONE  64
+#define MENU_MODE_GCODE_PROCESSING  128
 
 #include "HAL.h"
 #include "gcode.h"
@@ -335,6 +338,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 
 #include "ui.h"
 #include "Communication.h"
+
 
 #ifndef SDCARDDETECT
 #define SDCARDDETECT       -1
@@ -503,8 +507,21 @@ public:
   bool savetosd;
   SdBaseFile parentFound;
 
+#ifdef SDEEPROM
+#define SD_EEPROM_FILENAME "eeprom.bin"
+  char * eepromBuffer;
+  uint32_t eepromSize;
+  SdFile eepromFile;
+  inline void setupEeprom(char * buffer, uint32_t size) {
+	  eepromBuffer = buffer;
+	  eepromSize = size;
+  };
+  bool syncEeprom();
+#endif
+
   SDCard();
   void initsd();
+  void autoPrint();
   void writeCommand(GCode *code);
   bool selectFile(const char *filename,bool silent=false);
   void mount();
@@ -522,6 +539,9 @@ public:
   char *createFilename(char *buffer,const dir_t &p);
   void makeDirectory(char *filename);
   bool showFilename(const uint8_t *name);
+ #if HIDE_BINARY_ON_SD
+ static bool showFilename( dir_t*p,const char *filename);
+ #endif
   void automount();
 #ifdef GLENN_DEBUG
   void writeToFile();

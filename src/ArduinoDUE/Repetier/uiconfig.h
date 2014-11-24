@@ -55,6 +55,13 @@ Currently supported hardware:
 #ifndef _ui_config_h
 #define _ui_config_h
 
+#define FLAG_OK					1 
+#define FLAG_NEXT				2 
+#define FLAG_PREVIOUS		4 
+#define FLAG_BACK				8
+#define FLAG_RIGHT 			16
+#define FLAG_TOPMENU 	32 
+
 /** While the ascii chars are all the same, the driver have different charsets
 for special chars used in different countries. The charset allows to fix for
 this problem. If characters look wrong, try a different charset. If nothing
@@ -65,7 +72,7 @@ works, use the ascii charset 0 as fallback. Not the nicest for everything but wo
 2 = Alternative charset with more european chars
 
 */
-#define UI_DISPLAY_CHARSET 2
+#define UI_DISPLAY_CHARSET 1
 
 /** Select type of beeper
 0 = none
@@ -78,7 +85,7 @@ works, use the ascii charset 0 as fallback. Not the nicest for everything but wo
 #endif
 
 #if BEEPER_TYPE==1 && !defined(BEEPER_PIN)
-#define BEEPER_PIN 37
+#define BEEPER_PIN 66
 #endif
 #if BEEPER_TYPE==2
 #define BEEPER_ADDRESS 0x40 // I2C address of the chip with the beeper pin
@@ -98,7 +105,7 @@ What display type do you use?
                If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
 5 = U8G supported display
 */
-#define UI_DISPLAY_TYPE NO_DISPLAY
+#define UI_DISPLAY_TYPE 1
 
 #if UI_DISPLAY_TYPE == DISPLAY_U8G // Special case for graphic displays
 
@@ -126,7 +133,7 @@ What display type do you use?
 /** Number of columns per row
 Typical values are 16 and 20
 */
-#define UI_COLS 20
+#define UI_COLS 16
 /**
 Rows of your display. 2 or 4
 */
@@ -191,18 +198,20 @@ Define the pin
 #define UI_DISPLAY_D7_PIN _BV(9)*/
 
 #else // Direct display connections
-#define UI_DISPLAY_RS_PIN		63		// PINK.1, 88, D_RS
+#define UI_DISPLAY_RS_PIN		8		// PINK.1, 88, D_RS
 #define UI_DISPLAY_RW_PIN		-1
-#define UI_DISPLAY_ENABLE_PIN	        65		// PINK.3, 86, D_E
-#define UI_DISPLAY_D0_PIN		59		// PINF.5, 92, D_D4
-#define UI_DISPLAY_D1_PIN		64		// PINK.2, 87, D_D5
-#define UI_DISPLAY_D2_PIN		44		// PINL.5, 40, D_D6
-#define UI_DISPLAY_D3_PIN		66		// PINK.4, 85, D_D7
-#define UI_DISPLAY_D4_PIN		59		// PINF.5, 92, D_D4
-#define UI_DISPLAY_D5_PIN		64		// PINK.2, 87, D_D5
-#define UI_DISPLAY_D6_PIN		44		// PINL.5, 40, D_D6
-#define UI_DISPLAY_D7_PIN		66		// PINK.4, 85, D_D7
-#define UI_DELAYPERCHAR		   320
+#define UI_DISPLAY_ENABLE_PIN	        125		// PINK.3, 86, D_E
+#define UI_DISPLAY_D0_PIN		34		// PINF.5, 92, D_D4
+#define UI_DISPLAY_D1_PIN		35		// PINK.2, 87, D_D5
+#define UI_DISPLAY_D2_PIN		36		// PINL.5, 40, D_D6
+#define UI_DISPLAY_D3_PIN		37		// PINK.4, 85, D_D7
+#define UI_DISPLAY_D4_PIN		38		// PINF.5, 92, D_D4
+#define UI_DISPLAY_D5_PIN		39		// PINK.2, 87, D_D5
+#define UI_DISPLAY_D6_PIN		40		// PINL.5, 40, D_D6
+#define UI_DISPLAY_D7_PIN		41		// PINK.4, 85, D_D7
+#define UI_DELAYPERCHAR		        320
+
+#define UI_BACKLIGHT_PIN                78
 
 #endif
 
@@ -212,7 +221,7 @@ Define the pin
 0 = No keys attached - disables also menu
 1 = Some keys attached
 */
-#define UI_HAS_KEYS 0
+#define UI_HAS_KEYS 1
 
 
 /** \brief Is a back key present.
@@ -338,11 +347,12 @@ const int matrixActions[] PROGMEM = UI_MATRIX_ACTIONS;
 void uiInitKeys() {
 #if UI_HAS_KEYS!=0
   //UI_KEYS_INIT_CLICKENCODER_LOW(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
-  UI_KEYS_INIT_BUTTON_LOW(4); // push button, connects gnd to pin
-  UI_KEYS_INIT_BUTTON_LOW(5);
-  UI_KEYS_INIT_BUTTON_LOW(6);
-  UI_KEYS_INIT_BUTTON_LOW(11);
-  UI_KEYS_INIT_BUTTON_LOW(42);
+  UI_KEYS_INIT_BUTTON_LOW(44); // push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(10);
+  UI_KEYS_INIT_BUTTON_LOW(72);
+  UI_KEYS_INIT_BUTTON_LOW(75);
+  UI_KEYS_INIT_BUTTON_LOW(76);
+  UI_KEYS_INIT_BUTTON_LOW(77);
 
 //  UI_KEYS_INIT_CLICKENCODER_LOW(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
 //  UI_KEYS_INIT_BUTTON_LOW(43); // push button, connects gnd to pin
@@ -351,13 +361,30 @@ void uiInitKeys() {
 }
 void uiCheckKeys(int &action) {
 #if UI_HAS_KEYS!=0
-
+ int key_flag=0;
  //UI_KEYS_CLICKENCODER_LOW_REV(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
- UI_KEYS_BUTTON_LOW(4,UI_ACTION_OK); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(5,UI_ACTION_NEXT); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(6,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(11,UI_ACTION_BACK); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(42,UI_ACTION_SD_PRINT ); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(76,UI_ACTION_OK); // push button, connects gnd to pin
+ if (action==UI_ACTION_OK)key_flag = key_flag|FLAG_OK;
+ UI_KEYS_BUTTON_LOW(10,UI_ACTION_NEXT); // push button, connects gnd to pin
+  if (action==UI_ACTION_NEXT)key_flag = key_flag|FLAG_NEXT;
+ UI_KEYS_BUTTON_LOW(44,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
+  if (action==UI_ACTION_PREVIOUS)key_flag = key_flag|FLAG_PREVIOUS;
+ UI_KEYS_BUTTON_LOW(75,UI_ACTION_BACK); // push button, connects gnd to pin
+  if (action==UI_ACTION_BACK)key_flag = key_flag|FLAG_BACK;
+ UI_KEYS_BUTTON_LOW(72,UI_ACTION_RIGHT_KEY); // push button, connects gnd to pin
+  if (action==UI_ACTION_RIGHT_KEY)key_flag = key_flag|FLAG_RIGHT;
+ UI_KEYS_BUTTON_LOW(77,UI_ACTION_TOP_MENU); // push button, connects gnd to pin
+  if (action==UI_ACTION_TOP_MENU)key_flag = key_flag|FLAG_TOPMENU;
+  if (key_flag==(FLAG_OK|FLAG_PREVIOUS|FLAG_TOPMENU))action=UI_ACTION_OK_TOP_PREV;
+  if (key_flag==(FLAG_OK|FLAG_NEXT|FLAG_TOPMENU))action=UI_ACTION_OK_TOP_NEXT;
+  if (key_flag==(FLAG_OK|FLAG_NEXT|FLAG_TOPMENU))action=UI_ACTION_OK_TOP_BACK;
+  if (key_flag==(FLAG_OK|FLAG_RIGHT|FLAG_BACK))action=UI_ACTION_OK_TOP_RIGHT;
+  if (key_flag==(FLAG_OK|FLAG_NEXT|FLAG_BACK))action=UI_ACTION_OK_NEXT_BACK;
+  if (key_flag==(FLAG_OK|FLAG_NEXT|FLAG_PREVIOUS))action=UI_ACTION_OK_NEXT_PREV;
+  if (key_flag==(FLAG_OK|FLAG_NEXT|FLAG_RIGHT))action=UI_ACTION_OK_NEXT_RIGHT;
+  if (key_flag==(FLAG_OK|FLAG_PREVIOUS|FLAG_RIGHT))action=UI_ACTION_OK_PREV_RIGHT;
+  if (key_flag==(FLAG_OK|FLAG_PREVIOUS|FLAG_BACK))action=UI_ACTION_OK_PREV_BACK;
+  
 //  UI_KEYS_CLICKENCODER_LOW_REV(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
 //  UI_KEYS_BUTTON_LOW(43,UI_ACTION_OK); // push button, connects gnd to pin
 #endif

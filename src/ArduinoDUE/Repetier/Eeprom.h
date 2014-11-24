@@ -108,9 +108,9 @@ have problems with other modules using the eeprom */
 #define EPR_TOUCHSCREEN           946 // - 975 = 30 byte for touchscreen calibration data
 
 // Axis compensation
-#define EPR_AXISCOMP_TANXY			976
-#define EPR_AXISCOMP_TANYZ			980
-#define EPR_AXISCOMP_TANXZ			984
+#define EPR_AXISCOMP_TANXY          976
+#define EPR_AXISCOMP_TANYZ          980
+#define EPR_AXISCOMP_TANXZ          984
 
 #if EEPROM_MODE != 0
 #define EEPROM_FLOAT(x) HAL::eprGetFloat(EPR_##x)
@@ -147,7 +147,7 @@ have problems with other modules using the eeprom */
 // 55-57 free for byte sized parameter
 #define EPR_EXTRUDER_MIXING_RATIOS  58 // 16*2 byte ratios = 32 byte -> end = 89
 #ifndef Z_PROBE_BED_DISTANCE
-#define Z_PROBE_BED_DISTANCE 5.0
+#define Z_PROBE_BED_DISTANCE 10.0
 #endif
 
 class EEPROM

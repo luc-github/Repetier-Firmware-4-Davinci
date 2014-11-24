@@ -269,7 +269,7 @@ extern const PinDescription g_APinDescription[]=
   { PIOD, PIO_PD4B_TXD3|PIO_PD5B_RXD3, ID_PIOD, PIO_PERIPH_B, PIO_DEFAULT, (PIN_ATTR_DIGITAL|PIN_ATTR_COMBO), NO_ADC, NO_ADC, NOT_ON_PWM, NOT_ON_TIMER },
 
   // 85 - USB
- { PIOB, PIO_PB11A_UOTGID, ID_PIOB, PIO_PERIPH_A, PIO_DEFAULT, PIN_ATTR_DIGITAL,NO_ADC, NO_ADC, NOT_ON_PWM,  NOT_ON_TIMER }, // ID 
+ { PIOB, PIO_PB11A_UOTGID, ID_PIOB, PIO_PERIPH_A, PIO_DEFAULT, PIN_ATTR_DIGITAL,NO_ADC, NO_ADC, NOT_ON_PWM,  NOT_ON_TIMER }, // ID
 // { PIOB, PIO_PB11A_UOTGID|PIO_PB10A_UOTGVBOF, ID_PIOB, PIO_PERIPH_A, PIO_DEFAULT, PIN_ATTR_DIGITAL,NO_ADC, NO_ADC, NOT_ON_PWM,  NOT_ON_TIMER }, // ID - VBOF
   // 86 - SPI CS2
   { PIOB, PIO_PB21B_SPI0_NPCS2, ID_PIOB, PIO_PERIPH_B, PIO_DEFAULT, PIN_ATTR_DIGITAL,                  NO_ADC, NO_ADC, NOT_ON_PWM,  NOT_ON_TIMER }, // NPCS2
@@ -330,7 +330,7 @@ extern const PinDescription g_APinDescription[]=
   { PIOB, PIO_PB13X1_AD9,   ID_PIOB, PIO_INPUT,    PIO_DEFAULT, PIN_ATTR_ANALOG,                   ADC0,  ADC9,  NOT_ON_PWM,  NOT_ON_TIMER },  // PIN 127 - PB13 with enabled ACD AD9
   { PIOB, PIO_PB22,          ID_PIOB, PIO_OUTPUT_0, PIO_DEFAULT, PIN_ATTR_DIGITAL,                  NO_ADC, NO_ADC, NOT_ON_PWM,  NOT_ON_TIMER }, // PIN 128 - PB22 E1 Enabled
   { PIOB, PIO_PB10A_UOTGVBOF, ID_PIOB, PIO_PERIPH_A, PIO_DEFAULT, PIN_ATTR_DIGITAL,NO_ADC, NO_ADC, NOT_ON_PWM,  NOT_ON_TIMER }, // ID - VBOF 129
- 
+
  // END
   { NULL, 0, 0, PIO_NOT_A_PIN, PIO_DEFAULT, 0, NO_ADC, NO_ADC, NOT_ON_PWM, NOT_ON_TIMER }
 } ;
@@ -418,14 +418,13 @@ void init( void )
   }
 
   // Disable watchdog
-  WDT_Disable(WDT);
-   //WDT_Enable(WDT, 0x0fff2fff );
+  //WDT_Disable(WDT);
   // Initialize C library
   __libc_init_array();
 
   // Disable pull-up on every pin
   for (int i = 0; i < PINS_COUNT; i++)
-	  digitalWrite(i, LOW);
+      digitalWrite(i, LOW);
 
   // Enable parallel access on PIO output data registers
   PIOA->PIO_OWER = 0xFFFFFFFF;

@@ -41,12 +41,28 @@ extern const int8_t encoder_table[16] PROGMEM ;
 
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
 long ui_autoreturn_time=0;
+bool benable_autoreturn=true;
 #endif
 
+#if FEATURE_BEEPER
+bool enablesound = true;
+#endif
+uint8_t UIDisplay::display_mode=ADVANCED_MODE;
 
+void playsound(int tone,int duration)
+{
+#if FEATURE_BEEPER
+if (!HAL::enablesound)return;
+HAL::tone(BEEPER_PIN, tone);
+HAL::delayMilliseconds(duration);
+HAL::noTone(BEEPER_PIN);
+#endif
+}
+float Z_probe[3];
 void beep(uint8_t duration,uint8_t count)
 {
 #if FEATURE_BEEPER
+if (!HAL::enablesound)return;
 #if BEEPER_TYPE!=0
 #if BEEPER_TYPE==1 && defined(BEEPER_PIN) && BEEPER_PIN>=0
     SET_OUTPUT(BEEPER_PIN);
@@ -198,6 +214,17 @@ const uint8_t character_folder[8] PROGMEM = {0,28,31,17,17,31,0,0};
 // *...* 17
 // *...* 17
 const byte character_ready[8] PROGMEM = {17,10,4,17,4,10,17,17};
+
+// Bed - code 2
+// ..... 0
+// ***** 31
+// *.*.* 21
+// *...* 17
+// *.*.* 21
+// ***** 31
+// ..... 0
+// ..... 0
+const byte character_bed[8] PROGMEM = {0,31,21,17,21,31,0,0};
 
 const long baudrates[] PROGMEM = {9600,14400,19200,28800,38400,56000,57600,76800,111112,115200,128000,230400,250000,256000,
                                   460800,500000,921600,1000000,1500000,0
@@ -498,7 +525,13 @@ void initializeLCD()
     uid.createChar(4,character_unselected);
     uid.createChar(5,character_temperature);
     uid.createChar(6,character_folder);
-    uid.createChar(7,character_ready);
+    //uid.createChar(7,character_ready);
+    uid.createChar(7,character_bed);
+    
+#if defined(UI_BACKLIGHT_PIN)
+    SET_OUTPUT(UI_BACKLIGHT_PIN);
+    WRITE(UI_BACKLIGHT_PIN, HIGH);
+#endif
 }
 // ----------- end direct LCD driver
 #endif
@@ -1462,12 +1495,16 @@ void UIDisplay::updateSDFileCount()
 
     root->rewind();
     nFilesOnCard = 0;
-    while ((p = root->getLongFilename(p, NULL, 0, NULL)))
+    while ((p = root->getLongFilename(p, tempLongFilename, 0, NULL)))
     {
         if (! (DIR_IS_FILE(p) || DIR_IS_SUBDIR(p)))
             continue;
         if (folderLevel>=SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0]=='.' && p->name[1]=='.'))
             continue;
+ #if HIDE_BINARY_ON_SD
+      	//hide unwished files
+		if (!SDCard::showFilename(p,tempLongFilename))continue;
+#endif
         nFilesOnCard++;
         if (nFilesOnCard > 5000) // Arbitrary maximum, limited only by how long someone would scroll
             return;
@@ -1487,6 +1524,10 @@ void getSDFilenameAt(uint16_t filePos,char *filename)
         HAL::pingWatchdog();
         if (!DIR_IS_FILE(p) && !DIR_IS_SUBDIR(p)) continue;
         if(uid.folderLevel>=SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0]=='.' && p->name[1]=='.')) continue;
+ #if HIDE_BINARY_ON_SD
+        //hide unwished files
+		if (!SDCard::showFilename(p,tempLongFilename))continue;
+#endif
         if (filePos--)
             continue;
         strcpy(filename, tempLongFilename);
@@ -1554,7 +1595,11 @@ void sdrefresh(uint16_t &r,char cache[UI_ROWS][MAX_COLS+1])
         {
             if(uid.folderLevel >= SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0]=='.' && p->name[1]=='.'))
                 continue;
-            if(skip > 0)
+ #if HIDE_BINARY_ON_SD
+			//hide unwished files
+			if (!SDCard::showFilename(p,tempLongFilename))continue;
+ #endif
+            if(skip>0)
             {
                 skip--;
                 continue;
@@ -1947,13 +1992,13 @@ void UIDisplay::pushMenu(const UIMenu *men,bool refresh)
         refreshPage();
         return;
     }
-    if(menuLevel == 4) return; // Max. depth reached. No more memory to down further.
+    if(menuLevel == UI_MENU_MAXLEVEL-1) return; // Max. depth reached. No more memory to down further.
     menuLevel++;
     menu[menuLevel] = men;
     menuTop[menuLevel] = menuPos[menuLevel] = 0;
 #if SDSUPPORT
     UIMenu *men2 = (UIMenu*)menu[menuLevel];
-    if(pgm_read_byte(&(men2->menuType)) == 1) {
+    if(pgm_read_byte(&(men2->menuType))==UI_MENU_TYPE_FILE_SELECTOR) {
       // Menu is Open files list
       updateSDFileCount();
       // Keep menu positon in file list, more user friendly.

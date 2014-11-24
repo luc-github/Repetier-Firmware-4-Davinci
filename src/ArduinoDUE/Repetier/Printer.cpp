@@ -18,6 +18,7 @@
 
 #include "Repetier.h"
 
+extern void playsound(int tone,int duration);
 #if USE_ADVANCE
 uint8_t Printer::minExtruderSpeed;            ///< Timer delay for start extruder speed
 uint8_t Printer::maxExtruderSpeed;            ///< Timer delay for end extruder speed
@@ -645,7 +646,12 @@ void Printer::setup()
     WRITE(Z2_ENABLE_PIN,!Z_ENABLE_ON);
 #endif
 #endif
-
+#if defined(FIL_SENSOR1_PIN)
+SET_INPUT(FIL_SENSOR1_PIN);
+#endif
+#if defined(FIL_SENSOR2_PIN)
+SET_INPUT(FIL_SENSOR2_PIN);
+#endif
     //endstop pullups
 #if MIN_HARDWARE_ENDSTOP_X
 #if X_MIN_PIN>-1
@@ -831,6 +837,12 @@ void Printer::setup()
     UI_INITIALIZE;
     HAL::showStartReason();
     Extruder::initExtruder();
+#if SDSUPPORT
+#ifdef SDEEPROM
+    HAL::setupSdEeprom();
+#endif
+    sd.initsd();
+#endif
     // sets autoleveling in eeprom init
     EEPROM::init(); // Read settings from eeprom if wanted
     for(uint8_t i=0; i<E_AXIS_ARRAY; i++) {
@@ -854,11 +866,15 @@ void Printer::setup()
 #endif // DRIVE_SYSTEM
     Extruder::selectExtruderById(0);
 #if SDSUPPORT
-    sd.initsd();
+    sd.autoPrint();
 #endif
 #if FEATURE_WATCHDOG
     HAL::startWatchdog();
 #endif // FEATURE_WATCHDOG
+    playsound(880,100);
+    playsound(1479,150);
+    playsound(1174,100);
+    playsound(2349,150);
 }
 
 void Printer::defaultLoopActions()
@@ -882,6 +898,12 @@ void Printer::defaultLoopActions()
     }
 #if SDCARDDETECT>-1 && SDSUPPORT
     sd.automount();
+#endif
+#if defined(SDEEPROM)
+    if (!HAL::syncSdEeprom())
+    {
+        Com::printFLN(PSTR("SD EEPROM write error"));
+    }
 #endif
     DEBUG_MEMORY;
 }

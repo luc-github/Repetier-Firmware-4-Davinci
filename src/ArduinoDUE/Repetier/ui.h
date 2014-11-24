@@ -29,6 +29,11 @@
 #define DISPLAY_U8G  5
 #define DISPLAY_GAMEDUINO2 6
 
+#define NOT_SHOW_MODE 0 //mask 0000
+#define ADVANCED_MODE 1 //mask 0001
+#define EASY_MODE 2		//mask 0010
+#define ALL_MODE ADVANCED_MODE|EASY_MODE //mask 0011
+
 /**
 What display type do you use?
 0 = No display
@@ -50,10 +55,26 @@ What display type do you use?
 // Add UI_ACTION_TOPMENU to show a menu as top menu
 // ----------------------------------------------------------------------------
 
+#define UI_CONFIRMATION_TYPE_YES_NO 1
+#define STATUS_OK	1
+#define STATUS_CANCEL	2
+#define STATUS_FAIL	3
+
 #define UI_ACTION_TOPMENU 8192
 
 #define UI_ACTION_NEXT 1
 #define UI_ACTION_PREVIOUS 2
+#define UI_ACTION_RIGHT_KEY 3
+
+#define UI_ACTION_OK_TOP_PREV 10
+#define UI_ACTION_OK_TOP_NEXT 11
+#define UI_ACTION_OK_TOP_BACK 12
+#define UI_ACTION_OK_TOP_RIGHT 13
+#define UI_ACTION_OK_NEXT_BACK  14
+#define UI_ACTION_OK_NEXT_PREV  15
+#define UI_ACTION_OK_NEXT_RIGHT 16
+#define UI_ACTION_OK_PREV_RIGHT 17
+#define UI_ACTION_OK_PREV_BACK 18
 
 #define UI_ACTION_X_UP                 100
 #define UI_ACTION_X_DOWN               101
@@ -179,6 +200,51 @@ What display type do you use?
 #define UI_ACTION_Z_BABYSTEPS           1111
 #define UI_ACTION_MAX_INACTIVE          1112
 #define UI_ACTION_TEMP_DEFECT           1113
+#define UI_ACTION_CLEAN_NOZZLE          1114
+#define UI_ACTION_SOUND			1115
+#define UI_ACTION_LOAD_EXTRUDER_0	1116
+#define UI_ACTION_UNLOAD_EXTRUDER_0	1117
+#if NUM_EXTRUDER > 1
+	#define UI_ACTION_LOAD_EXTRUDER_1	1118
+	#define UI_ACTION_UNLOAD_EXTRUDER_1	1119
+#endif
+#define UI_ACTION_AUTOLEVEL		1120
+#define UI_ACTION_DISPLAY_MODE		1121
+#define UI_ACTION_FILAMENT_SENSOR_ONOFF		1122
+#define UI_ACTION_KEEP_LIGHT_ON		1123
+#define UI_ACTION_CLEAN_DRIPBOX         1124
+#define UI_ACTION_LOAD_FAILSAFE          1125
+#define UI_ACTION_X_1 						1126
+#define UI_ACTION_X_10 						1127
+#define UI_ACTION_X_100	 				1128
+#define UI_ACTION_Y_1 						1129
+#define UI_ACTION_Y_10 						1130
+#define UI_ACTION_Y_100	 					1131
+#define UI_ACTION_Z_1 						1132
+#define UI_ACTION_Z_10 						1133
+#define UI_ACTION_Z_100	 					1134
+#define UI_ACTION_E_1 						1135
+#define UI_ACTION_E_10 						1136
+#define UI_ACTION_E_100	 					1137
+#define UI_ACTION_BED_OFF 					1138
+#define UI_ACTION_LIGHT_OFF_AFTER			1139
+#define UI_ACTION_MANUAL_LEVEL				1140
+#define UI_ACTION_NO_FILAMENT				1141
+#define UI_ACTION_EXT_TEMP_ABS				1142
+#define UI_ACTION_EXT_TEMP_PLA				1143
+#define UI_ACTION_BED_TEMP_ABS				1144
+#define UI_ACTION_BED_TEMP_PLA				1145
+#define UI_ACTION_X_LENGTH					1146
+#define UI_ACTION_Y_LENGTH					1147
+#define UI_ACTION_Z_LENGTH					1148
+#define UI_ACTION_VERSION					1149
+#define UI_ACTION_TOP_SENSOR_ONOFF 1150
+#define UI_ACTION_AUTOLEVEL_ON          1151
+#define UI_ACTION_Z_0_1                          1152
+#define UI_ACTION_X_MIN                          1153
+#define UI_ACTION_Y_MIN                          1154
+#define UI_ACTION_Z_MIN                          1155
+#define UI_ACTION_TOGGLE_POWERSAVE	1156
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -215,11 +281,16 @@ What display type do you use?
 #define UI_MENU_TYPE_INFO 0
 #define UI_MENU_TYPE_FILE_SELECTOR 1
 #define UI_MENU_TYPE_SUBMENU 2
-#define UI_MENU_TYPE_MODIFICATION_MENU 3
+#define UI_MENU_TYPE_ACTION_MENU 3
+#define UI_MENU_TYPE_MODIFICATION_MENU 4
+#define UI_MENU_TYPE_MENU_WITH_STATUS 5
+
+#define UI_MENU_ENTRY_MIN_TYPE_CHECK 2
+#define UI_MENU_ENTRY_MAX_TYPE_CHECK 5
 
 typedef struct {
   const char *text; // Menu text
-  uint8_t menuType; // 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command, 4 = modify action command
+  uint8_t menuType; // 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command, 4 = modify action command , 5 = special menu with status
   unsigned int action; // must be int so it gets 32 bit on arm!
   uint8_t filter; // allows dynamic menu filtering based on Printer::menuMode bits set.
   uint8_t nofilter; // Hide if one of these bits are set
@@ -390,6 +461,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 
 class UIDisplay {
   public:
+    static uint8_t display_mode;
     volatile uint8_t flags; // 1 = fast key action, 2 = slow key action, 4 = slow action running, 8 = key test running
     uint8_t col; // current col for buffer prefill
     uint8_t menuLevel; // current menu level, 0 = info, 1 = group, 2 = groupdata select, 3 = value change

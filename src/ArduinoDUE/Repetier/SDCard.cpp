@@ -59,6 +59,7 @@ void SDCard::automount()
             UI_STATUS(UI_TEXT_SD_INSERTED);
             Com::printFLN(PSTR("SD card inserted")); // Not translateable or host will not understand signal
             initsd();
+            autoPrint();
 #if UI_DISPLAY_TYPE != NO_DISPLAY
             if(sdactive) {
                 Printer::setAutomount(true);
@@ -89,17 +90,52 @@ void SDCard::initsd()
     Printer::setMenuMode(MENU_MODE_SD_MOUNTED, true);
 
     fat.chdir();
-    if(selectFile("init.g", true))
+#ifdef SDEEPROM
+	if (eepromBuffer != NULL && eepromSize > 0)
+	{
+		if (eepromFile.isOpen())
+			eepromFile.close();
+		if (!eepromFile.open(SD_EEPROM_FILENAME, O_RDWR | O_CREAT | O_SYNC) ||
+			eepromFile.read(eepromBuffer, eepromSize) != eepromSize)
+		{
+			Com::printFLN(Com::tOpenFailedFile, SD_EEPROM_FILENAME);
+		}
+
+	}
+#endif
+#endif
+}
+#ifdef SDEEPROM
+bool SDCard::syncEeprom() {
+	if (!sdactive)
+	{
+		if (eepromFile.isOpen())
+			eepromFile.close();
+		return 0;
+	}
+
+	if (!eepromFile.seekSet(0))
+		return 0;
+
+	return eepromFile.write(eepromBuffer, eepromSize) == eepromSize;
+}
+#endif
+
+void SDCard::autoPrint() {
+	if (!sdactive)
+		return;
+
+    if(selectFile("init.g",true))
     {
         startPrint();
     }
-#endif
 }
 
 void SDCard::mount()
 {
     sdmode = 0;
     initsd();
+    autoPrint();
 }
 
 void SDCard::unmount()
@@ -315,7 +351,27 @@ bool SDCard::showFilename(const uint8_t *name)
     if (*name == DIR_NAME_DELETED || *name == '.') return false;
     return true;
 }
-
+ #if HIDE_BINARY_ON_SD
+bool SDCard::showFilename(dir_t *p,const char *filename)
+{
+	int slen;
+    char file_extension[4];
+    file_extension[0]=0;
+	if(DIR_IS_FILE(p)&& filename!=NULL)
+            {
+            slen=strlen(filename);
+            if (slen>3)strcpy(file_extension,&filename[slen-3]);
+            else
+              file_extension[0]=0;
+            //check extension 
+			if ((strcasecmp(file_extension,"bin")==0) //all .bin
+			|| (strcasecmp(file_extension,"dat")==0)  //all .dat
+			|| (strcasecmp(file_extension,"hex")==0)  //all .hex
+			||  (strchr(filename,'.')==NULL)) return false; //all file without extension
+			}
+    return true;
+}
+#endif
 int8_t RFstricmp(const char* s1, const char* s2)
 {
     while(*s1 && (tolower(*s1) == tolower(*s2)))
