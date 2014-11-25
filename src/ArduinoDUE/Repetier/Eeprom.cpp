@@ -22,8 +22,35 @@
 */
 
 #include "Repetier.h"
-
-
+//internal usage of update value
+void EEPROM:: update(long P,uint8_t T,long S,float X)
+{
+#if EEPROM_MODE!=0
+    if(T>=0 &&T<=3 && P>0 && P<=2048) //SDEEPROM_SIZE =2048 // Minimum size used by Eeprom.cpp
+    switch(T)
+        {
+        case EPR_TYPE_BYTE:
+            HAL::eprSetByte(P,(uint8_t)S);
+            break;
+        case EPR_TYPE_INT:
+           HAL::eprSetInt16(P,(int)S);
+            break;
+        case EPR_TYPE_LONG:
+            HAL::eprSetInt32(P,(int32_t)S);
+            break;
+        case EPR_TYPE_FLOAT:
+           HAL::eprSetFloat(P,X);
+            break;
+        }
+    uint8_t newcheck = computeChecksum();
+    if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
+        HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
+    readDataFromEEPROM();
+    Extruder::selectExtruderById(Extruder::current->id);
+#else
+    Com::printErrorF(Com::tNoEEPROMSupport);
+#endif
+}
 void EEPROM::update(GCode *com)
 {
 #if EEPROM_MODE != 0
@@ -57,6 +84,19 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 #if EEPROM_MODE != 0
     baudrate = BAUDRATE;
     maxInactiveTime = MAX_INACTIVE_TIME*1000L;
+    EEPROM::buselight = bool(CASE_LIGHT_DEFAULT_ON);
+    EEPROM::bkeeplighton = bool(CASE_KEEP_LIGHT_DEFAULT_ON);
+    UIDisplay::display_mode=CASE_DISPLAY_MODE_DEFAULT;
+    HAL::enablesound = bool(CASE_SOUND_DEFAULT_ON);
+    EEPROM::busesensor = bool(CASE_FILAMENT_SENSOR_DEFAULT_ON);
+    EEPROM::btopsensor = bool(CASE_TOP_SENSOR_DEFAULT_ON);
+    EEPROM::ftemp_ext_pla=UI_SET_PRESET_EXTRUDER_TEMP_PLA;
+    EEPROM::ftemp_ext_abs=UI_SET_PRESET_EXTRUDER_TEMP_ABS;
+    EEPROM::ftemp_bed_pla=UI_SET_PRESET_HEATED_BED_TEMP_PLA;
+    EEPROM::ftemp_bed_abs=UI_SET_PRESET_HEATED_BED_TEMP_ABS;
+	#if CASE_LIGHTS_PIN>=0
+        WRITE(CASE_LIGHTS_PIN, byte(EEPROM::buselight));
+	#endif // CASE_LIGHTS_PIN
     stepperInactiveTime = STEPPER_INACTIVE_TIME*1000L;
     Printer::axisStepsPerMM[X_AXIS] = XAXIS_STEPS_PER_MM;
     Printer::axisStepsPerMM[Y_AXIS] = YAXIS_STEPS_PER_MM;
@@ -301,6 +341,21 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 
 }
 
+bool EEPROM::buselight=false;
+bool EEPROM::busesensor=false;
+bool EEPROM::btopsensor=false;
+bool EEPROM::bkeeplighton=true;
+float EEPROM::ftemp_ext_pla=UI_SET_PRESET_EXTRUDER_TEMP_PLA;
+float EEPROM::ftemp_ext_abs=UI_SET_PRESET_EXTRUDER_TEMP_ABS;
+float EEPROM::ftemp_bed_pla=UI_SET_PRESET_HEATED_BED_TEMP_PLA;
+float EEPROM::ftemp_bed_abs=UI_SET_PRESET_HEATED_BED_TEMP_ABS;
+
+#if UI_AUTOLIGHTOFF_AFTER !=0
+millis_t EEPROM::timepowersaving=1000 * 60 * 30; //30 min
+#else
+millis_t EEPROM::timepowersaving=0; 
+#endif
+
 void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
 {
 #if EEPROM_MODE != 0
@@ -356,9 +411,38 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
     HAL::eprSetFloat(EPR_X_LENGTH,Printer::xLength);
     HAL::eprSetFloat(EPR_Y_LENGTH,Printer::yLength);
     HAL::eprSetFloat(EPR_Z_LENGTH,Printer::zLength);
+
 #if NONLINEAR_SYSTEM
     HAL::eprSetFloat(EPR_DELTA_HORIZONTAL_RADIUS, Printer::radius0);
 #endif
+    HAL::eprSetByte(EPR_LIGHT_ON,EEPROM::buselight);
+    HAL::eprSetByte(EPR_KEEP_LIGHT_ON,EEPROM::bkeeplighton);
+    
+    HAL::eprSetByte(EPR_DISPLAY_MODE,UIDisplay::display_mode);
+#if defined(FIL_SENSOR1_PIN)
+	 HAL::eprSetByte(EPR_FIL_SENSOR_ON,EEPROM::busesensor);
+#endif
+#if defined(TOP_SENSOR_PIN)
+	 HAL::eprSetByte(EPR_TOP_SENSOR_ON,EEPROM::btopsensor);
+#endif
+#if FEATURE_BEEPER
+	HAL::eprSetByte(EPR_SOUND_ON,HAL::enablesound);
+#endif
+#if UI_AUTOLIGHTOFF_AFTER !=0
+	HAL::eprSetInt32(EPR_POWERSAVE_AFTER_TIME,EEPROM::timepowersaving);
+#endif
+    HAL::eprSetFloat(EPR_MANUAL_LEVEL_X1, MANUAL_LEVEL_X1);
+    HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y1, MANUAL_LEVEL_Y1);
+    HAL::eprSetFloat(EPR_MANUAL_LEVEL_X2, MANUAL_LEVEL_X2);
+    HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y2, MANUAL_LEVEL_Y2);
+    HAL::eprSetFloat(EPR_MANUAL_LEVEL_X3, MANUAL_LEVEL_X3);
+    HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y3, MANUAL_LEVEL_Y3);
+    HAL::eprSetFloat(EPR_MANUAL_LEVEL_X4, MANUAL_LEVEL_X4);
+    HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y4, MANUAL_LEVEL_Y4);
+    HAL::eprSetFloat(EPR_TEMP_BED_PLA, EEPROM::ftemp_bed_pla);
+    HAL::eprSetFloat(EPR_TEMP_BED_ABS, EEPROM::ftemp_bed_abs);
+    HAL::eprSetFloat(EPR_TEMP_EXT_PLA, EEPROM::ftemp_ext_pla);
+    HAL::eprSetFloat(EPR_TEMP_EXT_ABS, EEPROM::ftemp_ext_abs);
 #if ENABLE_BACKLASH_COMPENSATION
     HAL::eprSetFloat(EPR_BACKLASH_X,Printer::backlashX);
     HAL::eprSetFloat(EPR_BACKLASH_Y,Printer::backlashY);
@@ -445,6 +529,18 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_Z_PROBE_Y2,Z_PROBE_Y2);
     HAL::eprSetFloat(EPR_Z_PROBE_X3,Z_PROBE_X3);
     HAL::eprSetFloat(EPR_Z_PROBE_Y3,Z_PROBE_Y3);
+    HAL::eprSetFloat(EPR_MANUAL_LEVEL_X1, MANUAL_LEVEL_X1);
+    HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y1, MANUAL_LEVEL_Y1);
+    HAL::eprSetFloat(EPR_MANUAL_LEVEL_X2, MANUAL_LEVEL_X2);
+    HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y2, MANUAL_LEVEL_Y2);
+    HAL::eprSetFloat(EPR_MANUAL_LEVEL_X3, MANUAL_LEVEL_X3);
+    HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y3, MANUAL_LEVEL_Y3);
+    HAL::eprSetFloat(EPR_MANUAL_LEVEL_X4, MANUAL_LEVEL_X4);
+    HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y4, MANUAL_LEVEL_Y4);
+    HAL::eprSetFloat(EPR_TEMP_BED_PLA, EEPROM::ftemp_bed_pla);
+    HAL::eprSetFloat(EPR_TEMP_BED_ABS, EEPROM::ftemp_bed_abs);
+    HAL::eprSetFloat(EPR_TEMP_EXT_PLA, EEPROM::ftemp_ext_pla);
+    HAL::eprSetFloat(EPR_TEMP_EXT_ABS, EEPROM::ftemp_ext_abs);
     HAL::eprSetFloat(EPR_AXISCOMP_TANXY,AXISCOMP_TANXY);
     HAL::eprSetFloat(EPR_AXISCOMP_TANYZ,AXISCOMP_TANYZ);
     HAL::eprSetFloat(EPR_AXISCOMP_TANXZ,AXISCOMP_TANXZ);
@@ -522,6 +618,32 @@ void EEPROM::readDataFromEEPROM()
 #if NONLINEAR_SYSTEM
     Printer::radius0 = HAL::eprGetFloat(EPR_DELTA_HORIZONTAL_RADIUS);
 #endif
+	EEPROM::buselight=HAL::eprGetByte(EPR_LIGHT_ON);
+	EEPROM::bkeeplighton=HAL::eprGetByte(EPR_KEEP_LIGHT_ON);
+	UIDisplay::display_mode=HAL::eprGetByte(EPR_DISPLAY_MODE);
+	//need to be sure a valid value is set
+	if(!((UIDisplay::display_mode==ADVANCED_MODE)||(UIDisplay::display_mode==EASY_MODE)))UIDisplay::display_mode=ADVANCED_MODE;
+	#if CASE_LIGHTS_PIN>=0
+        WRITE(CASE_LIGHTS_PIN, byte(EEPROM::buselight));
+	#endif // CASE_LIGHTS_PIN
+#if defined(FIL_SENSOR1_PIN)
+	EEPROM::busesensor=HAL::eprGetByte(EPR_FIL_SENSOR_ON);
+#endif
+#if defined(TOP_SENSOR_PIN)
+	EEPROM::btopsensor=HAL::eprGetByte(EPR_TOP_SENSOR_ON);
+#endif
+#if FEATURE_BEEPER
+	HAL::enablesound=HAL::eprGetByte(EPR_SOUND_ON);
+#endif
+#if UI_AUTOLIGHTOFF_AFTER >0
+	EEPROM::timepowersaving = HAL::eprGetInt32(EPR_POWERSAVE_AFTER_TIME);
+	//new value do reset time
+	UIDisplay::ui_autolightoff_time=HAL::timeInMilliseconds()+EEPROM::timepowersaving;
+#endif	
+EEPROM::ftemp_ext_pla= HAL::eprGetFloat(EPR_TEMP_EXT_PLA);
+EEPROM::ftemp_ext_abs= HAL::eprGetFloat(EPR_TEMP_EXT_ABS);
+EEPROM::ftemp_bed_pla= HAL::eprGetFloat(EPR_TEMP_BED_PLA);
+EEPROM::ftemp_bed_abs= HAL::eprGetFloat(EPR_TEMP_BED_ABS);
 #if ENABLE_BACKLASH_COMPENSATION
     Printer::backlashX = HAL::eprGetFloat(EPR_BACKLASH_X);
     Printer::backlashY = HAL::eprGetFloat(EPR_BACKLASH_Y);
@@ -608,6 +730,14 @@ void EEPROM::readDataFromEEPROM()
             HAL::eprSetFloat(EPR_Z_PROBE_Y2,Z_PROBE_Y2);
             HAL::eprSetFloat(EPR_Z_PROBE_X3,Z_PROBE_X3);
             HAL::eprSetFloat(EPR_Z_PROBE_Y3,Z_PROBE_Y3);
+            HAL::eprSetFloat(EPR_MANUAL_LEVEL_X1, MANUAL_LEVEL_X1);
+			HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y1, MANUAL_LEVEL_Y1);
+			HAL::eprSetFloat(EPR_MANUAL_LEVEL_X2, MANUAL_LEVEL_X2);
+			HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y2, MANUAL_LEVEL_Y2);
+			HAL::eprSetFloat(EPR_MANUAL_LEVEL_X3, MANUAL_LEVEL_X3);
+			HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y3, MANUAL_LEVEL_Y3);
+			HAL::eprSetFloat(EPR_MANUAL_LEVEL_X4, MANUAL_LEVEL_X4);
+			HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y4, MANUAL_LEVEL_Y4);
         }
         if(version<4)
         {
@@ -788,6 +918,25 @@ void EEPROM::writeSettings()
     writeFloat(EPR_X_LENGTH,Com::tEPRXMaxLength);
     writeFloat(EPR_Y_LENGTH,Com::tEPRYMaxLength);
     writeFloat(EPR_Z_LENGTH,Com::tEPRZMaxLength);
+    writeByte(EPR_LIGHT_ON,Com::tLightOn);
+    writeByte(EPR_KEEP_LIGHT_ON,Com::tKeepLightOn);
+ #if defined(FIL_SENSOR1_PIN)
+	  writeByte(EPR_FIL_SENSOR_ON,Com::tSensorOn);
+#endif
+#if defined(TOP_SENSOR_PIN)
+	  writeByte(EPR_TOP_SENSOR_ON,Com::tTopsensorOn);
+#endif
+#if FEATURE_BEEPER
+    writeByte(EPR_SOUND_ON,Com::tSoundOn);
+#endif
+#if UI_AUTOLIGHTOFF_AFTER !=0
+	writeLong(EPR_POWERSAVE_AFTER_TIME,Com::tPowerSave);
+#endif
+    writeFloat(EPR_TEMP_EXT_PLA,Com::tTempExtPLA);
+    writeFloat(EPR_TEMP_EXT_ABS,Com::tTempExtABS);
+    writeFloat(EPR_TEMP_BED_PLA,Com::tTempBedPLA);
+    writeFloat(EPR_TEMP_BED_ABS,Com::tTempBedABS);
+	writeByte(EPR_DISPLAY_MODE,Com::tDisplayMode);
 #if ENABLE_BACKLASH_COMPENSATION
     writeFloat(EPR_BACKLASH_X,Com::tEPRXBacklash);
     writeFloat(EPR_BACKLASH_Y,Com::tEPRYBacklash);
@@ -830,6 +979,14 @@ void EEPROM::writeSettings()
     writeFloat(EPR_Z_MAX_TRAVEL_ACCEL,Com::tEPRZTravelAcceleration);
 #endif
 #endif
+     writeFloat(EPR_MANUAL_LEVEL_X1, Com::tManualProbeX1);
+     writeFloat(EPR_MANUAL_LEVEL_Y1, Com::tManualProbeY1);
+     writeFloat(EPR_MANUAL_LEVEL_X2, Com::tManualProbeX2);
+     writeFloat(EPR_MANUAL_LEVEL_Y2, Com::tManualProbeY2);
+     writeFloat(EPR_MANUAL_LEVEL_X3, Com::tManualProbeX3);
+     writeFloat(EPR_MANUAL_LEVEL_Y3, Com::tManualProbeY3);
+     writeFloat(EPR_MANUAL_LEVEL_X4, Com::tManualProbeX4);
+     writeFloat(EPR_MANUAL_LEVEL_Y4, Com::tManualProbeY4);
 #if FEATURE_Z_PROBE
     writeFloat(EPR_Z_PROBE_HEIGHT,Com::tZProbeHeight);
     writeFloat(EPR_Z_PROBE_BED_DISTANCE,Com::tZProbeBedDitance);

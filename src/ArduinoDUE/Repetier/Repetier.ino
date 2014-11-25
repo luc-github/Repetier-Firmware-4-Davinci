@@ -85,6 +85,9 @@ Custom M Codes
 - M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
 - M92  - Set axisStepsPerMM - same syntax as G92
 - M99 S<delayInSec> X0 Y0 Z0 - Disable motors for S seconds (default 10) for given axis.
+- M100 clean nozzle
+- M101 turn light on (no eeprom saving) and reset autoturn off time if activated
+- M102 turn light off (no eeprom saving)
 - M104 S<temp> T<extruder> P1 F1 - Set temperature without wait. P1 = wait for moves to finish, F1 = beep when temp. reached first time
 - M105 X0 - Get temperatures. If X0 is added, the raw analog values are also written.
 - M112 - Emergency kill

@@ -150,6 +150,8 @@ void PrintLine::moveRelativeDistanceInStepsReal(int32_t x,int32_t y,int32_t z,in
 */
 void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
 {
+	Printer::setMenuMode(MENU_MODE_PRINTING,true);
+    if (Printer::isMenuMode(MENU_MODE_STOP_REQUESTED))return;
     Printer::unsetAllSteppersDisabled();
     waitForXFreeLines(1);
     uint8_t newPath = insertWaitMovesIfNeeded(pathOptimize, 0);
@@ -1881,7 +1883,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
         if(Printer::isZProbingActive() && Printer::stepsRemainingAtZHit >= 0)
         {
             removeCurrentLineForbidInterrupt();
-            if(linesCount == 0) UI_STATUS(UI_TEXT_IDLE);
+          //  if(linesCount == 0) UI_STATUS(UI_TEXT_IDLE);
             return 1000;
         }
 #endif
@@ -2218,7 +2220,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
         //deltaSegmentCount -= cur->numDeltaSegments; // should always be zero
         removeCurrentLineForbidInterrupt();
         Printer::disableAllowedStepper();
-        if(linesCount == 0) UI_STATUS(UI_TEXT_IDLE);
+        //if(linesCount == 0) UI_STATUS(UI_TEXT_IDLE);
         interval = Printer::interval = interval >> 1; // 50% of time to next call to do cur=0
         DEBUG_MEMORY;
     } // Do even
@@ -2243,6 +2245,11 @@ int lastblk=-1;
 int32_t cur_errupd;
 int32_t PrintLine::bresenhamStep() // version for cartesian printer
 {
+        if (Printer::isMenuMode(MENU_MODE_STOP_REQUESTED))
+            {
+            while(linesCount)removeCurrentLineForbidInterrupt();
+            return 100;
+            }
 #if CPU_ARCH==ARCH_ARM
     if(!PrintLine::nlFlag)
 #else
@@ -2534,7 +2541,7 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
 #endif
         removeCurrentLineForbidInterrupt();
         Printer::disableAllowedStepper();
-        if(linesCount == 0) UI_STATUS(UI_TEXT_IDLE);
+       // if(linesCount == 0) UI_STATUS(UI_TEXT_IDLE);
         interval = Printer::interval = interval >> 1; // 50% of time to next call to do cur=0
         DEBUG_MEMORY;
     } // Do even

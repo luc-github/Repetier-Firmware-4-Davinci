@@ -48,6 +48,10 @@ union floatLong
 #define PRINTER_FLAG1_POWER_ON              64
 #define PRINTER_FLAG1_ALLOW_COLD_EXTRUSION  128
 
+#define PRINTER_FLAG_HOME_X		1
+#define PRINTER_FLAG_HOME_Y		2
+#define PRINTER_FLAG_HOME_Z		4
+
 // define an integer number of steps more than large enough to get to endstop from anywhere
 #define HOME_DISTANCE_STEPS (Printer::zMaxSteps-Printer::zMinSteps+1000)
 #define HOME_DISTANCE_MM (HOME_DISTANCE_STEPS * invAxisStepsPerMM[Z_AXIS])
@@ -87,7 +91,7 @@ public:
     static uint8_t unitIsInches;
 
     static uint8_t debugLevel;
-    static uint8_t flag0,flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
+    static uint8_t flag0,flag1,flaghome; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
     static uint8_t stepsPerTimerCall;
     static uint32_t interval;    ///< Last step duration in ticks.
     static uint32_t timer;              ///< used for acceleration/deceleration timing
@@ -373,8 +377,38 @@ public:
     }
     static inline uint8_t isHomed()
     {
-        return flag1 & PRINTER_FLAG1_HOMED;
+        return flaghome & (PRINTER_FLAG_HOME_X|PRINTER_FLAG_HOME_Y|PRINTER_FLAG_HOME_Z);
     }
+    
+    static inline uint8_t isXHomed()
+    {
+        return flaghome & PRINTER_FLAG_HOME_X;
+    }
+    
+     static inline uint8_t isYHomed()
+    {
+        return flaghome & PRINTER_FLAG_HOME_Y;
+    }
+    static inline uint8_t isZHomed()
+    {
+        return flaghome & PRINTER_FLAG_HOME_Z;
+    }
+    
+    static inline void setHomedX(uint8_t b)
+    {
+        flaghome = (b ? flaghome | PRINTER_FLAG_HOME_X : flag1 & ~PRINTER_FLAG_HOME_X);
+    }
+    
+    static inline void setHomedY(uint8_t b)
+    {
+        flaghome = (b ? flaghome | PRINTER_FLAG_HOME_Y : flag1 & ~PRINTER_FLAG_HOME_Y);
+    }
+    
+     static inline void setHomedZ(uint8_t b)
+    {
+        flaghome = (b ? flaghome | PRINTER_FLAG_HOME_Z : flag1 & ~PRINTER_FLAG_HOME_Z);
+    }
+    //this function just mention a home command has been sent not home is fully done, can be only X homed
     static inline void setHomed(uint8_t b)
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_HOMED : flag1 & ~PRINTER_FLAG1_HOMED);
@@ -722,6 +756,9 @@ public:
     static uint8_t moveTo(float x,float y,float z,float e,float f);
     static uint8_t moveToReal(float x,float y,float z,float e,float f);
     static void homeAxis(bool xaxis,bool yaxis,bool zaxis); /// Home axis
+	#if ENABLE_CLEAN_NOZZLE 
+	static void cleanNozzle(bool restoreposition=true);
+	#endif
     static void setOrigin(float xOff,float yOff,float zOff);
     static bool isPositionAllowed(float x,float y,float z);
     static inline int getFanSpeed()

@@ -294,6 +294,7 @@ typedef struct {
   unsigned int action; // must be int so it gets 32 bit on arm!
   uint8_t filter; // allows dynamic menu filtering based on Printer::menuMode bits set.
   uint8_t nofilter; // Hide if one of these bits are set
+  uint8_t display_mode; // Easy or advanced or both or none 
   bool showEntry() const;
 } const UIMenuEntry;
 
@@ -301,7 +302,9 @@ typedef struct UIMenu_struct {
   // 0 = info page
   // 1 = file selector
   // 2 = submenu
-  // 3 = modififaction menu
+  // 3 = action menu
+  // 4 = modification menu
+  // 5 =Special menu with status
   uint8_t menuType;
   int id; // Type of modification
   int numEntries;
@@ -381,52 +384,53 @@ extern const int8_t encoder_table[16] PROGMEM ;
 
 #define UI_STRING(name,text) const char PROGMEM name[] = text
 
-#define UI_PAGE6(name,row1,row2,row3,row4,row5,row6) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);UI_STRING(name ## _5txt,row5);UI_STRING(name ## _6txt,row6);\
-   UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
-   UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
-   UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,0,0,0,0};\
-   UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,0,0,0,0};\
-   UIMenuEntry name ## _5 PROGMEM ={name ## _5txt,0,0,0,0};\
-   UIMenuEntry name ## _6 PROGMEM ={name ## _6txt,0,0,0,0};\
+#define UI_PAGE6(name,row1,row2,row3,row4,row5,row6,dmode) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);UI_STRING(name ## _5txt,row5);UI_STRING(name ## _6txt,row6);\
+   UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
+   UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
+   UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
+   UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
+   UIMenuEntry name ## _5 PROGMEM ={name ## _5txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
+   UIMenuEntry name ## _6 PROGMEM ={name ## _6txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
    const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4,&name ## _5,&name ## _6};\
    const UIMenu name PROGMEM = {0,0,6,name ## _entries};
-#define UI_PAGE4(name,row1,row2,row3,row4) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);\
-  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
-  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
-  UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,0,0,0,0};\
-  UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,0,0,0,0};\
+#define UI_PAGE4(name,row1,row2,row3,row4,dmode) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);\
+  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
+  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
+  UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
+  UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
   const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
   const UIMenu name PROGMEM = {0,0,4,name ## _entries};
-#define UI_PAGE2(name,row1,row2) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);\
-  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
-  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
+#define UI_PAGE2(name,row1,row2,dmode) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);\
+  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
+  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
   const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
   const UIMenu name PROGMEM = {0,0,2,name ## _entries};
-#define UI_MENU_ACTION4C(name,action,rows) UI_MENU_ACTION4(name,action,rows)
-#define UI_MENU_ACTION2C(name,action,rows) UI_MENU_ACTION2(name,action,rows)
-#define UI_MENU_ACTION4(name,action,row1,row2,row3,row4) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);\
-  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
-  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
-  UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,0,0,0,0};\
-  UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,0,0,0,0};\
+#define UI_MENU_ACTION4C(name,action,rows,dmode) UI_MENU_ACTION4(name,action,rows,dmode)
+#define UI_MENU_ACTION2C(name,action,rows,dmode) UI_MENU_ACTION2(name,action,rows,dmode)
+#define UI_MENU_ACTION4(name,action,row1,row2,row3,row4,dmode) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);\
+  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
+  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
+  UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
+  UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
   const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
   const UIMenu name PROGMEM = {3,action,4,name ## _entries};
-#define UI_MENU_ACTION2(name,action,row1,row2) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);\
-  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
-  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
+#define UI_MENU_ACTION2(name,action,row1,row2,dmode) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);\
+  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
+  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
   const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
   const UIMenu name PROGMEM = {3,action,2,name ## _entries};
-#define UI_MENU_HEADLINE(name,text) UI_STRING(name ## _txt,text);UIMenuEntry name PROGMEM = {name ## _txt,1,0,0,0};
-#define UI_MENU_CHANGEACTION(name,row,action) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,4,action,0,0};
-#define UI_MENU_ACTIONCOMMAND(name,row,action) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,3,action,0,0};
-#define UI_MENU_ACTIONSELECTOR(name,row,entries) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries,0,0};
-#define UI_MENU_SUBMENU(name,row,entries) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries,0,0};
-#define UI_MENU_CHANGEACTION_FILTER(name,row,action,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,4,action,filter,nofilter};
-#define UI_MENU_ACTIONCOMMAND_FILTER(name,row,action,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,3,action,filter,nofilter};
-#define UI_MENU_ACTIONSELECTOR_FILTER(name,row,entries,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries,filter,nofilter};
-#define UI_MENU_SUBMENU_FILTER(name,row,entries,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries,filter,nofilter};
-#define UI_MENU(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {2,0,itemsCnt,name ## _entries};
-#define UI_MENU_FILESELECT(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {1,0,itemsCnt,name ## _entries};
+#define UI_MENU_HEADLINE(name,text,dmode) UI_STRING(name ## _txt,text);UIMenuEntry name PROGMEM = {name ## _txt,UI_MENU_TYPE_INFO,0,0,0,dmode};
+#define UI_MENU_CHANGEACTION(name,row,action,dmode) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,UI_MENU_TYPE_MODIFICATION_MENU,action,0,0,dmode};
+#define UI_MENU_ACTIONCOMMAND(name,row,action,dmode) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,UI_MENU_TYPE_ACTION_MENU,action,0,0,dmode};
+#define UI_MENU_ACTIONSELECTOR(name,row,entries,dmode) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,UI_MENU_TYPE_SUBMENU,(unsigned int)&entries,0,0,dmode};
+#define UI_MENU_SUBMENU(name,row,entries,dmode) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,UI_MENU_TYPE_SUBMENU,(unsigned int)&entries,0,0,dmode};
+#define UI_MENU_CHANGEACTION_FILTER(name,row,action,filter,nofilter,dmode) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,UI_MENU_TYPE_MODIFICATION_MENU,action,filter,nofilter,dmode};
+#define UI_MENU_ACTIONCOMMAND_FILTER(name,row,action,filter,nofilter,dmode) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,UI_MENU_TYPE_ACTION_MENU,action,filter,nofilter,dmode};
+#define UI_MENU_ACTIONSELECTOR_FILTER(name,row,entries,filter,nofilter,dmode) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,UI_MENU_TYPE_SUBMENU,(unsigned int)&entries,filter,nofilter,dmode};
+#define UI_MENU_SUBMENU_FILTER(name,row,entries,filter,nofilter,dmode) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,UI_MENU_TYPE_SUBMENU,(unsigned int)&entries,filter,nofilter,dmode};
+#define UI_MENU(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {UI_MENU_TYPE_SUBMENU,0,itemsCnt,name ## _entries}
+#define UI_MENU_WITH_STATUS(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {UI_MENU_TYPE_MENU_WITH_STATUS,0,itemsCnt,name ## _entries}
+#define UI_MENU_FILESELECT(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {UI_MENU_TYPE_FILE_SELECTOR,0,itemsCnt,name ## _entries}
 
 #if FEATURE_CONTROLLER == CONTROLLER_SMARTRAMPS || FEATURE_CONTROLLER == CONTROLLER_GADGETS3D_SHIELD || FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD
 #undef SDCARDDETECT
@@ -459,72 +463,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define UI_FLAG_SLOW_ACTION_RUNNING 4
 #define UI_FLAG_KEY_TEST_RUNNING 8
 
-class UIDisplay {
-  public:
-    static uint8_t display_mode;
-    volatile uint8_t flags; // 1 = fast key action, 2 = slow key action, 4 = slow action running, 8 = key test running
-    uint8_t col; // current col for buffer prefill
-    uint8_t menuLevel; // current menu level, 0 = info, 1 = group, 2 = groupdata select, 3 = value change
-    uint16_t menuPos[UI_MENU_MAXLEVEL]; // Positions in menu
-    const UIMenu *menu[UI_MENU_MAXLEVEL]; // Menus active
-    uint16_t menuTop[UI_MENU_MAXLEVEL]; // Top row in menu
-    int8_t shift; // Display shift for scrolling text
-    int pageDelay; // Counter. If 0 page is refreshed if menuLevel is 0.
-    void *errorMsg;
-    uint16_t activeAction; // action for ok/next/previous
-    uint16_t lastAction;
-    uint16_t delayedAction;
-    millis_t lastSwitch; // Last time display switched pages
-    millis_t lastRefresh;
-    uint16_t lastButtonAction;
-    millis_t lastButtonStart;
-    millis_t nextRepeat; // Time of next autorepeat
-    millis_t lastNextPrev; // for increasing speed settings
-    float lastNextAccumul; // Accumulated value
-    unsigned int outputMask; // Output mask for backlight, leds etc.
-    int repeatDuration; // Time beween to actions if autorepeat is enabled
-    int8_t oldMenuLevel;
-    uint8_t encoderStartScreen;
-    char printCols[MAX_COLS+1];
-    void addInt(int value,uint8_t digits,char fillChar=' '); // Print int into printCols
-    void addLong(long value,char digits);
-    inline void addLong(long value) {addLong(value, -11);};
-    void addFloat(float number, char fixdigits,uint8_t digits);
-    inline void addFloat(float number) {addFloat(number, -9,2);};
-    void addStringP(PGM_P text);
-    void addChar(const char c);
-    void addGCode(GCode *code);
-    bool okAction(bool allowMoves);
-    bool nextPreviousAction(int8_t next, bool allowMoves);
-    char statusMsg[21];
-    int8_t encoderPos;
-    int8_t encoderLast;
-    UIDisplay();
-    void createChar(uint8_t location, const uint8_t charmap[]);
-    void initialize(); // Initialize display and keys
-    void waitForKey();
-    void printRow(uint8_t r, char *txt, char *txt2, uint8_t changeAtCol); // Print row on display
-    void printRowP(uint8_t r,PGM_P txt);
-    void parse(const char *txt,bool ram); /// Parse output and write to printCols;
-    void refreshPage();
-    bool executeAction(int action, bool allowMoves);
-    void finishAction(int action);
-    void slowAction(bool allowMoves);
-    void fastAction();
-    void mediumAction();
-    void pushMenu(const UIMenu *men, bool refresh);
-    void adjustMenuPos();
-    void setStatusP(PGM_P txt, bool error = false);
-    void setStatus(const char *txt, bool error = false);
-    inline void setOutputMaskBits(unsigned int bits) {outputMask |= bits;}
-    inline void unsetOutputMaskBits(unsigned int bits) {outputMask &= ~bits;}
-    void updateSDFileCount();
-    void goDir(char *name);
-    bool isDirname(char *name);
-    char cwd[SD_MAX_FOLDER_DEPTH*LONG_FILENAME_LENGTH+2];
-    uint8_t folderLevel;
-};
-extern UIDisplay uid;
+
 
 
 #if FEATURE_CONTROLLER == UICONFIG_CONTROLLER
@@ -1334,7 +1273,7 @@ void ui_check_slow_keys(int &action) {}
 #include "uilang.h"
 #endif
 
-#define UI_VERSION_STRING "Repetier " REPETIER_VERSION
+#define UI_VERSION_STRING "Repetier " REPETIER_VERSION "Mod"
 
 #ifdef UI_HAS_I2C_KEYS
 #define COMPILE_I2C_DRIVER
@@ -1396,8 +1335,77 @@ void ui_check_slow_keys(int &action) {}
 #define BEEP_LONG beep(BEEPER_LONG_SEQUENCE);
 #endif
 
-
+class UIDisplay {
+  public:
+#if UI_AUTOLIGHTOFF_AFTER!=0
+	static millis_t ui_autolightoff_time;
+#endif
+	static uint8_t display_mode; 
+    volatile uint8_t flags; // 1 = fast key action, 2 = slow key action, 4 = slow action running, 8 = key test running
+    uint8_t col; // current col for buffer prefill
+    uint8_t menuLevel; // current menu level, 0 = info, 1 = group, 2 = groupdata select, 3 = value change
+    uint16_t menuPos[UI_MENU_MAXLEVEL]; // Positions in menu
+    const UIMenu *menu[UI_MENU_MAXLEVEL]; // Menus active
+    uint16_t menuTop[UI_MENU_MAXLEVEL]; // Top row in menu
+    int8_t shift; // Display shift for scrolling text
+    int pageDelay; // Counter. If 0 page is refreshed if menuLevel is 0.
+    void *errorMsg;
+    uint16_t activeAction; // action for ok/next/previous
+    uint16_t lastAction;
+    uint16_t delayedAction;
+    millis_t lastSwitch; // Last time display switched pages
+    millis_t lastRefresh;
+    uint16_t lastButtonAction;
+    millis_t lastButtonStart;
+    millis_t nextRepeat; // Time of next autorepeat
+    millis_t lastNextPrev; // for increasing speed settings
+    float lastNextAccumul; // Accumulated value
+    unsigned int outputMask; // Output mask for backlight, leds etc.
+    int repeatDuration; // Time beween to actions if autorepeat is enabled
+    int8_t oldMenuLevel;
+    uint8_t encoderStartScreen;
+    char printCols[MAX_COLS+1];
+    void addInt(int value,uint8_t digits,char fillChar=' '); // Print int into printCols
+    void addLong(long value,char digits);
+    inline void addLong(long value) {addLong(value, -11);};
+    void addFloat(float number, char fixdigits,uint8_t digits);
+    inline void addFloat(float number) {addFloat(number, -9,2);};
+    void addStringP(PGM_P text);
+    void addChar(const char c);
+    void addGCode(GCode *code);
+    bool okAction(bool allowMoves);
+    bool nextPreviousAction(int8_t next, bool allowMoves);
+    char statusMsg[21];
+    int8_t encoderPos;
+    int8_t encoderLast;
+    UIDisplay();
+    void createChar(uint8_t location, const uint8_t charmap[]);
+    void initialize(); // Initialize display and keys
+    void waitForKey();
+    void printRow(uint8_t r, char *txt, char *txt2, uint8_t changeAtCol); // Print row on display
+    void printRowP(uint8_t r,PGM_P txt);
+    void parse(const char *txt,bool ram); /// Parse output and write to printCols;
+    void refreshPage();
+    bool executeAction(int action, bool allowMoves);
+    void finishAction(int action);
+    void slowAction(bool allowMoves);
+    void fastAction();
+    void mediumAction();
+    bool confirmationDialog(char * title,char * line1,char * line2,int type=UI_CONFIRMATION_TYPE_YES_NO, bool defaultresponse=false);
+    void pushMenu(const UIMenu *men, bool refresh);
+    void adjustMenuPos();
+    void setStatusP(PGM_P txt, bool error = false);
+    void setStatus(const char *txt, bool error = false);
+    inline void setOutputMaskBits(unsigned int bits) {outputMask |= bits;}
+    inline void unsetOutputMaskBits(unsigned int bits) {outputMask &= ~bits;}
+    void updateSDFileCount();
+    void goDir(char *name);
+    bool isDirname(char *name);
+    char cwd[SD_MAX_FOLDER_DEPTH*LONG_FILENAME_LENGTH+2];
+    uint8_t folderLevel;
+};
+extern UIDisplay uid;
 extern void beep(uint8_t duration,uint8_t count);
-
+extern void playsound(int tone,int duration);
 #endif
 

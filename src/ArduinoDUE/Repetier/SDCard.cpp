@@ -174,7 +174,9 @@ void SDCard::pausePrint(bool intern)
 #if DRIVE_SYSTEM == DELTA
         Printer::moveToReal(0, 0.9 * EEPROM::deltaMaxRadius(), IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::maxFeedrate[X_AXIS]);
 #else
-        Printer::moveToReal(Printer::xMin, Printer::yMin + Printer::yLength, IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::maxFeedrate[X_AXIS]);
+         if (Printer::lastCmdPos[Z_AXIS]+10<Printer::zMin+Printer::zLength)
+          Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::lastCmdPos[Z_AXIS]+10,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+        Printer::moveToReal(Printer::xMin,Printer::yMin + Printer::yLength,IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
 #endif
         Printer::lastCmdPos[X_AXIS] = Printer::currentPosition[X_AXIS];
         Printer::lastCmdPos[Y_AXIS] = Printer::currentPosition[Y_AXIS];

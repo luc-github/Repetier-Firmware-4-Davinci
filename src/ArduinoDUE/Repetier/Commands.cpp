@@ -24,7 +24,9 @@
 const int sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
 int Commands::lowestRAMValue = MAX_RAM;
 int Commands::lowestRAMValueSend = MAX_RAM;
-
+uint8_t Commands::delay_flag_change=0;
+uint8_t Commands::delay_flag_change2=0;
+uint8_t Commands::countersensor=0;
 void Commands::commandLoop()
 {
     while(true)
@@ -74,11 +76,57 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves)
             writeMonitor();
         counter250ms = 5;
     }
+#if defined(TOP_SENSOR_PIN)
+     if(EEPROM::btopsensor)
+        {
+           if(!READ(TOP_SENSOR_PIN))
+            {
+                countersensor++;
+                if (countersensor>25)
+                    {
+                    playsound(1000,140);
+                    playsound(3000,240);
+                    UI_STATUS_UPD(UI_TEXT_TOP_COVER_OPEN);
+                    countersensor=0;
+                    }
+            }
+            else countersensor=0;
+        }
+#endif
+    if (Printer::isMenuMode(MENU_MODE_STOP_REQUESTED)  && Printer::isMenuMode(MENU_MODE_STOP_DONE) )
+        {
+            if (delay_flag_change2>10)
+                {
+                Printer::setMenuMode(MENU_MODE_STOP_REQUESTED,false);
+                UI_STATUS_UPD(UI_TEXT_IDLE);
+                delay_flag_change2=0;
+                }
+            else delay_flag_change2++;
+        }
+    else delay_flag_change2=0;
+    if ( Printer::isMenuMode(MENU_MODE_GCODE_PROCESSING))
+        {
+        delay_flag_change=0;
+        Printer::setMenuMode(MENU_MODE_PRINTING,true);
+        }
+    if (!PrintLine::hasLines() &&  Printer::isMenuMode(MENU_MODE_PRINTING))
+        {
+        if (delay_flag_change>5)
+        {
+        Printer::setMenuMode(MENU_MODE_PRINTING,false);
+        UI_STATUS_UPD(UI_TEXT_IDLE);
+        delay_flag_change=0;
+        }
+        else delay_flag_change++;
+        }
+    else delay_flag_change=0;
     // If called from queueDelta etc. it is an error to start a new move since it
     // would invalidate old computation resulting in unpredicted behaviour.
     // lcd controller can start new moves, so we disallow it if called from within
     // a move command.
     UI_SLOW(allowNewMoves);
+    //check if emergency stop button is pressed
+    if(uid.lastButtonAction==UI_ACTION_OK_NEXT_BACK)Commands::emergencyStop();
 }
 
 /** \brief Waits until movement cache is empty.
@@ -596,6 +644,7 @@ void Commands::processGCode(GCode *com)
         {
             GCode::readFromSerial();
             Commands::checkForPeriodicalActions(true);
+            if (Printer::isMenuMode(MENU_MODE_STOP_REQUESTED))break;
         }
         break;
     case 20: // G20 Units to inches
@@ -617,20 +666,48 @@ void Commands::processGCode(GCode *com)
 #if FEATURE_Z_PROBE
     case 29: // G29 3 points, build average
     {
+        float zMin_save=Printer::zMin ;
+        if(!Printer::isHomed()) Printer::homeAxis(true,true,true);
+        //to avoid hit on plates low, down bed a little
+        if (Printer::currentPosition[Z_AXIS] < Printer::zMin+5) Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+5,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
         GCode::executeFString(Com::tZProbeStartScript);
         bool oldAutolevel = Printer::isAutolevelActive();
         Printer::setAutolevelActive(false);
         float sum = 0,last,oldFeedrate = Printer::feedrate;
         Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         sum = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
-        if(sum<0) break;
+        if(sum<0)
+              {
+                Printer::zMin =  zMin_save;
+                Printer::setAutolevelActive(true);
+                if (Printer::realZPosition()<-200)Printer::homeAxis(false,false,true);
+                 //to avoid hit on plates, low down bed a little
+                Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+5,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+                break;
+                }
         Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         last = Printer::runZProbe(false,false);
-        if(last<0) break;
+        if(last<0)
+             {
+                Printer::zMin =  zMin_save;
+                Printer::setAutolevelActive(true);
+                if (Printer::realZPosition()<-200)Printer::homeAxis(false,false,true);
+                 //to avoid hit on plates, low down bed a little
+                Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+5,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+                break;
+                }
         sum+= last;
         Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         last = Printer::runZProbe(false,true);
-        if(last<0) break;
+        if(last<0)
+                {
+                Printer::zMin =  zMin_save;
+                Printer::setAutolevelActive(true);
+                if (Printer::realZPosition()<-200)Printer::homeAxis(false,false,true);
+                 //to avoid hit on plates, low down bed a little
+                Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+5,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+                break;
+                }
         sum+= last;
         sum *= 0.33333333333333;
         Com::printFLN(Com::tZProbeAverage,sum);
@@ -665,11 +742,18 @@ void Commands::processGCode(GCode *com)
     {
         uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
         bool oldAutolevel = Printer::isAutolevelActive();
+        if(!Printer::isHomed()) Printer::homeAxis(true,true,true);
+            //to avoid hit on plates, low down bed a little
+        if (Printer::currentPosition[Z_AXIS] < Printer::zMin+5) Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+5,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
         Printer::setAutolevelActive(false);
         Printer::runZProbe(p & 1,p & 2);
         Printer::setAutolevelActive(oldAutolevel);
         Printer::updateCurrentPosition(p & 1);
         printCurrentPosition(PSTR("G30 "));
+        if (Printer::realZPosition()<-200)Printer::homeAxis(false,false,true);
+        //to avoid hit on plates
+        Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+5,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+
     }
     break;
     case 31:  // G31 display hall sensor output
@@ -680,6 +764,10 @@ void Commands::processGCode(GCode *com)
 #if FEATURE_AUTOLEVEL
     case 32: // G32 Auto-Bed leveling
     {
+        float zMin_save=Printer::zMin;
+         if(!Printer::isHomed()) Printer::homeAxis(true,true,true);
+        //to avoid hit on plates, low down bed a little
+        if (Printer::currentPosition[Z_AXIS] < Printer::zMin+5) Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+5,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
         GCode::executeFString(Com::tZProbeStartScript);
         //bool iterate = com->hasP() && com->P>0;
         Printer::coordinateOffset[X_AXIS] = Printer::coordinateOffset[Y_AXIS] = Printer::coordinateOffset[Z_AXIS] = 0;
@@ -687,13 +775,37 @@ void Commands::processGCode(GCode *com)
         float h1,h2,h3,hc,oldFeedrate = Printer::feedrate;
         Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h1 = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
-        if(h1 < 0) break;
+        if(h1<0)
+                {
+                Printer::zMin =  zMin_save;
+                Printer::setAutolevelActive(true);
+                 if (Printer::realZPosition()<-200)Printer::homeAxis(false,false,true);
+                  //to avoid hit on plates, low down bed a little
+                 Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+5,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+                break;
+                }
         Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h2 = Printer::runZProbe(false,false);
-        if(h2 < 0) break;
+        if(h2<0)
+              {
+                Printer::zMin =  zMin_save;
+                Printer::setAutolevelActive(true);
+                 if (Printer::realZPosition()<-200)Printer::homeAxis(false,false,true);
+                  //to avoid hit on plates, low down bed a little
+                 Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+5,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+                break;
+                }
         Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h3 = Printer::runZProbe(false,true);
-        if(h3 < 0) break;
+        if(h3<0)
+              {
+                Printer::zMin =  zMin_save;
+                Printer::setAutolevelActive(true);
+                 if (Printer::realZPosition()<-200)Printer::homeAxis(false,false,true);
+                  //to avoid hit on plates, low down bed a little
+                 Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+5,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+                break;
+                }
         Printer::buildTransformationMatrix(h1,h2,h3);
         //-(Rxx*Ryz*y-Rxz*Ryx*y+(Rxz*Ryy-Rxy*Ryz)*x)/(Rxy*Ryx-Rxx*Ryy)
         // z = z-deviation from origin due to bed transformation
@@ -1126,7 +1238,23 @@ void Commands::processMCode(GCode *com)
             Printer::enableZStepper();
     }
     break;
+#if ENABLE_CLEAN_NOZZLE
+        case 100:
+            Printer::cleanNozzle();
+            break;
+#endif
 
+#if CASE_LIGHTS_PIN>=0
+        case 101://light on
+            #if UI_AUTOLIGHTOFF_AFTER!=0
+            UIDisplay::ui_autolightoff_time=HAL::timeInMilliseconds()+EEPROM::timepowersaving;
+            #endif
+            WRITE(CASE_LIGHTS_PIN,1);
+            break;
+        case 102://light off
+            WRITE(CASE_LIGHTS_PIN,0);
+            break;
+#endif // CASE_LIGHTS_PIN
     case 104: // M104 temperature
 #if NUM_EXTRUDER > 0
         if(reportTempsensorError()) break;
@@ -1186,6 +1314,7 @@ void Commands::processMCode(GCode *com)
                 printedTime = currentTime;
             }
             Commands::checkForPeriodicalActions(true);
+            if (Printer::isMenuMode(MENU_MODE_STOP_REQUESTED))break;
             //gcode_read_serial();
 #if RETRACT_DURING_HEATUP
             if (actExtruder == Extruder::current && actExtruder->waitRetractUnits > 0 && !retracted && dirRising && actExtruder->tempControl.currentTemperatureC > actExtruder->waitRetractTemperature)
@@ -1236,6 +1365,7 @@ void Commands::processMCode(GCode *com)
                 codenum = previousMillisCmd = HAL::timeInMilliseconds();
             }
             Commands::checkForPeriodicalActions(true);
+            if (Printer::isMenuMode(MENU_MODE_STOP_REQUESTED))break;
         }
 #endif
 #endif
@@ -1256,6 +1386,7 @@ void Commands::processMCode(GCode *com)
                     codenum = HAL::timeInMilliseconds();
                 }
                 Commands::checkForPeriodicalActions(true);
+                if (Printer::isMenuMode(MENU_MODE_STOP_REQUESTED))break;
                 for(uint8_t h = 0; h < NUM_TEMPERATURE_LOOPS; h++)
                 {
                     TemperatureController *act = tempController[h];
@@ -1505,7 +1636,7 @@ void Commands::processMCode(GCode *com)
     Com::printInfoFLN(PSTR("Watchdog feature was not compiled into this version!"));
 #endif
     break;
-#if defined(BEEPER_PIN) && BEEPER_PIN>=0
+#if defined(BEEPER_PIN) && BEEPER_PIN>=0 && FEATURE_BEEPER
     case 300: // M300
     {
         int beepS = 1;
@@ -1711,6 +1842,27 @@ void Commands::executeGCode(GCode *com)
             }
         }
     }
+    //periodical command from repetier should not be taken in account  for wake up
+    if(!((com->hasM() &&  com->M ==105) || Printer::isMenuMode(MENU_MODE_SD_PRINTING)))   // Process M Code
+    {
+        Printer::setMenuMode(MENU_MODE_GCODE_PROCESSING,true);
+        Printer::setMenuMode(MENU_MODE_PRINTING,true);
+#if UI_AUTOLIGHTOFF_AFTER!=0
+        if (EEPROM::timepowersaving>0 && EEPROM::bkeeplighton )
+            {
+            UIDisplay::ui_autolightoff_time=HAL::timeInMilliseconds()+EEPROM::timepowersaving;
+            #if CASE_LIGHTS_PIN > 0
+            if (!(READ(CASE_LIGHTS_PIN)) && EEPROM::buselight)
+                {
+                TOGGLE(CASE_LIGHTS_PIN);
+                }
+            #endif
+            #if defined(UI_BACKLIGHT_PIN)
+            if (!(READ(UI_BACKLIGHT_PIN))) WRITE(UI_BACKLIGHT_PIN, HIGH);
+            #endif
+            }
+#endif
+    }
     if(com->hasG()) processGCode(com);
     else if(com->hasM()) processMCode(com);
     else if(com->hasT())      // Process T code
@@ -1726,6 +1878,33 @@ void Commands::executeGCode(GCode *com)
             com->printCommand();
         }
     }
+         //if some extruder command and we are not in pause - check filament sensor
+        if (com->hasE() && !Printer:: isMenuMode(MENU_MODE_SD_PAUSED))
+        {
+            if ((Extruder::current->id)==0)//check correct extruder sensor
+                    {
+                        #if defined(FIL_SENSOR1_PIN)
+                            if(EEPROM::busesensor && READ(FIL_SENSOR1_PIN))uid.executeAction(UI_ACTION_NO_FILAMENT,true);
+                        #endif
+                    }
+                else
+                    {
+                        #if defined(FIL_SENSOR2_PIN)
+                            if(EEPROM::busesensor &&READ(FIL_SENSOR2_PIN))uid.executeAction(UI_ACTION_NO_FILAMENT,true);
+                        #endif
+                    }
+        }
+//periodical command from repetier should not be taken in account  for wake up
+    if(!((com->hasM() &&  com->M ==105) || Printer::isMenuMode(MENU_MODE_SD_PRINTING)))   // Process M Code
+    {
+#if UI_AUTOLIGHTOFF_AFTER!=0
+        if (EEPROM::timepowersaving>0 && EEPROM::bkeeplighton )
+            {//reset timer if any wait command was processing
+            UIDisplay::ui_autolightoff_time=HAL::timeInMilliseconds()+EEPROM::timepowersaving;
+            }
+#endif
+    }
+Printer::setMenuMode(MENU_MODE_GCODE_PROCESSING,false);
 }
 
 void Commands::emergencyStop()

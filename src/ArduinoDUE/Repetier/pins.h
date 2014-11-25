@@ -311,6 +311,8 @@ STEPPER_CURRENT_CONTROL
 
 #if NUM_EXTRUDER==1
 #define E1_PINS
+#define HEATER_2_PIN -1
+#define TEMP_2_PIN -1
 #endif
 
 #if NUM_EXTRUDER<3

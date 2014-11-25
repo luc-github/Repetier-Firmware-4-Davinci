@@ -105,12 +105,31 @@ have problems with other modules using the eeprom */
 #define EPR_DELTA_DIAGONAL_CORRECTION_A 933
 #define EPR_DELTA_DIAGONAL_CORRECTION_B 937
 #define EPR_DELTA_DIAGONAL_CORRECTION_C 941
-#define EPR_TOUCHSCREEN           946 // - 975 = 30 byte for touchscreen calibration data
+#define EPR_LIGHT_ON 946
+#define EPR_SOUND_ON 947
+#define EPR_POWERSAVE_AFTER_TIME 948
+#define EPR_DISPLAY_MODE 952
+#define EPR_FIL_SENSOR_ON 953
+#define EPR_KEEP_LIGHT_ON 954
+#define EPR_MANUAL_LEVEL_X1 955
+#define EPR_MANUAL_LEVEL_Y1 959
+#define EPR_MANUAL_LEVEL_X2 963
+#define EPR_MANUAL_LEVEL_Y2 971
+#define EPR_MANUAL_LEVEL_X3 975
+#define EPR_MANUAL_LEVEL_Y3 979
+#define EPR_MANUAL_LEVEL_X4 983
+#define EPR_MANUAL_LEVEL_Y4 987
+#define EPR_TEMP_EXT_PLA		 991
+#define EPR_TEMP_EXT_ABS 		 995
+#define EPR_TEMP_BED_PLA		 999
+#define EPR_TEMP_BED_ABS		1003
+#define EPR_TOP_SENSOR_ON     1007
+#define EPR_TOUCHSCREEN           1008 // - 1027 = 30 byte for touchscreen calibration data
 
 // Axis compensation
-#define EPR_AXISCOMP_TANXY          976
-#define EPR_AXISCOMP_TANYZ          980
-#define EPR_AXISCOMP_TANXZ          984
+#define EPR_AXISCOMP_TANXY          1028
+#define EPR_AXISCOMP_TANYZ          1032
+#define EPR_AXISCOMP_TANXZ          1036
 
 #if EEPROM_MODE != 0
 #define EEPROM_FLOAT(x) HAL::eprGetFloat(EPR_##x)
@@ -150,6 +169,12 @@ have problems with other modules using the eeprom */
 #define Z_PROBE_BED_DISTANCE 10.0
 #endif
 
+#define EPR_TYPE_BYTE			0
+#define EPR_TYPE_INT			1
+#define EPR_TYPE_LONG		2
+#define EPR_TYPE_FLOAT		3
+
+
 class EEPROM
 {
 #if EEPROM_MODE != 0
@@ -166,11 +191,21 @@ public:
 
     static void init();
     static void initBaudrate();
+    static bool buselight; 
+    static bool busesensor;
+    static bool btopsensor;
+    static bool bkeeplighton;
+    static float ftemp_ext_pla;
+    static float ftemp_ext_abs;
+    static float ftemp_bed_pla;
+    static float ftemp_bed_abs;
+    static millis_t timepowersaving;
     static void storeDataIntoEEPROM(uint8_t corrupted=0);
     static void readDataFromEEPROM();
     static void restoreEEPROMSettingsFromConfiguration();
     static void writeSettings();
     static void update(GCode *com);
+    static void update(long P,uint8_t T,long S,float X);
     static void updatePrinterUsage();
 
     static inline float zProbeSpeed() {
@@ -257,6 +292,69 @@ public:
         return Z_PROBE_BED_DISTANCE;
 #endif
     }
+static inline float ManualProbeX1() {
+#if EEPROM_MODE!=0
+        return HAL::eprGetFloat(EPR_MANUAL_LEVEL_X1);
+#else
+        return MANUAL_LEVEL_X1;
+#endif
+    }
+    
+static inline float ManualProbeY1() {
+#if EEPROM_MODE!=0
+        return HAL::eprGetFloat(EPR_MANUAL_LEVEL_Y1);
+#else
+        return MANUAL_LEVEL_Y1;
+#endif
+    } 
+    
+static inline float ManualProbeX2() {
+#if EEPROM_MODE!=0
+        return HAL::eprGetFloat(EPR_MANUAL_LEVEL_X2);
+#else
+        return MANUAL_LEVEL_X2;
+#endif
+    }
+    
+static inline float ManualProbeY2() {
+#if EEPROM_MODE!=0
+        return HAL::eprGetFloat(EPR_MANUAL_LEVEL_Y2);
+#else
+        return MANUAL_LEVEL_Y2;
+#endif
+    }    
+       
+static inline float ManualProbeX3() {
+#if EEPROM_MODE!=0
+        return HAL::eprGetFloat(EPR_MANUAL_LEVEL_X3);
+#else
+        return MANUAL_LEVEL_X3;
+#endif
+    }
+    
+static inline float ManualProbeY3() {
+#if EEPROM_MODE!=0
+        return HAL::eprGetFloat(EPR_MANUAL_LEVEL_Y3);
+#else
+        return MANUAL_LEVEL_Y3;
+#endif
+    }    
+ 
+ static inline float ManualProbeX4() {
+#if EEPROM_MODE!=0
+        return HAL::eprGetFloat(EPR_MANUAL_LEVEL_X4);
+#else
+        return MANUAL_LEVEL_X4;
+#endif
+    }
+    
+static inline float ManualProbeY4() {
+#if EEPROM_MODE!=0
+        return HAL::eprGetFloat(EPR_MANUAL_LEVEL_Y4);
+#else
+        return MANUAL_LEVEL_Y4;
+#endif
+    }    
 
     static inline float axisCompTanXY() {
 #if EEPROM_MODE != 0

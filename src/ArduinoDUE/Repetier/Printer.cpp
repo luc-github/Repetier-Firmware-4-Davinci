@@ -55,6 +55,7 @@ long Printer::destinationSteps[E_AXIS_ARRAY];
 float Printer::coordinateOffset[Z_AXIS_ARRAY] = {0,0,0};
 uint8_t Printer::flag0 = 0;
 uint8_t Printer::flag1 = 0;
+uint8_t Printer::flaghome = 0;
 uint8_t Printer::debugLevel = 6; ///< Bitfield defining debug output. 1 = echo, 2 = info, 4 = error, 8 = dry run., 16 = Only communication, 32 = No moves
 uint8_t Printer::stepsPerTimerCall = 1;
 uint8_t Printer::menuMode = 0;
@@ -157,6 +158,86 @@ int8_t Printer::motorYorZ;
 int debugWaitLoop = 0;
 #endif
 
+#if ENABLE_CLEAN_NOZZLE 
+void Printer::cleanNozzle(bool restoreposition)
+	{
+	//we save current configuration and position
+	uint8_t tmp_extruderid=Extruder::current->id;
+	float tmp_x = currentPosition[X_AXIS];
+	float tmp_y = currentPosition[Y_AXIS];
+	float tmp_z = currentPosition[Z_AXIS];
+	
+	//ensure homing is done and select E0
+	if(!Printer::isHomed()) Printer::homeAxis(true,true,true);
+    else 
+        {//put proper position in case position has been manualy changed no need to home Z as cannot be manualy changed and in case of something on plate it could be catastrophic
+            Printer::homeAxis(true,true,false);
+        }
+     
+	UI_STATUS_UPD_RAM(UI_TEXT_CLEANING_NOZZLE);
+        #if DAVINCI ==1
+	//first step noze
+	moveToReal(xMin+CLEAN_X-ENDSTOP_X_BACK_ON_HOME,yMin,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//second step noze
+	moveToReal(xMin-ENDSTOP_X_BACK_ON_HOME,yMin,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//third step noze
+	moveToReal(xMin+CLEAN_X-ENDSTOP_X_BACK_ON_HOME,yMin,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//fourth step noze
+	moveToReal(xMin-ENDSTOP_X_BACK_ON_HOME,yMin,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//fifth step noze
+	moveToReal(xMin+CLEAN_X-ENDSTOP_X_BACK_ON_HOME,yMin,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//sixth step noze
+	moveToReal(xMin-ENDSTOP_X_BACK_ON_HOME,yMin,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//first step Z probe
+	moveToReal(xMin,yMin + CLEAN_Y-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//second step Z probe
+	moveToReal(xMin,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//third step Z probe
+	moveToReal(xMin,yMin+CLEAN_Y-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//fourth step Z probe
+	moveToReal(xMin,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+        //fifth step Z probe
+	moveToReal(xMin,yMin+CLEAN_Y-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//sixth step Z probe
+	moveToReal(xMin,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	#else
+        // move Z to zMin + 15 if under this position to be sure nozzle do not touch metal holder
+        if (currentPosition[Z_AXIS] < zMin+15) moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,zMin+15,IGNORE_COORDINATE,homingFeedrate[0]);
+        Commands::waitUntilEndOfAllMoves();
+	//first step
+	moveToReal(xMin + CLEAN_X-ENDSTOP_X_BACK_ON_HOME,yMin + CLEAN_Y-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//second step
+	moveToReal(xMin-ENDSTOP_X_BACK_ON_HOME,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//third step
+	moveToReal(xMin+CLEAN_X-ENDSTOP_X_BACK_ON_HOME,yMin+CLEAN_Y-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//fourth step
+	moveToReal(xMin-ENDSTOP_X_BACK_ON_HOME,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//move out to be sure first drop go to purge box
+        moveToReal(xLength-2,yMin+CLEAN_Y-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+        moveToReal(xLength-2,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+        Commands::waitUntilEndOfAllMoves();
+        //first step
+        moveToReal(xLength-20,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+        //second step
+        moveToReal(xLength,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+        //third step
+        moveToReal(xLength-20,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+         //fourth step
+        moveToReal(xLength,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+        
+        Commands::waitUntilEndOfAllMoves();
+	//back to original position and original extruder
+        //X,Y first then Z
+	if (restoreposition)
+		{
+		moveToReal(tmp_x,tmp_y,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+		moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,tmp_z,IGNORE_COORDINATE,homingFeedrate[0]);
+		Commands::waitUntilEndOfAllMoves();
+		Extruder::selectExtruderById(tmp_extruderid);
+		}
+        #endif
+	}
+#endif
 
 
 #if !NONLINEAR_SYSTEM
@@ -777,7 +858,7 @@ SET_INPUT(FIL_SENSOR2_PIN);
 #endif
 #if CASE_LIGHTS_PIN>=0
     SET_OUTPUT(CASE_LIGHTS_PIN);
-    WRITE(CASE_LIGHTS_PIN, CASE_LIGHT_DEFAULT_ON);
+    WRITE(CASE_LIGHTS_PIN, EEPROM::buselight);
 #endif // CASE_LIGHTS_PIN
 #if GANTRY
     Printer::motorX = 0;
@@ -834,7 +915,7 @@ SET_INPUT(FIL_SENSOR2_PIN);
     EEPROM::initBaudrate();
     HAL::serialSetBaudrate(baudrate);
     Com::printFLN(Com::tStart);
-    UI_INITIALIZE;
+    //UI_INITIALIZE;
     HAL::showStartReason();
     Extruder::initExtruder();
 #if SDSUPPORT
@@ -855,7 +936,7 @@ SET_INPUT(FIL_SENSOR2_PIN);
     Commands::checkFreeMemory();
     Commands::writeLowestFreeRAM();
     HAL::setupTimer();
-
+    UI_INITIALIZE;
 #if NONLINEAR_SYSTEM
     transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
 
@@ -942,6 +1023,7 @@ void Printer::deltaMoveToTopEndstops(float feedrate)
 }
 void Printer::homeXAxis()
 {
+	setHomedX(true);
     destinationSteps[X_AXIS] = 0;
     if (!PrintLine::queueDeltaMove(true,false,false)) {
       Com::printWarningFLN(PSTR("homeXAxis / queueDeltaMove returns error"));
@@ -949,6 +1031,7 @@ void Printer::homeXAxis()
 }
 void Printer::homeYAxis()
 {
+	setHomedY(true);
     Printer::destinationSteps[Y_AXIS] = 0;
     if (!PrintLine::queueDeltaMove(true,false,false)) {
       Com::printWarningFLN(PSTR("homeYAxis / queueDeltaMove returns error"));
@@ -956,6 +1039,7 @@ void Printer::homeYAxis()
 }
 void Printer::homeZAxis() // Delta z homing
 {
+    setHomedZ(true);
     SHOT("homeZAxis ");
     deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]);
     PrintLine::moveRelativeDistanceInSteps(0,0,2*axisStepsPerMM[Z_AXIS]*-ENDSTOP_Z_BACK_MOVE,0,Printer::homingFeedrate[Z_AXIS]/ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
@@ -1006,6 +1090,7 @@ void Printer::homeZAxis() // Delta z homing
 // This home axis is for delta
 void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
 {
+    setHomed(true)
     SHOT("homeAxis ");
     bool autoLevel = isAutolevelActive();
     setAutolevelActive(false);
@@ -1047,6 +1132,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
 void Printer::homeXAxis()
 {
     long steps;
+    setHomedX(true);
     if ((MIN_HARDWARE_ENDSTOP_X && X_MIN_PIN > -1 && X_HOME_DIR==-1 && MIN_HARDWARE_ENDSTOP_Y && Y_MIN_PIN > -1 && Y_HOME_DIR==-1) ||
             (MAX_HARDWARE_ENDSTOP_X && X_MAX_PIN > -1 && X_HOME_DIR==1 && MAX_HARDWARE_ENDSTOP_Y && Y_MAX_PIN > -1 && Y_HOME_DIR==1))
     {
@@ -1094,11 +1180,14 @@ void Printer::homeXAxis()
 void Printer::homeYAxis()
 {
     // Dummy function x and y homing must occur together
+    setHomedY(true);
 }
 #else // cartesian printer
 void Printer::homeXAxis()
 {
     long steps;
+    setHomedX(true);
+	Extruder::selectExtruderById(0,false);
     if ((MIN_HARDWARE_ENDSTOP_X && X_MIN_PIN > -1 && X_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_X && X_MAX_PIN > -1 && X_HOME_DIR==1))
     {
         long offX = 0;
@@ -1131,6 +1220,8 @@ void Printer::homeXAxis()
 void Printer::homeYAxis()
 {
     long steps;
+    setHomedY(true);
+	Extruder::selectExtruderById(0,false);
     if ((MIN_HARDWARE_ENDSTOP_Y && Y_MIN_PIN > -1 && Y_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_Y && Y_MAX_PIN > -1 && Y_HOME_DIR==1))
     {
         long offY = 0;
@@ -1165,6 +1256,7 @@ void Printer::homeYAxis()
 void Printer::homeZAxis() // cartesian homing
 {
     long steps;
+    setHomedZ(true);
     if ((MIN_HARDWARE_ENDSTOP_Z && Z_MIN_PIN > -1 && Z_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_Z && Z_MAX_PIN > -1 && Z_HOME_DIR==1))
     {
         UI_STATUS_UPD(UI_TEXT_HOME_Z);
