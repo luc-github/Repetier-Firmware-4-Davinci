@@ -287,6 +287,9 @@ public:
         TC_Configure(DELAY_TIMER, DELAY_TIMER_CHANNEL, TC_CMR_WAVSEL_UP |
                      TC_CMR_WAVE | DELAY_TIMER_CLOCK);
         TC_Start(DELAY_TIMER, DELAY_TIMER_CHANNEL);
+    }
+ static inline void loadVirtualEEPROM(void)
+    {
 #if EEPROM_AVAILABLE && EEPROM_MODE != 0
         // Copy eeprom to ram for faster access
         int i,n = EEPROM_BYTES;

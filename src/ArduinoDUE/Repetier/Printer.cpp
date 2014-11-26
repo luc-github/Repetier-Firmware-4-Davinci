@@ -923,6 +923,7 @@ SET_INPUT(FIL_SENSOR2_PIN);
 #endif
     sd.initsd();
 #endif
+     HAL::loadVirtualEEPROM();
     // sets autoleveling in eeprom init
     EEPROM::init(); // Read settings from eeprom if wanted
     for(uint8_t i=0; i<E_AXIS_ARRAY; i++) {
@@ -948,13 +949,13 @@ SET_INPUT(FIL_SENSOR2_PIN);
 #if SDSUPPORT
     sd.autoPrint();
 #endif
-#if FEATURE_WATCHDOG
-    HAL::startWatchdog();
-#endif // FEATURE_WATCHDOG
     playsound(880,100);
     playsound(1479,150);
     playsound(1174,100);
     playsound(2349,150);
+#if FEATURE_WATCHDOG
+    HAL::startWatchdog();
+#endif // FEATURE_WATCHDOG
 }
 
 void Printer::defaultLoopActions()
