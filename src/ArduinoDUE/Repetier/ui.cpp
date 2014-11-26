@@ -1156,7 +1156,90 @@ void UIDisplay::parse(const char *txt,bool ram)
             else if(c2=='J') addFloat(Printer::maxZJerk,3,1);
 #endif
             break;
-
+        case 'A':
+            if(c2=='m') addStringP(Printer:: isAutolevelActive()?ui_text_on:ui_text_off);
+        break;
+        case 'B':
+        if(c2=='1') //heat PLA
+                {
+                        bool allheat=true;
+                        if(extruder[0].tempControl.targetTemperatureC!=EEPROM::ftemp_ext_pla)allheat=false;
+                       #if NUM_EXTRUDER>1
+                        if(extruder[1].tempControl.targetTemperatureC!=EEPROM::ftemp_ext_pla)allheat=false;
+                        #endif
+                       #if NUM_EXTRUDER>2
+                        if(extruder[2].tempControl.targetTemperatureC!=EEPROM::ftemp_ext_pla)allheat=false;
+                        #endif
+                        #if HAVE_HEATED_BED==true
+                        if(heatedBedController.targetTemperatureC!=EEPROM::ftemp_bed_pla)allheat=false;
+                        #endif
+                        addStringP(allheat?"\003":"\004");
+                }
+        else if(c2=='2') //heat ABS
+                {
+                    bool allheat=true;
+                    if(extruder[0].tempControl.targetTemperatureC!=EEPROM::ftemp_ext_abs)allheat=false;
+                   #if NUM_EXTRUDER>1
+                    if(extruder[1].tempControl.targetTemperatureC!=EEPROM::ftemp_ext_abs)allheat=false;
+                    #endif
+                   #if NUM_EXTRUDER>2
+                    if(extruder[2].tempControl.targetTemperatureC!=EEPROM::ftemp_ext_abs)allheat=false;
+                    #endif
+                    #if HAVE_HEATED_BED==true
+                    if(heatedBedController.targetTemperatureC!=EEPROM::ftemp_bed_abs)allheat=false;
+                    #endif
+                    addStringP(allheat?"\003":"\004");
+                }
+          else if(c2=='3') //Cooldown
+                {
+                     bool alloff=true;
+                     if(extruder[0].tempControl.targetTemperatureC>0)alloff=false;
+#if NUM_EXTRUDER>1
+                    if(extruder[1].tempControl.targetTemperatureC>0)alloff=false;
+#endif
+#if NUM_EXTRUDER>2
+                     if(extruder[2].tempControl.targetTemperatureC>0)alloff=false;
+#endif
+#if HAVE_HEATED_BED==true
+                    if (heatedBedController.targetTemperatureC>0)alloff=false;
+#endif
+               addStringP(alloff?"\003":"\004");
+                }
+            else if(c2=='4') //Extruder 1 Off
+                {
+                    addStringP(extruder[0].tempControl.targetTemperatureC>0?"\004":"\003");
+                }
+            else if(c2=='5') //Extruder 2 Off
+                {
+                addStringP(extruder[1].tempControl.targetTemperatureC>0?"\004":"\003");
+                }
+             else if(c2=='6') //Extruder 3 Off
+                {
+                addStringP(extruder[2].tempControl.targetTemperatureC>0?"\004":"\003");
+                }
+             else if(c2=='7') //Bed Off
+                {
+                addStringP(heatedBedController.targetTemperatureC>0?"\004":"\003");
+                }
+        break;
+	    case 'C':
+            if(c2=='1')
+                {
+                addStringP(uipagedialog[0]);
+                }
+            else if(c2=='2')
+                {
+                addStringP(uipagedialog[1]);
+                }
+            else if(c2=='3')
+                {
+                addStringP(uipagedialog[2]);
+                }
+            else if(c2=='4')
+                {
+                addStringP(uipagedialog[3]);
+                }
+	    break;
         case 'd':
             if(c2=='o') addStringP(Printer::debugEcho()?ui_text_on:ui_text_off);
             else if(c2=='i') addStringP(Printer::debugInfo()?ui_text_on:ui_text_off);
