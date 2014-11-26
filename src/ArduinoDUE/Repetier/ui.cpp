@@ -1927,15 +1927,15 @@ void UIDisplay::refreshPage()
         if (mtype==UI_MENU_TYPE_MENU_WITH_STATUS)
         {
         UIMenuEntry *ent =(UIMenuEntry *)pgm_read_word(&(entries[nr-1]));   //this is status bar
-        printCols[0]=0;//fill with blank line if number of entries < 3(1 or 2)
+        uid.printCols[0]=0;//fill with blank line if number of entries < 3(1 or 2)
         if (nr<UI_ROWS)r--;
         while(r<UI_ROWS)
             {
-            strcpy(cache[r++],printCols);
+            strcpy(cache[r++],uid.printCols);
             }
         col=0;//init parsing
          parse((char*)pgm_read_word(&(ent->text)),false);
-         strcpy(cache[UI_ROWS-1],printCols);//copy status
+         strcpy(cache[UI_ROWS-1],uid.printCols);//copy status
          r=UI_ROWS;
         }
     }
@@ -2401,7 +2401,9 @@ void UIDisplay::adjustMenuPos()
     UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
     uint8_t mtype = HAL::readFlashByte((PGM_P)&(men->menuType));
     int numEntries = pgm_read_word(&(men->numEntries));
-    if(mtype != 2) return;
+    int numrows=UI_ROWS;
+    if(!((mtype == UI_MENU_TYPE_SUBMENU)||(mtype == UI_MENU_TYPE_MENU_WITH_STATUS))) return;
+    if (mtype == UI_MENU_TYPE_MENU_WITH_STATUS)numrows--;
     UIMenuEntry *entry;
     while(menuPos[menuLevel] > 0) // Go up until we reach visible position
     {
@@ -2440,8 +2442,8 @@ void UIDisplay::adjustMenuPos()
             if(!ent->showEntry())
                 skipped++;
         }
-        if(menuTop[menuLevel] + skipped + UI_ROWS - 1 < menuPos[menuLevel]) {
-            menuTop[menuLevel] = menuPos[menuLevel] + 1 - UI_ROWS;
+        if(menuTop[menuLevel] + skipped + numrows - 1 < menuPos[menuLevel]) {
+            menuTop[menuLevel] = menuPos[menuLevel] + 1 - numrows;
             modified = true;
         }
     }
