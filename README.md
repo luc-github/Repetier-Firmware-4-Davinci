@@ -11,8 +11,9 @@ Sources are [here](https://github.com/luc-github/Repetier-Firmware-0.92)
 The previous version (based on repetier v0.91) can be found [here](https://github.com/luc-github/Repetier-Firmware)
 It gets rid off Da Vinci software and filament restrictions: it allows to use clear ABS because it allows to disable sensors, as well as others brand name filaments because it does not use cartridge chip, it allows any slicer or third-party host software usage in normal way.
 
+***
 ##Current Status
-#Alpha 1 - not tested - ready for testing
+####Alpha 1 - not tested - ready for testing
 
 ***
 ##Installation
@@ -74,7 +75,7 @@ If not, you should have "Watchdog feature was not compiled into this version!" i
 
 
 ***
-Current menu (not up to date):
+##Current menu (not up to date):
 Easy: <img src='https://cloud.githubusercontent.com/assets/8822552/4748170/bfa0b7e8-5a69-11e4-80b7-02b9c99fe122.png'>
 Advanced :  <img src='https://cloud.githubusercontent.com/assets/8822552/4748932/bebab9e2-5a7c-11e4-8fea-cdbe3d70820c.png'>
 
