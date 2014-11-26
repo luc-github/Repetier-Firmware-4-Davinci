@@ -68,6 +68,9 @@ void Commands::commandLoop()
 void Commands::checkForPeriodicalActions(bool allowNewMoves)
 {
     if(!executePeriodical) return;
+#if FEATURE_WATCHDOG
+            HAL::pingWatchdog();
+#endif
     executePeriodical = 0;
     Extruder::manageTemperatures();
     if(--counter250ms == 0)
