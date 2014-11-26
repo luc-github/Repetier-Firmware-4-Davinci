@@ -1399,6 +1399,7 @@ class UIDisplay {
     inline void setOutputMaskBits(unsigned int bits) {outputMask |= bits;}
     inline void unsetOutputMaskBits(unsigned int bits) {outputMask &= ~bits;}
     void updateSDFileCount();
+    void sdrefresh(uint16_t &r,char cache[UI_ROWS][MAX_COLS+1]);
     void goDir(char *name);
     bool isDirname(char *name);
     char cwd[SD_MAX_FOLDER_DEPTH*LONG_FILENAME_LENGTH+2];
