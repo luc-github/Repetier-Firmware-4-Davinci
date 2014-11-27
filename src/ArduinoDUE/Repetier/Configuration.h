@@ -334,7 +334,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT0_EXTRUDER_COOLER_SPEED 255
 /** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
-#define EXT0_DECOUPLE_TEST_PERIOD 12000
+#define EXT0_DECOUPLE_TEST_PERIOD 30000
 
 
 // =========================== Configuration for second extruder ========================
@@ -450,7 +450,7 @@ cog. Direct drive extruder need 0. */
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT1_EXTRUDER_COOLER_SPEED 255
 /** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
-#define EXT1_DECOUPLE_TEST_PERIOD 12000
+#define EXT1_DECOUPLE_TEST_PERIOD 30000
 
 /** If enabled you can select the distance your filament gets retracted during a
 M140 command, after a given temperature is reached. */
