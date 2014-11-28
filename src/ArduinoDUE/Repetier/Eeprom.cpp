@@ -888,10 +888,29 @@ void EEPROM::writeSettings()
 {
 #if EEPROM_MODE != 0
     writeLong(EPR_BAUDRATE,Com::tEPRBaudrate);
+    writeByte(EPR_DISPLAY_MODE,Com::tDisplayMode);
+    writeByte(EPR_LIGHT_ON,Com::tLightOn);
+    writeByte(EPR_KEEP_LIGHT_ON,Com::tKeepLightOn);
+ #if defined(FIL_SENSOR1_PIN)
+	  writeByte(EPR_FIL_SENSOR_ON,Com::tSensorOn);
+#endif
+#if defined(TOP_SENSOR_PIN)
+	  writeByte(EPR_TOP_SENSOR_ON,Com::tTopsensorOn);
+#endif
+#if FEATURE_BEEPER
+    writeByte(EPR_SOUND_ON,Com::tSoundOn);
+#endif
     writeFloat(EPR_PRINTING_DISTANCE,Com::tEPRFilamentPrinted);
     writeLong(EPR_PRINTING_TIME,Com::tEPRPrinterActive);
     writeLong(EPR_MAX_INACTIVE_TIME,Com::tEPRMaxInactiveTime);
     writeLong(EPR_STEPPER_INACTIVE_TIME,Com::tEPRStopAfterInactivty);
+#if UI_AUTOLIGHTOFF_AFTER !=0
+	writeLong(EPR_POWERSAVE_AFTER_TIME,Com::tPowerSave);
+#endif
+    writeFloat(EPR_TEMP_EXT_PLA,Com::tTempExtPLA);
+    writeFloat(EPR_TEMP_EXT_ABS,Com::tTempExtABS);
+    writeFloat(EPR_TEMP_BED_PLA,Com::tTempBedPLA);
+    writeFloat(EPR_TEMP_BED_ABS,Com::tTempBedABS);
 //#define EPR_ACCELERATION_TYPE 1
 #if DRIVE_SYSTEM != DELTA
     writeFloat(EPR_XAXIS_STEPS_PER_MM,Com::tEPRXStepsPerMM,4);
@@ -918,25 +937,7 @@ void EEPROM::writeSettings()
     writeFloat(EPR_X_LENGTH,Com::tEPRXMaxLength);
     writeFloat(EPR_Y_LENGTH,Com::tEPRYMaxLength);
     writeFloat(EPR_Z_LENGTH,Com::tEPRZMaxLength);
-    writeByte(EPR_LIGHT_ON,Com::tLightOn);
-    writeByte(EPR_KEEP_LIGHT_ON,Com::tKeepLightOn);
- #if defined(FIL_SENSOR1_PIN)
-	  writeByte(EPR_FIL_SENSOR_ON,Com::tSensorOn);
-#endif
-#if defined(TOP_SENSOR_PIN)
-	  writeByte(EPR_TOP_SENSOR_ON,Com::tTopsensorOn);
-#endif
-#if FEATURE_BEEPER
-    writeByte(EPR_SOUND_ON,Com::tSoundOn);
-#endif
-#if UI_AUTOLIGHTOFF_AFTER !=0
-	writeLong(EPR_POWERSAVE_AFTER_TIME,Com::tPowerSave);
-#endif
-    writeFloat(EPR_TEMP_EXT_PLA,Com::tTempExtPLA);
-    writeFloat(EPR_TEMP_EXT_ABS,Com::tTempExtABS);
-    writeFloat(EPR_TEMP_BED_PLA,Com::tTempBedPLA);
-    writeFloat(EPR_TEMP_BED_ABS,Com::tTempBedABS);
-	writeByte(EPR_DISPLAY_MODE,Com::tDisplayMode);
+
 #if ENABLE_BACKLASH_COMPENSATION
     writeFloat(EPR_BACKLASH_X,Com::tEPRXBacklash);
     writeFloat(EPR_BACKLASH_Y,Com::tEPRYBacklash);
