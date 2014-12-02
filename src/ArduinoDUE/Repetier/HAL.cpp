@@ -254,6 +254,7 @@ int HAL::getFreeRam() {
 
 // Reset peripherals and cpu
 void HAL::resetHardware() {
+	playsound (1000,400);
     RSTC->RSTC_CR = RSTC_CR_KEY(0xA5) | RSTC_CR_PERRST | RSTC_CR_PROCRST;
 }
 
