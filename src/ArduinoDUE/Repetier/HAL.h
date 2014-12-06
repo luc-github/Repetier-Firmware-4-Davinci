@@ -130,7 +130,7 @@ typedef char prog_char;
 #define PULLUP(IO,v)            {pinMode(IO, (v!=LOW ? INPUT_PULLUP : INPUT)); }
 
 // INTERVAL / (32Khz/128)  = seconds
-#define WATCHDOG_INTERVAL       512u  // 4sec  (~16 seconds max)
+#define WATCHDOG_INTERVAL       1024u  // 4sec  (~16 seconds max)
 
 
 

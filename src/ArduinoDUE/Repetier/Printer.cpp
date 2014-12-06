@@ -614,7 +614,9 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 
 void Printer::setup()
 {
-    HAL::stopWatchdog();
+#if FEATURE_WATCHDOG
+    HAL::startWatchdog();
+#endif // FEATURE_WATCHDOG
 #if FEATURE_CONTROLLER == CONTROLLER_VIKI
     HAL::delayMilliseconds(100);
 #endif // FEATURE_CONTROLLER
@@ -953,9 +955,7 @@ SET_INPUT(FIL_SENSOR2_PIN);
     playsound(1479,150);
     playsound(1174,100);
     playsound(2349,150);
-#if FEATURE_WATCHDOG
-    HAL::startWatchdog();
-#endif // FEATURE_WATCHDOG
+
 }
 
 void Printer::defaultLoopActions()
