@@ -83,17 +83,45 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves)
      if(EEPROM::btopsensor)
         {
            if(!READ(TOP_SENSOR_PIN))
-            {
-                countersensor++;
-                if (countersensor>25)
+            {  
+                bool bheating =false;
+                  #if HAVE_HEATED_BED==true
+                        if(heatedBedController.targetTemperatureC!=0)bheating=true;
+                   #endif
+                   #if NUM_EXTRUDER>1
+                        if(extruder[1].tempControl.targetTemperatureC!=0)bheating=true;
+                        #endif
+                       #if NUM_EXTRUDER>2
+                        if(extruder[2].tempControl.targetTemperatureC!=0)bheating=true;
+                        #endif
+                if (bheating)
                     {
-                    playsound(1000,140);
-                    playsound(3000,240);
-                    UI_STATUS_UPD(UI_TEXT_TOP_COVER_OPEN);
-                    countersensor=0;
+                    countersensor++;
+                    if ((countersensor>25) ||  !Printer::btop_Cover_open)
+                        {
+                         //save status in flag
+                        Printer::btop_Cover_open=true;
+                        //play alarm
+                        playsound(1000,140);
+                        playsound(3000,240);
+                        UI_STATUS_UPD(UI_TEXT_TOP_COVER_OPEN);
+                        countersensor=0;
+                        }
                     }
             }
-            else countersensor=0;
+            else 
+                {
+                    countersensor=0;
+                    //check if top was previously open
+                    if (Printer::btop_Cover_open)
+                        {   //erase only if no other status
+                            if  (String(UI_TEXT_TOP_COVER_OPEN).equals(String(uid.statusMsg)))
+                                {
+                                     UI_STATUS_UPD("");
+                                }
+                            Printer::btop_Cover_open=false;
+                        }
+                }
         }
 #endif
     if (Printer::isMenuMode(MENU_MODE_STOP_REQUESTED)  && Printer::isMenuMode(MENU_MODE_STOP_DONE) )

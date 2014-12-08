@@ -76,6 +76,7 @@ public:
     static long advanceExecuted;             ///< Executed advance steps
 #endif
 #endif
+    static bool btop_Cover_open;
     static uint8_t menuMode;
     static float axisStepsPerMM[];
     static float invAxisStepsPerMM[];

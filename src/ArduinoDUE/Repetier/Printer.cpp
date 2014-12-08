@@ -56,6 +56,7 @@ float Printer::coordinateOffset[Z_AXIS_ARRAY] = {0,0,0};
 uint8_t Printer::flag0 = 0;
 uint8_t Printer::flag1 = 0;
 uint8_t Printer::flaghome = 0;
+bool Printer::btop_Cover_open=false;
 uint8_t Printer::debugLevel = 6; ///< Bitfield defining debug output. 1 = echo, 2 = info, 4 = error, 8 = dry run., 16 = Only communication, 32 = No moves
 uint8_t Printer::stepsPerTimerCall = 1;
 uint8_t Printer::menuMode = 0;
