@@ -1272,7 +1272,7 @@ Always hard to say since the other angle is 89° in this case!
 #define BABYSTEP_MULTIPLICATOR 1
 
 /* Define a pin to tuen light on/off */
-#define CASE_LIGHTS_PIN 85
+#define CASE_LIGHTS_PIN LIGHT_PIN
 #define CASE_LIGHT_DEFAULT_ON 1
 
 /** Set to false to disable SD support: */

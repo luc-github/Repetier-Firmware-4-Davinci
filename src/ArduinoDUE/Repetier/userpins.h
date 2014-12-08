@@ -55,7 +55,8 @@
 #define X_MAX_PIN -1
 #define Y_MAX_PIN -1
 #define Z_MAX_PIN -1
-#define LED_PIN         129
+#define LED_PIN         -1
+#define LIGHT_PIN    85
 #define ORIG_PS_ON_PIN      -1
 #define PS_ON_PIN       ORIG_PS_ON_PIN
 #define TOP_SENSOR_PIN      6
