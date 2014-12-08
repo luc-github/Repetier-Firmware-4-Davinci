@@ -2,6 +2,7 @@
 ============================
 
 This fw is based on repetier fw and modified to work with DaVinci 1.0, 2.0 single fan and 2.0.   
+###It does not support latest boards generation! Check you board first!  
 It works with host software like [repetier host](http://repetier.com), or as stand alone if you use a WIFI SD Card.    
 
 You can see more on [Voltivo forum](http://voltivo.com/forum/davinci-firmware).     
