@@ -330,7 +330,11 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT0_SELECT_COMMANDS "M117 Extruder 1"
 #define EXT0_DESELECT_COMMANDS ""
 /** The extruder cooler is a fan to cool the extruder when it is heating. If you turn the etxruder on, the fan goes on. */
+#if DAVINCI==3
+#define EXT0_EXTRUDER_COOLER_PIN ORIG_FAN2_PIN
+#else
 #define EXT0_EXTRUDER_COOLER_PIN ORIG_FAN_PIN
+#endif
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT0_EXTRUDER_COOLER_SPEED 255
 /** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
@@ -444,7 +448,7 @@ cog. Direct drive extruder need 0. */
 #define EXT1_EXTRUDER_COOLER_PIN ORIG_FAN_PIN
 #endif
 #if DAVINCI==3
-#define EXT1_EXTRUDER_COOLER_PIN ORIG_FAN2_PIN
+#define EXT1_EXTRUDER_COOLER_PIN ORIG_FAN_PIN
 #endif
 
 /** PWM speed for the cooler fan. 0=off 255=full speed */
