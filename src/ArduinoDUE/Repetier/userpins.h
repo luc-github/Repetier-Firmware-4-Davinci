@@ -15,11 +15,20 @@
 
 #define ORIG_Z_STEP_PIN     119
 #define ORIG_Z_DIR_PIN      118
+#if MODEL==0
 #define ORIG_Z_MIN_PIN      124
+#else
+#define ORIG_Z_MIN_PIN      128
+#endif
 #define ORIG_Z_MAX_PIN      -1
 #define ORIG_Z_ENABLE_PIN   120
 //bed
+#if MODEL==0
 #define HEATER_1_PIN        17
+#else
+#define HEATER_1_PIN      67
+#endif
+
 #define TEMP_1_PIN      14 // ADC channel #, not a PIN #
 
 //extruders and sensors
@@ -56,7 +65,11 @@
 #define Y_MAX_PIN -1
 #define Z_MAX_PIN -1
 #define LED_PIN         -1
+#if MODEL==0
 #define LIGHT_PIN    85
+#else
+#define LIGHT_PIN    17
+#endif
 #define ORIG_PS_ON_PIN      -1
 #define PS_ON_PIN       ORIG_PS_ON_PIN
 #define TOP_SENSOR_PIN      6
