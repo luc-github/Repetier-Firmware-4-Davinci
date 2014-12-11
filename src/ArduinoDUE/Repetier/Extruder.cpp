@@ -161,12 +161,17 @@ void Extruder::manageTemperatures()
             {
                 if(act->currentTemperatureC - act->lastDecoupleTemp < DECOUPLING_TEST_MIN_TEMP_RISE)   // failed test
                 {
-                    Printer::setAnyTempsensorDefect();
-                    UI_ERROR_P(Com::tHeaterDecoupled);
-                    Com::printErrorFLN(Com::tHeaterDecoupledWarning);
-                    Com::printF(PSTR("Error:Temp. raised to slow. Rise = "),act->currentTemperatureC - act->lastDecoupleTemp);
-                    Com::printF(PSTR(" after "),(int32_t)(time-act->lastDecoupleTest));
-                    Com::printFLN(PSTR(" ms"));
+                     extruderTempErrors++;
+                     errorDetected = 1;
+                     if(extruderTempErrors > 10)   // Ignore short temporary failures
+                     {
+                         Printer::setAnyTempsensorDefect();
+                         UI_ERROR_P(Com::tHeaterDecoupled);
+                         Com::printErrorFLN(Com::tHeaterDecoupledWarning);
+                         Com::printF(PSTR("Error:Temp. raised to slow. Rise = "),act->currentTemperatureC - act->lastDecoupleTemp);
+                         Com::printF(PSTR(" after "),(int32_t)(time-act->lastDecoupleTest));
+                         Com::printFLN(PSTR(" ms"));
++                    }
                 }
                 else
                 {
@@ -178,12 +183,17 @@ void Extruder::manageTemperatures()
             {
                 if(fabs(act->currentTemperatureC - act->targetTemperatureC) > DECOUPLING_TEST_MAX_HOLD_VARIANCE)   // failed test
                 {
-                    Printer::setAnyTempsensorDefect();
-                    UI_ERROR_P(Com::tHeaterDecoupled);
-                    Com::printErrorFLN(Com::tHeaterDecoupledWarning);
-                    Com::printF(PSTR("Error:Could not hold temperature "),act->lastDecoupleTemp);
-                    Com::printF(PSTR(" measured "),act->currentTemperatureC);
-                    Com::printFLN(PSTR(" deg. C"));
+                     extruderTempErrors++;
+                     errorDetected = 1;
+                     if(extruderTempErrors > 10)   // Ignore short temporary failures
+                     {
+                         Printer::setAnyTempsensorDefect();
+                         UI_ERROR_P(Com::tHeaterDecoupled);
+                         Com::printErrorFLN(Com::tHeaterDecoupledWarning);
+                         Com::printF(PSTR("Error:Could not hold temperature "),act->lastDecoupleTemp);
+                         Com::printF(PSTR(" measured "),act->currentTemperatureC);
+                         Com::printFLN(PSTR(" deg. C"));
+                     }
                 }
                 else
                 {
@@ -672,7 +682,7 @@ void Extruder::unstep()
     WRITE(EXT5_STEP_PIN,LOW);
 #endif
 }
-void Extruder::setDirection(uint8_t dir)
+/*void Extruder::setDirection(uint8_t dir)
 {
     mixingDir = dir;
 #if NUM_EXTRUDER>0
@@ -711,7 +721,7 @@ void Extruder::setDirection(uint8_t dir)
     else
         WRITE(EXT5_DIR_PIN,EXT5_INVERSE);
 #endif
-}
+}*/
 void Extruder::enable()
 {
 #if NUM_EXTRUDER>0 && defined(EXT0_ENABLE_PIN) && EXT0_ENABLE_PIN>-1
