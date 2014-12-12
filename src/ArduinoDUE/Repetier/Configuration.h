@@ -507,6 +507,7 @@ temperature*8.
 If you have a PTC thermistor instead of a NTC thermistor, keep the adc values increasing and use themistor types 50-52 instead of 5-7!
 */
 /** Number of entries in the user thermistor table 0. Set to 0 to disable it. */
+#if MODEL==0
 #define NUM_TEMPS_USERTHERMISTOR0 29
 #define USER_THERMISTORTABLE0 {{111,2240},{132,2120},{165,2000},{201,1920},{248,1800},{309,1720},{389,1640},{485,1560},{596,1440},{714,1360},{894,1280},{1083,1160},{1312,1080},{1539,960},{1786,880},{2006,760},{2208,640},{2382,560},{2503,440},{2602,360},{2679,264},{2695,160},{2728,120},{2747,80},{2786,0},{2824,-80},{2863,-160},{2901,-240}}
 
@@ -516,6 +517,17 @@ If you have a PTC thermistor instead of a NTC thermistor, keep the adc values in
 /** Number of entries in the user thermistor table 2. Set to 0 to disable it. */
 #define NUM_TEMPS_USERTHERMISTOR2 0
 #define USER_THERMISTORTABLE2  {}
+
+#else
+#define NUM_TEMPS_USERTHERMISTOR0 27
+#define USER_THERMISTORTABLE0 {{294, 2560},{375, 2400},{461, 2272},{526, 2184},{601, 2104},{674, 2048},{811, 1928},{925, 1848},{1071, 1768},{1219, 1696},{1445, 1584},{1673, 1496},{1902, 1416},{2187, 1312},{2454, 1224},{2672, 1152},{3000, 1048},{3196, 968},{3439, 864},{3583, 784},{3736, 680},{3899, 536},{3960, 448},{4024, 336},{4067, 192},{4076, 0},{4081, -160}}
+
+/** Number of entries in the user thermistor table 1. Set to 0 to disable it. */
+#define NUM_TEMPS_USERTHERMISTOR1 16
+#define USER_THERMISTORTABLE1 {{1197, 1280},{1682, 1096},{1892, 1008},{2164, 936},{2350, 912},{2548, 848},{2740, 784},{2901, 704},{3096, 608},{3246, 496},{3360, 424},{3503, 336},{3599, 264},{3695, 208},{3880, 0},{3981, -160}}
+/** Number of entries in the user thermistor table 2. Set to 0 to disable it. */
+#define NUM_TEMPS_USERTHERMISTOR2 0
+#endif
 
 /** If defined, creates a thermistor table at startup.
 
