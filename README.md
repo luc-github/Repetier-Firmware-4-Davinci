@@ -4,7 +4,7 @@
 This firmware is based on the popular repetier firmware and modified to work with first generation Da Vinci 1.0, 2.0 single fan and 2.0.
 
 ***
-###WARNING! It does not currently support the latest board generations! Check you board first!
+###Support for 1.0A is implemented and need feedback 
 
 The board can be easily exposed by removing the back panel of the printer secured by two torx screws.  Supported boards have a jumper labeled JP1.  Unsupported second generation boards have a jumper labeled J37. More info can be found on the [Voltivo forum](http://voltivo.com/forum/davinci-peersupport/340-new-kind-of-mainboard-no-j1-erase-jumper).
 ***
@@ -23,7 +23,7 @@ The previous version (based on repetier v0.91) can be found [here](https://githu
 
 ***
 ##Current Status
-####Alpha 1 - not tested - ready for testing
+####Alpha 1 - ready for testing
 
 ***
 ##Installation
@@ -52,7 +52,9 @@ for basic installation just change :
   3 for DaVinci 2.0  (2Fans, 2 Extruders)   
 
 For some boards that have a heatbed sensor with a slow response time and generate a defect temperature :   
-Set WARMUP_BED_ON_INIT to 1, it will preheat bed if it is necessary to increase sensor response time when starting printer if a defect is detected, if it is a real sensor issue - it will stop after 10 seconds and generate a temperature defect error.   
+Set WARMUP_BED_ON_INIT to 1, it will preheat bed if it is necessary to increase sensor response time when starting printer if a defect is detected, if it is a real sensor issue - it will stop after 10 seconds and generate a temperature defect error. 
+
+Support for 1.0A:  need to change <CODE>#define MODEL 0</CODE>  to  <CODE>#define MODEL 1</CODE>
 
 To repurpose the main Extruder cooling fan to be controlled VIA G-Code instructions M106/M107:   
 Set REPURPOSE_FAN_TO_COOL_EXTRUSIONS to 1, do not forget to add a fan with power source to cool extruder permanently if you use this option.     
