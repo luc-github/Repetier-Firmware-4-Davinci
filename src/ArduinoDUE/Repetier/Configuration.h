@@ -21,14 +21,14 @@
 
 // ################## EDIT THESE SETTINGS MANUALLY ################
 
-#define DAVINCI 2 // "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN
+#define DAVINCI 1 // "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN
 #define MODEL  0//"0" for first generation (jumper JP1 to reset ) , "1" for new generation   (jumper J37 to reset)
 #define REPURPOSE_FAN_TO_COOL_EXTRUSIONS 0 //Setting this to 1 will repurpose the main Extruder cooling fan to be controlled VIA M106/M107
                                                                                             //Warning: for DaVinci 1.0 need to add a permanent fan with power supply to cool extruder
 #define VERSION_MAJOR " 1"
-#define VERSION_MINOR_YEAR "14"
-#define VERSION_MINOR_MONTH "11"
-#define VERSION_MINOR_DAY "27"
+#define VERSION_MINOR_YEAR "15"
+#define VERSION_MINOR_MONTH "01"
+#define VERSION_MINOR_DAY "02"
 #define VERSION_BUILD "1"
 
 #define WARMUP_BED_ON_INIT 0 //use this to preheat your bed if you have a temperature defect  at start due to slow  response time of cold thermistor
