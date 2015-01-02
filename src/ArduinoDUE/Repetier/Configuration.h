@@ -21,7 +21,7 @@
 
 // ################## EDIT THESE SETTINGS MANUALLY ################
 
-#define DAVINCI 1 // "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN
+#define DAVINCI 2 // "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN
 #define MODEL  0//"0" for first generation (jumper JP1 to reset ) , "1" for new generation   (jumper J37 to reset)
 #define REPURPOSE_FAN_TO_COOL_EXTRUSIONS 0 //Setting this to 1 will repurpose the main Extruder cooling fan to be controlled VIA M106/M107
                                                                                             //Warning: for DaVinci 1.0 need to add a permanent fan with power supply to cool extruder
@@ -508,12 +508,13 @@ If you have a PTC thermistor instead of a NTC thermistor, keep the adc values in
 */
 /** Number of entries in the user thermistor table 0. Set to 0 to disable it. */
 #if MODEL==0
-#define NUM_TEMPS_USERTHERMISTOR0 29
-#define USER_THERMISTORTABLE0 {{111,2240},{132,2120},{165,2000},{201,1920},{248,1800},{309,1720},{389,1640},{485,1560},{596,1440},{714,1360},{894,1280},{1083,1160},{1312,1080},{1539,960},{1786,880},{2006,760},{2208,640},{2382,560},{2503,440},{2602,360},{2679,264},{2695,160},{2728,120},{2747,80},{2786,0},{2824,-80},{2863,-160},{2901,-240}}
+#define NUM_TEMPS_USERTHERMISTOR0 33
+#define USER_THERMISTORTABLE0 {{96,2400},{99,2320},{113,2240},{132,2160},{155,2080},{180,2000},{211,1920},{247,1840},{293,1760},{350,1680},{421,1600},{508,1520},{611,1440},{732,1360},{871,1280},{1024,1200},{1192,1120},{1369,1040},{1552,960},{1737,880},{1900,800},{2070,720},{2219,640},{2361,560},{2478,480},{2565,400},{2628,320},{2673,240},{2710,160},{2746,80},{2783,0},{2824,-80},{2864,-160}}
 
 /** Number of entries in the user thermistor table 1. Set to 0 to disable it. */
-#define NUM_TEMPS_USERTHERMISTOR1 30
-#define USER_THERMISTORTABLE1 {{2003,1040},{2058,1000},{2161,960},{2253,920},{2337,880},{2450,840},{2549,800},{2637,760},{2715,720},{2786,680},{2907,640},{3008,600},{3093,560},{3165,520},{3247,480},{3316,440},{3374,400},{3447,360},{3506,320},{3548,280},{3610,240},{3664,200},{3708,160},{3764,120},{3816,80},{3868,40},{3920,0},{4025,-80},{4129,-160},{4233,-240}}
+#define NUM_TEMPS_USERTHERMISTOR1 19
+#define USER_THERMISTORTABLE1 {{628,1280},{859,1200},{1113,1120},{1382,1040},{1660,960},{1938,880},{2211,800},{2473,720},{2718,640},{2945,560},{3148,480},{3328,400},{3482,320},{3613,240},{3722,160},{3815,80},{3895,0},{3972,-80},{4055,-160}}
+
 /** Number of entries in the user thermistor table 2. Set to 0 to disable it. */
 #define NUM_TEMPS_USERTHERMISTOR2 0
 #define USER_THERMISTORTABLE2  {}
@@ -523,8 +524,9 @@ If you have a PTC thermistor instead of a NTC thermistor, keep the adc values in
 #define USER_THERMISTORTABLE0 {{294, 2560},{375, 2400},{461, 2272},{526, 2184},{601, 2104},{674, 2048},{811, 1928},{925, 1848},{1071, 1768},{1219, 1696},{1445, 1584},{1673, 1496},{1902, 1416},{2187, 1312},{2454, 1224},{2672, 1152},{3000, 1048},{3196, 968},{3439, 864},{3583, 784},{3736, 680},{3899, 536},{3960, 448},{4024, 336},{4067, 192},{4076, 0},{4081, -160}}
 
 /** Number of entries in the user thermistor table 1. Set to 0 to disable it. */
-#define NUM_TEMPS_USERTHERMISTOR1 16
-#define USER_THERMISTORTABLE1 {{1197, 1280},{1682, 1096},{1892, 1008},{2164, 936},{2350, 912},{2548, 848},{2740, 784},{2901, 704},{3096, 608},{3246, 496},{3360, 424},{3503, 336},{3599, 264},{3695, 208},{3880, 0},{3981, -160}}
+#define NUM_TEMPS_USERTHERMISTOR1 19
+#define USER_THERMISTORTABLE1 {{628,1280},{859,1200},{1113,1120},{1382,1040},{1660,960},{1938,880},{2211,800},{2473,720},{2718,640},{2945,560},{3148,480},{3328,400},{3482,320},{3613,240},{3722,160},{3815,80},{3895,0},{3972,-80},{4055,-160}}
+
 /** Number of entries in the user thermistor table 2. Set to 0 to disable it. */
 #define NUM_TEMPS_USERTHERMISTOR2 0
 #endif
