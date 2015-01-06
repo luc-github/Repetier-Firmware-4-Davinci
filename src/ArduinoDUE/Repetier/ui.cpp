@@ -418,18 +418,15 @@ void lcdWriteNibble(uint8_t value)
     WRITE(UI_DISPLAY_D5_PIN,value & 2);
     WRITE(UI_DISPLAY_D6_PIN,value & 4);
     WRITE(UI_DISPLAY_D7_PIN,value & 8);
+	DELAY1MICROSECOND;
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);// enable pulse must be >450ns
-    DELAY1MICROSECOND;
-
+    HAL::delayMicroseconds(UI_DELAYPERCHAR);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-    DELAY1MICROSECOND;
-
 }
+
 void lcdWriteByte(uint8_t c,uint8_t rs)
 {
-#if UI_DISPLAY_RW_PIN<0
-    HAL::delayMicroseconds(UI_DELAYPERCHAR);
-#else
+#if false && UI_DISPLAY_RW_PIN >= 0 // not really needed
     SET_INPUT(UI_DISPLAY_D4_PIN);
     SET_INPUT(UI_DISPLAY_D5_PIN);
     SET_INPUT(UI_DISPLAY_D6_PIN);
@@ -440,16 +437,16 @@ void lcdWriteByte(uint8_t c,uint8_t rs)
     do
     {
         WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);
-        DELAY1MICROSECOND;
+		DELAY1MICROSECOND;
         busy = READ(UI_DISPLAY_D7_PIN);
         WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-        DELAY1MICROSECOND;
+		DELAY2MICROSECOND;
 
         WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);
-        DELAY1MICROSECOND;
+		DELAY2MICROSECOND;
 
         WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-        DELAY1MICROSECOND;
+		DELAY2MICROSECOND;
 
     }
     while (busy);
@@ -465,21 +462,19 @@ void lcdWriteByte(uint8_t c,uint8_t rs)
     WRITE(UI_DISPLAY_D5_PIN, c & 0x20);
     WRITE(UI_DISPLAY_D6_PIN, c & 0x40);
     WRITE(UI_DISPLAY_D7_PIN, c & 0x80);
+	DELAY1MICROSECOND;
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
-    DELAY1MICROSECOND;
-
+    HAL::delayMicroseconds(UI_DELAYPERCHAR);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-    DELAY1MICROSECOND;
 
     WRITE(UI_DISPLAY_D4_PIN, c & 0x01);
     WRITE(UI_DISPLAY_D5_PIN, c & 0x02);
     WRITE(UI_DISPLAY_D6_PIN, c & 0x04);
     WRITE(UI_DISPLAY_D7_PIN, c & 0x08);
+	DELAY1MICROSECOND;
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
-    DELAY1MICROSECOND;
-
+    HAL::delayMicroseconds(UI_DELAYPERCHAR);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-    DELAY1MICROSECOND;
 
 }
 void initializeLCD()
@@ -501,8 +496,6 @@ void initializeLCD()
 #endif
     SET_OUTPUT(UI_DISPLAY_ENABLE_PIN);
 
-////Initialization 1
-
     // Now we pull both RS and R/W low to begin commands
     WRITE(UI_DISPLAY_RS_PIN, LOW);
     HAL::delayMicroseconds(5);
@@ -522,61 +515,13 @@ void initializeLCD()
     HAL::delayMicroseconds(5500); // I have one LCD for which 4500 here was not long enough.
     // second try
     lcdWriteNibble(0x03);
-    HAL::delayMicroseconds(150); // wait
+    HAL::delayMicroseconds(180); // wait
     // third go!
     lcdWriteNibble(0x03);
-    HAL::delayMicroseconds(150);
+    HAL::delayMicroseconds(180);
     // finally, set to 4-bit interface
     lcdWriteNibble(0x02);
-    HAL::delayMicroseconds(150);
-    
-    lcdCommand(LCD_DISPLAYOFF); 
-    HAL::delayMicroseconds(120);
-    
-    lcdCommand(LCD_CLEAR);                  //- Clear Screen
-    HAL::delayMilliseconds(10); // clear is slow operation
-    
-    // finally, set # lines, font size, etc.
-    lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);
-    HAL::delayMicroseconds(120);
-    
-    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);    //- Display on
-    HAL::delayMicroseconds(150);
-
-    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF); //- Entrymode (Display Shift: off, Increment Address Counter)
-    HAL::delayMicroseconds(150);
-
-    lcdCommand(LCD_CLEAR);                  //- Clear Screen
-    HAL::delayMilliseconds(10); // clear is slow operation
-    
-    ////Initialization 2
-    HAL::delayMicroseconds(5500); // I have one LCD for which 4500 here was not long enough.
-    // Now we pull both RS and R/W low to begin commands
-    WRITE(UI_DISPLAY_RS_PIN, LOW);
-    HAL::delayMicroseconds(5);
-    WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-
-    //put the LCD into 4 bit mode
-    // this is according to the hitachi HD44780 datasheet
-    // figure 24, pg 46
-
-    // we start in 8bit mode, try to set 4 bit mode
-    // at this point we are in 8 bit mode but of course in this
-    // interface 4 pins are dangling unconnected and the values
-    // on them don't matter for these instructions.
-    WRITE(UI_DISPLAY_RS_PIN, LOW);
-    HAL::delayMicroseconds(10);
-    lcdWriteNibble(0x03);
-    HAL::delayMicroseconds(5500); // I have one LCD for which 4500 here was not long enough.
-    // second try
-    lcdWriteNibble(0x03);
-    HAL::delayMicroseconds(150); // wait
-    // third go!
-    lcdWriteNibble(0x03);
-    HAL::delayMicroseconds(150);
-    // finally, set to 4-bit interface
-    lcdWriteNibble(0x02);
-    HAL::delayMicroseconds(150);
+    HAL::delayMicroseconds(180);
     
     lcdCommand(LCD_DISPLAYOFF); 
     HAL::delayMicroseconds(120);
