@@ -481,6 +481,9 @@ void initializeLCD()
 {
     playsound(5000,240);
     playsound(3000,240);
+#if defined(UI_BACKLIGHT_PIN)
+    SET_OUTPUT(UI_BACKLIGHT_PIN);
+#endif
     // SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
     // according to datasheet, we need at least 40ms after power rises above 2.7V
     // before sending commands. Arduino can turn on way before 4.5V.
@@ -522,26 +525,14 @@ void initializeLCD()
     // finally, set to 4-bit interface
     lcdWriteNibble(0x02);
     HAL::delayMicroseconds(180);
-    
-    lcdCommand(LCD_DISPLAYOFF); 
-    HAL::delayMicroseconds(120);
-    
-    lcdCommand(LCD_CLEAR);                  //- Clear Screen
-    HAL::delayMilliseconds(10); // clear is slow operation
-    
+  
     // finally, set # lines, font size, etc.
     lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);
-    HAL::delayMicroseconds(120);
-    
-    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);    //- Display on
-    HAL::delayMicroseconds(150);
 
-    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF); //- Entrymode (Display Shift: off, Increment Address Counter)
-    HAL::delayMicroseconds(150);
-
-    lcdCommand(LCD_CLEAR);                  //- Clear Screen
-    HAL::delayMilliseconds(10); // clear is slow operation
-
+    lcdCommand(LCD_CLEAR);					//-	Clear Screen
+    HAL::delayMilliseconds(2); // clear is slow operation
+    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF);	//-	Entrymode (Display Shift: off, Increment Address Counter)
+    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);	//-	Display on
     uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
     uid.createChar(1,character_back);
     uid.createChar(2,character_degree);
@@ -553,7 +544,6 @@ void initializeLCD()
     uid.createChar(7,character_bed);
 
 #if defined(UI_BACKLIGHT_PIN)
-    SET_OUTPUT(UI_BACKLIGHT_PIN);
     WRITE(UI_BACKLIGHT_PIN, HIGH);
 #endif
 }
