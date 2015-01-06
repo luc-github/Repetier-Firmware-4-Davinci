@@ -490,7 +490,7 @@ void initializeLCD()
     // according to datasheet, we need at least 40ms after power rises above 2.7V
     // before sending commands. Arduino can turn on way before 4.5V.
     // is this delay long enough for all cases??
-    HAL::delayMilliseconds(2000);
+    HAL::delayMilliseconds(500);
     SET_OUTPUT(UI_DISPLAY_D4_PIN);
     SET_OUTPUT(UI_DISPLAY_D5_PIN);
     SET_OUTPUT(UI_DISPLAY_D6_PIN);
@@ -501,6 +501,56 @@ void initializeLCD()
 #endif
     SET_OUTPUT(UI_DISPLAY_ENABLE_PIN);
 
+////Initialization 1
+
+    // Now we pull both RS and R/W low to begin commands
+    WRITE(UI_DISPLAY_RS_PIN, LOW);
+    HAL::delayMicroseconds(5);
+    WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
+
+    //put the LCD into 4 bit mode
+    // this is according to the hitachi HD44780 datasheet
+    // figure 24, pg 46
+
+    // we start in 8bit mode, try to set 4 bit mode
+    // at this point we are in 8 bit mode but of course in this
+    // interface 4 pins are dangling unconnected and the values
+    // on them don't matter for these instructions.
+    WRITE(UI_DISPLAY_RS_PIN, LOW);
+    HAL::delayMicroseconds(10);
+    lcdWriteNibble(0x03);
+    HAL::delayMicroseconds(5500); // I have one LCD for which 4500 here was not long enough.
+    // second try
+    lcdWriteNibble(0x03);
+    HAL::delayMicroseconds(150); // wait
+    // third go!
+    lcdWriteNibble(0x03);
+    HAL::delayMicroseconds(150);
+    // finally, set to 4-bit interface
+    lcdWriteNibble(0x02);
+    HAL::delayMicroseconds(150);
+    
+    lcdCommand(LCD_DISPLAYOFF); 
+    HAL::delayMicroseconds(120);
+    
+    lcdCommand(LCD_CLEAR);                  //- Clear Screen
+    HAL::delayMilliseconds(10); // clear is slow operation
+    
+    // finally, set # lines, font size, etc.
+    lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);
+    HAL::delayMicroseconds(120);
+    
+    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);    //- Display on
+    HAL::delayMicroseconds(150);
+
+    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF); //- Entrymode (Display Shift: off, Increment Address Counter)
+    HAL::delayMicroseconds(150);
+
+    lcdCommand(LCD_CLEAR);                  //- Clear Screen
+    HAL::delayMilliseconds(10); // clear is slow operation
+    
+    ////Initialization 2
+    HAL::delayMicroseconds(5500); // I have one LCD for which 4500 here was not long enough.
     // Now we pull both RS and R/W low to begin commands
     WRITE(UI_DISPLAY_RS_PIN, LOW);
     HAL::delayMicroseconds(5);
