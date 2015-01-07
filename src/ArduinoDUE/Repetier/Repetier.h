@@ -574,6 +574,7 @@ extern int debugWaitLoop;
 #define DELAY1MICROSECOND        __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t")
 #else
 #define DELAY1MICROSECOND     HAL::delayMicroseconds(1);
+#define DELAY2MICROSECOND     HAL::delayMicroseconds(2);
 #endif
 
 #ifdef FAST_INTEGER_SQRT
