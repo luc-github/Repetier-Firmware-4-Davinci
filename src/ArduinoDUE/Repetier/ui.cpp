@@ -297,8 +297,8 @@ const long baudrates[] PROGMEM = {9600,14400,19200,28800,38400,56000,57600,76800
 #define lcdCommand(value) lcdWriteByte(value,0)
 
 static const uint8_t LCDLineOffsets[] PROGMEM = UI_LINE_OFFSETS;
-//static const char versionString[] PROGMEM = UI_VERSION_STRING;
-static const char versionString[] PROGMEM = "Test 1";
+static const char versionString[] PROGMEM = UI_VERSION_STRING;
+
 
 #if UI_DISPLAY_TYPE == DISPLAY_I2C
 
@@ -418,15 +418,18 @@ void lcdWriteNibble(uint8_t value)
     WRITE(UI_DISPLAY_D5_PIN,value & 2);
     WRITE(UI_DISPLAY_D6_PIN,value & 4);
     WRITE(UI_DISPLAY_D7_PIN,value & 8);
-	DELAY1MICROSECOND;
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);// enable pulse must be >450ns
-    HAL::delayMicroseconds(UI_DELAYPERCHAR);
-    WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-}
+    DELAY1MICROSECOND;
 
+    WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
+    DELAY1MICROSECOND;
+
+}
 void lcdWriteByte(uint8_t c,uint8_t rs)
 {
-#if false && UI_DISPLAY_RW_PIN >= 0 // not really needed
+#if UI_DISPLAY_RW_PIN<0
+    HAL::delayMicroseconds(UI_DELAYPERCHAR);
+#else
     SET_INPUT(UI_DISPLAY_D4_PIN);
     SET_INPUT(UI_DISPLAY_D5_PIN);
     SET_INPUT(UI_DISPLAY_D6_PIN);
@@ -437,16 +440,16 @@ void lcdWriteByte(uint8_t c,uint8_t rs)
     do
     {
         WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);
-		DELAY1MICROSECOND;
+        DELAY1MICROSECOND;
         busy = READ(UI_DISPLAY_D7_PIN);
         WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-		DELAY2MICROSECOND;
+        DELAY1MICROSECOND;
 
         WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);
-		DELAY2MICROSECOND;
+        DELAY1MICROSECOND;
 
         WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-		DELAY2MICROSECOND;
+        DELAY1MICROSECOND;
 
     }
     while (busy);
@@ -462,28 +465,27 @@ void lcdWriteByte(uint8_t c,uint8_t rs)
     WRITE(UI_DISPLAY_D5_PIN, c & 0x20);
     WRITE(UI_DISPLAY_D6_PIN, c & 0x40);
     WRITE(UI_DISPLAY_D7_PIN, c & 0x80);
-	DELAY1MICROSECOND;
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
-    HAL::delayMicroseconds(UI_DELAYPERCHAR);
+    DELAY1MICROSECOND;
+
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
+    DELAY1MICROSECOND;
 
     WRITE(UI_DISPLAY_D4_PIN, c & 0x01);
     WRITE(UI_DISPLAY_D5_PIN, c & 0x02);
     WRITE(UI_DISPLAY_D6_PIN, c & 0x04);
     WRITE(UI_DISPLAY_D7_PIN, c & 0x08);
-	DELAY1MICROSECOND;
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
-    HAL::delayMicroseconds(UI_DELAYPERCHAR);
+    DELAY1MICROSECOND;
+
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
+    DELAY1MICROSECOND;
 
 }
 void initializeLCD()
 {
     playsound(5000,240);
     playsound(3000,240);
-#if defined(UI_BACKLIGHT_PIN)
-    SET_OUTPUT(UI_BACKLIGHT_PIN);
-#endif
     // SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
     // according to datasheet, we need at least 40ms after power rises above 2.7V
     // before sending commands. Arduino can turn on way before 4.5V.
@@ -514,25 +516,30 @@ void initializeLCD()
     // on them don't matter for these instructions.
     WRITE(UI_DISPLAY_RS_PIN, LOW);
     HAL::delayMicroseconds(10);
-    lcdWriteNibble(0x03);
-    HAL::delayMicroseconds(5500); // I have one LCD for which 4500 here was not long enough.
-    // second try
-    lcdWriteNibble(0x03);
-    HAL::delayMicroseconds(180); // wait
-    // third go!
-    lcdWriteNibble(0x03);
-    HAL::delayMicroseconds(180);
-    // finally, set to 4-bit interface
-    lcdWriteNibble(0x02);
-    HAL::delayMicroseconds(180);
-  
-    // finally, set # lines, font size, etc.
-    lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);
+    //start new init 
+    lcdWriteNibble(0x03);//Init Function Set
+    HAL::delayMicroseconds(100); //more than 39micro seconds
+    
+    lcdWriteNibble(0x02); //Function Set
+    lcdWriteNibble(0x08|0x00); //Lines (0x08) and Font(0x00)
+    HAL::delayMicroseconds(100); //more than 39micro seconds
+    
+    lcdWriteNibble(0x02);//Function Set
+    lcdWriteNibble(0x08|0x00); //Lines (0x08) and Font(0x00)
+    HAL::delayMicroseconds(100); //more than 39micro seconds
+    
+    lcdWriteNibble(0X0 );//Display on/off Control
+    lcdWriteNibble(0x08|0x04 | 0x0 |0X0 );//Cmd (0X08),Display On(0X04),Cursor Off(0X00), Blink Off(0X00)
+    HAL::delayMicroseconds(100);//more than 39micro seconds
+    
+    lcdWriteNibble(0x00);//Display Clear
+    lcdWriteNibble(0x01);//Clear screen
+    HAL::delayMilliseconds(5); // clear is slow operation, more than 1.53ms
+    
+    lcdWriteNibble(0x00);//Entry Mode Set
+    lcdWriteNibble(0X04|0x02|0x00);//Cmd (0X04),Cursor Direction On(0X02), Shift Off(0X00)
+    HAL::delayMilliseconds(10);//no recommendation so just a feeling
 
-    lcdCommand(LCD_CLEAR);					//-	Clear Screen
-    HAL::delayMilliseconds(2); // clear is slow operation
-    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF);	//-	Entrymode (Display Shift: off, Increment Address Counter)
-    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);	//-	Display on
     uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
     uid.createChar(1,character_back);
     uid.createChar(2,character_degree);
@@ -544,6 +551,7 @@ void initializeLCD()
     uid.createChar(7,character_bed);
 
 #if defined(UI_BACKLIGHT_PIN)
+    SET_OUTPUT(UI_BACKLIGHT_PIN);
     WRITE(UI_BACKLIGHT_PIN, HIGH);
 #endif
 }
