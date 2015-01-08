@@ -422,7 +422,7 @@ void lcdWriteNibble(uint8_t value)
     DELAY1MICROSECOND;
 
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-    DELAY1MICROSECOND;
+    DELAY2MICROSECOND;
 
 }
 void lcdWriteByte(uint8_t c,uint8_t rs)
@@ -516,16 +516,16 @@ void initializeLCD()
     // on them don't matter for these instructions.
     WRITE(UI_DISPLAY_RS_PIN, LOW);
     HAL::delayMicroseconds(10);
-    //start new init 
+
     lcdWriteNibble(0x03);//Init Function Set
     HAL::delayMicroseconds(100); //more than 39micro seconds
     
     lcdWriteNibble(0x02); //Function Set
-    lcdWriteNibble(0x08|0x00); //Lines (0x08) and Font(0x00)
+    lcdWriteNibble(0x08|0x04); //Lines (0x08) and Font(0x04)
     HAL::delayMicroseconds(100); //more than 39micro seconds
     
     lcdWriteNibble(0x02);//Function Set
-    lcdWriteNibble(0x08|0x00); //Lines (0x08) and Font(0x00)
+    lcdWriteNibble(0x08|0x04); //Lines (0x08) and Font(0x04)
     HAL::delayMicroseconds(100); //more than 39micro seconds
     
     lcdWriteNibble(0X0 );//Display on/off Control
