@@ -288,8 +288,12 @@ const long baudrates[] PROGMEM = {9600,14400,19200,28800,38400,56000,57600,76800
 #define LCD_4BIT        LCD_CONFIGURATION | 0x00    /**<    4 bits interface */
 #define LCD_2LINE       LCD_CONFIGURATION | 0x08    /**<    2 line display */
 #define LCD_1LINE       LCD_CONFIGURATION | 0x00    /**<    1 line display */
+//for HD44780 and clones
 #define LCD_5X10        LCD_CONFIGURATION | 0x04    /**<    5 X 10 dots */
 #define LCD_5X7         LCD_CONFIGURATION | 0x00    /**<    5 X 7 dots */
+//for Winstar 1604A 
+#define LCD_5X11        LCD_CONFIGURATION | 0x04    /**<    5 X 18 dots */
+#define LCD_5X8         LCD_CONFIGURATION | 0x00    /**<    5 X 8 dots */
 
 #define LCD_SETCGRAMADDR 0x40
 
@@ -412,6 +416,10 @@ void initializeLCD()
 #endif
 #if UI_DISPLAY_TYPE == DISPLAY_4BIT || UI_DISPLAY_TYPE == DISPLAY_8BIT
 
+#if  UI_DISPLAY_TYPE == DISPLAY_4BIT
+
+#define BIT_INTERFACE LCD_4BIT
+
 void lcdWriteNibble(uint8_t value)
 {
     WRITE(UI_DISPLAY_D4_PIN,value & 1);
@@ -419,10 +427,9 @@ void lcdWriteNibble(uint8_t value)
     WRITE(UI_DISPLAY_D6_PIN,value & 4);
     WRITE(UI_DISPLAY_D7_PIN,value & 8);
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);// enable pulse must be >450ns
-    DELAY1MICROSECOND;
-
+    HAL::delayMicroseconds(5);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-    DELAY2MICROSECOND;
+   HAL::delayMicroseconds(15); //tc must be >1200ns
 
 }
 void lcdWriteByte(uint8_t c,uint8_t rs)
@@ -443,13 +450,13 @@ void lcdWriteByte(uint8_t c,uint8_t rs)
         DELAY1MICROSECOND;
         busy = READ(UI_DISPLAY_D7_PIN);
         WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-        DELAY1MICROSECOND;
+        HAL::delayMicroseconds(5);
 
         WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);
-        DELAY1MICROSECOND;
+        HAL::delayMicroseconds(5);
 
         WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-        DELAY1MICROSECOND;
+        HAL::delayMicroseconds(5);
 
     }
     while (busy);
@@ -460,34 +467,96 @@ void lcdWriteByte(uint8_t c,uint8_t rs)
     WRITE(UI_DISPLAY_RW_PIN, LOW);
 #endif
     WRITE(UI_DISPLAY_RS_PIN, rs);
-
+    HAL::delayMicroseconds(5);
     WRITE(UI_DISPLAY_D4_PIN, c & 0x10);
     WRITE(UI_DISPLAY_D5_PIN, c & 0x20);
     WRITE(UI_DISPLAY_D6_PIN, c & 0x40);
     WRITE(UI_DISPLAY_D7_PIN, c & 0x80);
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
-    DELAY1MICROSECOND;
+    HAL::delayMicroseconds(5);
 
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-    DELAY1MICROSECOND;
+    HAL::delayMicroseconds(5);//tc must be >1200ns
 
     WRITE(UI_DISPLAY_D4_PIN, c & 0x01);
     WRITE(UI_DISPLAY_D5_PIN, c & 0x02);
     WRITE(UI_DISPLAY_D6_PIN, c & 0x04);
     WRITE(UI_DISPLAY_D7_PIN, c & 0x08);
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
-    DELAY1MICROSECOND;
+    HAL::delayMicroseconds(5);
 
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-    DELAY1MICROSECOND;
-
+    HAL::delayMicroseconds(5);//tc must be >1200ns
 }
+#else  //DISPLAY_8BIT
+
+#define BIT_INTERFACE LCD_8BIT
+
+void lcdWriteByte(uint8_t c,uint8_t rs)
+{
+#if UI_DISPLAY_RW_PIN<0
+    HAL::delayMicroseconds(UI_DELAYPERCHAR);
+#else
+    SET_INPUT(UI_DISPLAY_D4_PIN);
+    SET_INPUT(UI_DISPLAY_D5_PIN);
+    SET_INPUT(UI_DISPLAY_D6_PIN);
+    SET_INPUT(UI_DISPLAY_D7_PIN);
+    WRITE(UI_DISPLAY_RW_PIN, HIGH);
+    WRITE(UI_DISPLAY_RS_PIN, LOW);
+    uint8_t busy;
+    do
+    {
+        WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);
+        DELAY1MICROSECOND;
+        busy = READ(UI_DISPLAY_D7_PIN);
+        WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
+    HAL::delayMicroseconds(5);
+
+        WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);
+    HAL::delayMicroseconds(5);
+
+        WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
+    HAL::delayMicroseconds(5);
+
+    }
+    while (busy);
+    SET_OUTPUT(UI_DISPLAY_D4_PIN);
+    SET_OUTPUT(UI_DISPLAY_D5_PIN);
+    SET_OUTPUT(UI_DISPLAY_D6_PIN);
+    SET_OUTPUT(UI_DISPLAY_D7_PIN);
+    WRITE(UI_DISPLAY_RW_PIN, LOW);
+#endif
+    WRITE(UI_DISPLAY_RS_PIN, rs);
+    HAL::delayMicroseconds(5);
+    WRITE(UI_DISPLAY_D0_PIN, c & 0x01);
+    WRITE(UI_DISPLAY_D1_PIN, c & 0x02);
+    WRITE(UI_DISPLAY_D2_PIN, c & 0x04);
+    WRITE(UI_DISPLAY_D3_PIN, c & 0x08);
+    WRITE(UI_DISPLAY_D4_PIN, c & 0x10);
+    WRITE(UI_DISPLAY_D5_PIN, c & 0x20);
+    WRITE(UI_DISPLAY_D6_PIN, c & 0x40);
+    WRITE(UI_DISPLAY_D7_PIN, c & 0x80);
+    WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
+    HAL::delayMicroseconds(5);
+    WRITE(UI_DISPLAY_ENABLE_PIN, LOW);   //tc must be >1200ns
+    HAL::delayMicroseconds(5);
+}
+
+#endif 
+
 void initializeLCD()
 {
     playsound(5000,240);
-    playsound(3000,240);
-    // SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
-    // according to datasheet, we need at least 40ms after power rises above 2.7V
+    playsound(3000,120);
+#if  UI_DISPLAY_TYPE == DISPLAY_8BIT
+    playsound(5000,120);
+    SET_OUTPUT(UI_DISPLAY_D0_PIN);
+    SET_OUTPUT(UI_DISPLAY_D1_PIN);
+    SET_OUTPUT(UI_DISPLAY_D2_PIN);
+    SET_OUTPUT(UI_DISPLAY_D3_PIN);
+#endif
+  // SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
+    // according to HD44780 datasheet, we need at least 40ms after power rises above 2.7V
     // before sending commands. Arduino can turn on way before 4.5V.
     // is this delay long enough for all cases??
     HAL::delayMilliseconds(500);
@@ -503,41 +572,33 @@ void initializeLCD()
 
     // Now we pull both RS and R/W low to begin commands
     WRITE(UI_DISPLAY_RS_PIN, LOW);
-    HAL::delayMicroseconds(5);
+    HAL::delayMicroseconds(2);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-
-    //put the LCD into 4 bit mode
-    // this is according to the hitachi HD44780 datasheet
-    // figure 24, pg 46
-
-    // we start in 8bit mode, try to set 4 bit mode
-    // at this point we are in 8 bit mode but of course in this
-    // interface 4 pins are dangling unconnected and the values
-    // on them don't matter for these instructions.
+    //initialization sequence for 4bits/8bits of Winstar 1604A Screen
+    //16 rows, 4 lines
+    HAL::delayMicroseconds(2);
     WRITE(UI_DISPLAY_RS_PIN, LOW);
-    HAL::delayMicroseconds(10);
+    HAL::delayMicroseconds(2);
+#if  UI_DISPLAY_TYPE == DISPLAY_4BIT
+    lcdWriteNibble(0x03);//Init Function Set for 4bits
+    HAL::delayMicroseconds(100); //more than 39micro seconds
+#endif
+    
+    lcdCommand( BIT_INTERFACE | LCD_2LINE | LCD_5X11); //LCD Configuration: Bits, Lines and Font
+    HAL::delayMicroseconds(100); //more than 39micro seconds
+    
+    lcdCommand(BIT_INTERFACE | LCD_2LINE | LCD_5X8);//LCD Configuration: Bits, Lines and Font
+    HAL::delayMicroseconds(100); //more than 39micro seconds
+    
+    lcdCommand( LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);    //Display Control : Display on/off, Cursor, Blinking Cursor
+    HAL::delayMicroseconds(100);
+    
+    lcdCommand(LCD_CLEAR);                  //Clear Screen
+    HAL::delayMilliseconds(8); // clear is slow operation more than 1.53ms
+    
+    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF); //Entrymode: Sets cursor move direction (I/D); specifies to shift the display
+    HAL::delayMicroseconds(100);
 
-    lcdWriteNibble(0x03);//Init Function Set
-    HAL::delayMicroseconds(100); //more than 39micro seconds
-    
-    lcdWriteNibble(0x02); //Function Set
-    lcdWriteNibble(0x08|0x04); //Lines (0x08) and Font(0x04)
-    HAL::delayMicroseconds(100); //more than 39micro seconds
-    
-    lcdWriteNibble(0x02);//Function Set
-    lcdWriteNibble(0x08|0x04); //Lines (0x08) and Font(0x04)
-    HAL::delayMicroseconds(100); //more than 39micro seconds
-    
-    lcdWriteNibble(0X0 );//Display on/off Control
-    lcdWriteNibble(0x08|0x04 | 0x0 |0X0 );//Cmd (0X08),Display On(0X04),Cursor Off(0X00), Blink Off(0X00)
-    HAL::delayMicroseconds(100);//more than 39micro seconds
-    
-    lcdWriteNibble(0x00);//Display Clear
-    lcdWriteNibble(0x01);//Clear screen
-    HAL::delayMilliseconds(5); // clear is slow operation, more than 1.53ms
-    
-    lcdWriteNibble(0x00);//Entry Mode Set
-    lcdWriteNibble(0X04|0x02|0x00);//Cmd (0X04),Cursor Direction On(0X02), Shift Off(0X00)
     HAL::delayMilliseconds(10);//no recommendation so just a feeling
 
     uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
@@ -2213,7 +2274,7 @@ void UIDisplay::refreshPage()
                         printRow(y,cache[y] + UI_COLS - scroll,&displayCache[y][off[y]],scroll);
                     }
                 }
-#if DISPLAY_TYPE != 5
+#if  UI_DISPLAY_TYPE != 5
                 HAL::delayMilliseconds(transition<3 ? 200 : 70);
 #endif
                 HAL::pingWatchdog();
