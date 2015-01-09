@@ -581,23 +581,23 @@ void initializeLCD()
     HAL::delayMicroseconds(2);
 #if  UI_DISPLAY_TYPE == DISPLAY_4BIT
     lcdWriteNibble(0x03);//Init Function Set for 4bits
-    HAL::delayMicroseconds(100); //more than 39micro seconds
+    HAL::delayMicroseconds(150); //more than 39micro seconds
 #endif
     
     lcdCommand( BIT_INTERFACE | LCD_2LINE | LCD_5X11); //LCD Configuration: Bits, Lines and Font
-    HAL::delayMicroseconds(100); //more than 39micro seconds
+    HAL::delayMicroseconds(150); //more than 39micro seconds
     
     lcdCommand(BIT_INTERFACE | LCD_2LINE | LCD_5X8);//LCD Configuration: Bits, Lines and Font
-    HAL::delayMicroseconds(100); //more than 39micro seconds
+    HAL::delayMicroseconds(150); //more than 39micro seconds
     
     lcdCommand( LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);    //Display Control : Display on/off, Cursor, Blinking Cursor
-    HAL::delayMicroseconds(100);
+    HAL::delayMicroseconds(150);
     
     lcdCommand(LCD_CLEAR);                  //Clear Screen
     HAL::delayMilliseconds(8); // clear is slow operation more than 1.53ms
     
     lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF); //Entrymode: Sets cursor move direction (I/D); specifies to shift the display
-    HAL::delayMicroseconds(100);
+    HAL::delayMicroseconds(150);
 
     HAL::delayMilliseconds(10);//no recommendation so just a feeling
 
