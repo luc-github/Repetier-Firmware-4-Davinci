@@ -586,7 +586,7 @@ void initializeLCD()
     SET_OUTPUT(UI_DISPLAY_ENABLE_PIN);
     HAL::delayMicroseconds(5);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-    HAL::delayMicroseconds(5);
+    HAL::delayMilliseconds(10); // Just to be safe
     //initialization sequence for 4bits/8bits of Winstar 1604A Screen
     //16 rows, 4 lines
 #if  UI_DISPLAY_TYPE == DISPLAY_4BIT
