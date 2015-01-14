@@ -555,19 +555,17 @@ void initializeLCD()
     SET_OUTPUT(UI_DISPLAY_D2_PIN);
     SET_OUTPUT(UI_DISPLAY_D3_PIN);
 #endif
-    SET_OUTPUT(UI_DISPLAY_D4_PIN);
-    SET_OUTPUT(UI_DISPLAY_D5_PIN);
-    SET_OUTPUT(UI_DISPLAY_D6_PIN);
-    SET_OUTPUT(UI_DISPLAY_D7_PIN);
-#if UI_DISPLAY_RW_PIN>-1
-    SET_OUTPUT(UI_DISPLAY_RW_PIN);
-#endif
   // SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
     // according to HD44780 datasheet, we need at least 40ms after power rises above 2.7V
     // before sending commands. Arduino can turn on way before 4.5V.
     // is this delay long enough for all cases??
     HAL::delayMilliseconds(500);
-   
+    SET_OUTPUT(UI_DISPLAY_D4_PIN);
+    SET_OUTPUT(UI_DISPLAY_D5_PIN);
+    SET_OUTPUT(UI_DISPLAY_D6_PIN);
+    SET_OUTPUT(UI_DISPLAY_D7_PIN);
+    SET_OUTPUT(UI_DISPLAY_RS_PIN);
+ 
     //init pins to a known state
     WRITE(UI_DISPLAY_D0_PIN, HIGH);
     WRITE(UI_DISPLAY_D1_PIN, HIGH);
@@ -577,14 +575,17 @@ void initializeLCD()
     WRITE(UI_DISPLAY_D5_PIN, HIGH);
     WRITE(UI_DISPLAY_D6_PIN, HIGH);
     WRITE(UI_DISPLAY_D7_PIN, HIGH);
-
+    
+#if UI_DISPLAY_RW_PIN>-1
+    SET_OUTPUT(UI_DISPLAY_RW_PIN);
+#endif
+    // Now we pull both RS and R/W low to begin commands
+    WRITE(UI_DISPLAY_RS_PIN, LOW);
+    HAL::delayMicroseconds(5);
     //move set output late to be sure pin is not affected before
-    SET_OUTPUT(UI_DISPLAY_RS_PIN);
     SET_OUTPUT(UI_DISPLAY_ENABLE_PIN);
     HAL::delayMicroseconds(5);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-    // Now we pull both RS and R/W low to begin commands
-    WRITE(UI_DISPLAY_RS_PIN, LOW);
     HAL::delayMilliseconds(10); // Just to be safe
     //initialization sequence for 4bits/8bits of Winstar 1604A Screen
     //16 rows, 4 lines
@@ -593,7 +594,10 @@ void initializeLCD()
     HAL::delayMicroseconds(150); //more than 39micro seconds
 #endif
     
-    lcdCommand( BIT_INTERFACE | LCD_2LINE | LCD_5X11); //LCD Configuration: Bits, Lines and Font
+    lcdCommand( BIT_INTERFACE | LCD_2LINE | LCD_5X8); //LCD Configuration: Bits, Lines and Font
+    HAL::delayMicroseconds(150); //more than 39micro seconds
+    
+    lcdCommand(BIT_INTERFACE | LCD_2LINE | LCD_5X8);//LCD Configuration: Bits, Lines and Font
     HAL::delayMicroseconds(150); //more than 39micro seconds
     
     lcdCommand(BIT_INTERFACE | LCD_2LINE | LCD_5X8);//LCD Configuration: Bits, Lines and Font
