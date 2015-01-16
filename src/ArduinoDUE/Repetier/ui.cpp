@@ -600,6 +600,10 @@ void initializeLCD()
     lcdCommand(BIT_INTERFACE | LCD_2LINE | LCD_5X8);//LCD Configuration: Bits, Lines and Font
     HAL::delayMicroseconds(150); //more than 39micro seconds
     
+    //specification says 2 is enough but a 3rd one solve issue if restart with keypad buttons pressed 
+    lcdCommand(BIT_INTERFACE | LCD_2LINE | LCD_5X8);//LCD Configuration: Bits, Lines and Font
+    HAL::delayMicroseconds(150); //more than 39micro seconds
+    
     lcdCommand( LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);    //Display Control : Display on/off, Cursor, Blinking Cursor
     HAL::delayMicroseconds(150);
     
