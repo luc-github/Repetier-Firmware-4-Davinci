@@ -580,7 +580,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         if(relativeCoordinateMode || relativeExtruderCoordinateMode)
         {
             if(
-#if MIN_EXTRUDER_TEMP > 30
+#if MIN_EXTRUDER_TEMP > 20
                 (Extruder::current->tempControl.currentTemperatureC < MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed()) ||
 #endif
                 fabs(com->E) > EXTRUDE_MAXLENGTH)
@@ -590,7 +590,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         else
         {
             if(
-#if MIN_EXTRUDER_TEMP > 30
+#if MIN_EXTRUDER_TEMP > 20
                 Extruder::current->tempControl.currentTemperatureC<MIN_EXTRUDER_TEMP ||
 #endif
                 fabs(p - currentPositionSteps[E_AXIS]) > EXTRUDE_MAXLENGTH * axisStepsPerMM[E_AXIS])
@@ -1009,7 +1009,7 @@ void Printer::GoToMemoryPosition(bool x, bool y, bool z, bool e, float feed)
                ,(e ? memoryE : IGNORE_COORDINATE),
                feed);
     feedrate = memoryF;
-    updateCurrentPosition(true);
+    updateCurrentPosition(false);
 }
 
 #if DRIVE_SYSTEM == DELTA

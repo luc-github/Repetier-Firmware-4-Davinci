@@ -1496,6 +1496,12 @@ case 'P':
                     addStringP(ui_text_on);//if not defined by preset
                     }
             #endif
+            if(c2=='P')
+            #if (Z_PROBE_PIN > -1)
+                addStringP(Printer::isZProbeHit()?ui_text_on:ui_text_off);
+            #else
+                addStringP(ui_text_na);
+            #endif
             break;
         case 's': // Endstop positions
             #if FEATURE_BEEPER
@@ -2345,11 +2351,11 @@ void UIDisplay::pushMenu(const UIMenu *men,bool refresh)
         refreshPage();
 }
 
-bool UIDisplay::okAction(bool allowMoves)
+int UIDisplay::okAction(bool allowMoves)
 {
     if(Printer::isUIErrorMessage()) {
         Printer::setUIErrorMessage(false);
-        return true;
+        return 0;
     }
 #if UI_HAS_KEYS == 1
     if(menuLevel == 0)   // Enter menu
@@ -2359,7 +2365,7 @@ bool UIDisplay::okAction(bool allowMoves)
         menuPos[1] =  UI_MENU_BACKCNT; // if top entry is back, default to next useful item
         menu[1] = &ui_menu_main;
         BEEP_SHORT
-        return true;
+        return 0;
     }
     UIMenu *men = (UIMenu*)menu[menuLevel];
     //uint8_t nr = pgm_read_word_near(&(menu->numEntries));
@@ -2373,12 +2379,11 @@ bool UIDisplay::okAction(bool allowMoves)
     {
         if(menuPos[menuLevel] == 0)   // Selected back instead of file
         {
-            executeAction(UI_ACTION_BACK, allowMoves);
-            return true;
+            return executeAction(UI_ACTION_BACK, allowMoves);
         }
 
         if(!sd.sdactive)
-            return true;
+            return 0;
         uint8_t filePos = menuPos[menuLevel] - 1;
         char filename[LONG_FILENAME_LENGTH + 1];
 
@@ -2390,7 +2395,7 @@ bool UIDisplay::okAction(bool allowMoves)
             menuPos[menuLevel] = 1;
             refreshPage();
             oldMenuLevel = -1;
-            return true;
+            return 0;
         }
 
         int16_t shortAction; // renamed to avoid scope confusion
@@ -2435,7 +2440,7 @@ bool UIDisplay::okAction(bool allowMoves)
             }
             break;
         }
-        return true;
+        return 0;
     }
 #endif
     entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
@@ -2446,8 +2451,7 @@ bool UIDisplay::okAction(bool allowMoves)
     {
         action = pgm_read_word(&(men->id));
         finishAction(action);
-        executeAction(UI_ACTION_BACK, true);
-        return true;
+        return executeAction(UI_ACTION_BACK, true);
     }
     if(((mtype == UI_MENU_TYPE_SUBMENU) ||(mtype == UI_MENU_TYPE_MENU_WITH_STATUS) )&& entType == UI_MENU_TYPE_MODIFICATION_MENU)   // Modify action
     {
@@ -2458,13 +2462,13 @@ bool UIDisplay::okAction(bool allowMoves)
         }
         else
             activeAction = action;
-        return true;
+        return 0;
     }
     if(entType==UI_MENU_TYPE_MENU_WITH_STATUS || entType==UI_MENU_TYPE_SUBMENU)   // Enter submenu
     {
         pushMenu((UIMenu*)action, false);
         BEEP_SHORT
-        return true;
+        return 0;
     }
     if(entType == 3)
     {
@@ -3248,9 +3252,9 @@ return response;
 }
 // Actions are events from user input. Depending on the current state, each
 // action can behave differently. Other actions do always the same like home, disable extruder etc.
-bool UIDisplay::executeAction(int action, bool allowMoves)
+int UIDisplay::executeAction(int action, bool allowMoves)
 {
-    bool ret = true;
+    int ret = true;
 #if UI_HAS_KEYS == 1
     bool skipBeep = false;
     bool process_it=false;
@@ -3311,10 +3315,12 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             activeAction = 0;
             break;
         case UI_ACTION_NEXT:
-            ret = nextPreviousAction(1, allowMoves);
+            if(!nextPreviousAction(1, allowMoves))
+                ret = UI_ACTION_NEXT;
             break;
         case UI_ACTION_PREVIOUS:
-            ret = nextPreviousAction(-1, allowMoves);
+            if(!nextPreviousAction(-1, allowMoves))
+                ret = UI_ACTION_PREVIOUS;
             break;
         case UI_ACTION_MENU_UP:
             if(menuLevel > 0) menuLevel--;
@@ -3335,7 +3341,7 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             break;
         case UI_ACTION_HOME_ALL:
             {
-            if(!allowMoves) return false;
+            if(!allowMoves) return UI_ACTION_HOME_ALL;
             int tmpmenu=menuLevel;
             int tmpmenupos=menuPos[menuLevel];
             UIMenu *tmpmen = (UIMenu*)menu[menuLevel];
@@ -3352,7 +3358,7 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
 			}
         case UI_ACTION_HOME_X:
             {
-            if(!allowMoves) return false;
+            if(!allowMoves) return UI_ACTION_HOME_X;
             int tmpmenu=menuLevel;
             int tmpmenupos=menuPos[menuLevel];
             UIMenu *tmpmen = (UIMenu*)menu[menuLevel];
@@ -3369,7 +3375,7 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             }
         case UI_ACTION_HOME_Y:
             {
-            if(!allowMoves) return false;
+            if(!allowMoves) return UI_ACTION_HOME_Y;
             int tmpmenu=menuLevel;
             int tmpmenupos=menuPos[menuLevel];
             UIMenu *tmpmen = (UIMenu*)menu[menuLevel];
@@ -3386,7 +3392,7 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             }
         case UI_ACTION_HOME_Z:
             {
-            if(!allowMoves) return false;
+            if(!allowMoves) return UI_ACTION_HOME_Z;
             int tmpmenu=menuLevel;
             int tmpmenupos=menuPos[menuLevel];
             UIMenu *tmpmen = (UIMenu*)menu[menuLevel];
@@ -3402,7 +3408,7 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             break;
             }
         case UI_ACTION_SET_ORIGIN:
-            if(!allowMoves) return false;
+            if(!allowMoves) return UI_ACTION_SET_ORIGIN;
             Printer::setOrigin(0, 0, 0);
             break;
         case UI_ACTION_DEBUG_ECHO:
@@ -4934,19 +4940,19 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             break;
         case UI_ACTION_SELECT_EXTRUDER0:
 #if NUM_EXTRUDER > 0
-            if(!allowMoves) return false;
+            if(!allowMoves) return UI_ACTION_SELECT_EXTRUDER0;
             Extruder::selectExtruderById(0);
 #endif
             break;
         case UI_ACTION_SELECT_EXTRUDER1:
 #if NUM_EXTRUDER > 1
-            if(!allowMoves) return false;
+            if(!allowMoves) return UI_ACTION_SELECT_EXTRUDER1;
             Extruder::selectExtruderById(1);
 #endif
             break;
         case UI_ACTION_SELECT_EXTRUDER2:
 #if NUM_EXTRUDER > 2
-            if(!allowMoves) return false;
+            if(!allowMoves) return UI_ACTION_SELECT_EXTRUDER2;
             Extruder::selectExtruderById(2);
 #endif
             break;
@@ -4996,17 +5002,17 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             break;
         case UI_ACTION_SD_PAUSE:
             if(!allowMoves)
-                ret = false;
+                ret = UI_ACTION_SD_PAUSE;
             else
                 sd.pausePrint(true);
             break;
         case UI_ACTION_SD_CONTINUE:
-            if(!allowMoves) ret = false;
+            if(!allowMoves) ret = UI_ACTION_SD_CONTINUE;
             else sd.continuePrint(true);
             break;
         case UI_ACTION_SD_STOP:
             {
-            //if(!allowMoves) ret = false;
+            //if(!allowMoves) ret = UI_ACTION_SD_STOP;
             //else sd.stopPrint();
              playsound(400,400);
              //reset connect with host if any
@@ -5143,35 +5149,35 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             break;
 #endif
         case UI_ACTION_X_UP:
-            if(!allowMoves) return false;
+            if(!allowMoves) return UI_ACTION_X_UP;
             PrintLine::moveRelativeDistanceInStepsReal(Printer::axisStepsPerMM[X_AXIS],0,0,0,Printer::homingFeedrate[X_AXIS],false);
             break;
         case UI_ACTION_X_DOWN:
-            if(!allowMoves) return false;
+            if(!allowMoves) return UI_ACTION_X_DOWN;
             PrintLine::moveRelativeDistanceInStepsReal(-Printer::axisStepsPerMM[X_AXIS],0,0,0,Printer::homingFeedrate[X_AXIS],false);
             break;
         case UI_ACTION_Y_UP:
-            if(!allowMoves) return false;
+            if(!allowMoves) return UI_ACTION_Y_UP;
             PrintLine::moveRelativeDistanceInStepsReal(0,Printer::axisStepsPerMM[Y_AXIS],0,0,Printer::homingFeedrate[Y_AXIS],false);
             break;
         case UI_ACTION_Y_DOWN:
-            if(!allowMoves) return false;
+            if(!allowMoves) return UI_ACTION_Y_DOWN;
             PrintLine::moveRelativeDistanceInStepsReal(0,-Printer::axisStepsPerMM[Y_AXIS],0,0,Printer::homingFeedrate[Y_AXIS],false);
             break;
         case UI_ACTION_Z_UP:
-            if(!allowMoves) return false;
+            if(!allowMoves) return UI_ACTION_Z_UP;
             PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[Z_AXIS],false);
             break;
         case UI_ACTION_Z_DOWN:
-            if(!allowMoves) return false;
+            if(!allowMoves) return UI_ACTION_Z_DOWN;
             PrintLine::moveRelativeDistanceInStepsReal(0,0,-Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[Z_AXIS],false);
             break;
         case UI_ACTION_EXTRUDER_UP:
-            if(!allowMoves) return false;
+            if(!allowMoves) return UI_ACTION_EXTRUDER_UP;
             PrintLine::moveRelativeDistanceInStepsReal(0,0,0,Printer::axisStepsPerMM[E_AXIS],UI_SET_EXTRUDER_FEEDRATE,false);
             break;
         case UI_ACTION_EXTRUDER_DOWN:
-            if(!allowMoves) return false;
+            if(!allowMoves) return UI_ACTION_EXTRUDER_DOWN;
             PrintLine::moveRelativeDistanceInStepsReal(0,0,0,-Printer::axisStepsPerMM[E_AXIS],UI_SET_EXTRUDER_FEEDRATE,false);
             break;
         case UI_ACTION_EXTRUDER_TEMP_UP:
@@ -5372,12 +5378,13 @@ void UIDisplay::slowAction(bool allowMoves)
         flags |= UI_FLAG_SLOW_ACTION_RUNNING;
         // Reset click encoder
         noInts.protect();
-        int8_t epos = encoderPos;
+        int8_t encodeChange = encoderPos;
         encoderPos = 0;
         noInts.unprotect();
-        if(epos) // encoder changed
+        int newAction;
+        if(encodeChange) // encoder changed
         {
-            nextPreviousAction(epos, allowMoves);
+            nextPreviousAction(encodeChange, allowMoves);
             BEEP_SHORT
             refresh = 1;
         }
@@ -5394,12 +5401,12 @@ void UIDisplay::slowAction(bool allowMoves)
             else if(time - lastButtonStart > UI_KEY_BOUNCETIME)     // New key pressed
             {
                 lastAction = lastButtonAction;
-                if(executeAction(lastAction, allowMoves)) {
+                if(newAction = executeAction(lastAction, allowMoves))==0) {
                     nextRepeat = time + UI_KEY_FIRST_REPEAT;
                     repeatDuration = UI_KEY_FIRST_REPEAT;
                 } else {
                     if(delayedAction == 0)
-                        delayedAction = lastAction;
+                        delayedAction = newAction =;
                 }
             }
         }
@@ -5407,10 +5414,10 @@ void UIDisplay::slowAction(bool allowMoves)
         {
             if(time - nextRepeat < 10000)
             {
-                if(!executeAction(lastAction, allowMoves)) {
-                    if(delayedAction == 0)
-                        delayedAction = lastAction;
-                }
+                if(delayedAction == 0)
+                    delayedAction = executeAction(lastAction, allowMoves);
+                else
+                    executeAction(lastAction, allowMoves);
                 repeatDuration -= UI_KEY_REDUCE_REPEAT;
                 if(repeatDuration < UI_KEY_MIN_REPEAT) repeatDuration = UI_KEY_MIN_REPEAT;
                 nextRepeat = time + repeatDuration;
