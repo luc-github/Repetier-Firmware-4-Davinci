@@ -566,7 +566,7 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_RESET_PIN           41
 #endif
 #endif
-#define UI_DELAYPERCHAR 320
+#define UI_DELAYPERCHAR 50
 #define UI_INVERT_MENU_DIRECTION 0
 #if UI_MAIN
 void uiInitKeys() {
@@ -659,7 +659,7 @@ void uiCheckSlowKeys(int &action) {
 #define UI_DISPLAY_D5_PIN		64		// PINK.2, 87, D_D5
 #define UI_DISPLAY_D6_PIN		44		// PINL.5, 40, D_D6
 #define UI_DISPLAY_D7_PIN		66		// PINK.4, 85, D_D7
-#define UI_DELAYPERCHAR		   320
+#define UI_DELAYPERCHAR		   50
 #define UI_INVERT_MENU_DIRECTION 0
 #if UI_MAIN
 void uiInitKeys() {
@@ -801,7 +801,7 @@ void uiCheckSlowKeys(int &action) {
 #define UI_SHIFT_CLK 44
 #endif
 
-#define UI_DELAYPERCHAR 320
+#define UI_DELAYPERCHAR 50
 #define UI_INVERT_MENU_DIRECTION 1
 #if UI_MAIN
 void uiInitKeys() {
@@ -875,7 +875,7 @@ void uiCheckSlowKeys(int &action) {
 #define UI_ENCODER_B           52
 #define UI_ENCODER_CLICK       48
 #define UI_RESET_PIN           -1
-#define UI_DELAYPERCHAR 40
+#define UI_DELAYPERCHAR 50
 #define UI_INVERT_MENU_DIRECTION 0
 #define UI_BUTTON_BACK         71
 #ifdef UI_MAIN
@@ -900,7 +900,7 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_HAS_BACK_KEY 1
 #define UI_DISPLAY_TYPE DISPLAY_4BIT
 #define UI_DISPLAY_CHARSET 1
-#define UI_DELAYPERCHAR 320
+#define UI_DELAYPERCHAR 50
 #define UI_INVERT_MENU_DIRECTION 1
 #define BEEPER_SHORT_SEQUENCE 6,2 // Needs longer beep sequence
 #define BEEPER_LONG_SEQUENCE 24,8
@@ -932,7 +932,7 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_B           62
 #define UI_ENCODER_CLICK       63
 #define UI_RESET_PIN           28
-#define UI_DELAYPERCHAR 320
+#define UI_DELAYPERCHAR 50
 #define UI_BUTTON_OK       49
 #define UI_BUTTON_NEXT     48
 #define UI_BUTTON_PREVIOUS 47
@@ -955,7 +955,7 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_B           31
 #define UI_ENCODER_CLICK       35
 #define UI_RESET_PIN           41
-#define UI_DELAYPERCHAR 320
+#define UI_DELAYPERCHAR 50
 #define UI_BUTTON_OK       4
 #define UI_BUTTON_NEXT     6
 #define UI_BUTTON_PREVIOUS 5
@@ -1007,7 +1007,7 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_A           35
 #define UI_ENCODER_B           37
 #define UI_ENCODER_CLICK       31
-#define UI_DELAYPERCHAR 320
+#define UI_DELAYPERCHAR 50
 #define UI_INVERT_MENU_DIRECTION 0
 #if UI_MAIN
 void uiInitKeys() {
@@ -1047,7 +1047,7 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_B           77
 #define UI_ENCODER_CLICK       78
 #define UI_KILL_PIN            80
-#define UI_DELAYPERCHAR       320
+#define UI_DELAYPERCHAR       50
 #define UI_INVERT_MENU_DIRECTION 0
 #if UI_MAIN
 void uiInitKeys() {
