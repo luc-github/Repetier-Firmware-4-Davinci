@@ -282,11 +282,15 @@ void Commands::changeFeedrateMultiply(int factor)
     Com::printFLN(Com::tSpeedMultiply, factor);
 }
 
-void Commands::changeFlowateMultiply(int factor)
+void Commands::changeFlowrateMultiply(int factor)
 {
     if(factor < 25) factor = 25;
     if(factor > 200) factor = 200;
     Printer::extrudeMultiply = factor;
+    if(Extruder::current->diameter <= 0)
+        Printer::extrusionFactor = 0.01f * static_cast<float>(factor);
+    else
+        Printer::extrusionFactor = 0.01f * static_cast<float>(factor) * 4.0f / (Extruder::current->diameter * Extruder::current->diameter * 3.141592654f);
     Com::printFLN(Com::tFlowMultiply, factor);
 }
 
@@ -678,6 +682,22 @@ void Commands::processGCode(GCode *com)
             if (Printer::isMenuMode(MENU_MODE_STOP_REQUESTED))break;
         }
         break;
+        #if FEATURE_RETRACTION && NUM_EXTRUDER > 0
+    case 10: // G10 S<1 = long retract, 0 = short retract = default> retracts filament accoridng to stored setting
+#if NUM_EXTRUDER > 1
+        Extruder::current->retract(true, com->hasS() && com->S > 0);
+#else
+        Extruder::current->retract(true, false);
+#endif
+        break;
+    case 11: // G11 S<1 = long retract, 0 = short retract = default> = Undo retraction according to stored setting
+#if NUM_EXTRUDER > 1
+        Extruder::current->retract(false, com->hasS() && com->S > 0);
+#else
+        Extruder::current->retract(false, false);
+#endif
+        break;
+#endif // FEATURE_RETRACTION
     case 20: // G20 Units to inches
         Printer::unitIsInches = 1;
         break;
@@ -1523,6 +1543,27 @@ void Commands::processMCode(GCode *com)
 #endif
         break;
 #endif // MIXING_EXTRUDER
+case 200: // M200 T<extruder> D<diameter>
+        {
+            uint8_t extruderId = Extruder::current->id;
+            if(com->hasT() && com->T < NUM_EXTRUDER)
+                extruderId = com->T;
+            float d = 0;
+            if(com->hasR())
+                d = com->R;
+            if(com->hasD())
+                d = com->D;
+            extruder[extruderId].diameter = d;
+            if(extruderId == Extruder::current->id)
+                changeFlowrateMultiply(Printer::extrudeMultiply);
+            if(d == 0) {
+                Com::printFLN(PSTR("Disabled volumetric extrusion for extruder "),static_cast<int>(extruderId));
+            } else {
+                Com::printF(PSTR("Set volumetric extrusion for extruder "),static_cast<int>(extruderId));
+                Com::printFLN(PSTR(" to "),d);
+            }
+        }
+        break;
 #if RAMP_ACCELERATION
     case 201: // M201
         if(com->hasX()) Printer::maxAccelerationMMPerSquareSecond[X_AXIS] = com->X;
@@ -1594,7 +1635,7 @@ void Commands::processMCode(GCode *com)
         changeFeedrateMultiply(com->getS(100));
         break;
     case 221: // M221 S<Extrusion flow multiplier in percent>
-        changeFlowateMultiply(com->getS(100));
+        changeFlowrateMultiply(com->getS(100));
         break;
 #if USE_ADVANCE
     case 223: // M223 Extruder interrupt test
@@ -1748,6 +1789,9 @@ void Commands::processMCode(GCode *com)
 #endif
     }
     break;
+//    case 360: // M360 - show configuration
+//        Printer::showConfiguration();
+//        break;
     case 400: // M400 Finish all moves
         Commands::waitUntilEndOfAllMoves();
         break;

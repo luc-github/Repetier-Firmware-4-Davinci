@@ -94,6 +94,14 @@ Second word if V2:
 - I : Bit 0 : 32-Bit float
 - J : Bit 1 : 32-Bit float
 - R : Bit 2 : 32-Bit float
+- D : Bit 3 : 32-Bit float
+- C : Bit 4 : 32-Bit float
+- H : Bit 5 : 32-Bit float
+- A : Bit 6 : 32-Bit float
+- B : Bit 7 : 32-Bit float
+- K : Bit 8 : 32-Bit float
+- L : Bit 9 : 32-Bit float
+- O : Bit 0 : 32-Bit float
 */
 uint8_t GCode::computeBinarySize(char *ptr)  // unsigned int bitfield) {
 {
@@ -117,6 +125,19 @@ uint8_t GCode::computeBinarySize(char *ptr)  // unsigned int bitfield) {
         if(bitfield2 & 1) s+= 4;
         if(bitfield2 & 2) s+= 4;
         if(bitfield2 & 4) s+= 4;
+        if(bitfield2 & 8) s += 4;
+        if(bitfield2 & 16) s += 4;
+        if(bitfield2 & 32) s += 4;
+        if(bitfield2 & 64) s += 4;
+        if(bitfield2 & 128) s += 4;
+        if(bitfield2 & 256) s += 4;
+        if(bitfield2 & 512) s += 4;
+        if(bitfield2 & 1024) s += 4;
+        if(bitfield2 & 2048) s += 4;
+        if(bitfield2 & 4096) s += 4;
+        if(bitfield2 & 8192) s += 4;
+        if(bitfield2 & 16384) s += 4;
+        if(bitfield2 & 32768) s += 4;
         if(bitfield & 32768) s+=RMath::min(80,(uint8_t)ptr[4]+1);
     }
     else
@@ -214,7 +235,7 @@ void GCode::pushCommand()
 #if !ECHO_ON_EXECUTE
     commandsBuffered[bufferWriteIndex].echoCommand();
 #endif
-    bufferWriteIndex = (bufferWriteIndex + 1) % GCODE_BUFFER_SIZE;
+    if(++bufferWriteIndex >= GCODE_BUFFER_SIZE) bufferWriteIndex = 0;
     bufferLength++;
 }
 
@@ -617,6 +638,46 @@ bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
     {
         R=*(float *)p;
         p+=4;
+        }
+    if(hasD())
+    {
+        D = *(float *)p;
+        p += 4;
+    }
+    if(hasC())
+    {
+        C = *(float *)p;
+        p += 4;
+    }
+    if(hasH())
+    {
+        H = *(float *)p;
+        p += 4;
+    }
+    if(hasA())
+    {
+        A = *(float *)p;
+        p += 4;
+    }
+    if(hasB())
+    {
+        B = *(float *)p;
+        p += 4;
+    }
+    if(hasK())
+    {
+        K = *(float *)p;
+        p += 4;
+    }
+    if(hasL())
+    {
+        L = *(float *)p;
+        p += 4;
+    }
+    if(hasO())
+    {
+        O = *(float *)p;
+        p += 4;
     }
     if(hasString())   // set text pointer to string
     {
@@ -769,6 +830,14 @@ bool GCode::parseAscii(char *line,bool fromSerial)
         {
             R = parseFloatValue(pos);
             params2 |= 4;
+            params |= 4096; // Needs V2 for saving
+            break;
+        }
+        case 'D':
+        case 'd':
+        {
+            D = parseFloatValue(pos);
+            params2 |= 8;
             params |= 4096; // Needs V2 for saving
             break;
         }

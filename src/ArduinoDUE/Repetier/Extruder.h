@@ -92,6 +92,8 @@ class TemperatureController
 class Extruder;
 extern Extruder extruder[];
 
+#define EXTRUDER_FLAG_RETRACTED 1
+
 /** \brief Data to drive one extruder.
 
 This structure contains all definitions for an extruder and all
@@ -141,7 +143,8 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
     const char * PROGMEM deselectCommands;
     uint8_t coolerSpeed; ///< Speed to use when enabled
     uint8_t coolerPWM; ///< current PWM setting
-
+    uint8_t flags;
+    float diameter;
 #if MIXING_EXTRUDER > 0
     static void setMixingWeight(uint8_t extr,int weight);
     static void step();
@@ -361,6 +364,14 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
 #endif
 #endif
     }
+#endif
+#if FEATURE_RETRACTION
+    inline bool isRetracted() {return (flags & EXTRUDER_FLAG_RETRACTED) != 0;}
+    inline void setRetracted(bool on) {
+        flags = (flags & (255 - EXTRUDER_FLAG_RETRACTED)) | (on ? EXTRUDER_FLAG_RETRACTED : 0);
+    }
+    void retract(bool isRetract,bool isLong);
+    void retractDistance(float dist);
 #endif
     static void manageTemperatures();
     static void disableCurrentExtruderMotor();

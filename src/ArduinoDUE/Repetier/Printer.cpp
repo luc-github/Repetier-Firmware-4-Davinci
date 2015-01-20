@@ -55,12 +55,14 @@ long Printer::destinationSteps[E_AXIS_ARRAY];
 float Printer::coordinateOffset[Z_AXIS_ARRAY] = {0,0,0};
 uint8_t Printer::flag0 = 0;
 uint8_t Printer::flag1 = 0;
+uint8_t Printer::flag2 = 0;
 uint8_t Printer::flaghome = 0;
 bool Printer::btop_Cover_open=false;
 uint8_t Printer::debugLevel = 6; ///< Bitfield defining debug output. 1 = echo, 2 = info, 4 = error, 8 = dry run., 16 = Only communication, 32 = No moves
 uint8_t Printer::stepsPerTimerCall = 1;
 uint8_t Printer::menuMode = 0;
 float Printer::extrudeMultiplyError = 0;
+float Printer::extrusionFactor = 1.0;
 
 #if FEATURE_AUTOLEVEL
 float Printer::autolevelTransformation[9]; ///< Transformation matrix
@@ -547,6 +549,17 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 {
     register int32_t p;
     float x, y, z;
+    #if FEATURE_RETRACTION
+    if(com->hasNoXYZ() && com->hasE() && isAutoretract()) { // convert into autoretract
+        if(relativeCoordinateMode || relativeExtruderCoordinateMode) {
+            Extruder::current->retract(com->E < 0,false);
+        } else {
+            p = convertToMM(com->E * axisStepsPerMM[E_AXIS]); // current position
+            Extruder::current->retract(com->E < p,false);
+        }
+        return 0; // Fake no move so nothing gets added
+        #endif
+    }
     if(!relativeCoordinateMode)
     {
         if(com->hasX()) lastCmdPos[X_AXIS] = currentPosition[X_AXIS] = convertToMM(com->X) - coordinateOffset[X_AXIS];
@@ -583,7 +596,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 #if MIN_EXTRUDER_TEMP > 30
                 (Extruder::current->tempControl.currentTemperatureC < MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed()) ||
 #endif
-                fabs(com->E) > EXTRUDE_MAXLENGTH)
+               fabs(com->E) * extrusionFactor > EXTRUDE_MAXLENGTH)
                 p = 0;
             destinationSteps[E_AXIS] = currentPositionSteps[E_AXIS] + p;
         }
@@ -593,7 +606,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 #if MIN_EXTRUDER_TEMP > 30
                 Extruder::current->tempControl.currentTemperatureC<MIN_EXTRUDER_TEMP ||
 #endif
-                fabs(p - currentPositionSteps[E_AXIS]) > EXTRUDE_MAXLENGTH * axisStepsPerMM[E_AXIS])
+                fabs(p - currentPositionSteps[E_AXIS]) * extrusionFactor > EXTRUDE_MAXLENGTH * axisStepsPerMM[E_AXIS])
                 currentPositionSteps[E_AXIS] = p;
             destinationSteps[E_AXIS] = p;
         }
@@ -1606,4 +1619,71 @@ void Printer::buildTransformationMatrix(float h1,float h2,float h3)
     Com::printArrayFLN(Com::tTransformationMatrix,autolevelTransformation,9,6);
 }
 #endif
-
+#define START_EXTRUDER_CONFIG(i)     Com::printF(Com::tConfig);Com::printF(Com::tExtrDot,i+1);Com::print(':');
+/*void Printer::showConfiguration() {
+    Com::config(PSTR("Baudrate:"),baudrate);
+    Com::config(PSTR("InputBuffer:"),SERIAL_BUFFER_SIZE - 1);
+    Com::config(PSTR("NumExtruder:"),NUM_EXTRUDER);
+    Com::config(PSTR("MixingExtruder:"),MIXING_EXTRUDER);
+    Com::config(PSTR("HeatedBed:"),HAVE_HEATED_BED);
+    Com::config(PSTR("SDCard:"),SDSUPPORT);
+    Com::config(PSTR("Fan:"),FAN_PIN > -1 && FEATURE_FAN_CONTROL);
+    Com::config(PSTR("LCD:"),FEATURE_CONTROLLER != NO_CONTROLLER);
+    Com::config(PSTR("SoftwarePowerSwitch:"),PS_ON_PIN > -1);
+    Com::config(PSTR("XHomeDir:"),X_HOME_DIR);
+    Com::config(PSTR("YHomeDir:"),Y_HOME_DIR);
+    Com::config(PSTR("ZHomeDir:"),Z_HOME_DIR);
+    Com::config(PSTR("SupportG10G11:"),FEATURE_RETRACTION);
+    Com::config(PSTR("SupportLocalFilamentchange:"),FEATURE_RETRACTION);
+    Com::config(PSTR("CaseLights:"),CASE_LIGHTS_PIN > -1);
+    Com::config(PSTR("ZProbe:"),FEATURE_Z_PROBE);
+    Com::config(PSTR("Autolevel:"),FEATURE_AUTOLEVEL);
+    Com::config(PSTR("EEPROM:"),EEPROM_MODE != 0);
+    Com::config(PSTR("PrintlineCache:"), PRINTLINE_CACHE_SIZE);
+    Com::config(PSTR("JerkXY:"),maxJerk);
+#if DRIVE_SYSTEM != DELTA
+    Com::config(PSTR("JerkZ:"),maxZJerk);
+#endif
+#if FEATURE_RETRACTION
+    Com::config(PSTR("RetractionLength:"),EEPROM_FLOAT(RETRACTION_LENGTH));
+    Com::config(PSTR("RetractionLongLength:"),EEPROM_FLOAT(RETRACTION_LONG_LENGTH));
+    Com::config(PSTR("RetractionSpeed:"),EEPROM_FLOAT(RETRACTION_SPEED));
+    Com::config(PSTR("RetractionZLift:"),EEPROM_FLOAT(RETRACTION_Z_LIFT));
+    Com::config(PSTR("RetractionUndoExtraLength:"),EEPROM_FLOAT(RETRACTION_UNDO_EXTRA_LENGTH));
+    Com::config(PSTR("RetractionUndoExtraLongLength:"),EEPROM_FLOAT(RETRACTION_UNDO_EXTRA_LONG_LENGTH));
+    Com::config(PSTR("RetractionUndoSpeed:"),EEPROM_FLOAT(RETRACTION_UNDO_SPEED));
+#endif // FEATURE_RETRACTION
+    Com::config(PSTR("XMin:"),xMin);
+    Com::config(PSTR("YMin:"),yMin);
+    Com::config(PSTR("ZMin:"),zMin);
+    Com::config(PSTR("XMax:"),xMin + xLength);
+    Com::config(PSTR("YMax:"),yMin + yLength);
+    Com::config(PSTR("ZMax:"),zMin + zLength);
+    Com::config(PSTR("XSize:"), xLength);
+    Com::config(PSTR("YSize:"), yLength);
+    Com::config(PSTR("ZSize:"), zLength);
+    Com::config(PSTR("XPrintAccel:"), maxAccelerationMMPerSquareSecond[X_AXIS]);
+    Com::config(PSTR("YPrintAccel:"), maxAccelerationMMPerSquareSecond[Y_AXIS]);
+    Com::config(PSTR("ZPrintAccel:"), maxAccelerationMMPerSquareSecond[Z_AXIS]);
+    Com::config(PSTR("XTravelAccel:"), maxTravelAccelerationMMPerSquareSecond[X_AXIS]);
+    Com::config(PSTR("YTravelAccel:"), maxTravelAccelerationMMPerSquareSecond[Y_AXIS]);
+    Com::config(PSTR("ZTravelAccel:"), maxTravelAccelerationMMPerSquareSecond[Z_AXIS]);
+#if DRIVE_SYSTEM == DELTA
+    Com::config(PSTR("PrinterType:Delta"));
+#else
+    Com::config(PSTR("PrinterType:Cartesian"));
+#endif // DRIVE_SYSTEM
+    Com::config(PSTR("MaxBedTemp:"), HEATED_BED_MAX_TEMP);
+    for(fast8_t i = 0; i < NUM_EXTRUDER; i++) {
+        START_EXTRUDER_CONFIG(i)
+        Com::printFLN(PSTR("Jerk:"),extruder[i].maxStartFeedrate);
+        START_EXTRUDER_CONFIG(i)
+        Com::printFLN(PSTR("MaxSpeed:"),extruder[i].maxFeedrate);
+        START_EXTRUDER_CONFIG(i)
+        Com::printFLN(PSTR("Acceleration:"),extruder[i].maxAcceleration);
+        START_EXTRUDER_CONFIG(i)
+        Com::printFLN(PSTR("Diameter:"),extruder[i].diameter);
+        START_EXTRUDER_CONFIG(i)
+        Com::printFLN(PSTR("MaxTemp:"),MAXTEMP);
+    }
+}*/
