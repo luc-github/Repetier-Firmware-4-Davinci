@@ -39,6 +39,8 @@ Implemented Codes
 - G0  -> G1
 - G1  - Coordinated Movement X Y Z E, S1 disables boundary check, S0 enables it
 - G4  - Dwell S<seconds> or P<milliseconds>
+- G10 S<1 = long retract, 0 = short retract = default> retracts filament accoridng to stored setting
+- G11 S<1 = long retract, 0 = short retract = default> = Undo retraction according to stored setting
 - G20 - Units for G0/G1 are inches.
 - G21 - Units for G0/G1 are mm.
 - G28 - Home all axis or named axis.
@@ -76,6 +78,7 @@ Custom M Codes
 - M30 <filename> - Delete file on sd card
 - M32 <dirname> create subdirectory
 - M42 P<pin number> S<value 0..255> - Change output of pin P to S. Does not work on most important pins.
+- M50  - Stop print from host or SD Card
 - M80  - Turn on power supply
 - M81  - Turn off power supply
 - M82  - Set E codes absolute (default)
@@ -99,6 +102,7 @@ Custom M Codes
 - M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive
 - M164 S<virtNum> P<0 = dont store eeprom,1 = store to eeprom> - Store weights as virtual extruder S
 - M190 - Wait for bed current temp to reach target temp.
+- M200 T<extruder> D<diameter> - Use volumetric extrusion. Set D0 or omit D to disable volumetric extr. Omit T for current extruder.
 - M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
 - M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
 - M203 - Set temperture monitor to Sx
@@ -106,6 +110,7 @@ Custom M Codes
 - M205 - Output EEPROM settings
 - M206 - Set EEPROM value
 - M207 X<XY jerk> Z<Z Jerk> E<ExtruderJerk> - Changes current jerk values, but do not store them in eeprom.
+- M209 S<0/1> - Enable/disable autoretraction
 - M220 S<Feedrate multiplier in percent> - Increase/decrease given feedrate
 - M221 S<Extrusion flow multiplier in percent> - Increase/decrease given flow rate
 - M231 S<OPS_MODE> X<Min_Distance> Y<Retract> Z<Backlash> F<ReatrctMove> - Set OPS parameter
@@ -122,6 +127,7 @@ Custom M Codes
 - M322 - Reset autolevel matrix
 - M340 P<servoId> S<pulseInUS> : servoID = 0..3, Servos are controlled by a pulse with normally between 500 and 2500 with 1500ms in center position. 0 turns servo off.
 - M350 S<mstepsAll> X<mstepsX> Y<mstepsY> Z<mstepsZ> E<mstepsE0> P<mstespE1> : Set microstepping on RAMBO board
+- M360 - show configuration
 - M400 - Wait until move buffers empty.
 - M401 - Store x, y and z position.
 - M402 - Go to stored position. If X, Y or Z is specified, only these coordinates are used. F changes feedrate fo rthat move.

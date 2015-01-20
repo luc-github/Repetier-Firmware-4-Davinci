@@ -47,6 +47,8 @@ union floatLong
 #define PRINTER_FLAG1_NO_DESTINATION_CHECK  32
 #define PRINTER_FLAG1_POWER_ON              64
 #define PRINTER_FLAG1_ALLOW_COLD_EXTRUSION  128
+#define PRINTER_FLAG2_BLOCK_RECEIVING       1
+#define PRINTER_FLAG2_AUTORETRACT           2
 
 #define PRINTER_FLAG_HOME_X		1
 #define PRINTER_FLAG_HOME_Y		2
@@ -93,6 +95,7 @@ public:
 
     static uint8_t debugLevel;
     static uint8_t flag0,flag1,flaghome; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
+    static uint8_t flag2;
     static uint8_t stepsPerTimerCall;
     static uint32_t interval;    ///< Last step duration in ticks.
     static uint32_t timer;              ///< used for acceleration/deceleration timing
@@ -102,7 +105,8 @@ public:
     static float currentPosition[Z_AXIS_ARRAY];
     static float lastCmdPos[Z_AXIS_ARRAY]; ///< Last coordinates send by gcodes
     static int32_t destinationSteps[E_AXIS_ARRAY];         ///< Target position in steps.
-    static float extrudeMultiplyError;
+    static float extrudeMultiplyError; ///< Accumulated error during extrusion
+    static float extrusionFactor; ///< Extrusion multiply factor
 #if NONLINEAR_SYSTEM
     static int32_t maxDeltaPositionSteps;
     static int32_t currentDeltaPositionSteps[E_TOWER_ARRAY];
@@ -469,6 +473,24 @@ public:
     static inline void setColdExtrusionAllowed(uint8_t b)
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_ALLOW_COLD_EXTRUSION : flag1 & ~PRINTER_FLAG1_ALLOW_COLD_EXTRUSION);
+    }
+    
+     static inline uint8_t isBlockingReceive()
+    {
+        return flag2 & PRINTER_FLAG2_BLOCK_RECEIVING;
+    }
+    static inline void setBlockingReceive(uint8_t b)
+    {
+        flag2 = (b ? flag2 | PRINTER_FLAG2_BLOCK_RECEIVING : flag2 & ~PRINTER_FLAG2_BLOCK_RECEIVING);
+    }
+    static inline uint8_t isAutoretract()
+    {
+        return flag2 & PRINTER_FLAG2_AUTORETRACT;
+    }
+    static inline void setAutoretract(uint8_t b)
+    {
+        flag2 = (b ? flag2 | PRINTER_FLAG2_AUTORETRACT : flag2 & ~PRINTER_FLAG2_AUTORETRACT);
+        Com::printFLN(PSTR("Autoretract:"),b);
     }
 
 

@@ -20,7 +20,7 @@
 #define _EEPROM_H
 
 // Id to distinguish version changes
-#define EEPROM_PROTOCOL_VERSION 10
+#define EEPROM_PROTOCOL_VERSION 11
 
 /** Where to start with our datablock in memory. Can be moved if you
 have problems with other modules using the eeprom */
@@ -131,10 +131,25 @@ have problems with other modules using the eeprom */
 #define EPR_AXISCOMP_TANYZ          1032
 #define EPR_AXISCOMP_TANXZ          1036
 
+#define EPR_RETRACTION_LENGTH 992
+#define EPR_RETRACTION_LONG_LENGTH 996
+#define EPR_RETRACTION_SPEED 1000
+#define EPR_RETRACTION_Z_LIFT 1004
+#define EPR_RETRACTION_UNDO_EXTRA_LENGTH 1008
+#define EPR_RETRACTION_UNDO_EXTRA_LONG_LENGTH 1012
+#define EPR_RETRACTION_UNDO_SPEED 1016
+#define EPR_AUTORETRACT_ENABLED 1018
+
 #if EEPROM_MODE != 0
 #define EEPROM_FLOAT(x) HAL::eprGetFloat(EPR_##x)
+#define EEPROM_INT32(x) HAL::eprGetInt32(EPR_##x)
+#define EEPROM_BYTE(x) HAL::eprGetByte(EPR_##x)
+#define EEPROM_SET_BYTE(x,val) HAL::eprSetByte(EPR_##x,val)
 #else
 #define EEPROM_FLOAT(x) (x)
+#define EEPROM_INT32(x) (x)
+#define EEPROM_BYTE(x) (x)
+#define EEPROM_SET_BYTE(x,val)
 #endif
 
 #define EEPROM_EXTRUDER_OFFSET 200

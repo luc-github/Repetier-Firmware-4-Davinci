@@ -22,7 +22,7 @@
 #ifndef _REPETIER_H
 #define _REPETIER_H
 
-#define REPETIER_VERSION "0.92"
+#define REPETIER_VERSION "0.92.2"
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
@@ -177,6 +177,8 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 
 
 #include "Configuration.h"
+
+#define GCODE_BUFFER_SIZE 1
 
 #ifndef FEATURE_BABYSTEPPING
 #define FEATURE_BABYSTEPPING 0

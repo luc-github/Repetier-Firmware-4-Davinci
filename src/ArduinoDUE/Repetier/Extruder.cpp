@@ -161,17 +161,12 @@ void Extruder::manageTemperatures()
             {
                 if(act->currentTemperatureC - act->lastDecoupleTemp < DECOUPLING_TEST_MIN_TEMP_RISE)   // failed test
                 {
-                     extruderTempErrors++;
-                     errorDetected = 1;
-                     if(extruderTempErrors > 10)   // Ignore short temporary failures
-                     {
-                         Printer::setAnyTempsensorDefect();
-                         UI_ERROR_P(Com::tHeaterDecoupled);
-                         Com::printErrorFLN(Com::tHeaterDecoupledWarning);
-                         Com::printF(PSTR("Error:Temp. raised to slow. Rise = "),act->currentTemperatureC - act->lastDecoupleTemp);
-                         Com::printF(PSTR(" after "),(int32_t)(time-act->lastDecoupleTest));
-                         Com::printFLN(PSTR(" ms"));
-+                    }
+                    Printer::setAnyTempsensorDefect();
+                    UI_ERROR_P(Com::tHeaterDecoupled);
+                    Com::printErrorFLN(Com::tHeaterDecoupledWarning);
+                    Com::printF(PSTR("Error:Temp. raised to slow. Rise = "),act->currentTemperatureC - act->lastDecoupleTemp);
+                    Com::printF(PSTR(" after "),(int32_t)(time-act->lastDecoupleTest));
+                    Com::printFLN(PSTR(" ms"));
                 }
                 else
                 {
@@ -183,17 +178,12 @@ void Extruder::manageTemperatures()
             {
                 if(fabs(act->currentTemperatureC - act->targetTemperatureC) > DECOUPLING_TEST_MAX_HOLD_VARIANCE)   // failed test
                 {
-                     extruderTempErrors++;
-                     errorDetected = 1;
-                     if(extruderTempErrors > 10)   // Ignore short temporary failures
-                     {
-                         Printer::setAnyTempsensorDefect();
-                         UI_ERROR_P(Com::tHeaterDecoupled);
-                         Com::printErrorFLN(Com::tHeaterDecoupledWarning);
-                         Com::printF(PSTR("Error:Could not hold temperature "),act->lastDecoupleTemp);
-                         Com::printF(PSTR(" measured "),act->currentTemperatureC);
-                         Com::printFLN(PSTR(" deg. C"));
-                     }
+                    Printer::setAnyTempsensorDefect();
+                    UI_ERROR_P(Com::tHeaterDecoupled);
+                    Com::printErrorFLN(Com::tHeaterDecoupledWarning);
+                    Com::printF(PSTR("Error:Could not hold temperature "),act->lastDecoupleTemp);
+                    Com::printF(PSTR(" measured "),act->currentTemperatureC);
+                    Com::printFLN(PSTR(" deg. C"));
                 }
                 else
                 {
@@ -498,6 +488,7 @@ void Extruder::selectExtruderById(uint8_t extruderId, bool changepos)
     float oldfeedrate = Printer::feedrate;
     Printer::offsetX = -Extruder::current->xOffset * Printer::invAxisStepsPerMM[X_AXIS];
     Printer::offsetY = -Extruder::current->yOffset * Printer::invAxisStepsPerMM[Y_AXIS];
+    Commands::changeFeedrateMultiply(Printer::extrudeMultiply); // needed to adjust extrusionFactor to possibly different diameter
     if(Printer::isHomed() && changepos)
         Printer::moveToReal(cx, cy, cz, IGNORE_COORDINATE, Printer::homingFeedrate[X_AXIS]);
     Printer::feedrate = oldfeedrate;
@@ -682,7 +673,7 @@ void Extruder::unstep()
     WRITE(EXT5_STEP_PIN,LOW);
 #endif
 }
-/*void Extruder::setDirection(uint8_t dir)
+void Extruder::setDirection(uint8_t dir)
 {
     mixingDir = dir;
 #if NUM_EXTRUDER>0
@@ -721,7 +712,7 @@ void Extruder::unstep()
     else
         WRITE(EXT5_DIR_PIN,EXT5_INVERSE);
 #endif
-}*/
+}
 void Extruder::enable()
 {
 #if NUM_EXTRUDER>0 && defined(EXT0_ENABLE_PIN) && EXT0_ENABLE_PIN>-1
@@ -1453,6 +1444,41 @@ int16_t read_max31855(uint8_t ss_pin)
     return temperature;
 }
 #endif
+
+#if FEATURE_RETRACTION
+void Extruder::retractDistance(float dist) {
+    float oldFeedrate = Printer::feedrate;
+    int32_t distance = static_cast<int32_t>(dist * stepsPerMM / Printer::extrusionFactor);
+    int32_t oldEPos = Printer::currentPositionSteps[E_AXIS];
+    PrintLine::moveRelativeDistanceInSteps(0, 0, 0, -distance,distance > 0 ? EEPROM_FLOAT(RETRACTION_SPEED) : EEPROM_FLOAT(RETRACTION_UNDO_SPEED), false, false);
+    Printer::currentPositionSteps[E_AXIS] = oldEPos; // restore previous extruder position
+    Printer::feedrate = oldFeedrate;
+}
+
+void Extruder::retract(bool isRetract,bool isLong) {
+    float oldFeedrate = Printer::feedrate;
+    float distance = (isLong ? EEPROM_FLOAT( RETRACTION_LONG_LENGTH) : EEPROM_FLOAT(RETRACTION_LENGTH));
+    int32_t zlift = static_cast<int32_t>(EEPROM_FLOAT(RETRACTION_Z_LIFT) * Printer::axisStepsPerMM[Z_AXIS]);
+    int32_t oldZPos = Printer::currentPositionSteps[Z_AXIS];
+    float oldZPosF = Printer::currentPosition[Z_AXIS];
+    if(isRetract && !isRetracted()) {
+        retractDistance(distance);
+        setRetracted(true);
+        if(zlift > 0)
+            PrintLine::moveRelativeDistanceInStepsReal(0,0,zlift,0,Printer::maxFeedrate[Z_AXIS], false);
+    } else if(!isRetract && isRetracted()) {
+        distance += (isLong ? EEPROM_FLOAT(RETRACTION_UNDO_EXTRA_LONG_LENGTH) : EEPROM_FLOAT(RETRACTION_UNDO_EXTRA_LENGTH) );
+        if(zlift > 0)
+           PrintLine::moveRelativeDistanceInStepsReal(0,0,-zlift,0,Printer::maxFeedrate[Z_AXIS], false);
+        retractDistance(-distance);
+        setRetracted(false);
+    }
+    Printer::currentPositionSteps[Z_AXIS] = oldZPos; // z lift should have no visible impact
+    Printer::currentPosition[Z_AXIS] = oldZPosF;
+    Printer::feedrate = oldFeedrate;
+}
+#endif
+
 Extruder *Extruder::current;
 
 #if NUM_EXTRUDER>0
@@ -1503,7 +1529,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
             ,0,0,0,EXT0_DECOUPLE_TEST_PERIOD
         }
-        ,ext0_select_cmd,ext0_deselect_cmd,EXT0_EXTRUDER_COOLER_SPEED,0
+        ,ext0_select_cmd,ext0_deselect_cmd,EXT0_EXTRUDER_COOLER_SPEED,0,0
     }
 #endif
 #if NUM_EXTRUDER>1
@@ -1527,7 +1553,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
             ,0,0,0,EXT1_DECOUPLE_TEST_PERIOD
         }
-        ,ext1_select_cmd,ext1_deselect_cmd,EXT1_EXTRUDER_COOLER_SPEED,0
+        ,ext1_select_cmd,ext1_deselect_cmd,EXT1_EXTRUDER_COOLER_SPEED,0,0
     }
 #endif
 #if NUM_EXTRUDER>2
@@ -1551,7 +1577,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
             ,0,0,0,EXT2_DECOUPLE_TEST_PERIOD
         }
-        ,ext2_select_cmd,ext2_deselect_cmd,EXT2_EXTRUDER_COOLER_SPEED,0
+        ,ext2_select_cmd,ext2_deselect_cmd,EXT2_EXTRUDER_COOLER_SPEED,0,0
     }
 #endif
 #if NUM_EXTRUDER>3

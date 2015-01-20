@@ -61,54 +61,27 @@ class TemperatureController
     void setTargetTemperature(float target);
     void updateCurrentTemperature();
     void updateTempControlVars();
-    inline bool isAlarm()
-    {
-        return flags & TEMPERATURE_CONTROLLER_FLAG_ALARM;
-    }
-    inline void setAlarm(bool on)
-    {
-        if(on) flags |= TEMPERATURE_CONTROLLER_FLAG_ALARM;
-        else flags &= ~TEMPERATURE_CONTROLLER_FLAG_ALARM;
-    }
-    inline bool isDecoupleFull()
-    {
-        return flags & TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL;
-    }
-    inline bool isDecoupleFullOrHold()
-    {
-        return flags & (TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL | TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD);
-    }
-    inline void setDecoupleFull(bool on)
-    {
-        flags &= ~(TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL | TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD);
-        if(on) flags |= TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL;
-    }
-    inline bool isDecoupleHold()
-    {
-        return flags & TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD;
-    }
-    inline void setDecoupleHold(bool on)
-    {
-        flags &= ~(TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL | TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD);
-        if(on) flags |= TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD;
-    }
-    inline void startFullDecouple(millis_t &t)
-    {
+    inline bool isAlarm() {return flags & TEMPERATURE_CONTROLLER_FLAG_ALARM;}
+    inline void setAlarm(bool on) {if(on) flags |= TEMPERATURE_CONTROLLER_FLAG_ALARM; else flags &= ~TEMPERATURE_CONTROLLER_FLAG_ALARM;}
+    inline bool isDecoupleFull() {return flags & TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL;}
+    inline bool isDecoupleFullOrHold() {return flags & (TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL | TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD);}
+    inline void setDecoupleFull(bool on) {flags &= ~(TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL | TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD); if(on) flags |= TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL;}
+    inline bool isDecoupleHold() {return flags & TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD;}
+    inline void setDecoupleHold(bool on) {flags &= ~(TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL | TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD); if(on) flags |= TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD;}
+    inline void startFullDecouple(millis_t &t) {
         if(isDecoupleFull()) return;
         lastDecoupleTest = t;
         lastDecoupleTemp = currentTemperatureC;
         setDecoupleFull(true);
     }
-    inline void startHoldDecouple(millis_t &t) 
-    {
+    inline void startHoldDecouple(millis_t &t) {
         if(isDecoupleHold()) return;
         if(fabs(currentTemperatureC - targetTemperatureC) + 1 > DECOUPLING_TEST_MAX_HOLD_VARIANCE) return;
         lastDecoupleTest = t;
         lastDecoupleTemp = targetTemperatureC;
         setDecoupleHold(true);
     }
-    inline void stopDecouple() 
-    {
+    inline void stopDecouple() {
         setDecoupleFull(false);
     }
 #if TEMP_PID
@@ -118,6 +91,8 @@ class TemperatureController
 
 class Extruder;
 extern Extruder extruder[];
+
+#define EXTRUDER_FLAG_RETRACTED 1
 
 /** \brief Data to drive one extruder.
 
@@ -139,7 +114,7 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
     int32_t xOffset;
     int32_t yOffset;
     float stepsPerMM;        ///< Steps per mm.
-    int8_t enablePin;          ///< Pin to enable extruder stepper motor.
+    int16_t enablePin;          ///< Pin to enable extruder stepper motor.
 //  uint8_t directionPin; ///< Pin number to assign the direction.
 //  uint8_t stepPin; ///< Pin number for a step.
     uint8_t enableOn;
@@ -168,12 +143,13 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
     const char * PROGMEM deselectCommands;
     uint8_t coolerSpeed; ///< Speed to use when enabled
     uint8_t coolerPWM; ///< current PWM setting
-
+    uint8_t flags;
+    float diameter;
 #if MIXING_EXTRUDER > 0
     static void setMixingWeight(uint8_t extr,int weight);
     static void step();
     static void unstep();
-    //static void setDirection(uint8_t dir);
+    static void setDirection(uint8_t dir);
     static void enable();
 #else
     /** \brief Sends the high-signal to the stepper for next extruder step.
@@ -296,9 +272,6 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
     /** \brief Activates the extruder stepper and sets the direction. */
     static inline void setDirection(uint8_t dir)
     {
-        #if MIXING_EXTRUDER > 0
-        mixingDir = dir;
-        #endif
 #if NUM_EXTRUDER==1
         if(dir)
             WRITE(EXT0_DIR_PIN,!EXT0_INVERSE);
@@ -314,30 +287,11 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
             else
                 WRITE(EXT0_DIR_PIN,EXT0_INVERSE);
 #if FEATURE_DITTO_PRINTING
-            if(Extruder::dittoMode)
-            {
-                 if(dir)
-                     WRITE(EXT1_DIR_PIN,!EXT1_INVERSE);
-                 else
-                     WRITE(EXT1_DIR_PIN,EXT1_INVERSE);
-#if NUM_EXTRUDER > 2
-                if(Extruder::dittoMode > 1)
-                {
-                    if(dir)
-                        WRITE(EXT2_DIR_PIN,!EXT2_INVERSE);
-                    else
-                        WRITE(EXT2_DIR_PIN,EXT2_INVERSE);
-                }
-#endif
-#if NUM_EXTRUDER > 3
-                if(Extruder::dittoMode > 2)
-                {
-                    if(dir)
-                        WRITE(EXT3_DIR_PIN,!EXT3_INVERSE);
-                    else
-                        WRITE(EXT3_DIR_PIN,EXT3_INVERSE);
-                }
-#endif
+            if(Extruder::dittoMode) {
+                if(dir)
+                    WRITE(EXT1_DIR_PIN,!EXT1_INVERSE);
+                else
+                    WRITE(EXT1_DIR_PIN,EXT1_INVERSE);
             }
 #endif
             break;
@@ -410,6 +364,14 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
 #endif
 #endif
     }
+#endif
+#if FEATURE_RETRACTION
+    inline bool isRetracted() {return (flags & EXTRUDER_FLAG_RETRACTED) != 0;}
+    inline void setRetracted(bool on) {
+        flags = (flags & (255 - EXTRUDER_FLAG_RETRACTED)) | (on ? EXTRUDER_FLAG_RETRACTED : 0);
+    }
+    void retract(bool isRetract,bool isLong);
+    void retractDistance(float dist);
 #endif
     static void manageTemperatures();
     static void disableCurrentExtruderMotor();

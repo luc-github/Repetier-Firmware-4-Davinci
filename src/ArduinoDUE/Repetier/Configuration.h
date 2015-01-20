@@ -26,9 +26,9 @@
 #define REPURPOSE_FAN_TO_COOL_EXTRUSIONS 0 //Setting this to 1 will repurpose the main Extruder cooling fan to be controlled VIA M106/M107
                                                                                             //Warning: for DaVinci 1.0 need to add a permanent fan with power supply to cool extruder
 #define VERSION_MAJOR " 1"
-#define VERSION_MINOR_YEAR "14"
-#define VERSION_MINOR_MONTH "11"
-#define VERSION_MINOR_DAY "27"
+#define VERSION_MINOR_YEAR "15"
+#define VERSION_MINOR_MONTH "01"
+#define VERSION_MINOR_DAY "02"
 #define VERSION_BUILD "1"
 
 #define WARMUP_BED_ON_INIT 0 //use this to preheat your bed if you have a temperature defect  at start due to slow  response time of cold thermistor
@@ -193,7 +193,11 @@ Overridden if EEPROM activated.*/
 // the cleaner signal. The only advantage of PWM is giving signals at a fixed rate and never more
 // then PWM.
 #define PDM_FOR_EXTRUDER 1
+#if REPURPOSE_FAN_TO_COOL_EXTRUSIONS
+#define PDM_FOR_COOLER 0
+#else
 #define PDM_FOR_COOLER 1
+#endif
 
 // The firmware checks if the heater and sensor got decoupled, which is dangerous. SInce it will never reach target
 // temperature, the heater will stay on for every which can burn your printe ror house.
@@ -461,6 +465,37 @@ cog. Direct drive extruder need 0. */
 M140 command, after a given temperature is reached. */
 #define RETRACT_DURING_HEATUP true
 
+/** Allow retraction with G10/G11 removing requirement for retraction setting in slicer. Also allows filament change if lcd is configured. */
+#define FEATURE_RETRACTION 1
+/** autoretract converts pure axtrusion moves into retractions. Beware that 
+ simple extrusion e.g. over Repetier-Host will then not work! */
+#define AUTORETRACT_ENABLED 0
+#define RETRACTION_LENGTH 3
+#define RETRACTION_LONG_LENGTH 13
+#define RETRACTION_SPEED 40
+#define RETRACTION_Z_LIFT 0
+#define RETRACTION_UNDO_EXTRA_LENGTH 0
+#define RETRACTION_UNDO_EXTRA_LONG_LENGTH 0
+#define RETRACTION_UNDO_SPEED 20
+
+/**
+If you have a lcd display, you can do a filament switch with M600.
+It will change the current extruders filament and temperature must already be high enough.
+*/
+#define FILAMENTCHANGE_X_POS 0
+#define FILAMENTCHANGE_Y_POS 0
+#define FILAMENTCHANGE_Z_ADD 1
+/** Does a homing procedure after a filament change. This is good in case
+you moved the extruder while changing filament during print.
+0 = no homing, 1 = xy homing, 2 = xyz homing
+*/
+#define FILAMENTCHANGE_REHOME 1
+/** Will first retract short distance, go to change position and then retract longretract.
+Retractions speeds are taken from RETRACTION_SPEED and RETRACTION_UNDO_SPEED
+*/
+#define FILAMENTCHANGE_SHORTRETRACT 30
+#define FILAMENTCHANGE_LONGRETRACT 30
+
 /** PID control only works target temperature +/- PID_CONTROL_RANGE.
 If you get much overshoot at the first temperature set, because the heater is going full power too long, you
 need to increase this value. For one 6.8 Ohm heater 10 is ok. With two 6.8 Ohm heater use 15.
@@ -507,15 +542,29 @@ temperature*8.
 If you have a PTC thermistor instead of a NTC thermistor, keep the adc values increasing and use themistor types 50-52 instead of 5-7!
 */
 /** Number of entries in the user thermistor table 0. Set to 0 to disable it. */
-#define NUM_TEMPS_USERTHERMISTOR0 29
-#define USER_THERMISTORTABLE0 {{111,2240},{132,2120},{165,2000},{201,1920},{248,1800},{309,1720},{389,1640},{485,1560},{596,1440},{714,1360},{894,1280},{1083,1160},{1312,1080},{1539,960},{1786,880},{2006,760},{2208,640},{2382,560},{2503,440},{2602,360},{2679,264},{2695,160},{2728,120},{2747,80},{2786,0},{2824,-80},{2863,-160},{2901,-240}}
+#if MODEL==0
+#define NUM_TEMPS_USERTHERMISTOR0 33
+#define USER_THERMISTORTABLE0 {{96,2400},{99,2320},{113,2240},{132,2160},{155,2080},{180,2000},{211,1920},{247,1840},{293,1760},{350,1680},{421,1600},{508,1520},{611,1440},{732,1360},{871,1280},{1024,1200},{1192,1120},{1369,1040},{1552,960},{1737,880},{1900,800},{2070,720},{2219,640},{2361,560},{2478,480},{2565,400},{2628,320},{2673,240},{2710,160},{2746,80},{2783,0},{2824,-80},{2864,-160}}
 
 /** Number of entries in the user thermistor table 1. Set to 0 to disable it. */
-#define NUM_TEMPS_USERTHERMISTOR1 30
-#define USER_THERMISTORTABLE1 {{2003,1040},{2058,1000},{2161,960},{2253,920},{2337,880},{2450,840},{2549,800},{2637,760},{2715,720},{2786,680},{2907,640},{3008,600},{3093,560},{3165,520},{3247,480},{3316,440},{3374,400},{3447,360},{3506,320},{3548,280},{3610,240},{3664,200},{3708,160},{3764,120},{3816,80},{3868,40},{3920,0},{4025,-80},{4129,-160},{4233,-240}}
+#define NUM_TEMPS_USERTHERMISTOR1 19
+#define USER_THERMISTORTABLE1 {{628,1280},{859,1200},{1113,1120},{1382,1040},{1660,960},{1938,880},{2211,800},{2473,720},{2718,640},{2945,560},{3148,480},{3328,400},{3482,320},{3613,240},{3722,160},{3815,80},{3895,0},{3972,-80},{4055,-160}}
+
 /** Number of entries in the user thermistor table 2. Set to 0 to disable it. */
 #define NUM_TEMPS_USERTHERMISTOR2 0
 #define USER_THERMISTORTABLE2  {}
+
+#else
+#define NUM_TEMPS_USERTHERMISTOR0 28
+#define USER_THERMISTORTABLE0 {{294, 2560},{375, 2400},{461, 2272},{526, 2184},{601, 2104},{674, 2048},{811, 1928},{925, 1848},{1071, 1768},{1219, 1696},{1445, 1584},{1673, 1496},{1902, 1416},{2187, 1312},{2454, 1224},{2672, 1152},{3000, 1048},{3196, 968},{3439, 864},{3583, 784},{3736, 680},{3899, 536},{3960, 448},{4024, 336},{4067, 192},{4079, 156},{4100, 0},{4120, -160}}
+
+/** Number of entries in the user thermistor table 1. Set to 0 to disable it. */
+#define NUM_TEMPS_USERTHERMISTOR1 19
+#define USER_THERMISTORTABLE1 {{628,1280},{859,1200},{1113,1120},{1382,1040},{1660,960},{1938,880},{2211,800},{2473,720},{2718,640},{2945,560},{3148,480},{3328,400},{3482,320},{3613,240},{3722,160},{3815,80},{3895,0},{3972,-80},{4055,-160}}
+
+/** Number of entries in the user thermistor table 2. Set to 0 to disable it. */
+#define NUM_TEMPS_USERTHERMISTOR2 0
+#endif
 
 /** If defined, creates a thermistor table at startup.
 

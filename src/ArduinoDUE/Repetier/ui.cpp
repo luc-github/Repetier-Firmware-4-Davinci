@@ -288,8 +288,12 @@ const long baudrates[] PROGMEM = {9600,14400,19200,28800,38400,56000,57600,76800
 #define LCD_4BIT        LCD_CONFIGURATION | 0x00    /**<    4 bits interface */
 #define LCD_2LINE       LCD_CONFIGURATION | 0x08    /**<    2 line display */
 #define LCD_1LINE       LCD_CONFIGURATION | 0x00    /**<    1 line display */
+//for HD44780 and clones
 #define LCD_5X10        LCD_CONFIGURATION | 0x04    /**<    5 X 10 dots */
 #define LCD_5X7         LCD_CONFIGURATION | 0x00    /**<    5 X 7 dots */
+//for Winstar 1604A 
+#define LCD_5X11        LCD_CONFIGURATION | 0x04    /**<    5 X 18 dots */
+#define LCD_5X8         LCD_CONFIGURATION | 0x00    /**<    5 X 8 dots */
 
 #define LCD_SETCGRAMADDR 0x40
 
@@ -412,6 +416,10 @@ void initializeLCD()
 #endif
 #if UI_DISPLAY_TYPE == DISPLAY_4BIT || UI_DISPLAY_TYPE == DISPLAY_8BIT
 
+#if  UI_DISPLAY_TYPE == DISPLAY_4BIT
+
+#define BIT_INTERFACE LCD_4BIT
+
 void lcdWriteNibble(uint8_t value)
 {
     WRITE(UI_DISPLAY_D4_PIN,value & 1);
@@ -419,10 +427,9 @@ void lcdWriteNibble(uint8_t value)
     WRITE(UI_DISPLAY_D6_PIN,value & 4);
     WRITE(UI_DISPLAY_D7_PIN,value & 8);
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);// enable pulse must be >450ns
-    DELAY1MICROSECOND;
-
+    HAL::delayMicroseconds(5);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-    DELAY1MICROSECOND;
+   HAL::delayMicroseconds(15); //tc must be >1200ns
 
 }
 void lcdWriteByte(uint8_t c,uint8_t rs)
@@ -443,13 +450,13 @@ void lcdWriteByte(uint8_t c,uint8_t rs)
         DELAY1MICROSECOND;
         busy = READ(UI_DISPLAY_D7_PIN);
         WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-        DELAY1MICROSECOND;
+        HAL::delayMicroseconds(5);
 
         WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);
-        DELAY1MICROSECOND;
+        HAL::delayMicroseconds(5);
 
         WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-        DELAY1MICROSECOND;
+        HAL::delayMicroseconds(5);
 
     }
     while (busy);
@@ -460,79 +467,154 @@ void lcdWriteByte(uint8_t c,uint8_t rs)
     WRITE(UI_DISPLAY_RW_PIN, LOW);
 #endif
     WRITE(UI_DISPLAY_RS_PIN, rs);
-
+    HAL::delayMicroseconds(5);
     WRITE(UI_DISPLAY_D4_PIN, c & 0x10);
     WRITE(UI_DISPLAY_D5_PIN, c & 0x20);
     WRITE(UI_DISPLAY_D6_PIN, c & 0x40);
     WRITE(UI_DISPLAY_D7_PIN, c & 0x80);
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
-    DELAY1MICROSECOND;
+    HAL::delayMicroseconds(5);
 
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-    DELAY1MICROSECOND;
+    HAL::delayMicroseconds(5);//tc must be >1200ns
 
     WRITE(UI_DISPLAY_D4_PIN, c & 0x01);
     WRITE(UI_DISPLAY_D5_PIN, c & 0x02);
     WRITE(UI_DISPLAY_D6_PIN, c & 0x04);
     WRITE(UI_DISPLAY_D7_PIN, c & 0x08);
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
-    DELAY1MICROSECOND;
+    HAL::delayMicroseconds(5);
 
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-    DELAY1MICROSECOND;
-
+    HAL::delayMicroseconds(5);//tc must be >1200ns
 }
+#else  //DISPLAY_8BIT
+
+#define BIT_INTERFACE LCD_8BIT
+
+void lcdWriteByte(uint8_t c,uint8_t rs)
+{
+#if UI_DISPLAY_RW_PIN<0
+    HAL::delayMicroseconds(UI_DELAYPERCHAR);
+#else
+    SET_INPUT(UI_DISPLAY_D4_PIN);
+    SET_INPUT(UI_DISPLAY_D5_PIN);
+    SET_INPUT(UI_DISPLAY_D6_PIN);
+    SET_INPUT(UI_DISPLAY_D7_PIN);
+    WRITE(UI_DISPLAY_RW_PIN, HIGH);
+    WRITE(UI_DISPLAY_RS_PIN, LOW);
+    uint8_t busy;
+    do
+    {
+        WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);
+        DELAY1MICROSECOND;
+        busy = READ(UI_DISPLAY_D7_PIN);
+        WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
+    HAL::delayMicroseconds(5);
+
+        WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);
+    HAL::delayMicroseconds(5);
+
+        WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
+    HAL::delayMicroseconds(5);
+
+    }
+    while (busy);
+    SET_OUTPUT(UI_DISPLAY_D4_PIN);
+    SET_OUTPUT(UI_DISPLAY_D5_PIN);
+    SET_OUTPUT(UI_DISPLAY_D6_PIN);
+    SET_OUTPUT(UI_DISPLAY_D7_PIN);
+    WRITE(UI_DISPLAY_RW_PIN, LOW);
+#endif
+    WRITE(UI_DISPLAY_RS_PIN, rs);
+    HAL::delayMicroseconds(5);
+    WRITE(UI_DISPLAY_D0_PIN, c & 0x01);
+    WRITE(UI_DISPLAY_D1_PIN, c & 0x02);
+    WRITE(UI_DISPLAY_D2_PIN, c & 0x04);
+    WRITE(UI_DISPLAY_D3_PIN, c & 0x08);
+    WRITE(UI_DISPLAY_D4_PIN, c & 0x10);
+    WRITE(UI_DISPLAY_D5_PIN, c & 0x20);
+    WRITE(UI_DISPLAY_D6_PIN, c & 0x40);
+    WRITE(UI_DISPLAY_D7_PIN, c & 0x80);
+    WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
+    HAL::delayMicroseconds(5);
+    WRITE(UI_DISPLAY_ENABLE_PIN, LOW);   //tc must be >1200ns
+    HAL::delayMicroseconds(5);
+}
+
+#endif 
+
 void initializeLCD()
 {
     playsound(5000,240);
-    playsound(3000,240);
-    // SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
-    // according to datasheet, we need at least 40ms after power rises above 2.7V
+    playsound(3000,120);
+#if  UI_DISPLAY_TYPE == DISPLAY_8BIT
+    playsound(5000,120);
+    SET_OUTPUT(UI_DISPLAY_D0_PIN);
+    SET_OUTPUT(UI_DISPLAY_D1_PIN);
+    SET_OUTPUT(UI_DISPLAY_D2_PIN);
+    SET_OUTPUT(UI_DISPLAY_D3_PIN);
+#endif
+  // SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
+    // according to HD44780 datasheet, we need at least 40ms after power rises above 2.7V
     // before sending commands. Arduino can turn on way before 4.5V.
     // is this delay long enough for all cases??
-    HAL::delayMilliseconds(235);
+    HAL::delayMilliseconds(500);
     SET_OUTPUT(UI_DISPLAY_D4_PIN);
     SET_OUTPUT(UI_DISPLAY_D5_PIN);
     SET_OUTPUT(UI_DISPLAY_D6_PIN);
     SET_OUTPUT(UI_DISPLAY_D7_PIN);
     SET_OUTPUT(UI_DISPLAY_RS_PIN);
+ 
+    //init pins to a known state
+    WRITE(UI_DISPLAY_D0_PIN, HIGH);
+    WRITE(UI_DISPLAY_D1_PIN, HIGH);
+    WRITE(UI_DISPLAY_D2_PIN, HIGH);
+    WRITE(UI_DISPLAY_D3_PIN, HIGH);
+    WRITE(UI_DISPLAY_D4_PIN, HIGH);
+    WRITE(UI_DISPLAY_D5_PIN, HIGH);
+    WRITE(UI_DISPLAY_D6_PIN, HIGH);
+    WRITE(UI_DISPLAY_D7_PIN, HIGH);
+    
 #if UI_DISPLAY_RW_PIN>-1
     SET_OUTPUT(UI_DISPLAY_RW_PIN);
 #endif
-    SET_OUTPUT(UI_DISPLAY_ENABLE_PIN);
-
     // Now we pull both RS and R/W low to begin commands
     WRITE(UI_DISPLAY_RS_PIN, LOW);
+    HAL::delayMicroseconds(5);
+    //move set output late to be sure pin is not affected before
+    SET_OUTPUT(UI_DISPLAY_ENABLE_PIN);
+    HAL::delayMicroseconds(5);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
+    HAL::delayMilliseconds(10); // Just to be safe
+    //initialization sequence for 4bits/8bits of Winstar 1604A Screen
+    //16 rows, 4 lines
+#if  UI_DISPLAY_TYPE == DISPLAY_4BIT
+    lcdWriteNibble(0x03);//Init Function Set for 4bits
+    HAL::delayMicroseconds(150); //more than 39micro seconds
+#endif
+    
+    lcdCommand( BIT_INTERFACE | LCD_2LINE | LCD_5X8); //LCD Configuration: Bits, Lines and Font
+    HAL::delayMicroseconds(150); //more than 39micro seconds
+    
+    lcdCommand(BIT_INTERFACE | LCD_2LINE | LCD_5X8);//LCD Configuration: Bits, Lines and Font
+    HAL::delayMicroseconds(150); //more than 39micro seconds
+    
+    //specification says 2 is enough but a 3rd one solve issue if restart with keypad buttons pressed 
+    lcdCommand(BIT_INTERFACE | LCD_2LINE | LCD_5X8);//LCD Configuration: Bits, Lines and Font
+    HAL::delayMicroseconds(150); //more than 39micro seconds
+    
+    lcdCommand( LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);    //Display Control : Display on/off, Cursor, Blinking Cursor
+    HAL::delayMicroseconds(150);
+    
+    lcdCommand(LCD_CLEAR);                  //Clear Screen
+    HAL::delayMilliseconds(8); // clear is slow operation more than 1.53ms
+    
+    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF); //Entrymode: Sets cursor move direction (I/D); specifies to shift the display
+    HAL::delayMicroseconds(150);
 
-    //put the LCD into 4 bit mode
-    // this is according to the hitachi HD44780 datasheet
-    // figure 24, pg 46
+    HAL::delayMilliseconds(10);//no recommendation so just a feeling
 
-    // we start in 8bit mode, try to set 4 bit mode
-    // at this point we are in 8 bit mode but of course in this
-    // interface 4 pins are dangling unconnected and the values
-    // on them don't matter for these instructions.
-    WRITE(UI_DISPLAY_RS_PIN, LOW);
-    HAL::delayMicroseconds(10);
-    lcdWriteNibble(0x03);
-    HAL::delayMicroseconds(5500); // I have one LCD for which 4500 here was not long enough.
-    // second try
-    lcdWriteNibble(0x03);
-    HAL::delayMicroseconds(180); // wait
-    // third go!
-    lcdWriteNibble(0x03);
-    HAL::delayMicroseconds(180);
-    // finally, set to 4-bit interface
-    lcdWriteNibble(0x02);
-    HAL::delayMicroseconds(180);
-    // finally, set # lines, font size, etc.
-    lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);
-
-    lcdCommand(LCD_CLEAR);                  //- Clear Screen
-    HAL::delayMilliseconds(2); // clear is slow operation
-    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF); //- Entrymode (Display Shift: off, Increment Address Counter)
-    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);    //- Display on
     uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
     uid.createChar(1,character_back);
     uid.createChar(2,character_degree);
@@ -1414,12 +1496,6 @@ case 'P':
                     addStringP(ui_text_on);//if not defined by preset
                     }
             #endif
-            if(c2=='P')
-            #if (Z_PROBE_PIN > -1)
-                addStringP(Printer::isZProbeHit()?ui_text_on:ui_text_off);
-            #else
-                addStringP(ui_text_na);
-            #endif
             break;
         case 's': // Endstop positions
             #if FEATURE_BEEPER
@@ -2212,7 +2288,7 @@ void UIDisplay::refreshPage()
                         printRow(y,cache[y] + UI_COLS - scroll,&displayCache[y][off[y]],scroll);
                     }
                 }
-#if DISPLAY_TYPE != 5
+#if  UI_DISPLAY_TYPE != 5
                 HAL::delayMilliseconds(transition<3 ? 200 : 70);
 #endif
                 HAL::pingWatchdog();
@@ -2269,11 +2345,11 @@ void UIDisplay::pushMenu(const UIMenu *men,bool refresh)
         refreshPage();
 }
 
-int UIDisplay::okAction(bool allowMoves)
+bool UIDisplay::okAction(bool allowMoves)
 {
     if(Printer::isUIErrorMessage()) {
         Printer::setUIErrorMessage(false);
-        return 0;
+        return true;
     }
 #if UI_HAS_KEYS == 1
     if(menuLevel == 0)   // Enter menu
@@ -2283,7 +2359,7 @@ int UIDisplay::okAction(bool allowMoves)
         menuPos[1] =  UI_MENU_BACKCNT; // if top entry is back, default to next useful item
         menu[1] = &ui_menu_main;
         BEEP_SHORT
-        return 0;
+        return true;
     }
     UIMenu *men = (UIMenu*)menu[menuLevel];
     //uint8_t nr = pgm_read_word_near(&(menu->numEntries));
@@ -2297,11 +2373,12 @@ int UIDisplay::okAction(bool allowMoves)
     {
         if(menuPos[menuLevel] == 0)   // Selected back instead of file
         {
-            return executeAction(UI_ACTION_BACK, allowMoves);
+            executeAction(UI_ACTION_BACK, allowMoves);
+            return true;
         }
 
         if(!sd.sdactive)
-            return 0;
+            return true;
         uint8_t filePos = menuPos[menuLevel] - 1;
         char filename[LONG_FILENAME_LENGTH + 1];
 
@@ -2313,7 +2390,7 @@ int UIDisplay::okAction(bool allowMoves)
             menuPos[menuLevel] = 1;
             refreshPage();
             oldMenuLevel = -1;
-            return 0;
+            return true;
         }
 
         int16_t shortAction; // renamed to avoid scope confusion
@@ -2358,7 +2435,7 @@ int UIDisplay::okAction(bool allowMoves)
             }
             break;
         }
-        return 0;
+        return true;
     }
 #endif
     entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
@@ -2369,7 +2446,8 @@ int UIDisplay::okAction(bool allowMoves)
     {
         action = pgm_read_word(&(men->id));
         finishAction(action);
-        return executeAction(UI_ACTION_BACK, true);
+        executeAction(UI_ACTION_BACK, true);
+        return true;
     }
     if(((mtype == UI_MENU_TYPE_SUBMENU) ||(mtype == UI_MENU_TYPE_MENU_WITH_STATUS) )&& entType == UI_MENU_TYPE_MODIFICATION_MENU)   // Modify action
     {
@@ -2380,13 +2458,13 @@ int UIDisplay::okAction(bool allowMoves)
         }
         else
             activeAction = action;
-        return 0;
+        return true;
     }
     if(entType==UI_MENU_TYPE_MENU_WITH_STATUS || entType==UI_MENU_TYPE_SUBMENU)   // Enter submenu
     {
         pushMenu((UIMenu*)action, false);
         BEEP_SHORT
-        return 0;
+        return true;
     }
     if(entType == 3)
     {
@@ -2738,7 +2816,7 @@ bool UIDisplay::nextPreviousAction(int8_t next, bool allowMoves)
 
     case UI_ACTION_EPOSITION:
          //need to check temperature ?
-        PrintLine::moveRelativeDistanceInSteps(0,0,0,Printer::axisStepsPerMM[3]*increment,UI_SET_EXTRUDER_FEEDRATE,true,false);
+        PrintLine::moveRelativeDistanceInSteps(0,0,0,Printer::axisStepsPerMM[E_AXIS]*increment / Printer::extrusionFactor,UI_SET_EXTRUDER_FEEDRATE,true,false);
         Commands::printCurrentPosition(PSTR("UI_ACTION_EPOSITION "));
         break;
     case UI_ACTION_Z_BABYSTEPS:
@@ -2857,7 +2935,7 @@ case UI_ACTION_BED_TEMP_PLA :
     case UI_ACTION_FLOWRATE_MULTIPLY:
     {
         INCREMENT_MIN_MAX(Printer::extrudeMultiply,1,25,500);
-        Com::printFLN(Com::tFlowMultiply,(int)Printer::extrudeMultiply);
+        Commands::changeFlowrateMultiply(Printer::extrudeMultiply);
     }
     break;
     case UI_ACTION_STEPPER_INACTIVE:
@@ -3170,9 +3248,9 @@ return response;
 }
 // Actions are events from user input. Depending on the current state, each
 // action can behave differently. Other actions do always the same like home, disable extruder etc.
-int UIDisplay::executeAction(int action, bool allowMoves)
+bool UIDisplay::executeAction(int action, bool allowMoves)
 {
-    int ret = true;
+    bool ret = true;
 #if UI_HAS_KEYS == 1
     bool skipBeep = false;
     bool process_it=false;
@@ -3233,12 +3311,10 @@ int UIDisplay::executeAction(int action, bool allowMoves)
             activeAction = 0;
             break;
         case UI_ACTION_NEXT:
-            if(!nextPreviousAction(1, allowMoves))
-                ret = UI_ACTION_NEXT;
+            ret = nextPreviousAction(1, allowMoves);
             break;
         case UI_ACTION_PREVIOUS:
-            if(!nextPreviousAction(-1, allowMoves))
-                ret = UI_ACTION_PREVIOUS;
+            ret = nextPreviousAction(-1, allowMoves);
             break;
         case UI_ACTION_MENU_UP:
             if(menuLevel > 0) menuLevel--;
@@ -3259,7 +3335,7 @@ int UIDisplay::executeAction(int action, bool allowMoves)
             break;
         case UI_ACTION_HOME_ALL:
             {
-            if(!allowMoves) return UI_ACTION_HOME_ALL;
+            if(!allowMoves) return false;
             int tmpmenu=menuLevel;
             int tmpmenupos=menuPos[menuLevel];
             UIMenu *tmpmen = (UIMenu*)menu[menuLevel];
@@ -3276,7 +3352,7 @@ int UIDisplay::executeAction(int action, bool allowMoves)
 			}
         case UI_ACTION_HOME_X:
             {
-            if(!allowMoves) return UI_ACTION_HOME_X;
+            if(!allowMoves) return false;
             int tmpmenu=menuLevel;
             int tmpmenupos=menuPos[menuLevel];
             UIMenu *tmpmen = (UIMenu*)menu[menuLevel];
@@ -3293,7 +3369,7 @@ int UIDisplay::executeAction(int action, bool allowMoves)
             }
         case UI_ACTION_HOME_Y:
             {
-            if(!allowMoves) return UI_ACTION_HOME_Y;
+            if(!allowMoves) return false;
             int tmpmenu=menuLevel;
             int tmpmenupos=menuPos[menuLevel];
             UIMenu *tmpmen = (UIMenu*)menu[menuLevel];
@@ -3310,7 +3386,7 @@ int UIDisplay::executeAction(int action, bool allowMoves)
             }
         case UI_ACTION_HOME_Z:
             {
-            if(!allowMoves) return UI_ACTION_HOME_Z;
+            if(!allowMoves) return false;
             int tmpmenu=menuLevel;
             int tmpmenupos=menuPos[menuLevel];
             UIMenu *tmpmen = (UIMenu*)menu[menuLevel];
@@ -3326,7 +3402,7 @@ int UIDisplay::executeAction(int action, bool allowMoves)
             break;
             }
         case UI_ACTION_SET_ORIGIN:
-            if(!allowMoves) return UI_ACTION_SET_ORIGIN;
+            if(!allowMoves) return false;
             Printer::setOrigin(0, 0, 0);
             break;
         case UI_ACTION_DEBUG_ECHO:
@@ -4858,19 +4934,19 @@ int UIDisplay::executeAction(int action, bool allowMoves)
             break;
         case UI_ACTION_SELECT_EXTRUDER0:
 #if NUM_EXTRUDER > 0
-            if(!allowMoves) return UI_ACTION_SELECT_EXTRUDER0;
+            if(!allowMoves) return false;
             Extruder::selectExtruderById(0);
 #endif
             break;
         case UI_ACTION_SELECT_EXTRUDER1:
 #if NUM_EXTRUDER > 1
-            if(!allowMoves) return UI_ACTION_SELECT_EXTRUDER1;
+            if(!allowMoves) return false;
             Extruder::selectExtruderById(1);
 #endif
             break;
         case UI_ACTION_SELECT_EXTRUDER2:
 #if NUM_EXTRUDER > 2
-            if(!allowMoves) return UI_ACTION_SELECT_EXTRUDER2;
+            if(!allowMoves) return false;
             Extruder::selectExtruderById(2);
 #endif
             break;
@@ -4920,17 +4996,17 @@ int UIDisplay::executeAction(int action, bool allowMoves)
             break;
         case UI_ACTION_SD_PAUSE:
             if(!allowMoves)
-                ret = UI_ACTION_SD_PAUSE;
+                ret = false;
             else
                 sd.pausePrint(true);
             break;
         case UI_ACTION_SD_CONTINUE:
-            if(!allowMoves) ret = UI_ACTION_SD_CONTINUE;
+            if(!allowMoves) ret = false;
             else sd.continuePrint(true);
             break;
         case UI_ACTION_SD_STOP:
             {
-            //if(!allowMoves) ret = UI_ACTION_SD_STOP;
+            //if(!allowMoves) ret = false;
             //else sd.stopPrint();
              playsound(400,400);
              //reset connect with host if any
@@ -5067,35 +5143,35 @@ int UIDisplay::executeAction(int action, bool allowMoves)
             break;
 #endif
         case UI_ACTION_X_UP:
-            if(!allowMoves) return UI_ACTION_X_UP;
+            if(!allowMoves) return false;
             PrintLine::moveRelativeDistanceInStepsReal(Printer::axisStepsPerMM[X_AXIS],0,0,0,Printer::homingFeedrate[X_AXIS],false);
             break;
         case UI_ACTION_X_DOWN:
-            if(!allowMoves) return UI_ACTION_X_DOWN;
+            if(!allowMoves) return false;
             PrintLine::moveRelativeDistanceInStepsReal(-Printer::axisStepsPerMM[X_AXIS],0,0,0,Printer::homingFeedrate[X_AXIS],false);
             break;
         case UI_ACTION_Y_UP:
-            if(!allowMoves) return UI_ACTION_Y_UP;
+            if(!allowMoves) return false;
             PrintLine::moveRelativeDistanceInStepsReal(0,Printer::axisStepsPerMM[Y_AXIS],0,0,Printer::homingFeedrate[Y_AXIS],false);
             break;
         case UI_ACTION_Y_DOWN:
-            if(!allowMoves) return UI_ACTION_Y_DOWN;
+            if(!allowMoves) return false;
             PrintLine::moveRelativeDistanceInStepsReal(0,-Printer::axisStepsPerMM[Y_AXIS],0,0,Printer::homingFeedrate[Y_AXIS],false);
             break;
         case UI_ACTION_Z_UP:
-            if(!allowMoves) return UI_ACTION_Z_UP;
+            if(!allowMoves) return false;
             PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[Z_AXIS],false);
             break;
         case UI_ACTION_Z_DOWN:
-            if(!allowMoves) return UI_ACTION_Z_DOWN;
+            if(!allowMoves) return false;
             PrintLine::moveRelativeDistanceInStepsReal(0,0,-Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[Z_AXIS],false);
             break;
         case UI_ACTION_EXTRUDER_UP:
-            if(!allowMoves) return UI_ACTION_EXTRUDER_UP;
+            if(!allowMoves) return false;
             PrintLine::moveRelativeDistanceInStepsReal(0,0,0,Printer::axisStepsPerMM[E_AXIS],UI_SET_EXTRUDER_FEEDRATE,false);
             break;
         case UI_ACTION_EXTRUDER_DOWN:
-            if(!allowMoves) return UI_ACTION_EXTRUDER_DOWN;
+            if(!allowMoves) return false;
             PrintLine::moveRelativeDistanceInStepsReal(0,0,0,-Printer::axisStepsPerMM[E_AXIS],UI_SET_EXTRUDER_FEEDRATE,false);
             break;
         case UI_ACTION_EXTRUDER_TEMP_UP:
@@ -5296,13 +5372,12 @@ void UIDisplay::slowAction(bool allowMoves)
         flags |= UI_FLAG_SLOW_ACTION_RUNNING;
         // Reset click encoder
         noInts.protect();
-        int8_t encodeChange = encoderPos;
+        int8_t epos = encoderPos;
         encoderPos = 0;
         noInts.unprotect();
-        int newAction;
-        if(encodeChange) // encoder changed
+        if(epos) // encoder changed
         {
-            nextPreviousAction(encodeChange, allowMoves);
+            nextPreviousAction(epos, allowMoves);
             BEEP_SHORT
             refresh = 1;
         }
@@ -5319,12 +5394,12 @@ void UIDisplay::slowAction(bool allowMoves)
             else if(time - lastButtonStart > UI_KEY_BOUNCETIME)     // New key pressed
             {
                 lastAction = lastButtonAction;
-                if(newAction = executeAction(lastAction, allowMoves))==0) {
+                if(executeAction(lastAction, allowMoves)) {
                     nextRepeat = time + UI_KEY_FIRST_REPEAT;
                     repeatDuration = UI_KEY_FIRST_REPEAT;
                 } else {
                     if(delayedAction == 0)
-                        delayedAction = newAction =;
+                        delayedAction = lastAction;
                 }
             }
         }
@@ -5332,10 +5407,10 @@ void UIDisplay::slowAction(bool allowMoves)
         {
             if(time - nextRepeat < 10000)
             {
-                if(delayedAction == 0)
-                    delayedAction = executeAction(lastAction, allowMoves);
-                else
-                    executeAction(lastAction, allowMoves);
+                if(!executeAction(lastAction, allowMoves)) {
+                    if(delayedAction == 0)
+                        delayedAction = lastAction;
+                }
                 repeatDuration -= UI_KEY_REDUCE_REPEAT;
                 if(repeatDuration < UI_KEY_MIN_REPEAT) repeatDuration = UI_KEY_MIN_REPEAT;
                 nextRepeat = time + repeatDuration;
