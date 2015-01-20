@@ -1504,7 +1504,7 @@
 #define UI_TEXT_ACCELERATION     "Acceleration"
 #define UI_TEXT_STORE_TO_EEPROM  "Enreg. \176 EEPROM"
 #define UI_TEXT_LOAD_EEPROM      "Charg. \177 EEPROM"
-#define UI_TEXT_LOAD_FAILSAFE    "Renitialiser"
+#define UI_TEXT_LOAD_FAILSAFE    "Reinitialiser"
 #define UI_TEXT_LOAD_FAILSAFE2   "Apres chargeme.?"
 #define UI_TEXT_DBG_ECHO         "Echo       :%do"
 #define UI_TEXT_DBG_INFO         "Info       :%di"

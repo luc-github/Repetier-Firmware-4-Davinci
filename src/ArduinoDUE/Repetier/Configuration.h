@@ -28,7 +28,7 @@
 #define VERSION_MAJOR " 1"
 #define VERSION_MINOR_YEAR "15"
 #define VERSION_MINOR_MONTH "01"
-#define VERSION_MINOR_DAY "02"
+#define VERSION_MINOR_DAY "20"
 #define VERSION_BUILD "1"
 
 #define WARMUP_BED_ON_INIT 0 //use this to preheat your bed if you have a temperature defect  at start due to slow  response time of cold thermistor
