@@ -565,28 +565,42 @@ void initializeLCD()
     SET_OUTPUT(UI_DISPLAY_D6_PIN);
     SET_OUTPUT(UI_DISPLAY_D7_PIN);
     SET_OUTPUT(UI_DISPLAY_RS_PIN);
+ 
+    //init pins to a known state
+    WRITE(UI_DISPLAY_D0_PIN, HIGH);
+    WRITE(UI_DISPLAY_D1_PIN, HIGH);
+    WRITE(UI_DISPLAY_D2_PIN, HIGH);
+    WRITE(UI_DISPLAY_D3_PIN, HIGH);
+    WRITE(UI_DISPLAY_D4_PIN, HIGH);
+    WRITE(UI_DISPLAY_D5_PIN, HIGH);
+    WRITE(UI_DISPLAY_D6_PIN, HIGH);
+    WRITE(UI_DISPLAY_D7_PIN, HIGH);
+    
 #if UI_DISPLAY_RW_PIN>-1
     SET_OUTPUT(UI_DISPLAY_RW_PIN);
 #endif
-    SET_OUTPUT(UI_DISPLAY_ENABLE_PIN);
-
     // Now we pull both RS and R/W low to begin commands
     WRITE(UI_DISPLAY_RS_PIN, LOW);
-    HAL::delayMicroseconds(2);
+    HAL::delayMicroseconds(5);
+    //move set output late to be sure pin is not affected before
+    SET_OUTPUT(UI_DISPLAY_ENABLE_PIN);
+    HAL::delayMicroseconds(5);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
+    HAL::delayMilliseconds(10); // Just to be safe
     //initialization sequence for 4bits/8bits of Winstar 1604A Screen
     //16 rows, 4 lines
-    HAL::delayMicroseconds(2);
-    WRITE(UI_DISPLAY_RS_PIN, LOW);
-    HAL::delayMicroseconds(2);
 #if  UI_DISPLAY_TYPE == DISPLAY_4BIT
     lcdWriteNibble(0x03);//Init Function Set for 4bits
     HAL::delayMicroseconds(150); //more than 39micro seconds
 #endif
     
-    lcdCommand( BIT_INTERFACE | LCD_2LINE | LCD_5X11); //LCD Configuration: Bits, Lines and Font
+    lcdCommand( BIT_INTERFACE | LCD_2LINE | LCD_5X8); //LCD Configuration: Bits, Lines and Font
     HAL::delayMicroseconds(150); //more than 39micro seconds
     
+    lcdCommand(BIT_INTERFACE | LCD_2LINE | LCD_5X8);//LCD Configuration: Bits, Lines and Font
+    HAL::delayMicroseconds(150); //more than 39micro seconds
+    
+    //specification says 2 is enough but a 3rd one solve issue if restart with keypad buttons pressed 
     lcdCommand(BIT_INTERFACE | LCD_2LINE | LCD_5X8);//LCD Configuration: Bits, Lines and Font
     HAL::delayMicroseconds(150); //more than 39micro seconds
     
@@ -900,6 +914,8 @@ void UIDisplay::initialize()
     folderLevel=0;
     UI_STATUS(UI_TEXT_PRINTER_READY);
 #if UI_DISPLAY_TYPE != NO_DISPLAY
+    initializeLCD();
+    HAL::delayMilliseconds(10);
     initializeLCD();
 #if UI_DISPLAY_TYPE == DISPLAY_I2C
     // I don't know why but after power up the lcd does not come up
@@ -5504,3 +5520,4 @@ const int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,0,0,0,-1,0,0,1,0}; // 
 #endif
 
 #endif
+
