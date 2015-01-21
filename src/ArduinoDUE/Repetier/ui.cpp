@@ -584,7 +584,7 @@ void initializeLCD()
     HAL::delayMicroseconds(150); //more than 39micro seconds
 #endif
     
-    lcdCommand( BIT_INTERFACE | LCD_2LINE | LCD_5X8); //LCD Configuration: Bits, Lines and Font
+    lcdCommand( BIT_INTERFACE | LCD_2LINE | LCD_5X11); //LCD Configuration: Bits, Lines and Font
     HAL::delayMicroseconds(150); //more than 39micro seconds
     
     lcdCommand(BIT_INTERFACE | LCD_2LINE | LCD_5X8);//LCD Configuration: Bits, Lines and Font
