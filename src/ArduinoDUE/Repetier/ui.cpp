@@ -536,8 +536,9 @@ void lcdWriteByte(uint8_t c,uint8_t rs)
     WRITE(UI_DISPLAY_D5_PIN, c & 0x20);
     WRITE(UI_DISPLAY_D6_PIN, c & 0x40);
     WRITE(UI_DISPLAY_D7_PIN, c & 0x80);
-    WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
     HAL::delayMicroseconds(5);
+    WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
+    HAL::delayMicroseconds(10);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);   //tc must be >1200ns
     HAL::delayMicroseconds(5);
 }
@@ -559,7 +560,7 @@ void initializeLCD()
     // according to HD44780 datasheet, we need at least 40ms after power rises above 2.7V
     // before sending commands. Arduino can turn on way before 4.5V.
     // is this delay long enough for all cases??
-    HAL::delayMilliseconds(2000);
+    HAL::delayMilliseconds(500);
     SET_OUTPUT(UI_DISPLAY_D4_PIN);
     SET_OUTPUT(UI_DISPLAY_D5_PIN);
     SET_OUTPUT(UI_DISPLAY_D6_PIN);
@@ -914,8 +915,6 @@ void UIDisplay::initialize()
     folderLevel=0;
     UI_STATUS(UI_TEXT_PRINTER_READY);
 #if UI_DISPLAY_TYPE != NO_DISPLAY
-    initializeLCD();
-    HAL::delayMilliseconds(10);
     initializeLCD();
 #if UI_DISPLAY_TYPE == DISPLAY_I2C
     // I don't know why but after power up the lcd does not come up
