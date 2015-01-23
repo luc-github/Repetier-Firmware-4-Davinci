@@ -536,9 +536,8 @@ void lcdWriteByte(uint8_t c,uint8_t rs)
     WRITE(UI_DISPLAY_D5_PIN, c & 0x20);
     WRITE(UI_DISPLAY_D6_PIN, c & 0x40);
     WRITE(UI_DISPLAY_D7_PIN, c & 0x80);
-    HAL::delayMicroseconds(5);
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
-    HAL::delayMicroseconds(10);
+    HAL::delayMicroseconds(5);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);   //tc must be >1200ns
     HAL::delayMicroseconds(5);
 }
@@ -566,7 +565,8 @@ void initializeLCD()
     SET_OUTPUT(UI_DISPLAY_D6_PIN);
     SET_OUTPUT(UI_DISPLAY_D7_PIN);
     SET_OUTPUT(UI_DISPLAY_RS_PIN);
- 
+    SET_OUTPUT(45); //RW pin but we do not use it just set a state
+    
     //init pins to a known state
     WRITE(UI_DISPLAY_D0_PIN, HIGH);
     WRITE(UI_DISPLAY_D1_PIN, HIGH);
@@ -582,6 +582,8 @@ void initializeLCD()
 #endif
     // Now we pull both RS and R/W low to begin commands
     WRITE(UI_DISPLAY_RS_PIN, LOW);
+    WRITE(45, LOW);
+    
     HAL::delayMicroseconds(5);
     //move set output late to be sure pin is not affected before
     SET_OUTPUT(UI_DISPLAY_ENABLE_PIN);
@@ -5519,4 +5521,3 @@ const int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,0,0,0,-1,0,0,1,0}; // 
 #endif
 
 #endif
-
