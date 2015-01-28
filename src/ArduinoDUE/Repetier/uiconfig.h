@@ -200,6 +200,7 @@ Define the pin
 #else // Direct display connections
 #define UI_DISPLAY_RS_PIN		8		// PINK.1, 88, D_RS
 #define UI_DISPLAY_RW_PIN		-1
+#define UI_DISPLAY_RW_PIN_NOT_USED		45 //to set state to low as it is connected
 #define UI_DISPLAY_ENABLE_PIN	        125		// PINK.3, 86, D_E
 #define UI_DISPLAY_D0_PIN		34		// PINF.5, 92, D_D4
 #define UI_DISPLAY_D1_PIN		35		// PINK.2, 87, D_D5

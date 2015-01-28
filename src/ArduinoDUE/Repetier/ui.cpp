@@ -565,7 +565,9 @@ void initializeLCD()
     SET_OUTPUT(UI_DISPLAY_D6_PIN);
     SET_OUTPUT(UI_DISPLAY_D7_PIN);
     SET_OUTPUT(UI_DISPLAY_RS_PIN);
- 
+#if UI_DISPLAY_RW_PIN_NOT_USED  > -1
+    SET_OUTPUT(UI_DISPLAY_RW_PIN_NOT_USED); //RW pin but we do not use it
+ #endif 
     //init pins to a known state
     WRITE(UI_DISPLAY_D0_PIN, HIGH);
     WRITE(UI_DISPLAY_D1_PIN, HIGH);
@@ -581,6 +583,12 @@ void initializeLCD()
 #endif
     // Now we pull both RS and R/W low to begin commands
     WRITE(UI_DISPLAY_RS_PIN, LOW);
+#if UI_DISPLAY_RW_PIN  > -1
+    WRITE(UI_DISPLAY_RW_PIN, LOW);
+ #endif 
+#if UI_DISPLAY_RW_PIN_NOT_USED  > -1
+    WRITE(UI_DISPLAY_RW_PIN_NOT_USED, LOW);//RW pin but we do not use it just set a state
+ #endif 
     HAL::delayMicroseconds(5);
     //move set output late to be sure pin is not affected before
     SET_OUTPUT(UI_DISPLAY_ENABLE_PIN);
