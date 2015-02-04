@@ -58,7 +58,7 @@ void Commands::commandLoop()
             }
             else
 #endif
-                Commands::executeGCode(code);
+             if(!Printer::isMenuMode(MENU_MODE_STOP_REQUESTED))   Commands::executeGCode(code);
             code->popCurrentCommand();
         }
         Printer::defaultLoopActions();
