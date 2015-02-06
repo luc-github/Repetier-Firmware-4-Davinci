@@ -1192,6 +1192,11 @@ void Commands::processMCode(GCode *com)
         break;
     case 50://kill print
     uid.executeAction(UI_ACTION_SD_STOP,true);
+     if (com->hasS() &&  com->S==0)
+        {
+          Commands::waitUntilEndOfAllMoves();
+          Printer::kill(true);
+        }
     break;
     case 80: // M80 - ATX Power On
 #if PS_ON_PIN>-1
