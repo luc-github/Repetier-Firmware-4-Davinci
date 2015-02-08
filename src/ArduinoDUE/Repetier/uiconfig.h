@@ -210,7 +210,7 @@ Define the pin
 #define UI_DISPLAY_D5_PIN		39		// PINK.2, 87, D_D5
 #define UI_DISPLAY_D6_PIN		40		// PINL.5, 40, D_D6
 #define UI_DISPLAY_D7_PIN		41		// PINK.4, 85, D_D7
-#define UI_DELAYPERCHAR		        320
+#define UI_DELAYPERCHAR		        40
 
 #define UI_BACKLIGHT_PIN                78
 
