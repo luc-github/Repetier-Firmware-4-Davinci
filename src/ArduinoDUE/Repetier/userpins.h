@@ -52,7 +52,11 @@
 #define ORIG_E1_DIR_PIN     121//ORIG_E0_DIR_PIN    //switch pin value
 #define ORIG_E0_STEP_PIN        53
 #define ORIG_E0_DIR_PIN          3
+#if MODEL==0
 #define ORIG_E0_ENABLE_PIN     128
+#else
+#define ORIG_E0_ENABLE_PIN     124 // no idea if it is good value but can avoid conflict with ORIG_Z_MIN_PIN for 2.0A, another value to try is 85
+#endif
 #endif
 
 //fan PINS

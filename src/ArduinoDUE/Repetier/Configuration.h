@@ -28,7 +28,7 @@
 #define VERSION_MAJOR " 1"
 #define VERSION_MINOR_YEAR "15"
 #define VERSION_MINOR_MONTH "01"
-#define VERSION_MINOR_DAY "02"
+#define VERSION_MINOR_DAY "28"
 #define VERSION_BUILD "1"
 
 #define WARMUP_BED_ON_INIT 0 //use this to preheat your bed if you have a temperature defect  at start due to slow  response time of cold thermistor
@@ -193,7 +193,11 @@ Overridden if EEPROM activated.*/
 // the cleaner signal. The only advantage of PWM is giving signals at a fixed rate and never more
 // then PWM.
 #define PDM_FOR_EXTRUDER 1
+#if REPURPOSE_FAN_TO_COOL_EXTRUSIONS
+#define PDM_FOR_COOLER 0
+#else
 #define PDM_FOR_COOLER 1
+#endif
 
 // The firmware checks if the heater and sensor got decoupled, which is dangerous. SInce it will never reach target
 // temperature, the heater will stay on for every which can burn your printe ror house.

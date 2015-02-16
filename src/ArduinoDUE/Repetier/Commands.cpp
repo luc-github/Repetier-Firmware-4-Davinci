@@ -58,7 +58,7 @@ void Commands::commandLoop()
             }
             else
 #endif
-                Commands::executeGCode(code);
+             if(!Printer::isMenuMode(MENU_MODE_STOP_REQUESTED))   Commands::executeGCode(code);
             code->popCurrentCommand();
         }
         Printer::defaultLoopActions();
@@ -282,7 +282,7 @@ void Commands::changeFeedrateMultiply(int factor)
     Com::printFLN(Com::tSpeedMultiply, factor);
 }
 
-void Commands::changeFlowateMultiply(int factor)
+void Commands::changeFlowrateMultiply(int factor)
 {
     if(factor < 25) factor = 25;
     if(factor > 200) factor = 200;
@@ -1190,7 +1190,14 @@ void Commands::processMCode(GCode *com)
             }
         }
         break;
-
+    case 50://kill print
+    uid.executeAction(UI_ACTION_SD_STOP,true);
+     if (com->hasS() &&  com->S==0)
+        {
+          Commands::waitUntilEndOfAllMoves();
+          Printer::kill(true);
+        }
+    break;
     case 80: // M80 - ATX Power On
 #if PS_ON_PIN>-1
         Commands::waitUntilEndOfAllMoves();
@@ -1592,7 +1599,7 @@ void Commands::processMCode(GCode *com)
         changeFeedrateMultiply(com->getS(100));
         break;
     case 221: // M221 S<Extrusion flow multiplier in percent>
-        changeFlowateMultiply(com->getS(100));
+        changeFlowrateMultiply(com->getS(100));
         break;
 #if USE_ADVANCE
     case 223: // M223 Extruder interrupt test
