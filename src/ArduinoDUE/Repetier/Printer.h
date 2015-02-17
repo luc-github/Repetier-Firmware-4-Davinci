@@ -101,6 +101,9 @@ public:
     static int32_t currentPositionSteps[E_AXIS_ARRAY];     ///< Position in steps from origin.
     static float currentPosition[Z_AXIS_ARRAY];
     static float lastCmdPos[Z_AXIS_ARRAY]; ///< Last coordinates send by gcodes
+    #if NUM_EXTRUDER>1
+    static uint lastextruderID;
+    #endif
     static int32_t destinationSteps[E_AXIS_ARRAY];         ///< Target position in steps.
     static float extrudeMultiplyError;
 #if NONLINEAR_SYSTEM

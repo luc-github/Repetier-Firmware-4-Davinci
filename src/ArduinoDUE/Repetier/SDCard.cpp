@@ -171,16 +171,21 @@ void SDCard::pausePrint(bool intern)
         Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE,
                             Printer::memoryE - RETRACT_ON_PAUSE,
                             Printer::maxFeedrate[E_AXIS] / 2);
+        //save position and extruder ID
+        #if NUM_EXTRUDER>1
+        Printer::lastextruderID=Extruder::current->id;
+        Extruder::selectExtruderById(0);
+        #endif
+        Printer::lastCmdPos[X_AXIS] = Printer::currentPosition[X_AXIS];
+        Printer::lastCmdPos[Y_AXIS] = Printer::currentPosition[Y_AXIS];
+        Printer::lastCmdPos[Z_AXIS] = Printer::currentPosition[Z_AXIS];
 #if DRIVE_SYSTEM == DELTA
         Printer::moveToReal(0, 0.9 * EEPROM::deltaMaxRadius(), IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::maxFeedrate[X_AXIS]);
 #else
          if (Printer::lastCmdPos[Z_AXIS]+10<Printer::zMin+Printer::zLength)
           Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::lastCmdPos[Z_AXIS]+10,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
-        Printer::moveToReal(Printer::xMin,Printer::yMin + Printer::yLength,IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
+        Printer::moveToReal(Printer::xMin,Printer::yMin,IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
 #endif
-        Printer::lastCmdPos[X_AXIS] = Printer::currentPosition[X_AXIS];
-        Printer::lastCmdPos[Y_AXIS] = Printer::currentPosition[Y_AXIS];
-        Printer::lastCmdPos[Z_AXIS] = Printer::currentPosition[Z_AXIS];
         GCode::executeFString(PSTR(PAUSE_START_COMMANDS));
     }
 }
@@ -189,6 +194,9 @@ void SDCard::continuePrint(bool intern)
 {
     if(!sd.sdactive) return;
     if(intern) {
+		#if NUM_EXTRUDER>1
+		Extruder::selectExtruderById(Printer::lastextruderID);
+		#endif
         GCode::executeFString(PSTR(PAUSE_END_COMMANDS));
         Printer::GoToMemoryPosition(true, true, false, false, Printer::maxFeedrate[X_AXIS]);
         Printer::GoToMemoryPosition(false, false, true, false, Printer::maxFeedrate[Z_AXIS] / 2.0f);
