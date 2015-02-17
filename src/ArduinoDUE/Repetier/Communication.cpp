@@ -30,14 +30,7 @@ FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWAR
 FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Core_XY EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:2")
 #endif
 #endif
-FSTRINGVALUE(Com::tManualProbeX1,"Manual-probe X1")
-FSTRINGVALUE(Com::tManualProbeY1,"Manual-probe Y1")
-FSTRINGVALUE(Com::tManualProbeX2,"Manual-probe X2")
-FSTRINGVALUE(Com::tManualProbeY2,"Manual-probe Y2")
-FSTRINGVALUE(Com::tManualProbeX3,"Manual-probe X3")
-FSTRINGVALUE(Com::tManualProbeY3,"Manual-probe Y3")
-FSTRINGVALUE(Com::tManualProbeX4,"Manual-probe X4")
-FSTRINGVALUE(Com::tManualProbeY4,"Manual-probe Y4")
+
 FSTRINGVALUE(Com::tReset,RESET_IDENTIFIER)
 FSTRINGVALUE(Com::tTempExtABS,"Temp Ext ABS:")
 FSTRINGVALUE(Com::tTempExtPLA,"Temp Ext PLA:")
@@ -248,6 +241,14 @@ FSTRINGVALUE(Com::tWait,WAITING_IDENTIFIER)
 #if EEPROM_MODE==0
 FSTRINGVALUE(Com::tNoEEPROMSupport,"No EEPROM support compiled.\r\n")
 #else
+FSTRINGVALUE(Com::tManualProbeX1,"Manual-probe X1")
+FSTRINGVALUE(Com::tManualProbeY1,"Manual-probe Y1")
+FSTRINGVALUE(Com::tManualProbeX2,"Manual-probe X2")
+FSTRINGVALUE(Com::tManualProbeY2,"Manual-probe Y2")
+FSTRINGVALUE(Com::tManualProbeX3,"Manual-probe X3")
+FSTRINGVALUE(Com::tManualProbeY3,"Manual-probe Y3")
+FSTRINGVALUE(Com::tManualProbeX4,"Manual-probe X4")
+FSTRINGVALUE(Com::tManualProbeY4,"Manual-probe Y4")
 #if FEATURE_Z_PROBE
 FSTRINGVALUE(Com::tZProbeHeight,"Z-probe height [mm]")
 FSTRINGVALUE(Com::tZProbeBedDitance,"Max. z-probe - bed dist. [mm]")
