@@ -155,7 +155,7 @@ void Extruder::manageTemperatures()
 
         // Run test if heater and sensor are decoupled
         bool decoupleTestRequired = (time - act->lastDecoupleTest) > act->decoupleTestPeriod; // time enough for temperature change?
-        if(decoupleTestRequired && act->isDecoupleFullOrHold() && Printer::isPowerOn()) // Only test when powered
+        if(decoupleTestRequired && act->isDecoupleFullOrHold() && Printer::isPowerOn() && DECOUPLING_TEST_ENABLED) // Only test when powered
         {
             if(act->isDecoupleFull())
             {

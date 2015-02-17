@@ -213,6 +213,8 @@ Overridden if EEPROM activated.*/
 // then you have 3 seconds of increased heating to reach 1°„C.
 #define DECOUPLING_TEST_MIN_TEMP_RISE 1
 
+#define DECOUPLING_TEST_ENABLED true
+
 // for each extruder, fan will stay on until extruder temperature is below this value
 #define EXTRUDER_FAN_COOL_TEMP 50
 // Retraction for sd pause over lcd
