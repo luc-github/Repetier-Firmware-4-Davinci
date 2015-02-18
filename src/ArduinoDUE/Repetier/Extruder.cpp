@@ -78,7 +78,9 @@ void Extruder::manageTemperatures()
     HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG
     uint8_t errorDetected = 0;
+#if DECOUPLING_TEST_ENABLED
     millis_t time = HAL::timeInMilliseconds(); // compare time for decouple tests
+#endif
     for(uint8_t controller = 0; controller < NUM_TEMPERATURE_LOOPS; controller++)
     {
         if(controller == autotuneIndex) continue;
@@ -153,9 +155,10 @@ void Extruder::manageTemperatures()
             act->setAlarm(false);  //reset alarm
         }
 
+#if DECOUPLING_TEST_ENABLED
         // Run test if heater and sensor are decoupled
         bool decoupleTestRequired = (time - act->lastDecoupleTest) > act->decoupleTestPeriod; // time enough for temperature change?
-        if(decoupleTestRequired && act->isDecoupleFullOrHold() && Printer::isPowerOn() && DECOUPLING_TEST_ENABLED) // Only test when powered
+        if(decoupleTestRequired && act->isDecoupleFullOrHold() && Printer::isPowerOn()) // Only test when powered
         {
             if(act->isDecoupleFull())
             {
@@ -191,6 +194,7 @@ void Extruder::manageTemperatures()
                 }
             }
         }
+#endif
 
 #if TEMP_PID
         act->tempArray[act->tempPointer++] = act->currentTemperatureC;
@@ -202,18 +206,24 @@ void Extruder::manageTemperatures()
             if(act->targetTemperatureC < 20.0f)
             {
                 output = 0; // off is off, even if damping term wants a heat peak!
+#if DECOUPLING_TEST_ENABLED
                 act->stopDecouple();
+#endif
             }
             else if(error > PID_CONTROL_RANGE)
             {
                 output = act->pidMax;
+#if DECOUPLING_TEST_ENABLED
                 act->startFullDecouple(time);
+#endif
             }
             else if(error < -PID_CONTROL_RANGE)
                 output = 0;
             else
             {
+#if DECOUPLING_TEST_ENABLED
                 act->startHoldDecouple(time);
+#endif
                 float pidTerm = act->pidPGain * error;
                 act->tempIState = constrain(act->tempIState + error, act->tempIStateLimitMin, act->tempIStateLimitMax);
                 pidTerm += act->pidIGain * act->tempIState * 0.1; // 0.1 = 10Hz
@@ -233,18 +243,24 @@ void Extruder::manageTemperatures()
             if(act->targetTemperatureC < 20.0f)
             {
                 output = 0; // off is off, even if damping term wants a heat peak!
+#if DECOUPLING_TEST_ENABLED
                 act->stopDecouple();
+#endif
             }
             else if(error > PID_CONTROL_RANGE)
             {
                 output = act->pidMax;
+#if DECOUPLING_TEST_ENABLED
                 act->startFullDecouple(time);
+#endif
             }
             else if(error < -PID_CONTROL_RANGE)
                 output = 0;
             else
             {
+#if DECOUPLING_TEST_ENABLED
                 act->startHoldDecouple(time);
+#endif
                 float raising = 3.333 * (act->currentTemperatureC - act->tempArray[act->tempPointer]); // raising dT/dt, 3.33 = reciproke of time interval (300 ms)
                 act->tempIState = 0.25 * (3.0 * act->tempIState + raising); // damp raising
                 output = (act->currentTemperatureC + act->tempIState * act->deadTime > act->targetTemperatureC ? 0 : act->pidDriveMax);
@@ -259,15 +275,19 @@ void Extruder::manageTemperatures()
                 {
                     pwm_pos[act->pwmIndex] = (on ? 255 : 0);
                     act->lastTemperatureUpdate = time;
+#if DECOUPLING_TEST_ENABLED
                     if(on) act->startFullDecouple(time);
                     else act->stopDecouple();
+#endif
                 }
             }
             else     // Fast Bang-Bang fallback
             {
                 pwm_pos[act->pwmIndex] = (on ? 255 : 0);
+#if DECOUPLING_TEST_ENABLED
                 if(on) act->startFullDecouple(time);
                 else act->stopDecouple();
+#endif
             }
 #ifdef MAXTEMP
         if(act->currentTemperatureC > MAXTEMP) // Force heater off if MAXTEMP is exceeded
@@ -1079,7 +1099,9 @@ void TemperatureController::updateCurrentTemperature()
 void TemperatureController::setTargetTemperature(float target)
 {
     targetTemperatureC = target;
+#if DECOUPLING_TEST_ENABLED
     stopDecouple();
+#endif
     int temp = TEMP_FLOAT_TO_INT(target);
     uint8_t type = sensorType;
     switch(sensorType)

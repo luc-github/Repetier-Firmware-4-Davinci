@@ -199,6 +199,9 @@ Overridden if EEPROM activated.*/
 #define PDM_FOR_COOLER 1
 #endif
 
+#define DECOUPLING_TEST_ENABLED true
+
+#if DECOUPLING_TEST_ENABLED
 // The firmware checks if the heater and sensor got decoupled, which is dangerous. SInce it will never reach target
 // temperature, the heater will stay on for every which can burn your printe ror house.
 // As an additional barrier to your smoke detectors (I hope you have one above your printer) we now
@@ -212,8 +215,7 @@ Overridden if EEPROM activated.*/
 // because at startup you already need 7 seconds until heater starts to rise temp. for sensor
 // then you have 3 seconds of increased heating to reach 1°„C.
 #define DECOUPLING_TEST_MIN_TEMP_RISE 1
-
-#define DECOUPLING_TEST_ENABLED true
+#endif
 
 // for each extruder, fan will stay on until extruder temperature is below this value
 #define EXTRUDER_FAN_COOL_TEMP 50
@@ -344,8 +346,10 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #endif
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT0_EXTRUDER_COOLER_SPEED 255
+#if DECOUPLING_TEST_ENABLED
 /** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
 #define EXT0_DECOUPLE_TEST_PERIOD 30000
+#endif
 
 
 // =========================== Configuration for second extruder ========================
@@ -460,8 +464,10 @@ cog. Direct drive extruder need 0. */
 
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT1_EXTRUDER_COOLER_SPEED 255
+#if DECOUPLING_TEST_ENABLED
 /** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
 #define EXT1_DECOUPLE_TEST_PERIOD 30000
+#endif
 
 /** If enabled you can select the distance your filament gets retracted during a
 M140 command, after a given temperature is reached. */
@@ -666,9 +672,11 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 #define HEATED_BED_PID_DGAIN 290
 // maximum time the heater can be switched on. Max = 255.  Overridden if EEPROM activated.
 #define HEATED_BED_PID_MAX 255
+#if DECOUPLING_TEST_ENABLED
 // Time to see a temp. change when fully heating. Consider that beds at higher temp. need longer to rise and cold
 // beds need some time to get the temp. to the sensor. Time is in milliseconds!
 #define HEATED_BED_DECOUPLE_TEST_PERIOD 300000
+#endif
 
 // When temperature exceeds max temp, your heater will be switched off.
 // This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!

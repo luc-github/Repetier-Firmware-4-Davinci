@@ -377,8 +377,10 @@ FSTRINGVAR(tDirectoryCreated)
 FSTRINGVAR(tCreationFailed)
 FSTRINGVAR(tSDErrorCode)
 #endif // SDSUPPORT
+#if DECOUPLING_TEST_ENABLED
 FSTRINGVAR(tHeaterDecoupled)
 FSTRINGVAR(tHeaterDecoupledWarning)
+#endif
 
 
 static void printNumber(uint32_t n);

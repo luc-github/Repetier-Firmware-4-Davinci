@@ -392,8 +392,10 @@ FSTRINGVALUE(Com::tDirectoryCreated,"Directory created")
 FSTRINGVALUE(Com::tCreationFailed,"Creation failed")
 FSTRINGVALUE(Com::tSDErrorCode,"SD errorCode:")
 #endif // SDSUPPORT
+#if DECOUPLING_TEST_ENABLED
 FSTRINGVALUE(Com::tHeaterDecoupled,"Heater decoupled")
 FSTRINGVALUE(Com::tHeaterDecoupledWarning,"One heater seems decoupled from thermistor - disabling all for safety!")
+#endif
 
 void Com::printWarningF(FSTRINGPARAM(text)) {
     printF(tWarning);
