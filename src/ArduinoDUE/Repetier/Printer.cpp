@@ -65,6 +65,9 @@ float Printer::extrudeMultiplyError = 0;
 #if FEATURE_AUTOLEVEL
 float Printer::autolevelTransformation[9]; ///< Transformation matrix
 #endif
+#if NUM_EXTRUDER>1
+uint Printer::lastextruderID;
+#endif
 uint32_t Printer::interval;           ///< Last step duration in ticks.
 uint32_t Printer::timer;              ///< used for acceleration/deceleration timing
 uint32_t Printer::stepNumber;         ///< Step number in current move.
