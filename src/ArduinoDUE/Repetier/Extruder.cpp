@@ -67,10 +67,6 @@ short temptable_generic3[GENERIC_THERM_NUM_ENTRIES][2];
 Is called every 100ms.
 */
 static uint8_t extruderTempErrors = 0;
-#if WARMUP_BED_ON_INIT
-static bool warmbed = false;
-static int warmbed_try = 0;
-#endif
 
 void Extruder::manageTemperatures()
 {
@@ -107,33 +103,6 @@ void Extruder::manageTemperatures()
                 else
                     extruder[controller].coolerPWM = extruder[controller].coolerSpeed;
         }
-#if WARMUP_BED_ON_INIT
-         if (  controller==NUM_TEMPERATURE_LOOPS-1 && !warmbed) //this is bed and no warm up has been done
-            {
-             if (heatedBedController.currentTemperatureC < MIN_DEFECT_TEMPERATURE) //we are low
-                {
-                    if (warmbed_try>100) //10x100ms
-                         {
-                             warmbed=true; //do not try anymore
-                             Extruder::setHeatedBedTemperature(0);//cut heat
-                         }
-                     else
-                         {
-                             warmbed_try++; //new try
-                             Extruder::setHeatedBedTemperature(40); //heat bed until 40 degres
-                            //raise heating tick
-                            playsound(100,10);
-                            UI_STATUS_UPD("PreHeat Bed");
-                        }
-                }
-            else
-                {   //no issue so stop / cancel preheat
-                    warmbed=true; //do not try anymore
-                    Extruder::setHeatedBedTemperature(0);//cut heat
-                }
-            }
-         else
-#endif
         // Check for obvious sensor errors
         if(!Printer::isAnyTempsensorDefect() && (act->currentTemperatureC < MIN_DEFECT_TEMPERATURE || act->currentTemperatureC > MAX_DEFECT_TEMPERATURE))   // no temp sensor or short in sensor, disable heater
         {

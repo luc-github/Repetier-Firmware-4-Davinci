@@ -31,8 +31,6 @@
 #define VERSION_MINOR_DAY "28"
 #define VERSION_BUILD "1"
 
-#define WARMUP_BED_ON_INIT 0 //use this to preheat your bed if you have a temperature defect  at start due to slow  response time of cold thermistor
-
 // ################ END MANUAL SETTINGS ##########################
 
 //this will hide on sd card no extension files and bin/hex/dat files to make navigation and selection easier
