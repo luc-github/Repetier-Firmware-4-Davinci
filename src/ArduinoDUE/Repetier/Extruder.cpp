@@ -282,7 +282,7 @@ void Extruder::manageTemperatures()
 #if FEATURE_DECOUPLE_TEST
                 if(on) act->startFullDecouple(time);
                 else act->stopDecouple();
-#endiff
+#endif
             }
 #ifdef MAXTEMP
         if(act->currentTemperatureC > MAXTEMP) // Force heater off if MAXTEMP is exceeded
