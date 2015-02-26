@@ -154,6 +154,8 @@ void Extruder::manageTemperatures()
                         Com::printF(PSTR("Error:Temp. raised to slow. Rise = "),act->currentTemperatureC - act->lastDecoupleTemp);
                         Com::printF(PSTR(" after "),(int32_t)(time-act->lastDecoupleTest));
                         Com::printFLN(PSTR(" ms"));
+                        //stop printing
+                        uid.executeAction(UI_ACTION_SD_STOP,true);
                     }
                 }
                 else
@@ -177,6 +179,8 @@ void Extruder::manageTemperatures()
                         Com::printF(PSTR("Error:Could not hold temperature "),act->lastDecoupleTemp);
                         Com::printF(PSTR(" measured "),act->currentTemperatureC);
                         Com::printFLN(PSTR(" deg. C"));
+                        //stop printing
+                        uid.executeAction(UI_ACTION_SD_STOP,true);
                     }
                 }
                 else
