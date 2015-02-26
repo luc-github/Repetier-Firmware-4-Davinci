@@ -129,6 +129,8 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves)
             if (delay_flag_change2>10)
                 {
                 Printer::setMenuMode(MENU_MODE_STOP_REQUESTED,false);
+                //commands to run when stop
+                GCode::executeFString(PSTR(SD_RUN_ON_STOP));
                 UI_STATUS_UPD(UI_TEXT_IDLE);
                 delay_flag_change2=0;
                 }
@@ -1192,11 +1194,6 @@ void Commands::processMCode(GCode *com)
         break;
     case 50://kill print
     uid.executeAction(UI_ACTION_SD_STOP,true);
-     if (com->hasS() &&  com->S==0)
-        {
-          Commands::waitUntilEndOfAllMoves();
-          Printer::kill(true);
-        }
     break;
     case 80: // M80 - ATX Power On
 #if PS_ON_PIN>-1

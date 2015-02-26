@@ -1307,6 +1307,9 @@ Always hard to say since the other angle is 89° in this case!
 #endif
 /** Show extended directory including file length. Don't use this with Pronterface! */
 #define SD_EXTENDED_DIR 1
+/** The gcodes in this line get executed, when you stop a sd print befor it was ended.
+Separate commands by \n */
+#define SD_RUN_ON_STOP "G28 XY\nM84"
 // If you want support for G2/G3 arc commands set to true, otherwise false.
 #define ARC_SUPPORT 1
 
