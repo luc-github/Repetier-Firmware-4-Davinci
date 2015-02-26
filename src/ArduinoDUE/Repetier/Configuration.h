@@ -33,6 +33,10 @@
 
 // ################ END MANUAL SETTINGS ##########################
 
+//Decouple Test feature, do not disable it unless you know what you are doing!!!
+//if you have decouple issue it means you have hardware issue or bad air flow management!!!
+//this feature is a safety feature, if you disable it is dangerous!!!
+#define FEATURE_DECOUPLE_TEST 1
 //this will hide on sd card no extension files and bin/hex/dat files to make navigation and selection easier
 #define HIDE_BINARY_ON_SD 1
 #define UI_AUTOLIGHTOFF_AFTER 1
@@ -202,6 +206,7 @@ Overridden if EEPROM activated.*/
 // As an additional barrier to your smoke detectors (I hope you have one above your printer) we now
 // do some more checks to detect if something got wrong.
 
+#if FEATURE_DECOUPLE_TEST
 // If the temp. is on hold target, it may not sway more then this degrees celsius, or we mark
 // sensor as defect.
 #define DECOUPLING_TEST_MAX_HOLD_VARIANCE 15
@@ -211,6 +216,7 @@ Overridden if EEPROM activated.*/
 // then you have 3 seconds of increased heating to reach 1°„C.
 #define DECOUPLING_TEST_MIN_TEMP_RISE 1
 
+#endif
 // for each extruder, fan will stay on until extruder temperature is below this value
 #define EXTRUDER_FAN_COOL_TEMP 50
 // Retraction for sd pause over lcd

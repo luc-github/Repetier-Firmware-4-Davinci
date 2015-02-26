@@ -55,9 +55,11 @@ public:
     float tempArray[4];
 #endif
     uint8_t flags;
+#if FEATURE_DECOUPLE_TEST
     millis_t lastDecoupleTest;  ///< Last time of decoupling sensor-heater test
     float  lastDecoupleTemp;  ///< Temperature on last test
     millis_t decoupleTestPeriod; ///< Time between setting and testing decoupling.
+#endif
 
     void setTargetTemperature(float target);
     void updateCurrentTemperature();
@@ -71,6 +73,7 @@ public:
         if(on) flags |= TEMPERATURE_CONTROLLER_FLAG_ALARM;
         else flags &= ~TEMPERATURE_CONTROLLER_FLAG_ALARM;
     }
+#if FEATURE_DECOUPLE_TEST
     inline bool isDecoupleFull()
     {
         return flags & TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL;
@@ -112,14 +115,17 @@ public:
     {
         setDecoupleFull(false);
     }
+#endif
     inline bool isSensorDefect()
     {
         return flags & TEMPERATURE_CONTROLLER_FLAG_SENSDEFECT;
     }
+#if FEATURE_DECOUPLE_TEST
     inline bool isSensorDecoupled()
     {
         return flags & TEMPERATURE_CONTROLLER_FLAG_SENSDECOUPLED;
     }
+#endif
 
 #if TEMP_PID
     void autotunePID(float temp,uint8_t controllerId,bool storeResult);

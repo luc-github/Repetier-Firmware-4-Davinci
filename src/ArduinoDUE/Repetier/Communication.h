@@ -109,7 +109,9 @@ FSTRINGVAR(tE0Colon)
 FSTRINGVAR(tE1Colon)
 FSTRINGVAR(tMS1MS2Pins)
 FSTRINGVAR(tSetOutputSpace)
+FSTRINGVAR(tGetInputSpace)
 FSTRINGVAR(tSpaceToSpace)
+FSTRINGVAR(tSpaceIsSpace)
 FSTRINGVAR(tHSpace)
 FSTRINGVAR(tLSpace)
 FSTRINGVAR(tXMinColon)
@@ -377,8 +379,10 @@ FSTRINGVAR(tDirectoryCreated)
 FSTRINGVAR(tCreationFailed)
 FSTRINGVAR(tSDErrorCode)
 #endif // SDSUPPORT
+#if FEATURE_DECOUPLE_TEST
 FSTRINGVAR(tHeaterDecoupled)
 FSTRINGVAR(tHeaterDecoupledWarning)
+#endif
 
 
 static void printNumber(uint32_t n);
