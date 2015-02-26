@@ -400,6 +400,10 @@ void Printer::kill(uint8_t only_steppers)
     disableXStepper();
     disableYStepper();
     disableZStepper();
+    setHomedX(false);
+    setHomedY(false);
+    setHomedZ(false);
+    setHomed(false);
     Extruder::disableAllExtruderMotors();
 #if FAN_BOARD_PIN>-1
     pwm_pos[NUM_EXTRUDER + 1] = 0;
