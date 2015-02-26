@@ -113,8 +113,10 @@ FSTRINGVALUE(Com::tZColon,"Z:")
 FSTRINGVALUE(Com::tE0Colon,"E0:")
 FSTRINGVALUE(Com::tE1Colon,"E1:")
 FSTRINGVALUE(Com::tMS1MS2Pins,"MS1,MS2 Pins")
-FSTRINGVALUE(Com::tSetOutputSpace,"Set output ")
+FSTRINGVALUE(Com::tSetOutputSpace,"Set output: ")
+FSTRINGVALUE(Com::tGetInputSpace,"Get Input: ")
 FSTRINGVALUE(Com::tSpaceToSpace," to ")
+FSTRINGVALUE(Com::tSpaceIsSpace," is ")
 FSTRINGVALUE(Com::tHSpace,"H ")
 FSTRINGVALUE(Com::tLSpace,"L ")
 FSTRINGVALUE(Com::tXMinColon,"x_min:")
@@ -392,8 +394,10 @@ FSTRINGVALUE(Com::tDirectoryCreated,"Directory created")
 FSTRINGVALUE(Com::tCreationFailed,"Creation failed")
 FSTRINGVALUE(Com::tSDErrorCode,"SD errorCode:")
 #endif // SDSUPPORT
+#if FEATURE_DECOUPLE_TEST
 FSTRINGVALUE(Com::tHeaterDecoupled,"Heater decoupled")
 FSTRINGVALUE(Com::tHeaterDecoupledWarning,"One heater seems decoupled from thermistor - disabling all for safety!")
+#endif
 
 void Com::printWarningF(FSTRINGPARAM(text)) {
     printF(tWarning);
