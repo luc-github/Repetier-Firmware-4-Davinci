@@ -5003,6 +5003,9 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             }
             break;
         case UI_ACTION_SD_PAUSE:
+			playsound(3000,240);
+            playsound(4000,240);
+			Com::printFLN(PSTR("Pause requested"));
             if(!allowMoves)
                 ret = false;
             else
@@ -5020,7 +5023,7 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
              //reset connect with host if any
             Com::printFLN(Com::tReset);
             //we are printing from sdcard or from host ?
-            if(!Printer::isMenuMode(MENU_MODE_SD_PAUSED) || sd.sdmode )sd.stopPrint();
+            if(Printer::isMenuMode(MENU_MODE_SD_PAUSED) || sd.sdmode )sd.stopPrint();
             else Com::printFLN(PSTR("Host Print stopped by user."));
             menuLevel=0;
             menuPos[0]=0;
