@@ -3872,36 +3872,67 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
         int status=STATUS_OK;
         int tmpmenu=menuLevel;
         int tmpmenupos=menuPos[menuLevel];
+        float xpos,ypos;
         UIMenu *tmpmen = (UIMenu*)menu[menuLevel];
 //to be sure no return menu
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
         bool btmp_autoreturn=benable_autoreturn; //save current value
         benable_autoreturn=false;//desactivate no need to test if active or not
 #endif
+#if NUM_EXTRUDER > 1
+		//save current extruder to restore 
+		tmpextruderid=Extruder::current->id;
+#endif
+		//check if homed and home if not
+		if (!Printer::isXHomed())executeAction(UI_ACTION_HOME_X,true);
+		if (!Printer::isYHomed())executeAction(UI_ACTION_HOME_Y,true);
         if (action== UI_ACTION_LOAD_EXTRUDER_0)
             {
             load_dir=1;
             extruderid=0;
+            #if NUM_EXTRUDER == 0
+            xpos=Printer::xMin;
+            ypos=Printer::yMin;
+            #else
+            xpos=Printer::xMin+Printer::xLength;
+            ypos=Printer::yMin;
+            #endif
             }
         else if (action== UI_ACTION_UNLOAD_EXTRUDER_0)
             {
             load_dir=-1;
             extruderid=0;
+            #if NUM_EXTRUDER == 0
+            xpos=Printer::xMin;
+            ypos=Printer::yMin;
+            #else
+            xpos=Printer::xMin+Printer::xLength;
+            ypos=Printer::yMin;
+            #endif
             }
         #if NUM_EXTRUDER > 1
         else if (action== UI_ACTION_LOAD_EXTRUDER_1)
             {
             load_dir=1;
             extruderid=1;
+            xpos=Printer::xMin;
+            ypos=Printer::yMin;
             }
         else if (action== UI_ACTION_UNLOAD_EXTRUDER_1)
             {
             load_dir=-1;
             extruderid=1;
+            xpos=Printer::xMin;
+            ypos=Printer::yMin;
             }
         #endif
-        tmpextruderid=Extruder::current->id;
+#if NUM_EXTRUDER > 1
+        Extruder::selectExtruderById(0,true);
+#endif
+        Printer::moveToReal(xpos,ypos,IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::homingFeedrate[0]);
+#if NUM_EXTRUDER > 1
         Extruder::selectExtruderById(extruderid,false);
+#endif
          //save current target temp
         float extrudertarget=extruder[extruderid].tempControl.targetTemperatureC;
         //be sure no issue
@@ -4076,7 +4107,10 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
 
         //cool down if necessary
         Extruder::setTemperatureForExtruder(extrudertarget,extruderid);
-        Extruder::selectExtruderById(tmpextruderid,false);
+#if NUM_EXTRUDER > 1
+		Printer::moveToReal(Printer::xMin,Printer::yMin,IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::homingFeedrate[0]);
+        Extruder::selectExtruderById(tmpextruderid,true);
+#endif
         if(status==STATUS_OK)
             {
             UI_STATUS(UI_TEXT_PRINTER_READY);
