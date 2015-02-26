@@ -18,8 +18,10 @@ extern uint8_t manageMonitor;
 #define HTR_DEADTIME 3
 
 #define TEMPERATURE_CONTROLLER_FLAG_ALARM 1
+#if DECOUPLING_TEST_ENABLED
 #define TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL 2 //< Full heating enabled
 #define TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD 4  //< Holding target temperature
+#endif
 
 /** TemperatureController manages one heater-temperature sensore loop. You can have up to
 4 loops allowing pid/bang bang for up to 3 extruder and the heated bed.
@@ -53,16 +55,18 @@ class TemperatureController
     float tempArray[4];
 #endif
     uint8_t flags;
+#if DECOUPLING_TEST_ENABLED
     millis_t lastDecoupleTest;  ///< Last time of decoupling sensor-heater test
     float  lastDecoupleTemp;  ///< Temperature on last test
     millis_t decoupleTestPeriod; ///< Time between setting and testing decoupling.
-
+#endif
 
     void setTargetTemperature(float target);
     void updateCurrentTemperature();
     void updateTempControlVars();
     inline bool isAlarm() {return flags & TEMPERATURE_CONTROLLER_FLAG_ALARM;}
     inline void setAlarm(bool on) {if(on) flags |= TEMPERATURE_CONTROLLER_FLAG_ALARM; else flags &= ~TEMPERATURE_CONTROLLER_FLAG_ALARM;}
+#if DECOUPLING_TEST_ENABLED
     inline bool isDecoupleFull() {return flags & TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL;}
     inline bool isDecoupleFullOrHold() {return flags & (TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL | TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD);}
     inline void setDecoupleFull(bool on) {flags &= ~(TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL | TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD); if(on) flags |= TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL;}
@@ -84,6 +88,8 @@ class TemperatureController
     inline void stopDecouple() {
         setDecoupleFull(false);
     }
+#endif
+
 #if TEMP_PID
     void autotunePID(float temp,uint8_t controllerId,bool storeResult);
 #endif

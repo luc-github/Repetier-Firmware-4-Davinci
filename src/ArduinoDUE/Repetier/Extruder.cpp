@@ -122,6 +122,7 @@ void Extruder::manageTemperatures()
             act->setAlarm(false);  //reset alarm
         }
 
+#if DECOUPLING_TEST_ENABLED
         // Run test if heater and sensor are decoupled
         bool decoupleTestRequired = (time - act->lastDecoupleTest) > act->decoupleTestPeriod; // time enough for temperature change?
         if(decoupleTestRequired && act->isDecoupleFullOrHold() && Printer::isPowerOn()) // Only test when powered
@@ -160,6 +161,7 @@ void Extruder::manageTemperatures()
                 }
             }
         }
+#endif
 
 #if TEMP_PID
         act->tempArray[act->tempPointer++] = act->currentTemperatureC;
@@ -171,18 +173,24 @@ void Extruder::manageTemperatures()
             if(act->targetTemperatureC < 20.0f)
             {
                 output = 0; // off is off, even if damping term wants a heat peak!
+#if DECOUPLING_TEST_ENABLED
                 act->stopDecouple();
+#endif
             }
             else if(error > PID_CONTROL_RANGE)
             {
                 output = act->pidMax;
+#if DECOUPLING_TEST_ENABLED
                 act->startFullDecouple(time);
+#endif
             }
             else if(error < -PID_CONTROL_RANGE)
                 output = 0;
             else
             {
+#if DECOUPLING_TEST_ENABLED
                 act->startHoldDecouple(time);
+#endif
                 float pidTerm = act->pidPGain * error;
                 act->tempIState = constrain(act->tempIState + error, act->tempIStateLimitMin, act->tempIStateLimitMax);
                 pidTerm += act->pidIGain * act->tempIState * 0.1; // 0.1 = 10Hz
@@ -202,18 +210,24 @@ void Extruder::manageTemperatures()
             if(act->targetTemperatureC < 20.0f)
             {
                 output = 0; // off is off, even if damping term wants a heat peak!
+#if DECOUPLING_TEST_ENABLED
                 act->stopDecouple();
+#endif
             }
             else if(error > PID_CONTROL_RANGE)
             {
                 output = act->pidMax;
+#if DECOUPLING_TEST_ENABLED
                 act->startFullDecouple(time);
+#endif
             }
             else if(error < -PID_CONTROL_RANGE)
                 output = 0;
             else
             {
+#if DECOUPLING_TEST_ENABLED
                 act->startHoldDecouple(time);
+#endif
                 float raising = 3.333 * (act->currentTemperatureC - act->tempArray[act->tempPointer]); // raising dT/dt, 3.33 = reciproke of time interval (300 ms)
                 act->tempIState = 0.25 * (3.0 * act->tempIState + raising); // damp raising
                 output = (act->currentTemperatureC + act->tempIState * act->deadTime > act->targetTemperatureC ? 0 : act->pidDriveMax);
@@ -228,15 +242,19 @@ void Extruder::manageTemperatures()
                 {
                     pwm_pos[act->pwmIndex] = (on ? 255 : 0);
                     act->lastTemperatureUpdate = time;
+#if DECOUPLING_TEST_ENABLED
                     if(on) act->startFullDecouple(time);
                     else act->stopDecouple();
+#endif
                 }
             }
             else     // Fast Bang-Bang fallback
             {
                 pwm_pos[act->pwmIndex] = (on ? 255 : 0);
+#if DECOUPLING_TEST_ENABLED
                 if(on) act->startFullDecouple(time);
                 else act->stopDecouple();
+#endif
             }
 #ifdef MAXTEMP
         if(act->currentTemperatureC > MAXTEMP) // Force heater off if MAXTEMP is exceeded
@@ -1048,7 +1066,9 @@ void TemperatureController::updateCurrentTemperature()
 void TemperatureController::setTargetTemperature(float target)
 {
     targetTemperatureC = target;
+#if DECOUPLING_TEST_ENABLED
     stopDecouple();
+#endif
     int temp = TEMP_FLOAT_TO_INT(target);
     uint8_t type = sensorType;
     switch(sensorType)
@@ -1460,7 +1480,9 @@ Extruder extruder[NUM_EXTRUDER] =
 #if TEMP_PID
             ,0,EXT0_PID_INTEGRAL_DRIVE_MAX,EXT0_PID_INTEGRAL_DRIVE_MIN,EXT0_PID_PGAIN_OR_DEAD_TIME,EXT0_PID_I,EXT0_PID_D,EXT0_PID_MAX,0,0,0,{0,0,0,0}
 #endif
+#if DECOUPLING_TEST_ENABLED
             ,0,0,0,EXT0_DECOUPLE_TEST_PERIOD
+#endif
         }
         ,ext0_select_cmd,ext0_deselect_cmd,EXT0_EXTRUDER_COOLER_SPEED,0
     }
@@ -1484,7 +1506,9 @@ Extruder extruder[NUM_EXTRUDER] =
 #if TEMP_PID
             ,0,EXT1_PID_INTEGRAL_DRIVE_MAX,EXT1_PID_INTEGRAL_DRIVE_MIN,EXT1_PID_PGAIN_OR_DEAD_TIME,EXT1_PID_I,EXT1_PID_D,EXT1_PID_MAX,0,0,0,{0,0,0,0}
 #endif
+#if DECOUPLING_TEST_ENABLED
             ,0,0,0,EXT1_DECOUPLE_TEST_PERIOD
+#endif
         }
         ,ext1_select_cmd,ext1_deselect_cmd,EXT1_EXTRUDER_COOLER_SPEED,0
     }
@@ -1508,7 +1532,9 @@ Extruder extruder[NUM_EXTRUDER] =
 #if TEMP_PID
             ,0,EXT2_PID_INTEGRAL_DRIVE_MAX,EXT2_PID_INTEGRAL_DRIVE_MIN,EXT2_PID_PGAIN_OR_DEAD_TIME,EXT2_PID_I,EXT2_PID_D,EXT2_PID_MAX,0,0,0,{0,0,0,0}
 #endif
+#if DECOUPLING_TEST_ENABLED
             ,0,0,0,EXT2_DECOUPLE_TEST_PERIOD
+#endif
         }
         ,ext2_select_cmd,ext2_deselect_cmd,EXT2_EXTRUDER_COOLER_SPEED,0
     }
@@ -1532,7 +1558,9 @@ Extruder extruder[NUM_EXTRUDER] =
 #if TEMP_PID
             ,0,EXT3_PID_INTEGRAL_DRIVE_MAX,EXT3_PID_INTEGRAL_DRIVE_MIN,EXT3_PID_PGAIN_OR_DEAD_TIME,EXT3_PID_I,EXT3_PID_D,EXT3_PID_MAX,0,0,0,{0,0,0,0}
 #endif
+#if DECOUPLING_TEST_ENABLED
             ,0,0,0,EXT3_DECOUPLE_TEST_PERIOD
+#endif
         }
         ,ext3_select_cmd,ext3_deselect_cmd,EXT3_EXTRUDER_COOLER_SPEED,0
     }
@@ -1556,7 +1584,9 @@ Extruder extruder[NUM_EXTRUDER] =
 #if TEMP_PID
             ,0,EXT4_PID_INTEGRAL_DRIVE_MAX,EXT4_PID_INTEGRAL_DRIVE_MIN,EXT4_PID_PGAIN_OR_DEAD_TIME,EXT4_PID_I,EXT4_PID_D,EXT4_PID_MAX,0,0,0,{0,0,0,0}
 #endif
+#if DECOUPLING_TEST_ENABLED
             ,0,0,0,EXT4_DECOUPLE_TEST_PERIOD
+#endif
         }
         ,ext4_select_cmd,ext4_deselect_cmd,EXT4_EXTRUDER_COOLER_SPEED,0
     }
@@ -1580,7 +1610,9 @@ Extruder extruder[NUM_EXTRUDER] =
 #if TEMP_PID
             ,0,EXT5_PID_INTEGRAL_DRIVE_MAX,EXT5_PID_INTEGRAL_DRIVE_MIN,EXT5_PID_PGAIN_OR_DEAD_TIME,EXT5_PID_I,EXT5_PID_D,EXT5_PID_MAX,0,0,0,{0,0,0,0}
 #endif
+#if DECOUPLING_TEST_ENABLED
             ,0,0,0,EXT5_DECOUPLE_TEST_PERIOD
+#endif
         }
         ,ext5_select_cmd,ext5_deselect_cmd,EXT5_EXTRUDER_COOLER_SPEED,0
     }
@@ -1593,7 +1625,9 @@ TemperatureController heatedBedController = {NUM_EXTRUDER,HEATED_BED_SENSOR_TYPE
 #if TEMP_PID
         ,0,HEATED_BED_PID_INTEGRAL_DRIVE_MAX,HEATED_BED_PID_INTEGRAL_DRIVE_MIN,HEATED_BED_PID_PGAIN_OR_DEAD_TIME,HEATED_BED_PID_IGAIN,HEATED_BED_PID_DGAIN,HEATED_BED_PID_MAX,0,0,0,{0,0,0,0}
 #endif
+#if DECOUPLING_TEST_ENABLED
         ,0,0,0,HEATED_BED_DECOUPLE_TEST_PERIOD
+#endif
                                             };
 #else
 #define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER
