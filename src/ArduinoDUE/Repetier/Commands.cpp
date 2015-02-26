@@ -1754,6 +1754,12 @@ void Commands::processMCode(GCode *com)
 #endif
     }
     break;
+    case 355: // M355 S<0/1> - Turn case light on/off, no S = report status
+        if(com->hasS()) {
+            Printer::setCaseLight(com->S);
+        } else
+            Printer::reportCaseLightStatus();
+        break;
     case 360: // M360 - show configuration
         Printer::showConfiguration();
         break;
@@ -1885,7 +1891,7 @@ void Commands::executeGCode(GCode *com)
         }
     }
     //periodical command from repetier should not be taken in account  for wake up
-    if(!((com->hasM() &&  com->M ==105) || Printer::isMenuMode(MENU_MODE_SD_PRINTING)))   // Process M Code
+    if(!((com->hasM() &&  ((com->M ==105)||(com->M ==355)||(com->M ==360))) || Printer::isMenuMode(MENU_MODE_SD_PRINTING)))   // Process M Code
     {
         Printer::setMenuMode(MENU_MODE_GCODE_PROCESSING,true);
         Printer::setMenuMode(MENU_MODE_PRINTING,true);
@@ -1937,7 +1943,7 @@ void Commands::executeGCode(GCode *com)
                     }
         }
 //periodical command from repetier should not be taken in account  for wake up
-    if(!((com->hasM() &&  com->M ==105) || Printer::isMenuMode(MENU_MODE_SD_PRINTING)))   // Process M Code
+    if(!((com->hasM() &&  ((com->M ==105)||(com->M ==355)||(com->M ==360))) || Printer::isMenuMode(MENU_MODE_SD_PRINTING)))   // Process M Code
     {
 #if UI_AUTOLIGHTOFF_AFTER!=0
         if (EEPROM::timepowersaving>0 && EEPROM::bkeeplighton )

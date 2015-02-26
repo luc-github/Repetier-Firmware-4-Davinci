@@ -87,8 +87,6 @@ Custom M Codes
 - M92  - Set axisStepsPerMM - same syntax as G92
 - M99 S<delayInSec> X0 Y0 Z0 - Disable motors for S seconds (default 10) for given axis.
 - M100 clean nozzle
-- M101 turn light on (no eeprom saving) and reset autoturn off time if activated
-- M102 turn light off (no eeprom saving)
 - M104 S<temp> T<extruder> P1 F1 - Set temperature without wait. P1 = wait for moves to finish, F1 = beep when temp. reached first time
 - M105 X0 - Get temperatures. If X0 is added, the raw analog values are also written.
 - M112 - Emergency kill
@@ -123,6 +121,7 @@ Custom M Codes
 - M322 - Reset autolevel matrix
 - M340 P<servoId> S<pulseInUS> : servoID = 0..3, Servos are controlled by a pulse with normally between 500 and 2500 with 1500ms in center position. 0 turns servo off.
 - M350 S<mstepsAll> X<mstepsX> Y<mstepsY> Z<mstepsZ> E<mstepsE0> P<mstespE1> : Set microstepping on RAMBO board
+- M355 S<0/1> - Turn case light on/off, no S = report status, (no eeprom saving) and reset autoturn off time if activated
 - M360 - show configuration
 - M400 - Wait until move buffers empty.
 - M401 - Store x, y and z position.

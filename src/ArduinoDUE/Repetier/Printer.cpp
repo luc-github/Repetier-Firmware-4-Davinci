@@ -1626,6 +1626,26 @@ void Printer::buildTransformationMatrix(float h1,float h2,float h3)
 }
 #endif
 
+void Printer::setCaseLight(bool on) {
+#if CASE_LIGHTS_PIN > -1
+    WRITE(CASE_LIGHTS_PIN,on);
+#if UI_AUTOLIGHTOFF_AFTER!=0
+    if (on)UIDisplay::ui_autolightoff_time=HAL::timeInMilliseconds()+EEPROM::timepowersaving;
+#endif
+    reportCaseLightStatus();
+#endif
+}
+
+void Printer::reportCaseLightStatus() {
+#if CASE_LIGHTS_PIN > -1
+    if(READ(CASE_LIGHTS_PIN))
+        Com::printInfoFLN(PSTR("Case lights on"));
+    else
+        Com::printInfoFLN(PSTR("Case lights off"));
+#else
+    Com::printInfoFLN(PSTR("No case lights"));
+#endif
+}
 #define START_EXTRUDER_CONFIG(i)     Com::printF(Com::tConfig);Com::printF(Com::tExtrDot,i+1);Com::print(':');
 void Printer::showConfiguration() {
     Com::config(PSTR("Baudrate:"),baudrate);
@@ -1644,7 +1664,7 @@ void Printer::showConfiguration() {
     Com::config(PSTR("ZHomeDir:"),Z_HOME_DIR);
 //    Com::config(PSTR("SupportG10G11:"),FEATURE_RETRACTION);
 //    Com::config(PSTR("SupportLocalFilamentchange:"),FEATURE_RETRACTION);
-//    Com::config(PSTR("CaseLights:"),CASE_LIGHTS_PIN > -1);
+    Com::config(PSTR("CaseLights:"),CASE_LIGHTS_PIN > -1);
     Com::config(PSTR("ZProbe:"),FEATURE_Z_PROBE);
     Com::config(PSTR("Autolevel:"),FEATURE_AUTOLEVEL);
     Com::config(PSTR("EEPROM:"),EEPROM_MODE != 0);

@@ -797,6 +797,8 @@ public:
     static void GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed);
     static void zBabystep();
     static void showConfiguration();
+    static void setCaseLight(bool on);
+    static void reportCaseLightStatus();
 private:
     static void homeXAxis();
     static void homeYAxis();
