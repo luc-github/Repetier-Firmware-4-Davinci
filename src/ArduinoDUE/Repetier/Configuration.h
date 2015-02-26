@@ -27,8 +27,8 @@
                                                                                             //Warning: for DaVinci 1.0 need to add a permanent fan with power supply to cool extruder
 #define VERSION_MAJOR " 1"
 #define VERSION_MINOR_YEAR "15"
-#define VERSION_MINOR_MONTH "01"
-#define VERSION_MINOR_DAY "28"
+#define VERSION_MINOR_MONTH "02"
+#define VERSION_MINOR_DAY "26"
 #define VERSION_BUILD "1"
 
 // ################ END MANUAL SETTINGS ##########################
@@ -1126,12 +1126,6 @@ boards you might need to make it inverting.
 */
 #define KILL_METHOD 1
 
-/** \brief Cache size for incoming commands.
-
-There should be no reason to increase this cache. Commands are nearly immediately sent to
-execution.
-*/
-#define GCODE_BUFFER_SIZE 2
 /** Appends the linenumber after every ok send, to acknowledge the received command. Uncomment for plain ok ACK if your host has problems with this */
 #define ACK_WITH_LINENUMBER 1
 /** Communication errors can swollow part of the ok, which tells the host software to send
@@ -1139,6 +1133,7 @@ the next command. Not receiving it will cause your printer to stop. Sending this
 second, if our queue is empty should prevent this. Comment it, if you don't wan't this feature. */
 #define WAITING_IDENTIFIER "wait"
 #define RESET_IDENTIFIER "start"
+
 /** \brief Sets time for echo debug
 
 You can set M111 1 which enables ECHO of commands sent. This define specifies the position,

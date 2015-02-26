@@ -32,7 +32,7 @@ enum debugFlags {DEB_ECHO= 0x1, DEB_INFO=0x2, DEB_ERROR =0x4,DEB_DRYRUN=0x8,
                  DEB_COMMUNICATION=0x10, DEB_NOMOVES=0x20, DEB_DEBUG=0x40};
 
 /** Uncomment, to see detailed data for every move. Only for debugging purposes! */
-#define DEBUG_QUEUE_MOVE
+//#define DEBUG_QUEUE_MOVE
 /** Allows M111 to set bit 5 (16) which disables all commands except M111. This can be used
 to test your data througput or search for communication problems. */
 #define INCLUDE_DEBUG_COMMUNICATION 1
@@ -178,6 +178,8 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 
 #include "Configuration.h"
 
+#define GCODE_BUFFER_SIZE 1
+
 #ifndef FEATURE_BABYSTEPPING
 #define FEATURE_BABYSTEPPING 0
 #define BABYSTEP_MULTIPLICATOR 1
@@ -259,7 +261,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define EXT2_ANALOG_CHANNEL
 #endif
 
-#if NUM_EXTRUDER>3 && EXT3_TEMPSENSOR_TYPE<101
+#if NUM_EXTRUDER > 3 && EXT3_TEMPSENSOR_TYPE < 101
 #define EXT3_ANALOG_INPUTS 1
 #define EXT3_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS
 #define EXT3_ANALOG_CHANNEL ACCOMMA2 EXT3_TEMPSENSOR_PIN
@@ -271,7 +273,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define EXT3_ANALOG_CHANNEL
 #endif
 
-#if NUM_EXTRUDER>4 && EXT4_TEMPSENSOR_TYPE<101
+#if NUM_EXTRUDER > 4 && EXT4_TEMPSENSOR_TYPE < 101
 #define EXT4_ANALOG_INPUTS 1
 #define EXT4_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS
 #define EXT4_ANALOG_CHANNEL ACCOMMA3 EXT4_TEMPSENSOR_PIN
