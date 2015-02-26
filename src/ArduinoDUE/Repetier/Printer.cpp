@@ -239,6 +239,8 @@ void Printer::cleanNozzle(bool restoreposition)
 		Extruder::selectExtruderById(tmp_extruderid);
 		}
         #endif
+    Commands::waitUntilEndOfAllMoves();
+    UI_STATUS_UPD_RAM(UI_TEXT_IDLE);
 	}
 #endif
 
