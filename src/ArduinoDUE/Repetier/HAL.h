@@ -18,10 +18,10 @@
     by kliment (https://github.com/kliment/Sprinter)
     which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 
-
+    
     Main author: repetier
-
-    Initial port of HAL to Arduino Due: John Silvia
+ 
+    Initial port of HAL to Arduino Due: John Silvia 
 */
 
 /**
@@ -105,8 +105,8 @@ typedef char prog_char;
 //#define SERIAL_PORT_VECTOR      UART_Handler
 
 // TWI1 if SDA pin = 20  TWI0 for pin = 70
-#define TWI_INTERFACE           TWI1
-#define TWI_ID                  ID_TWI1
+#define TWI_INTERFACE   		TWI1	    
+#define TWI_ID  				ID_TWI1
 
 
 #define EXTRUDER_CLOCK_FREQ     244    // don't know what this should be
@@ -130,7 +130,7 @@ typedef char prog_char;
 #define PULLUP(IO,v)            {pinMode(IO, (v!=LOW ? INPUT_PULLUP : INPUT)); }
 
 // INTERVAL / (32Khz/128)  = seconds
-#define WATCHDOG_INTERVAL       1024u  // 4sec  (~16 seconds max)
+#define WATCHDOG_INTERVAL       1024u  // 8sec  (~16 seconds max)
 
 
 
@@ -141,19 +141,19 @@ typedef char prog_char;
 #define COMPAT_PRE1
 #endif
 
-#define READ(pin)  PIO_Get(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin)
-//#define   WRITE(pin, v) PIO_SetOutput(g_APinDescription[pin].pPort, g_APinDescription[pin].ulPin, v, 0, PIO_PULLUP)
-#define WRITE(pin, v) do{if(v) {g_APinDescription[pin].pPort->PIO_SODR = g_APinDescription[pin].ulPin;} else {g_APinDescription[pin].pPort->PIO_CODR = g_APinDescription[pin].ulPin; }}while(0)
-
-#define SET_INPUT(pin) pmc_enable_periph_clk(g_APinDescription[pin].ulPeripheralId); \
-    PIO_Configure(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin, 0)
-#define SET_OUTPUT(pin) PIO_Configure(g_APinDescription[pin].pPort, PIO_OUTPUT_1, \
+#define	READ(pin)  PIO_Get(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin)
+//#define	WRITE(pin, v) PIO_SetOutput(g_APinDescription[pin].pPort, g_APinDescription[pin].ulPin, v, 0, PIO_PULLUP)
+#define	WRITE(pin, v) do{if(v) {g_APinDescription[pin].pPort->PIO_SODR = g_APinDescription[pin].ulPin;} else {g_APinDescription[pin].pPort->PIO_CODR = g_APinDescription[pin].ulPin; }}while(0)
+ 
+#define	SET_INPUT(pin) pmc_enable_periph_clk(g_APinDescription[pin].ulPeripheralId); \
+    PIO_Configure(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin, 0) 
+#define	SET_OUTPUT(pin) PIO_Configure(g_APinDescription[pin].pPort, PIO_OUTPUT_1, \
     g_APinDescription[pin].ulPin, g_APinDescription[pin].ulPinConfiguration)
 #define TOGGLE(pin) WRITE(pin,!READ(pin))
 #define LOW         0
 #define HIGH        1
 
-// Protects a variable scope for interrupts. Uses RAII to force clearance of
+// Protects a variable scope for interrupts. Uses RAII to force clearance of 
 // Interrupt block at the end resp. sets them to previous state.
 // Uses ABSEPRI to allow higher level interrupts then the one changing firmware data
 #if 1
@@ -162,16 +162,16 @@ class InterruptProtectedBlock {
     inline void protect() {
         __set_BASEPRI(NVIC_EncodePriority(4, 3, 0));
     }
-
+    
     inline void unprotect() {
         __set_BASEPRI(0);
     }
-
+    
     inline InterruptProtectedBlock(bool later = false) {
         if(!later)
         __set_BASEPRI(NVIC_EncodePriority(4, 3, 0));
     }
-
+    
     inline ~InterruptProtectedBlock() {
         __set_BASEPRI(0);
     }
@@ -184,17 +184,17 @@ class InterruptProtectedBlock {
         mask = __get_PRIMASK();;
         __disable_irq();
     }
-
+    
     inline void unprotect() {
         __set_PRIMASK(mask);
     }
-
+    
     inline InterruptProtectedBlock(bool later = false) {
         mask = __get_PRIMASK();
         if(!later)
         __disable_irq();
     }
-
+    
     inline ~InterruptProtectedBlock() {
         __set_PRIMASK(mask);
     }
@@ -231,11 +231,12 @@ typedef unsigned int speed_t;
 typedef unsigned long ticks_t;
 typedef unsigned long millis_t;
 typedef int flag8_t;
+typedef int fast8_t;
 
-
-
+#ifndef RFSERIAL
+//#define RFSERIAL Serial   // Programming port of the due
 #define RFSERIAL SerialUSB  // Native USB Port of the due
-
+#endif
 
 #define OUT_P_I(p,i) //Com::printF(PSTR(p),(int)(i))
 #define OUT_P_I_LN(p,i) //Com::printFLN(PSTR(p),(int)(i))
@@ -265,8 +266,8 @@ class HAL
 public:
     // we use ram instead of eeprom, so reads are faster and safer. Writes store in real eeprom as well
     // as long as hal eeprom functions are used.
-    static char virtualEeprom[EEPROM_BYTES];
-
+    static char virtualEeprom[EEPROM_BYTES];     
+    
     HAL();
     virtual ~HAL();
 #if FEATURE_BEEPER
@@ -284,7 +285,7 @@ public:
 
         // setup microsecond delay timer
         pmc_enable_periph_clk(DELAY_TIMER_IRQ);
-        TC_Configure(DELAY_TIMER, DELAY_TIMER_CHANNEL, TC_CMR_WAVSEL_UP |
+        TC_Configure(DELAY_TIMER, DELAY_TIMER_CHANNEL, TC_CMR_WAVSEL_UP | 
                      TC_CMR_WAVE | DELAY_TIMER_CLOCK);
         TC_Start(DELAY_TIMER, DELAY_TIMER_CHANNEL);
     }
@@ -353,7 +354,7 @@ public:
             "L2_%=_delayMicroseconds:"       "\n\t"
             "subs   %0, #1"                 "\n\t"
             "bge    L2_%=_delayMicroseconds" "\n"
-            : "+r" (n) :
+            : "+r" (n) :  
         );
     }
     static inline void delayMilliseconds(unsigned int delayMs)
@@ -380,9 +381,9 @@ public:
         pmc_enable_periph_clk((uint32_t)BEEPER_TIMER_IRQ);
         // set interrupt to lowest possible priority
         NVIC_SetPriority((IRQn_Type)BEEPER_TIMER_IRQ, NVIC_EncodePriority(4, 6, 3));
-        TC_Configure(BEEPER_TIMER, BEEPER_TIMER_CHANNEL, TC_CMR_WAVE | TC_CMR_WAVSEL_UP_RC |
+        TC_Configure(BEEPER_TIMER, BEEPER_TIMER_CHANNEL, TC_CMR_WAVE | TC_CMR_WAVSEL_UP_RC | 
                      TC_CMR_TCCLKS_TIMER_CLOCK4);  // TIMER_CLOCK4 -> 128 divisor
-        uint32_t rc = VARIANT_MCK / 128 / frequency;
+        uint32_t rc = VARIANT_MCK / 128 / frequency; 
         TC_SetRA(BEEPER_TIMER, BEEPER_TIMER_CHANNEL, rc/2);                     // 50% duty cycle
         TC_SetRC(BEEPER_TIMER, BEEPER_TIMER_CHANNEL, rc);
         TC_Start(BEEPER_TIMER, BEEPER_TIMER_CHANNEL);
@@ -391,7 +392,7 @@ public:
         NVIC_EnableIRQ((IRQn_Type)BEEPER_TIMER_IRQ);
     }
     static inline void noTone(uint8_t pin) {
-        TC_Stop(TC1, 0);
+        TC_Stop(TC1, 0); 
         WRITE(pin, LOW);
     }
 
@@ -463,7 +464,7 @@ public:
     }
 
     // Write any data type to EEPROM
-    static inline void eprBurnValue(unsigned int pos, int size, union eeval_t newvalue)
+    static inline void eprBurnValue(unsigned int pos, int size, union eeval_t newvalue) 
     {
 #if EEPROM_MODE!=0
 #ifdef SDEEPROM
@@ -471,7 +472,7 @@ public:
             HAL::sdEepromImage[pos++] = newvalue.b[i];
         HAL::sdEepromLastChanged = millis() | 1; // Make sure it's not zero.
 #else
-        i2cStartAddr(EEPROM_SERIAL_ADDR << 1 | I2C_WRITE, pos);
+        i2cStartAddr(EEPROM_SERIAL_ADDR << 1 | I2C_WRITE, pos);        
         i2cWriting(newvalue.b[0]);        // write first byte
         for (int i=1;i<size;i++) {
             pos++;
@@ -479,7 +480,7 @@ public:
             if ((pos % EEPROM_PAGE_SIZE) == 0) {
                 // burn current page then address next one
                 i2cStop();
-                delayMilliseconds(EEPROM_PAGE_WRITE_TIME);
+                delayMilliseconds(EEPROM_PAGE_WRITE_TIME); 
                 i2cStartAddr(EEPROM_SERIAL_ADDR << 1, pos);
             } else {
               i2cTxFinished();      // wait for transmission register to empty
@@ -497,6 +498,7 @@ public:
     {
         int i;
         eeval_t v;
+
 #if EEPROM_MODE!=0
 #ifdef SDEEPROM
         for (int i = 0; i < size; i++)
@@ -508,10 +510,10 @@ public:
         // begin transmission from device
         i2cStartBit();
         for (i=0;i<size;i++) {
-            // read an incomming byte
-            v.b[i] = i2cReadAck();
+            // read an incomming byte 
+            v.b[i] = i2cReadAck(); 
         }
-        // read last byte
+        // read last byte 
         v.b[i] = i2cReadNak();
 #endif
 #endif
@@ -585,7 +587,7 @@ public:
         }
         return b;
     }
-    static inline void spiBegin()
+    static inline void spiBegin() 
     {
         SET_OUTPUT(SDSS);
         WRITE(SDSS, HIGH);
@@ -594,7 +596,7 @@ public:
         SET_OUTPUT(MOSI_PIN);
     }
 
-    static inline void spiInit(uint8_t spiClock)
+    static inline void spiInit(uint8_t spiClock) 
    {
        WRITE(SDSS, HIGH);
        WRITE(MOSI_PIN, HIGH);
@@ -603,17 +605,17 @@ public:
    static inline uint8_t spiReceive()
    {
        WRITE(SDSS, LOW);
-       uint8_t b = spiTransfer(0xff);
+       uint8_t b = spiTransfer(0xff);       
        WRITE(SDSS, HIGH);
        return b;
    }
-   static inline void spiReadBlock(uint8_t*buf,uint16_t nbyte)
-   {
+   static inline void spiReadBlock(uint8_t*buf,uint16_t nbyte) 
+   {   
        if (nbyte == 0) return;
-       WRITE(SDSS, LOW);
+       WRITE(SDSS, LOW);  
        for (int i=0; i<nbyte; i++)
         {
-            buf[i] = spiTransfer(0xff);
+            buf[i] = spiTransfer(0xff);  
         }
        WRITE(SDSS, HIGH);
 
@@ -623,18 +625,18 @@ public:
        uint8_t response = spiTransfer(b);
        WRITE(SDSS, HIGH);
    }
-
+   
    static inline void spiSend(const uint8_t* buf , size_t n)
    {
         uint8_t response;
         if (n == 0) return;
         WRITE(SDSS, LOW);
         for (uint16_t i = 0; i < n; i++) {
-           response = spiTransfer(buf[i]);
+           response = spiTransfer(buf[i]);  
        }
        WRITE(SDSS, HIGH);
    }
-
+   
    inline __attribute__((always_inline))
    static void spiSendBlock(uint8_t token, const uint8_t* buf)
    {
@@ -645,11 +647,11 @@ public:
 
        for (uint16_t i = 0; i < 512; i++)
        {
-           response = spiTransfer(buf[i]);
+           response = spiTransfer(buf[i]);  
        }
        WRITE(SDSS, HIGH);
    }
-
+   
 #else
 
    // hardware SPI
@@ -696,13 +698,13 @@ public:
     static void servoMicroseconds(uint8_t servo,int ms);
 #endif
 
-#if ANALOG_INPUTS>0
+#if ANALOG_INPUTS > 0
     static void analogStart(void);
 #endif
 #if USE_ADVANCE
     static void resetExtruderDirection();
 #endif
-    static volatile uint8_t insideTimer1;
+    static volatile uint8_t insideTimer1;        
 #ifdef SDEEPROM
     static void setupSdEeprom();
     static bool syncSdEeprom();

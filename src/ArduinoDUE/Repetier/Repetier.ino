@@ -76,7 +76,7 @@ Custom M Codes
 - M30 <filename> - Delete file on sd card
 - M32 <dirname> create subdirectory
 - M42 P<pin number> S<value 0..255> - Change output of pin P to S. Does not work on most important pins.
-- M50  - Stop print from host or SD Card, if add S0 it also disable steppers
+- M50  - Stop print from host or SD Card 
 - M80  - Turn on power supply
 - M81  - Turn off power supply
 - M82  - Set E codes absolute (default)
@@ -123,6 +123,7 @@ Custom M Codes
 - M322 - Reset autolevel matrix
 - M340 P<servoId> S<pulseInUS> : servoID = 0..3, Servos are controlled by a pulse with normally between 500 and 2500 with 1500ms in center position. 0 turns servo off.
 - M350 S<mstepsAll> X<mstepsX> Y<mstepsY> Z<mstepsZ> E<mstepsE0> P<mstespE1> : Set microstepping on RAMBO board
+- M360 - show configuration
 - M400 - Wait until move buffers empty.
 - M401 - Store x, y and z position.
 - M402 - Go to stored position. If X, Y or Z is specified, only these coordinates are used. F changes feedrate fo rthat move.

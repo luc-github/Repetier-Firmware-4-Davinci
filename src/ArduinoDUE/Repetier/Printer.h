@@ -676,22 +676,22 @@ public:
     }
     static inline speed_t updateStepsPerTimerCall(speed_t vbase)
     {
-        if(vbase>STEP_DOUBLER_FREQUENCY)
+        if(vbase > STEP_DOUBLER_FREQUENCY)
         {
 #if ALLOW_QUADSTEPPING
-            if(vbase>STEP_DOUBLER_FREQUENCY*2)
+            if(vbase > STEP_DOUBLER_FREQUENCY * 2)
             {
                 Printer::stepsPerTimerCall = 4;
-                return vbase>>2;
+                return vbase >> 2;
             }
             else
             {
                 Printer::stepsPerTimerCall = 2;
-                return vbase>>1;
+                return vbase >> 1;
             }
 #else
             Printer::stepsPerTimerCall = 2;
-            return vbase>>1;
+            return vbase >> 1;
 #endif
         }
         else
@@ -767,7 +767,7 @@ public:
     static bool isPositionAllowed(float x,float y,float z);
     static inline int getFanSpeed()
     {
-        return (int)pwm_pos[NUM_EXTRUDER+2];
+        return (int)pwm_pos[NUM_EXTRUDER + 2];
     }
 #if NONLINEAR_SYSTEM
     static inline void setDeltaPositions(long xaxis, long yaxis, long zaxis)
@@ -796,6 +796,7 @@ public:
     static void MemoryPosition();
     static void GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed);
     static void zBabystep();
+    static void showConfiguration();
 private:
     static void homeXAxis();
     static void homeYAxis();
