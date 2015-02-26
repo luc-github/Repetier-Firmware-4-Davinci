@@ -400,17 +400,17 @@ public:
     
     static inline void setHomedX(uint8_t b)
     {
-        flaghome = (b ? flaghome | PRINTER_FLAG_HOME_X : flag1 & ~PRINTER_FLAG_HOME_X);
+        flaghome = (b ? flaghome | PRINTER_FLAG_HOME_X : flaghome & ~PRINTER_FLAG_HOME_X);
     }
     
     static inline void setHomedY(uint8_t b)
     {
-        flaghome = (b ? flaghome | PRINTER_FLAG_HOME_Y : flag1 & ~PRINTER_FLAG_HOME_Y);
+        flaghome = (b ? flaghome | PRINTER_FLAG_HOME_Y : flaghome & ~PRINTER_FLAG_HOME_Y);
     }
     
      static inline void setHomedZ(uint8_t b)
     {
-        flaghome = (b ? flaghome | PRINTER_FLAG_HOME_Z : flag1 & ~PRINTER_FLAG_HOME_Z);
+        flaghome = (b ? flaghome | PRINTER_FLAG_HOME_Z : flaghome & ~PRINTER_FLAG_HOME_Z);
     }
     //this function just mention a home command has been sent not home is fully done, can be only X homed
     static inline void setHomed(uint8_t b)
