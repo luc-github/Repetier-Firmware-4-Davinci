@@ -266,6 +266,9 @@ void Extruder::manageTemperatures()
 #endif
             if(act->heatManager == HTR_SLOWBANG)    // Bang-bang with reduced change frequency to save relais life
             {
+#if !FEATURE_DECOUPLE_TEST 
+				uint32_t time = HAL::timeInMilliseconds();
+#endif
                 if (time - act->lastTemperatureUpdate > HEATED_BED_SET_INTERVAL)
                 {
                     pwm_pos[act->pwmIndex] = (on ? 255 : 0);
