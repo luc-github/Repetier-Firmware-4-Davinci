@@ -3890,7 +3890,7 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             {
             load_dir=1;
             extruderid=0;
-            #if NUM_EXTRUDER == 0
+            #if NUM_EXTRUDER == 1
             xpos=Printer::xMin;
             ypos=Printer::yMin;
             #else
@@ -3902,7 +3902,7 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             {
             load_dir=-1;
             extruderid=0;
-            #if NUM_EXTRUDER == 0
+            #if NUM_EXTRUDER == 1
             xpos=Printer::xMin;
             ypos=Printer::yMin;
             #else
