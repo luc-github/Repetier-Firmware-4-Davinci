@@ -284,7 +284,7 @@ public:
                 {
                     WRITE(EXT3_STEP_PIN,LOW);
                 }
-#endif
+#endif // NUM_EXTRUDER > 3
             }
 #endif // FEATURE_DITTO_PRINTING
 #endif // NUM_EXTRUDER > 0

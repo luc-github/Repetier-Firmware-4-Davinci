@@ -494,8 +494,8 @@ void Extruder::selectExtruderById(uint8_t extruderId, bool changepos)
     }
     else
     {
-        float maxdist = Extruder::current->maxFeedrate * Extruder::current->maxFeedrate * 0.00013888 / Extruder::current->maxAcceleration;
-        maxdist -= Extruder::current->maxStartFeedrate * Extruder::current->maxStartFeedrate * 0.5 / Extruder::current->maxAcceleration;
+    float maxdist = Extruder::current->maxFeedrate * Extruder::current->maxFeedrate * 0.00013888 / Extruder::current->maxAcceleration;
+    maxdist -= Extruder::current->maxStartFeedrate * Extruder::current->maxStartFeedrate * 0.5 / Extruder::current->maxAcceleration;
         //Printer::extruderAccelerateDelay = (uint8_t)constrain(ceil(maxdist*Extruder::current->stepsPerMM/(Printer::minExtruderSpeed-Printer::maxExtruderSpeed)),1,255);
     }
     float fmax = ((float)HAL::maxExtruderTimerFrequency() / ((float)Printer::maxExtruderSpeed * Printer::axisStepsPerMM[E_AXIS])); // Limit feedrate to interrupt speed
@@ -675,23 +675,23 @@ void Extruder::step()
 
 void Extruder::unstep()
 {
-#if NUM_EXTRUDER>0
-    WRITE(EXT0_STEP_PIN,LOW);
+#if NUM_EXTRUDER > 0
+    WRITE(EXT0_STEP_PIN, LOW);
 #endif
-#if NUM_EXTRUDER>1
-    WRITE(EXT1_STEP_PIN,LOW);
+#if NUM_EXTRUDER > 1
+    WRITE(EXT1_STEP_PIN, LOW);
 #endif
-#if NUM_EXTRUDER>2
-    WRITE(EXT2_STEP_PIN,LOW);
+#if NUM_EXTRUDER > 2
+    WRITE(EXT2_STEP_PIN, LOW);
 #endif
-#if NUM_EXTRUDER>3
-    WRITE(EXT3_STEP_PIN,LOW);
+#if NUM_EXTRUDER > 3
+    WRITE(EXT3_STEP_PIN, LOW);
 #endif
-#if NUM_EXTRUDER>4
-    WRITE(EXT4_STEP_PIN,LOW);
+#if NUM_EXTRUDER > 4
+    WRITE(EXT4_STEP_PIN, LOW);
 #endif
-#if NUM_EXTRUDER>5
-    WRITE(EXT5_STEP_PIN,LOW);
+#if NUM_EXTRUDER > 5
+    WRITE(EXT5_STEP_PIN, LOW);
 #endif
 }
 

@@ -92,7 +92,8 @@ public:
     static uint8_t unitIsInches;
 
     static uint8_t debugLevel;
-    static uint8_t flag0,flag1,flaghome; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
+    static uint8_t flag0,flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
+    static uint8_t flaghome;
     static uint8_t stepsPerTimerCall;
     static uint32_t interval;    ///< Last step duration in ticks.
     static uint32_t timer;              ///< used for acceleration/deceleration timing
@@ -105,7 +106,7 @@ public:
     static uint lastextruderID;
     #endif
     static int32_t destinationSteps[E_AXIS_ARRAY];         ///< Target position in steps.
-    static float extrudeMultiplyError;
+    static float extrudeMultiplyError; ///< Accumulated error during extrusion
 #if NONLINEAR_SYSTEM
     static int32_t maxDeltaPositionSteps;
     static int32_t currentDeltaPositionSteps[E_TOWER_ARRAY];

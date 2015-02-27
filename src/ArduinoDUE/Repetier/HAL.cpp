@@ -18,10 +18,10 @@
     by kliment (https://github.com/kliment/Sprinter)
     which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 
-
-
+  
+    
     Main author: repetier
-
+ 
     Initial port of hardware abstraction layer to Arduino Due: John Silvia
 */
 
@@ -32,7 +32,7 @@
 extern "C" char *sbrk(int i);
 extern long bresenham_step();
 
-char HAL::virtualEeprom[EEPROM_BYTES];
+char HAL::virtualEeprom[EEPROM_BYTES];  
 volatile uint8_t HAL::insideTimer1=0;
 #ifndef DUE_SOFTWARE_SPI
     int spiDueDividors[] = {10,21,42,84,168,255,255};
@@ -81,7 +81,7 @@ bool HAL::syncSdEeprom() {
 }
 #endif
 
-// Set up all timer interrupts
+// Set up all timer interrupts 
 void HAL::setupTimer() {
     uint32_t     tc_count, tc_clock;
 
@@ -100,7 +100,7 @@ void HAL::setupTimer() {
 
     TC_SetRC(EXTRUDER_TIMER, EXTRUDER_TIMER_CHANNEL, (F_CPU_TRUE / TIMER0_PRESCALE) / EXTRUDER_CLOCK_FREQ); // set frequency
     TC_Start(EXTRUDER_TIMER, EXTRUDER_TIMER_CHANNEL);           // start timer running
-
+    
     // enable RC compare interrupt
     EXTRUDER_TIMER->TC_CHANNEL[EXTRUDER_TIMER_CHANNEL].TC_IER = TC_IER_CPCS;
     // clear the "disable RC compare" interrupt
@@ -112,13 +112,13 @@ void HAL::setupTimer() {
     // Regular interrupts for heater control etc
     pmc_enable_periph_clk(PWM_TIMER_IRQ);
     NVIC_SetPriority((IRQn_Type)PWM_TIMER_IRQ, NVIC_EncodePriority(4, 6, 0));
-
-    TC_FindMckDivisor(PWM_CLOCK_FREQ, F_CPU_TRUE, &tc_count, &tc_clock, F_CPU_TRUE);
+   
+    TC_FindMckDivisor(PWM_CLOCK_FREQ, F_CPU_TRUE, &tc_count, &tc_clock, F_CPU_TRUE);  
     TC_Configure(PWM_TIMER, PWM_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC | TC_CMR_WAVE | tc_clock);
 
     TC_SetRC(PWM_TIMER, PWM_TIMER_CHANNEL, (F_CPU_TRUE / tc_count) / PWM_CLOCK_FREQ);
     TC_Start(PWM_TIMER, PWM_TIMER_CHANNEL);
-
+ 
     PWM_TIMER->TC_CHANNEL[PWM_TIMER_CHANNEL].TC_IER = TC_IER_CPCS;
     PWM_TIMER->TC_CHANNEL[PWM_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
     NVIC_EnableIRQ((IRQn_Type)PWM_TIMER_IRQ);
@@ -126,8 +126,8 @@ void HAL::setupTimer() {
     // Timer for stepper motor control
     pmc_enable_periph_clk(TIMER1_TIMER_IRQ );
     NVIC_SetPriority((IRQn_Type)TIMER1_TIMER_IRQ, NVIC_EncodePriority(4, 4, 0));
-
-    TC_Configure(TIMER1_TIMER, TIMER1_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC |
+      
+    TC_Configure(TIMER1_TIMER, TIMER1_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC | 
                  TC_CMR_WAVE | TC_CMR_TCCLKS_TIMER_CLOCK1);
 
     TC_SetRC(TIMER1_TIMER, TIMER1_TIMER_CHANNEL, (F_CPU_TRUE / TIMER1_PRESCALE) / TIMER1_CLOCK_FREQ);
@@ -135,30 +135,30 @@ void HAL::setupTimer() {
 
     TIMER1_TIMER->TC_CHANNEL[TIMER1_TIMER_CHANNEL].TC_IER = TC_IER_CPCS;
     TIMER1_TIMER->TC_CHANNEL[TIMER1_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
-    NVIC_EnableIRQ((IRQn_Type)TIMER1_TIMER_IRQ);
+    NVIC_EnableIRQ((IRQn_Type)TIMER1_TIMER_IRQ); 
 
     // Servo control
 #if FEATURE_SERVO
-#if SERVO0_PIN>-1
+#if SERVO0_PIN > -1
     SET_OUTPUT(SERVO0_PIN);
     WRITE(SERVO0_PIN,LOW);
 #endif
-#if SERVO1_PIN>-1
+#if SERVO1_PIN > -1
     SET_OUTPUT(SERVO1_PIN);
     WRITE(SERVO1_PIN,LOW);
 #endif
-#if SERVO2_PIN>-1
+#if SERVO2_PIN > -1
     SET_OUTPUT(SERVO2_PIN);
     WRITE(SERVO2_PIN,LOW);
 #endif
-#if SERVO3_PIN>-1
+#if SERVO3_PIN > -1
     SET_OUTPUT(SERVO3_PIN);
     WRITE(SERVO3_PIN,LOW);
 #endif
     pmc_enable_periph_clk(SERVO_TIMER_IRQ );
     NVIC_SetPriority((IRQn_Type)SERVO_TIMER_IRQ, NVIC_EncodePriority(4, 5, 0));
-
-    TC_Configure(SERVO_TIMER, SERVO_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC |
+      
+    TC_Configure(SERVO_TIMER, SERVO_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC | 
                  TC_CMR_WAVE | TC_CMR_TCCLKS_TIMER_CLOCK1);
 
     TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, (F_CPU_TRUE / SERVO_PRESCALE) / SERVO_CLOCK_FREQ);
@@ -172,7 +172,7 @@ void HAL::setupTimer() {
 
 
 
-#if ANALOG_INPUTS>0
+#if ANALOG_INPUTS > 0
 // Initialize ADC channels
 void HAL::analogStart(void)
 {
@@ -182,7 +182,7 @@ void HAL::analogStart(void)
   ADC->ADC_WPMR = ADC_WPMR_WPKEY(0);
   pmc_enable_periph_clk(ID_ADC);  // enable adc clock
 
-  for(int i=0; i<ANALOG_INPUTS; i++)
+  for(int i = 0; i < ANALOG_INPUTS; i++)
   {
       osAnalogInputCounter[i] = 0;
       osAnalogInputValues[i] = 0;
@@ -203,7 +203,7 @@ void HAL::analogStart(void)
   // convert channels in numeric order
   // set prescaler rate  MCK/((PRESCALE+1) * 2)
   // set tracking time  (TRACKTIM+1) * clock periods
-  // set transfer period  (TRANSFER * 2 + 3)
+  // set transfer period  (TRANSFER * 2 + 3) 
   ADC->ADC_MR = ADC_MR_TRGEN_DIS | ADC_MR_TRGSEL_ADC_TRIG0 | ADC_MR_LOWRES_BITS_10 |
             ADC_MR_SLEEP_NORMAL | ADC_MR_FWUP_OFF | ADC_MR_FREERUN_OFF |
             ADC_MR_STARTUP_SUT64 | ADC_MR_SETTLING_AST17 | ADC_MR_ANACH_NONE |
@@ -215,7 +215,7 @@ void HAL::analogStart(void)
   ADC->ADC_IER = 0;             // no ADC interrupts
   ADC->ADC_CGR = 0;             // Gain = 1
   ADC->ADC_COR = 0;             // Single-ended, no offset
-
+  
   // start first conversion
   ADC->ADC_CR = ADC_CR_START;
 }
@@ -240,7 +240,7 @@ void HAL::showStartReason() {
         break;
     case 4:
         Com::printInfoFLN(Com::tExternalReset);
-    }
+    } 
 }
 
 // Return available memory
@@ -307,7 +307,7 @@ uint32_t HAL::integer64Sqrt(uint64_t a_nInput) {
            g_APinDescription[MISO_PIN].ulPinConfiguration);
 
         // set master mode, peripheral select, fault detection
-        SPI_Configure(SPI0, ID_SPI0, SPI_MR_MSTR |
+        SPI_Configure(SPI0, ID_SPI0, SPI_MR_MSTR | 
                      SPI_MR_MODFDIS | SPI_MR_PS);
        SPI_Enable(SPI0);
         PIO_Configure(
@@ -319,12 +319,12 @@ uint32_t HAL::integer64Sqrt(uint64_t a_nInput) {
    }
    // spiClock is 0 to 6, relecting AVR clock dividers 2,4,8,16,32,64,128
    // Due can only go as slow as AVR divider 32 -- slowest Due clock is 329,412 Hz
-    void HAL::spiInit(uint8_t spiClock)
+    void HAL::spiInit(uint8_t spiClock) 
    {
-        if(spiClock>4) spiClock = 1;
+        if(spiClock > 4) spiClock = 1;
         // Set SPI mode 0, clock, select not active after transfer, with delay between transfers
         SPI_ConfigureNPCS(SPI0, SPI_CHAN, SPI_CSR_NCPHA |
-                         SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) |
+                         SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) | 
                          SPI_CSR_DLYBCT(1));
        SPI_Enable(SPI0);
    }
@@ -334,7 +334,7 @@ uint32_t HAL::integer64Sqrt(uint64_t a_nInput) {
         SPI0->SPI_TDR = (uint32_t)b | SPI_PCS(SPI_CHAN) | SPI_TDR_LASTXFER;
         // wait for transmit register empty
         while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
-        // wait for receive register
+        // wait for receive register 
         while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
         // clear status
         SPI0->SPI_RDR;
@@ -362,15 +362,15 @@ uint32_t HAL::integer64Sqrt(uint64_t a_nInput) {
         // wait for transmit register empty
         while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
 
-        // wait for receive register
+        // wait for receive register 
         while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
         // get byte from receive register
         //delayMicroseconds(1);
         return SPI0->SPI_RDR;
    }
     // Read from SPI into buffer
-   void HAL::spiReadBlock(uint8_t*buf,uint16_t nbyte)
-   {
+   void HAL::spiReadBlock(uint8_t*buf,uint16_t nbyte) 
+   {     
        if (nbyte-- == 0) return;
 
        for (int i=0; i<nbyte; i++)
@@ -411,43 +411,43 @@ uint32_t HAL::integer64Sqrt(uint64_t a_nInput) {
 *************************************************************************/
 void HAL::i2cInit(unsigned long clockSpeedHz)
 {
-    // enable TWI
-    pmc_enable_periph_clk(TWI_ID);
-
-    // Configure pins
-    PIO_Configure(g_APinDescription[SDA_PIN].pPort,
-                  g_APinDescription[SDA_PIN].ulPinType,
-                  g_APinDescription[SDA_PIN].ulPin,
-                  g_APinDescription[SDA_PIN].ulPinConfiguration);
-    PIO_Configure(g_APinDescription[SCL_PIN].pPort,
-                  g_APinDescription[SCL_PIN].ulPinType,
-                  g_APinDescription[SCL_PIN].ulPin,
-                  g_APinDescription[SCL_PIN].ulPinConfiguration);
-
-    // Set to Master mode with known state
-    TWI_INTERFACE->TWI_CR = TWI_CR_SVEN;
-    TWI_INTERFACE->TWI_CR = TWI_CR_SWRST;
-    //TWI_INTERFACE->TWI_RHR;  // no action???
-    TWI_INTERFACE->TWI_IMR = 0;
-
-    TWI_INTERFACE->TWI_CR = TWI_CR_SVDIS;
-    TWI_INTERFACE->TWI_CR = TWI_CR_MSDIS;
-    TWI_INTERFACE->TWI_CR = TWI_CR_MSEN;
-
-    // Set i2c clock rate
-    uint32_t dwCkDiv = 0;
-    uint32_t dwClDiv;
-    while ( dwClDiv == 0 )
-    {
+    // enable TWI                                                        
+    pmc_enable_periph_clk(TWI_ID);                                       
+                                                                         
+    // Configure pins                                                    
+    PIO_Configure(g_APinDescription[SDA_PIN].pPort,                      
+                  g_APinDescription[SDA_PIN].ulPinType,                  
+                  g_APinDescription[SDA_PIN].ulPin,                      
+                  g_APinDescription[SDA_PIN].ulPinConfiguration);        
+    PIO_Configure(g_APinDescription[SCL_PIN].pPort,                      
+                  g_APinDescription[SCL_PIN].ulPinType,                  
+                  g_APinDescription[SCL_PIN].ulPin,                      
+                  g_APinDescription[SCL_PIN].ulPinConfiguration);        
+                                                                         
+    // Set to Master mode with known state                               
+    TWI_INTERFACE->TWI_CR = TWI_CR_SVEN;                                 
+    TWI_INTERFACE->TWI_CR = TWI_CR_SWRST;                                
+    //TWI_INTERFACE->TWI_RHR;  // no action???                                              
+    TWI_INTERFACE->TWI_IMR = 0;                                          
+                                                                         
+    TWI_INTERFACE->TWI_CR = TWI_CR_SVDIS;                                
+    TWI_INTERFACE->TWI_CR = TWI_CR_MSDIS;                                
+    TWI_INTERFACE->TWI_CR = TWI_CR_MSEN;                                 
+                                                                         
+    // Set i2c clock rate                                                
+    uint32_t dwCkDiv = 0;                                                
+    uint32_t dwClDiv;                                                    
+    while ( dwClDiv == 0 )                                               
+    {                                                                    
         dwClDiv = ((F_CPU_TRUE / (2 * clockSpeedHz)) - 4) / (1<<dwCkDiv);
-
-        if ( dwClDiv > 255 )
-        {
-            dwCkDiv++;
-            dwClDiv = 0;
-        }
-    }
-    TWI_INTERFACE->TWI_CWGR = 0;
+                                                                         
+        if ( dwClDiv > 255 )                                             
+        {                                                                
+            dwCkDiv++;                                                   
+            dwClDiv = 0;                                                 
+        }                                                                
+    }                                                                    
+    TWI_INTERFACE->TWI_CWGR = 0;                                         
     TWI_INTERFACE->TWI_CWGR = (dwCkDiv << 16) | (dwClDiv << 8) | dwClDiv;
 }
 
@@ -465,7 +465,7 @@ unsigned char HAL::i2cStart(unsigned char address_and_direction)
 
     // set master mode register with no internal address
     TWI_INTERFACE->TWI_MMR = 0;
-    TWI_INTERFACE->TWI_MMR = (twiDirection << 12) | TWI_MMR_IADRSZ_NONE |
+    TWI_INTERFACE->TWI_MMR = (twiDirection << 12) | TWI_MMR_IADRSZ_NONE |  
         TWI_MMR_DADR(address);
 
     // returning readiness to send/recieve not device accessibility
@@ -492,7 +492,7 @@ void HAL::i2cStartWait(unsigned char address_and_direction)
 
     // set master mode register with no internal address
     TWI_INTERFACE->TWI_MMR = 0;
-    TWI_INTERFACE->TWI_MMR = (twiDirection << 12) | TWI_MMR_IADRSZ_NONE |
+    TWI_INTERFACE->TWI_MMR = (twiDirection << 12) | TWI_MMR_IADRSZ_NONE |  
          TWI_MMR_DADR(address);
 }
 
@@ -506,8 +506,8 @@ void HAL::i2cStartAddr(unsigned char address_and_direction, unsigned int pos)
 {
     uint32_t twiDirection = address_and_direction & 1;
     uint32_t address = address_and_direction >> 1;
-
-    // if 1 byte address, eeprom uses lower address bits for pos > 255
+    
+    // if 1 byte address, eeprom uses lower address bits for pos > 255    
     if (EEPROM_ADDRSZ_BYTES == TWI_MMR_IADRSZ_1_BYTE)
     {
       address |= pos >> 8;
@@ -530,7 +530,7 @@ void HAL::i2cStartAddr(unsigned char address_and_direction, unsigned int pos)
 void HAL::i2cStop(void)
 {
     i2cTxFinished();
-    TWI_INTERFACE->TWI_CR = TWI_CR_STOP;
+    TWI_INTERFACE->TWI_CR = TWI_CR_STOP; 
     i2cCompleted ();
 }
 
@@ -539,7 +539,7 @@ void HAL::i2cStop(void)
 *************************************************************************/
 void HAL::i2cStartBit(void)
 {
-    TWI_INTERFACE->TWI_CR = TWI_CR_START;
+    TWI_INTERFACE->TWI_CR = TWI_CR_START; 
 }
 
 /*************************************************************************
@@ -567,7 +567,7 @@ void HAL::i2cTxFinished(void)
             1 write failed
 *************************************************************************/
 unsigned char HAL::i2cWrite( uint8_t data )
-{
+{    
   i2cWriting(data);
   TWI_INTERFACE->TWI_CR = TWI_CR_STOP;
   i2cTxFinished();
@@ -578,10 +578,10 @@ unsigned char HAL::i2cWrite( uint8_t data )
 
 /*************************************************************************
   Send one byte to I2C device
-  Transaction can continue with more writes or reads
+  Transaction can continue with more writes or reads 
 ************************************************************************/
 void HAL::i2cWriting( uint8_t data )
-{
+{    
     TWI_INTERFACE->TWI_THR = data;
 }
 
@@ -604,7 +604,7 @@ unsigned char HAL::i2cReadAck(void)
 unsigned char HAL::i2cReadNak(void)
 {
     TWI_INTERFACE->TWI_CR = TWI_CR_STOP;
-
+    
     while( (TWI_INTERFACE->TWI_SR & TWI_SR_RXRDY) != TWI_SR_RXRDY );
     unsigned char data = i2cReadAck();
     i2cCompleted();
@@ -618,12 +618,12 @@ unsigned char HAL::i2cReadNak(void)
 unsigned int HAL::servoTimings[4] = {0,0,0,0};
 static uint8_t servoIndex = 0;
 void HAL::servoMicroseconds(uint8_t servo,int microsec) {
-    if(microsec<500) microsec = 0;
-    if(microsec>2500) microsec = 2500;
-    servoTimings[servo] = (unsigned int)(((F_CPU_TRUE / SERVO_PRESCALE) /
+    if(microsec < 500) microsec = 0;
+    if(microsec > 2500) microsec = 2500;
+    servoTimings[servo] = (unsigned int)(((F_CPU_TRUE / SERVO_PRESCALE) / 
                                          1000000) * microsec);
 }
-
+ 
 
 // ================== Interrupt handling ======================
 
@@ -639,75 +639,75 @@ void SERVO_COMPA_VECTOR ()
   switch(servoIndex) {
   case 0:
       if(HAL::servoTimings[0]) {
-#if SERVO0_PIN>-1
+#if SERVO0_PIN > -1
           WRITE(SERVO0_PIN,HIGH);
-#endif
+#endif  
           interval =  HAL::servoTimings[0];
-      } else
+      } else 
           interval = SERVO2500US;
       TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, interval);
       break;
   case 1:
-#if SERVO0_PIN>-1
+#if SERVO0_PIN > -1
       WRITE(SERVO0_PIN,LOW);
 #endif
-      TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL,
+      TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, 
                SERVO5000US - interval);
     break;
   case 2:
       if(HAL::servoTimings[1]) {
-#if SERVO1_PIN>-1
+#if SERVO1_PIN > -1
         WRITE(SERVO1_PIN,HIGH);
 #endif
         interval =  HAL::servoTimings[1];
-      } else
+      } else 
           interval = SERVO2500US;
     TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, interval);
     break;
   case 3:
-#if SERVO1_PIN>-1
+#if SERVO1_PIN > -1
       WRITE(SERVO1_PIN,LOW);
 #endif
-      TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL,
+      TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, 
                SERVO5000US - interval);
     break;
   case 4:
       if(HAL::servoTimings[2]) {
-#if SERVO2_PIN>-1
+#if SERVO2_PIN > -1
         WRITE(SERVO2_PIN,HIGH);
 #endif
         interval =  HAL::servoTimings[2];
-      } else
+      } else  
           interval = SERVO2500US;
     TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, interval);
     break;
   case 5:
-#if SERVO2_PIN>-1
+#if SERVO2_PIN > -1
       WRITE(SERVO2_PIN,LOW);
 #endif
-      TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL,
+      TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, 
                SERVO5000US - interval);
     break;
   case 6:
       if(HAL::servoTimings[3]) {
-#if SERVO3_PIN>-1
+#if SERVO3_PIN > -1
         WRITE(SERVO3_PIN,HIGH);
 #endif
         interval =  HAL::servoTimings[3];
-      } else
+      } else 
           interval = SERVO2500US;
     TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, interval);
     break;
   case 7:
-#if SERVO3_PIN>-1
+#if SERVO3_PIN > -1
       WRITE(SERVO3_PIN,LOW);
 #endif
-      TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL,
+      TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, 
                SERVO5000US - interval);
     break;
   }
   servoIndex++;
-  if(servoIndex>7) servoIndex = 0;
+  if(servoIndex > 7) servoIndex = 0;
 }
 #else
 #error No servo support for your board, please diable FEATURE_SERVO
@@ -758,7 +758,7 @@ void TIMER1_COMPA_VECTOR ()
 #endif
                 Printer::advanceStepsSet = 0;
             }
-            if((!Printer::extruderStepsNeeded) && (DISABLE_E))
+            if((!Printer::extruderStepsNeeded) && (DISABLE_E)) 
                 Extruder::disableCurrentExtruderMotor();
 #else
             if(DISABLE_E) Extruder::disableCurrentExtruderMotor();
@@ -798,7 +798,7 @@ void TIMER1_COMPA_VECTOR ()
 
 /**
 This timer is called 3906 times per second. It is used to update
-pwm values for heater and some other frequent jobs.
+pwm values for heater and some other frequent jobs. 
 */
 void PWM_TIMER_VECTOR ()
 {
@@ -813,136 +813,136 @@ void PWM_TIMER_VECTOR ()
 
     if(pwm_count_heater == 0 && !PDM_FOR_EXTRUDER)
     {
-#if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN>-1
-        if((pwm_pos_set[0] = (pwm_pos[0] & HEATER_PWM_MASK))>0) WRITE(EXT0_HEATER_PIN,!HEATER_PINS_INVERTED);
+#if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN > -1
+        if((pwm_pos_set[0] = (pwm_pos[0] & HEATER_PWM_MASK)) > 0) WRITE(EXT0_HEATER_PIN, !HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
-        if((pwm_pos_set[1] = (pwm_pos[1] & HEATER_PWM_MASK))>0) WRITE(EXT1_HEATER_PIN,!HEATER_PINS_INVERTED);
+#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1
+        if((pwm_pos_set[1] = (pwm_pos[1] & HEATER_PWM_MASK)) > 0) WRITE(EXT1_HEATER_PIN, !HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1 && NUM_EXTRUDER>2
-        if((pwm_pos_set[2] = (pwm_pos[2] & HEATER_PWM_MASK))>0) WRITE(EXT2_HEATER_PIN,!HEATER_PINS_INVERTED);
+#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN > -1 && NUM_EXTRUDER > 2
+        if((pwm_pos_set[2] = (pwm_pos[2] & HEATER_PWM_MASK)) > 0) WRITE(EXT2_HEATER_PIN, !HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN>-1 && NUM_EXTRUDER>3
-        if((pwm_pos_set[3] = (pwm_pos[3] & HEATER_PWM_MASK))>0) WRITE(EXT3_HEATER_PIN,!HEATER_PINS_INVERTED);
+#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN > -1 && NUM_EXTRUDER > 3
+        if((pwm_pos_set[3] = (pwm_pos[3] & HEATER_PWM_MASK)) > 0) WRITE(EXT3_HEATER_PIN, !HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN>-1 && NUM_EXTRUDER>4
-        if((pwm_pos_set[4] = (pwm_pos[4] & HEATER_PWM_MASK))>0) WRITE(EXT4_HEATER_PIN,!HEATER_PINS_INVERTED);
+#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN > -1 && NUM_EXTRUDER > 4
+        if((pwm_pos_set[4] = (pwm_pos[4] & HEATER_PWM_MASK)) > 0) WRITE(EXT4_HEATER_PIN, !HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1 && NUM_EXTRUDER>5
-        if((pwm_pos_set[5] = (pwm_pos[5] & HEATER_PWM_MASK))>0) WRITE(EXT5_HEATER_PIN,!HEATER_PINS_INVERTED);
+#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN > -1 && NUM_EXTRUDER > 5
+        if((pwm_pos_set[5] = (pwm_pos[5] & HEATER_PWM_MASK)) > 0) WRITE(EXT5_HEATER_PIN, !HEATER_PINS_INVERTED);
 #endif
-#if HEATED_BED_HEATER_PIN>-1 && HAVE_HEATED_BED
-        if((pwm_pos_set[NUM_EXTRUDER] = pwm_pos[NUM_EXTRUDER])>0) WRITE(HEATED_BED_HEATER_PIN,!HEATER_PINS_INVERTED);
+#if HEATED_BED_HEATER_PIN > -1 && HAVE_HEATED_BED
+        if((pwm_pos_set[NUM_EXTRUDER] = pwm_pos[NUM_EXTRUDER]) > 0) WRITE(HEATED_BED_HEATER_PIN,!HEATER_PINS_INVERTED);
 #endif
     }
     if(pwm_count==0 && !PDM_FOR_COOLER)
     {
-#if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN>-1 && EXT0_EXTRUDER_COOLER_PIN>-1
-        if((pwm_cooler_pos_set[0] = extruder[0].coolerPWM)>0) WRITE(EXT0_EXTRUDER_COOLER_PIN,1);
+#if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN > -1 && EXT0_EXTRUDER_COOLER_PIN > -1
+        if((pwm_cooler_pos_set[0] = extruder[0].coolerPWM)>0) WRITE(EXT0_EXTRUDER_COOLER_PIN, 1);
 #endif
-#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
-#if EXT1_EXTRUDER_COOLER_PIN>-1 && EXT1_EXTRUDER_COOLER_PIN!=EXT0_EXTRUDER_COOLER_PIN
-        if((pwm_cooler_pos_set[1] = extruder[1].coolerPWM)>0) WRITE(EXT1_EXTRUDER_COOLER_PIN,1);
+#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1
+#if EXT1_EXTRUDER_COOLER_PIN > -1 && EXT1_EXTRUDER_COOLER_PIN != EXT0_EXTRUDER_COOLER_PIN
+        if((pwm_cooler_pos_set[1] = extruder[1].coolerPWM) > 0) WRITE(EXT1_EXTRUDER_COOLER_PIN, 1);
 #endif
 #endif
-#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1 && NUM_EXTRUDER>2
+#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN > -1 && NUM_EXTRUDER > 2
 #if EXT2_EXTRUDER_COOLER_PIN>-1
-        if((pwm_cooler_pos_set[2] = extruder[2].coolerPWM)>0) WRITE(EXT2_EXTRUDER_COOLER_PIN,1);
+        if((pwm_cooler_pos_set[2] = extruder[2].coolerPWM) > 0) WRITE(EXT2_EXTRUDER_COOLER_PIN, 1);
 #endif
 #endif
-#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN>-1 && NUM_EXTRUDER>3
+#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN > -1 && NUM_EXTRUDER > 3
 #if EXT3_EXTRUDER_COOLER_PIN>-1
-        if((pwm_cooler_pos_set[3] = extruder[3].coolerPWM)>0) WRITE(EXT3_EXTRUDER_COOLER_PIN,1);
+        if((pwm_cooler_pos_set[3] = extruder[3].coolerPWM)>0) WRITE(EXT3_EXTRUDER_COOLER_PIN, 1);
 #endif
 #endif
-#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN>-1 && NUM_EXTRUDER>4
+#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN > -1 && NUM_EXTRUDER > 4
 #if EXT4_EXTRUDER_COOLER_PIN>-1
-        if((pwm_cooler_pos_set[4] = pwm_pos[4].coolerPWM)>0) WRITE(EXT4_EXTRUDER_COOLER_PIN,1);
+        if((pwm_cooler_pos_set[4] = pwm_pos[4].coolerPWM)>0) WRITE(EXT4_EXTRUDER_COOLER_PIN, 1);
 #endif
 #endif
-#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1 && NUM_EXTRUDER>5
+#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN > -1 && NUM_EXTRUDER > 5
 #if EXT5_EXTRUDER_COOLER_PIN>-1
-        if((pwm_cooler_pos_set[5] = extruder[5].coolerPWM)>0) WRITE(EXT5_EXTRUDER_COOLER_PIN,1);
+        if((pwm_cooler_pos_set[5] = extruder[5].coolerPWM)>0) WRITE(EXT5_EXTRUDER_COOLER_PIN, 1);
 #endif
 #endif
 #if FAN_BOARD_PIN>-1
-        if((pwm_pos_set[NUM_EXTRUDER+1] = pwm_pos[NUM_EXTRUDER+1])>0) WRITE(FAN_BOARD_PIN,1);
+        if((pwm_pos_set[NUM_EXTRUDER + 1] = pwm_pos[NUM_EXTRUDER + 1]) > 0) WRITE(FAN_BOARD_PIN, 1);
 #endif
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
-        if((pwm_pos_set[NUM_EXTRUDER+2] = pwm_pos[NUM_EXTRUDER+2])>0) WRITE(FAN_PIN,1);
+        if((pwm_pos_set[NUM_EXTRUDER + 2] = pwm_pos[NUM_EXTRUDER + 2]) > 0) WRITE(FAN_PIN, 1);
 #endif
     }
-#if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN>-1
+#if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN > -1
 #if PDM_FOR_EXTRUDER
     pulseDensityModulate(EXT0_HEATER_PIN, pwm_pos[0], pwm_pos_set[0], HEATER_PINS_INVERTED);
 #else
     if(pwm_pos_set[0] == pwm_count_heater && pwm_pos_set[0]!=HEATER_PWM_MASK) WRITE(EXT0_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
-#if EXT0_EXTRUDER_COOLER_PIN>-1
+#if EXT0_EXTRUDER_COOLER_PIN > -1
 #if PDM_FOR_COOLER
     pulseDensityModulate(EXT0_EXTRUDER_COOLER_PIN, extruder[0].coolerPWM, pwm_cooler_pos_set[0], false);
 #else
-    if(pwm_cooler_pos_set[0] == pwm_count && pwm_cooler_pos_set[0]!=255) WRITE(EXT0_EXTRUDER_COOLER_PIN,0);
+    if(pwm_cooler_pos_set[0] == pwm_count && pwm_cooler_pos_set[0] != 255) WRITE(EXT0_EXTRUDER_COOLER_PIN, 0);
 #endif
 #endif
 #endif
-#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
+#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1
 #if PDM_FOR_EXTRUDER
     pulseDensityModulate(EXT1_HEATER_PIN, pwm_pos[1], pwm_pos_set[1], HEATER_PINS_INVERTED);
 #else
-    if(pwm_pos_set[1] == pwm_count_heater && pwm_pos_set[1]!=HEATER_PWM_MASK) WRITE(EXT1_HEATER_PIN,HEATER_PINS_INVERTED);
+    if(pwm_pos_set[1] == pwm_count_heater && pwm_pos_set[1] != HEATER_PWM_MASK) WRITE(EXT1_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT1_EXTRUDER_COOLER_PIN) && EXT1_EXTRUDER_COOLER_PIN>-1 && EXT1_EXTRUDER_COOLER_PIN!=EXT0_EXTRUDER_COOLER_PIN
+#if defined(EXT1_EXTRUDER_COOLER_PIN) && EXT1_EXTRUDER_COOLER_PIN > -1 && EXT1_EXTRUDER_COOLER_PIN != EXT0_EXTRUDER_COOLER_PIN
 #if PDM_FOR_COOLER
     pulseDensityModulate(EXT1_EXTRUDER_COOLER_PIN, extruder[1].coolerPWM, pwm_cooler_pos_set[1], false);
 #else
-    if(pwm_cooler_pos_set[1] == pwm_count && pwm_cooler_pos_set[1]!=255) WRITE(EXT1_EXTRUDER_COOLER_PIN,0);
+    if(pwm_cooler_pos_set[1] == pwm_count && pwm_cooler_pos_set[1] != 255) WRITE(EXT1_EXTRUDER_COOLER_PIN, 0);
 #endif
 #endif
 #endif
-#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1 && NUM_EXTRUDER>2
+#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN > -1 && NUM_EXTRUDER > 2
 #if PDM_FOR_EXTRUDER
     pulseDensityModulate(EXT2_HEATER_PIN, pwm_pos[2], pwm_pos_set[2], HEATER_PINS_INVERTED);
 #else
-    if(pwm_pos_set[2] == pwm_count_heater && pwm_pos_set[2]!=HEATER_PWM_MASK) WRITE(EXT2_HEATER_PIN,HEATER_PINS_INVERTED);
+    if(pwm_pos_set[2] == pwm_count_heater && pwm_pos_set[2]!=HEATER_PWM_MASK) WRITE(EXT2_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
-#if EXT2_EXTRUDER_COOLER_PIN>-1
+#if EXT2_EXTRUDER_COOLER_PIN > -1
 #if PDM_FOR_COOLER
     pulseDensityModulate(EXT2_EXTRUDER_COOLER_PIN, extruder[2].coolerPWM, pwm_cooler_pos_set[2], false);
 #else
-    if(pwm_cooler_pos_set[2] == pwm_count && pwm_cooler_pos_set[2]!=255) WRITE(EXT2_EXTRUDER_COOLER_PIN,0);
+    if(pwm_cooler_pos_set[2] == pwm_count && pwm_cooler_pos_set[2]!=255) WRITE(EXT2_EXTRUDER_COOLER_PIN, 0);
 #endif
 #endif
 #endif
-#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN>-1 && NUM_EXTRUDER>3
+#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN > -1 && NUM_EXTRUDER > 3
 #if PDM_FOR_EXTRUDER
     pulseDensityModulate(EXT3_HEATER_PIN, pwm_pos[3], pwm_pos_set[3], HEATER_PINS_INVERTED);
 #else
-    if(pwm_pos_set[3] == pwm_count_heater && pwm_pos_set[3]!=HEATER_PWM_MASK) WRITE(EXT3_HEATER_PIN,HEATER_PINS_INVERTED);
+    if(pwm_pos_set[3] == pwm_count_heater && pwm_pos_set[3]!=HEATER_PWM_MASK) WRITE(EXT3_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
-#if EXT3_EXTRUDER_COOLER_PIN>-1
+#if EXT3_EXTRUDER_COOLER_PIN > -1
 #if PDM_FOR_COOLER
     pulseDensityModulate(EXT3_EXTRUDER_COOLER_PIN, extruder[3].coolerPWM, pwm_cooler_pos_set[3], false);
 #else
-    if(pwm_cooler_pos_set[3] == pwm_count && pwm_cooler_pos_set[3]!=255) WRITE(EXT3_EXTRUDER_COOLER_PIN,0);
+    if(pwm_cooler_pos_set[3] == pwm_count && pwm_cooler_pos_set[3]!=255) WRITE(EXT3_EXTRUDER_COOLER_PIN, 0);
 #endif
 #endif
 #endif
-#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN>-1 && NUM_EXTRUDER>4
+#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN > -1 && NUM_EXTRUDER > 4
 #if PDM_FOR_EXTRUDER
     pulseDensityModulate(EXT4_HEATER_PIN, pwm_pos[4], pwm_pos_set[4], HEATER_PINS_INVERTED);
 #else
-    if(pwm_pos_set[4] == pwm_count_heater && pwm_pos_set[4]!=HEATER_PWM_MASK) WRITE(EXT4_HEATER_PIN,HEATER_PINS_INVERTED);
+    if(pwm_pos_set[4] == pwm_count_heater && pwm_pos_set[4]!=HEATER_PWM_MASK) WRITE(EXT4_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
 #if EXT4_EXTRUDER_COOLER_PIN>-1
 #if PDM_FOR_COOLER
     pulseDensityModulate(EXT4_EXTRUDER_COOLER_PIN, extruder[4].coolerPWM, pwm_cooler_pos_set[4], false);
 #else
-    if(pwm_cooler_pos_set[4] == pwm_count && pwm_cooler_pos_set[4]!=255) WRITE(EXT4_EXTRUDER_COOLER_PIN,0);
+    if(pwm_cooler_pos_set[4] == pwm_count && pwm_cooler_pos_set[4] != 255) WRITE(EXT4_EXTRUDER_COOLER_PIN, 0);
 #endif
 #endif
 #endif
-#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1 && NUM_EXTRUDER>5
+#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN > -1 && NUM_EXTRUDER > 5
 #if PDM_FOR_EXTRUDER
     pulseDensityModulate(EXT5_HEATER_PIN, pwm_pos[5], pwm_pos_set[5], HEATER_PINS_INVERTED);
 #else
@@ -952,41 +952,40 @@ void PWM_TIMER_VECTOR ()
 #if PDM_FOR_COOLER
     pulseDensityModulate(EXT5_EXTRUDER_COOLER_PIN, extruder[5].coolerPWM, pwm_cooler_pos_set[5], false);
 #else
-    if(pwm_cooler_pos_set[5] == pwm_count && pwm_cooler_pos_set[5]!=255) WRITE(EXT5_EXTRUDER_COOLER_PIN,0);
+    if(pwm_cooler_pos_set[5] == pwm_count && pwm_cooler_pos_set[5] != 255) WRITE(EXT5_EXTRUDER_COOLER_PIN, 0);
 #endif
 #endif
 #endif
 #if FAN_BOARD_PIN>-1
 #if PDM_FOR_COOLER
-    pulseDensityModulate(FAN_BOARD_PIN, pwm_pos[NUM_EXTRUDER+1], pwm_pos_set[NUM_EXTRUDER+1], false);
+    pulseDensityModulate(FAN_BOARD_PIN, pwm_pos[NUM_EXTRUDER + 1], pwm_pos_set[NUM_EXTRUDER + 1], false);
 #else
-    if(pwm_pos_set[NUM_EXTRUDER+1] == pwm_count && pwm_pos_set[NUM_EXTRUDER+1]!=255) WRITE(FAN_BOARD_PIN,0);
+    if(pwm_pos_set[NUM_EXTRUDER + 1] == pwm_count && pwm_pos_set[NUM_EXTRUDER+1] != 255) WRITE(FAN_BOARD_PIN, 0);
 #endif
 #endif
-#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
+#if FAN_PIN > -1 && FEATURE_FAN_CONTROL
 #if PDM_FOR_COOLER
-    pulseDensityModulate(FAN_PIN, pwm_pos[NUM_EXTRUDER+2], pwm_pos_set[NUM_EXTRUDER+2], false);
+    pulseDensityModulate(FAN_PIN, pwm_pos[NUM_EXTRUDER + 2], pwm_pos_set[NUM_EXTRUDER+2], false);
 #else
-    if(pwm_pos_set[NUM_EXTRUDER+2] == pwm_count && pwm_pos_set[NUM_EXTRUDER+2]!=255) WRITE(FAN_PIN,0);
+    if(pwm_pos_set[NUM_EXTRUDER + 2] == pwm_count && pwm_pos_set[NUM_EXTRUDER + 2] != 255) WRITE(FAN_PIN, 0);
 #endif
 #endif
-#if HEATED_BED_HEATER_PIN>-1 && HAVE_HEATED_BED
+#if HEATED_BED_HEATER_PIN > -1 && HAVE_HEATED_BED
 #if PDM_FOR_EXTRUDER
     pulseDensityModulate(HEATED_BED_HEATER_PIN, pwm_pos[NUM_EXTRUDER], pwm_pos_set[NUM_EXTRUDER], HEATER_PINS_INVERTED);
 #else
-    if(pwm_pos_set[NUM_EXTRUDER] == pwm_count_heater && pwm_pos_set[NUM_EXTRUDER]!=HEATER_PWM_MASK) WRITE(HEATED_BED_HEATER_PIN,HEATER_PINS_INVERTED);
+    if(pwm_pos_set[NUM_EXTRUDER] == pwm_count_heater && pwm_pos_set[NUM_EXTRUDER] != HEATER_PWM_MASK) WRITE(HEATED_BED_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
 #endif
     HAL::allowInterrupts();
     counterPeriodical++; // Appxoimate a 100ms timer
     if(counterPeriodical >= 390) //  (int)(F_CPU/40960))
     {
-        counterPeriodical=0;
-        executePeriodical=1;
+        counterPeriodical = 0;
+        executePeriodical = 1;
     }
 // read analog values -- only read one per interrupt
-#if ANALOG_INPUTS>0
-
+#if ANALOG_INPUTS > 0        
     // conversion finished?
     //if(ADC->ADC_ISR & ADC_ISR_EOC(adcChannel[osAnalogInputPos]))
     if(ADC->ADC_ISR & ADC_ISR_EOC(osAnalogInputChannels[osAnalogInputPos]))
@@ -1019,7 +1018,7 @@ void PWM_TIMER_VECTOR ()
             ADC->ADC_CR = ADC_CR_START;
         }
     }
-#endif
+#endif // ANALOG_INPUTS > 0
     UI_FAST; // Short timed user interface action
     pwm_count++;
     pwm_count_heater += HEATER_PWM_STEP;
@@ -1028,12 +1027,12 @@ void PWM_TIMER_VECTOR ()
 
 /** \brief Timer routine for extruder stepper.
 
-Several methods need to move the extruder. To get a optimal
-result, all methods update the printer_state.extruderStepsNeeded
-with the number of additional steps needed. During this
-interrupt, one step is executed. This will keep the extruder
-moving, until the total wanted movement is achieved. This will
-be done with the maximum allowable speed for the extruder.
+Several methods need to move the extruder. To get a optimal 
+result, all methods update the printer_state.extruderStepsNeeded 
+with the number of additional steps needed. During this 
+interrupt, one step is executed. This will keep the extruder 
+moving, until the total wanted movement is achieved. This will 
+be done with the maximum allowable speed for the extruder. 
 */
 #if USE_ADVANCE
     static int extruderLastDirection = 0;

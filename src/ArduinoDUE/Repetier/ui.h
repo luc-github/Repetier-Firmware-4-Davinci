@@ -465,7 +465,6 @@ extern const int8_t encoder_table[16] PROGMEM ;
 
 
 
-
 #if FEATURE_CONTROLLER == UICONFIG_CONTROLLER
 #include "uiconfig.h"
 #endif
@@ -530,7 +529,7 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_CLICK       31
 #define UI_RESET_PIN           41
 #else  // Smartcontroller
-#if MOTHERBOARD==80 // Rumba has different pins as RAMPS!
+#if MOTHERBOARD == 80 // Rumba has different pins as RAMPS!
 #define BEEPER_PIN             44
 #define UI_DISPLAY_RS_PIN      19
 #define UI_DISPLAY_RW_PIN      -1

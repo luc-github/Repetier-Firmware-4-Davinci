@@ -382,6 +382,7 @@ bool SDCard::showFilename(dir_t *p,const char *filename)
     return true;
 }
 #endif
+
 int8_t RFstricmp(const char* s1, const char* s2)
 {
     while(*s1 && (tolower(*s1) == tolower(*s2)))

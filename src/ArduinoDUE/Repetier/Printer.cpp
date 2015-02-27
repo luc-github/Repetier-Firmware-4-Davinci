@@ -457,9 +457,10 @@ uint8_t Printer::moveTo(float x,float y,float z,float e,float f)
         feedrate = f;
 #if NONLINEAR_SYSTEM
     // Disable software endstop or we get wrong distances when length < real length
-    if (!PrintLine::queueDeltaMove(ALWAYS_CHECK_ENDSTOPS, true, false)) {
-      Com::printWarningFLN(PSTR("moveTo / queueDeltaMove returns error"));
-      return 0;
+    if (!PrintLine::queueDeltaMove(ALWAYS_CHECK_ENDSTOPS, true, false))
+    {
+        Com::printWarningFLN(PSTR("moveTo / queueDeltaMove returns error"));
+        return 0;
     }
 #else
     PrintLine::queueCartesianMove(ALWAYS_CHECK_ENDSTOPS, true);
@@ -606,7 +607,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         {
             if(
 #if MIN_EXTRUDER_TEMP > 30
-                Extruder::current->tempControl.currentTemperatureC<MIN_EXTRUDER_TEMP ||
+                Extruder::current->tempControl.currentTemperatureC < MIN_EXTRUDER_TEMP ||
 #endif
                 fabs(p - currentPositionSteps[E_AXIS]) > EXTRUDE_MAXLENGTH * axisStepsPerMM[E_AXIS])
                 currentPositionSteps[E_AXIS] = p;
@@ -621,7 +622,8 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         else
             feedrate = com->F * (float)feedrateMultiply * 0.00016666666f;
     }
-    if(!Printer::isPositionAllowed(lastCmdPos[X_AXIS],lastCmdPos[Y_AXIS], lastCmdPos[Z_AXIS])) {
+    if(!Printer::isPositionAllowed(lastCmdPos[X_AXIS], lastCmdPos[Y_AXIS], lastCmdPos[Z_AXIS]))
+    {
         currentPositionSteps[E_AXIS] = destinationSteps[E_AXIS];
         return false; // ignore move
     }
@@ -1469,7 +1471,7 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
     }
     Commands::waitUntilEndOfAllMoves();
     int32_t sum = 0,probeDepth,shortMove = (int32_t)((float)Z_PROBE_SWITCHING_DISTANCE * axisStepsPerMM[Z_AXIS]);
-    int32_t lastCorrection = currentPositionSteps[Z_AXIS];
+    int32_t lastCorrection = currentPositionSteps[Z_AXIS]; // starting position
 #if NONLINEAR_SYSTEM
     realDeltaPositionSteps[Z_AXIS] = currentDeltaPositionSteps[Z_AXIS]; // update real
 #endif
@@ -1507,13 +1509,13 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
             }
         }
         sum += lastCorrection - currentPositionSteps[Z_AXIS];
-        if(r + 1 < repeat)
-            PrintLine::moveRelativeDistanceInSteps(0,0,shortMove,0,EEPROM::zProbeSpeed(),true,false);
+        if(r + 1 < repeat) // go only shortes possible move up for repetitions
+            PrintLine::moveRelativeDistanceInSteps(0, 0, shortMove, 0, EEPROM::zProbeSpeed(), true, false);
     }
-    float distance = (float)sum * invAxisStepsPerMM[Z_AXIS] / (float)repeat + EEPROM::zProbeHeight();
-    Com::printF(Com::tZProbe,distance);
-    Com::printF(Com::tSpaceXColon,realXPosition());
-    Com::printFLN(Com::tSpaceYColon,realYPosition());
+    float distance = static_cast<float>(sum) * invAxisStepsPerMM[Z_AXIS] / static_cast<float>(repeat) + EEPROM::zProbeHeight();
+    Com::printF(Com::tZProbe, distance);
+    Com::printF(Com::tSpaceXColon, realXPosition());
+    Com::printFLN(Com::tSpaceYColon, realYPosition());
     // Go back to start position
     PrintLine::moveRelativeDistanceInSteps(0, 0, lastCorrection - currentPositionSteps[Z_AXIS], 0, EEPROM::zProbeSpeed(), true, false);
     //PrintLine::moveRelativeDistanceInSteps(offx,offy,0,0,EEPROM::zProbeXYSpeed(),true,true);

@@ -25,6 +25,7 @@ STEPPER_CURRENT_CONTROL
 #define CURRENT_CONTROL_LTC2600 3  // Use LTC2600 like Foltyn 3D Master
 
 
+
 #if MOTHERBOARD == 401
 #ifndef __SAM3X8E__
 #error Oops!  Make sure you have 'Arduino Due' selected from the 'Tools -> Boards' menu.
@@ -42,7 +43,7 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_X_MAX_PIN      2
 #define ORIG_X_ENABLE_PIN   38
 
-#define ORIG_Y_STEP_PIN     60  // A6
+#define ORIG_Y_STEP_PIN     60  // A6 
 #define ORIG_Y_DIR_PIN      61  // A7
 #define ORIG_Y_MIN_PIN      14
 #define ORIG_Y_MAX_PIN      15
@@ -70,17 +71,17 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_E1_DIR_PIN     34
 #define ORIG_E1_ENABLE_PIN  40
 
-#define SDPOWER        -1
-#define SDSS           53 // 10 if using HW SPI. 53 if using SW SPI
-#define LED_PIN        13
-#define ORIG_FAN_PIN       -1
+#define SDPOWER 	   -1
+#define SDSS		   53 // 10 if using HW SPI. 53 if using SW SPI
+#define LED_PIN 	   13
+#define ORIG_FAN_PIN 	   -1
 #define ORIG_PS_ON_PIN      12
-#define KILL_PIN       -1
+#define KILL_PIN	   -1
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
 
 
-#define SDA_PIN                 20      // 20 or 70
-#define SCL_PIN                 21      // 21 or 71
+#define SDA_PIN 				20  	// 20 or 70
+#define SCL_PIN 				21  	// 21 or 71
 
 
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
@@ -115,7 +116,7 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_X_MAX_PIN      34
 #define ORIG_X_ENABLE_PIN   26
 
-#define ORIG_Y_STEP_PIN     17
+#define ORIG_Y_STEP_PIN     17 
 #define ORIG_Y_DIR_PIN      16
 #define ORIG_Y_MIN_PIN      30
 #define ORIG_Y_MAX_PIN      36
@@ -130,7 +131,7 @@ STEPPER_CURRENT_CONTROL
 // Note that on the Due pin A0 on the board is channel 2 on the ARM chip
 #define HEATER_0_PIN     13
 #define TEMP_0_PIN       7 // Due analog pin #54
-#define HEATER_1_PIN     7
+#define HEATER_1_PIN     7 
 #define TEMP_1_PIN       3 // Due analog pin #58
 #define HEATER_2_PIN     12
 #define TEMP_2_PIN       6 // Due analog pin #55
@@ -159,19 +160,19 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_E4_ENABLE_PIN  31
 
 #define SDSUPPORT      1
-#define SDPOWER        -1
-#define SDSS            4// 4,10,52 if using HW SPI.
+#define SDPOWER 	   -1
+#define SDSS		    4// 4,10,52 if using HW SPI.
 #define SDCARDDETECT       14
 #define SDCARDDETECTINVERTED 0
-#define LED_PIN        -1
-#define ORIG_FAN_PIN       9
-#define ORIG_FAN2_PIN           8
+#define LED_PIN 	   -1
+#define ORIG_FAN_PIN 	   9 
+#define ORIG_FAN2_PIN           8 
 #define ORIG_PS_ON_PIN          40
-#define KILL_PIN       -1
+#define KILL_PIN	   -1
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
 
-#define SDA_PIN                 20      // 20 or 70
-#define SCL_PIN                 21      // 21 or 71
+#define SDA_PIN 				20  	// 20 or 70
+#define SCL_PIN 				21  	// 21 or 71
 
 
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
@@ -193,7 +194,7 @@ STEPPER_CURRENT_CONTROL
 
 /****************************************************************************/
 // RAMPS-FD Board
-//
+// 
 #if MOTHERBOARD == 403 || MOTHERBOARD == 404
 #ifndef __SAM3X8E__
 #error Oops!  Make sure you have 'Arduino Due' selected from the 'Tools -> Boards' menu.
@@ -218,7 +219,7 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_X_MAX_PIN      30
 #define ORIG_X_ENABLE_PIN   48
 
-#define ORIG_Y_STEP_PIN     65
+#define ORIG_Y_STEP_PIN     65 
 #define ORIG_Y_DIR_PIN      64
 #define ORIG_Y_MIN_PIN      24
 #define ORIG_Y_MAX_PIN      38
@@ -234,7 +235,7 @@ STEPPER_CURRENT_CONTROL
 #define HEATER_0_PIN     8
 #define TEMP_0_PIN       7 // Due analog pin #54
 
-#define HEATER_1_PIN     9
+#define HEATER_1_PIN     9 
 #define TEMP_1_PIN       6 // Due analog pin #55
 
 #define HEATER_2_PIN     10
@@ -258,20 +259,20 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_E2_ENABLE_PIN  45
 
 //#define SDSUPPORT      false
-#define SDPOWER        -1
-#define SDSS           4 // 4,10,52 if using HW SPI.
-//#define SDSS         -1
+#define SDPOWER 	   -1
+#define SDSS		   4 // 4,10,52 if using HW SPI.
+//#define SDSS		   -1
 //#define SDCARDDETECT   -1
 #define SDCARDDETECTINVERTED false
-#define LED_PIN        -1
-#define ORIG_FAN_PIN       12
+#define LED_PIN 	   -1
+#define ORIG_FAN_PIN 	   12 
 #define ORIG_FAN2_PIN       2
 #define ORIG_PS_ON_PIN      53
-#define KILL_PIN       -1
+#define KILL_PIN	   -1
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
 
-#define SDA_PIN                 20      // 20 or 70
-#define SCL_PIN                 21      // 21 or 71
+#define SDA_PIN 				20  	// 20 or 70
+#define SCL_PIN 				21  	// 21 or 71
 
 
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
@@ -324,12 +325,12 @@ STEPPER_CURRENT_CONTROL
 #endif
 
 // Available chip select pins for HW SPI are 4 10 52
-#if (SDSS == 4) || (SDSS == 10) || (SDSS == 52)
+#if (SDSS == 4) || (SDSS == 10) || (SDSS == 52) 
 #if (SDSS == 10)
 #define SPI_PIN         77
 #define SPI_CHAN        0
 #else
-#if (SDSS == 52)
+#if (SDSS == 52) 
 #define SPI_PIN         86
 #define SPI_CHAN        2
 #else // SDSS == 4
@@ -341,11 +342,11 @@ STEPPER_CURRENT_CONTROL
 #define MISO_PIN        74
 #define SCK_PIN         76
 //#define DUE_SOFTWARE_SPI
-#elsif (SDSS == 53)
+#elsif MOTHERBOARD != 999
 #define DUE_SOFTWARE_SPI
-#define MOSI_PIN        51
-#define MISO_PIN        50
-#define SCK_PIN         52
+#define MOSI_PIN		51
+#define MISO_PIN		50
+#define SCK_PIN 		52
 #endif
 
 

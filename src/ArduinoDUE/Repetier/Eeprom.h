@@ -370,14 +370,13 @@ static inline float ManualProbeY4() {
         return AXISCOMP_TANYZ;
 #endif
     }
-        static inline float axisCompTanXZ() {
+    static inline float axisCompTanXZ() {
 #if EEPROM_MODE != 0
         return HAL::eprGetFloat(EPR_AXISCOMP_TANXZ);
 #else
         return AXISCOMP_TANXZ;
 #endif
     }
-
 
 #if NONLINEAR_SYSTEM
     static inline int16_t deltaSegmentsPerSecondMove() {
@@ -468,12 +467,12 @@ static inline void setTowerYFloor(float newZ) {
 #if DRIVE_SYSTEM == DELTA
       Printer::yMin = newZ;
       Printer::updateDerivedParameter();
-      Com::printFLN(PSTR("Y (B) tower floor set to: "),Printer::yMin,3);
+      Com::printFLN(PSTR("Y (B) tower floor set to: "), Printer::yMin, 3);
 #if EEPROM_MODE != 0
 
         HAL::eprSetFloat(EPR_Y_HOME_OFFSET,Printer::yMin);
         uint8_t newcheck = computeChecksum();
-        if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
+        if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
             HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
 #endif
 #endif
@@ -482,11 +481,11 @@ static inline void setTowerZFloor(float newZ) {
 #if DRIVE_SYSTEM == DELTA
       Printer::zMin = newZ;
       Printer::updateDerivedParameter();
-      Com::printFLN(PSTR("Z (C) tower floor set to: "),Printer::zMin,3);
+      Com::printFLN(PSTR("Z (C) tower floor set to: "), Printer::zMin, 3);
 #if EEPROM_MODE != 0
       HAL::eprSetFloat(EPR_Z_HOME_OFFSET,Printer::zMin);
       uint8_t newcheck = computeChecksum();
-      if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
+      if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
         HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
 #endif
 #endif
@@ -495,7 +494,7 @@ static inline void setTowerZFloor(float newZ) {
 #if EEPROM_MODE != 0
         HAL::eprSetInt16(EPR_DELTA_TOWERX_OFFSET_STEPS,steps);
         uint8_t newcheck = computeChecksum();
-        if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
+        if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
             HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
 #endif
     }
@@ -503,7 +502,7 @@ static inline void setTowerZFloor(float newZ) {
 #if EEPROM_MODE != 0
         HAL::eprSetInt16(EPR_DELTA_TOWERY_OFFSET_STEPS,steps);
         uint8_t newcheck = computeChecksum();
-        if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
+        if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
             HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
 #endif
     }
@@ -511,7 +510,7 @@ static inline void setTowerZFloor(float newZ) {
 #if EEPROM_MODE != 0
         HAL::eprSetInt16(EPR_DELTA_TOWERZ_OFFSET_STEPS,steps);
         uint8_t newcheck = computeChecksum();
-        if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
+        if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
             HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
 #endif
     }
