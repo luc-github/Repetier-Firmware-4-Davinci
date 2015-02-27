@@ -690,7 +690,11 @@ public:
     // Watchdog support
     inline static void startWatchdog() {  WDT->WDT_MR = WDT_MR_WDRSTEN | WATCHDOG_INTERVAL | (WATCHDOG_INTERVAL << 16);WDT->WDT_CR = 0xA5000001;};
     inline static void stopWatchdog() {}
-    inline static void pingWatchdog() {WDT->WDT_CR = 0xA5000001;};
+    inline static void pingWatchdog() {
+#if FEATURE_WATCHDOG
+    WDT->WDT_CR = 0xA5000001;
+#endif
+    };
 
     inline static float maxExtruderTimerFrequency() {return (float)F_CPU/TIMER0_PRESCALE;}
 #if FEATURE_SERVO
