@@ -29,7 +29,7 @@ The previous version (based on repetier v0.91) can be found [here](https://githu
 ##Installation
 1. With the machine off remove the back panel and short the jumper JP1.  Some Boards do not have jumper pins exposed but can still be shorted with a conductive wire.
 2. Turn the machine on and wait a few seconds then turn it off again.  The machine will have been flashed removing the current stock firmware and allowing it to be detected as a normal arduino DUE. NOTE: Windows users may need to install drivers to detect the board.  Consult the Voltivo forums.
-3. Use an arduino IDE supporting arduino DUE, [version 1.5.8+ or 1.6.0](http://arduino.cc/en/Main/Software#toc3), but compiling with 1.6.0 seems bringing some USB communications issue currently.    
+3. Use an arduino IDE supporting arduino DUE, [version 1.5.8+ Not 1.6.0](http://arduino.cc/en/Main/OldSoftwareReleases), 1.6.0 bring several issues - a [tracker](https://github.com/luc-github/Repetier-Firmware-0.92/issues/51) is open to follow up .    
 4. Update arduino files (variants.cpp and USBcore.cpp) with the one(s) present in src\ArduinoDUE\AdditionalArduinoFiles\1.5.8. or in src\ArduinoDUE\AdditionalArduinoFiles\1.6.0 according your IDE version   
 NOTE: You do not need to compile arduino from source these files are in the arduino directory structure.  On Mac you will need to right click on the Arduino.app to Show Package Contents.    
 5. Open the project file named repetier.ino located in src\ArduinoDUE\Repetier directory in the arduino IDE. 
@@ -51,9 +51,6 @@ for basic installation just change :
   1 for DaVinci 1.0 (1Fan, 1 Extruder)   
   2 for DaVinci 2.0 SF (1Fan, 2 Extruders)   
   3 for DaVinci 2.0  (2Fans, 2 Extruders)   
-
-For some boards that have a heatbed sensor with a slow response time and generate a defect temperature :   
-Set WARMUP_BED_ON_INIT to 1, it will preheat bed if it is necessary to increase sensor response time when starting printer if a defect is detected, if it is a real sensor issue - it will stop after 10 seconds and generate a temperature defect error. 
 
 Support for 1.0A and 2.0A:  need to change <CODE>#define MODEL 0</CODE>  to  <CODE>#define MODEL 1</CODE>
 
