@@ -67,6 +67,7 @@ typedef char prog_char;
 #define pgm_read_word_near(addr) pgm_read_word(addr)
 #define pgm_read_dword(addr) (*(const unsigned long *)(addr))
 #define pgm_read_dword_near(addr) pgm_read_dword(addr)
+#define _BV(x) (1 << (x))
 
 #define FSTRINGVALUE(var,value) const char var[] PROGMEM = value;
 #define FSTRINGVAR(var) static const char var[] PROGMEM;
@@ -120,12 +121,12 @@ typedef char prog_char;
 #define SERVO2500US             (((F_CPU_TRUE / SERVO_PRESCALE) / 1000000) * 2500)
 #define SERVO5000US             (((F_CPU_TRUE / SERVO_PRESCALE) / 1000000) * 5000)
 
-#define AD_PRESCALE_FACTOR      41  // 1 MHz ADC clock
-#define AD_TRACKING_CYCLES      0   // 0 - 15     + 1 adc clock cycles
+#define AD_PRESCALE_FACTOR      84  // 500 kHz ADC clock 
+#define AD_TRACKING_CYCLES      4   // 0 - 15     + 1 adc clock cycles
 #define AD_TRANSFER_CYCLES      1   // 0 - 3      * 2 + 3 adc clock cycles
 
-#define ADC_ISR_EOC(channel)    (0x1u << channel)
-#define ENABLED_ADC_CHANNELS    {TEMP_0_PIN, TEMP_1_PIN, TEMP_2_PIN}
+#define ADC_ISR_EOC(channel)    (0x1u << channel) 
+#define ENABLED_ADC_CHANNELS    {TEMP_0_PIN, TEMP_1_PIN, TEMP_2_PIN}  
 
 #define PULLUP(IO,v)            {pinMode(IO, (v!=LOW ? INPUT_PULLUP : INPUT)); }
 
@@ -203,6 +204,11 @@ class InterruptProtectedBlock {
 
 #define EEPROM_OFFSET               0
 #define SECONDS_TO_TICKS(s) (unsigned long)(s*(float)F_CPU)
+#define ANALOG_INPUT_SAMPLE 6
+#define ANALOG_INPUT_MEDIAN 10
+
+// Bits of the ADC converter
+#define ANALOG_INPUT_BITS 12
 #define ANALOG_REDUCE_BITS 0
 #define ANALOG_REDUCE_FACTOR 1
 

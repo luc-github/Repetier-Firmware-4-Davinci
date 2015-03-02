@@ -27,8 +27,8 @@
                                                                                             //Warning: for DaVinci 1.0 need to add a permanent fan with power supply to cool extruder
 #define VERSION_MAJOR " 1"
 #define VERSION_MINOR_YEAR "15"
-#define VERSION_MINOR_MONTH "02"
-#define VERSION_MINOR_DAY "26"
+#define VERSION_MINOR_MONTH "03"
+#define VERSION_MINOR_DAY "02"
 #define VERSION_BUILD "1"
 
 // ################ END MANUAL SETTINGS ##########################

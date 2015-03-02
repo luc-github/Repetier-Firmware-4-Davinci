@@ -47,9 +47,6 @@ extern int16_t read_max31855(uint8_t ss_pin);
 
 #if ANALOG_INPUTS > 0
 const uint8 osAnalogInputChannels[] PROGMEM = ANALOG_INPUT_CHANNELS;
-uint8 osAnalogInputCounter[ANALOG_INPUTS];
-uint osAnalogInputBuildup[ANALOG_INPUTS];
-uint8 osAnalogInputPos=0; // Current sampling position
 volatile uint osAnalogInputValues[ANALOG_INPUTS];
 #endif
 

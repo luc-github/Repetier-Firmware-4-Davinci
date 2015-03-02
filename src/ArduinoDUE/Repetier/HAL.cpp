@@ -32,6 +32,17 @@
 extern "C" char *sbrk(int i);
 extern long bresenham_step();
 
+#define NUM_ADC_SAMPLES 2 + (1 << ANALOG_INPUT_SAMPLE)
+#if ANALOG_INPUTS > 0
+int32_t osAnalogInputBuildup[ANALOG_INPUTS];
+int32_t osAnalogSamples[ANALOG_INPUTS][ANALOG_INPUT_MEDIAN];
+static int32_t adcSamplesMin[ANALOG_INPUTS];
+static int32_t adcSamplesMax[ANALOG_INPUTS];
+static int adcCounter = 0,adcSamplePos = 0;
+#endif
+
+static   uint32_t  adcEnable = 0;
+
 char HAL::virtualEeprom[EEPROM_BYTES];  
 volatile uint8_t HAL::insideTimer1=0;
 #ifndef DUE_SOFTWARE_SPI
@@ -176,22 +187,21 @@ void HAL::setupTimer() {
 // Initialize ADC channels
 void HAL::analogStart(void)
 {
-  uint32_t  adcEnable = 0;
+
 
   // ensure we can write to ADC registers
-  ADC->ADC_WPMR = ADC_WPMR_WPKEY(0);
+  ADC->ADC_WPMR = 0x41444300u; //ADC_WPMR_WPKEY(0);
   pmc_enable_periph_clk(ID_ADC);  // enable adc clock
 
   for(int i = 0; i < ANALOG_INPUTS; i++)
   {
-      osAnalogInputCounter[i] = 0;
       osAnalogInputValues[i] = 0;
-
-  // osAnalogInputChannels
-      //adcEnable |= (0x1u << adcChannel[i]);
+      adcSamplesMin[i] = 100000;
+      adcSamplesMax[i] = 0;
       adcEnable |= (0x1u << osAnalogInputChannels[i]);
+      for(int j = 0; j < ANALOG_INPUT_MEDIAN; j++)
+        osAnalogSamples[i][j] = 2048; // we want to prevent early error from bad starting values
   }
-
   // enable channels
   ADC->ADC_CHER = adcEnable;
   ADC->ADC_CHDR = !adcEnable;
@@ -204,7 +214,7 @@ void HAL::analogStart(void)
   // set prescaler rate  MCK/((PRESCALE+1) * 2)
   // set tracking time  (TRACKTIM+1) * clock periods
   // set transfer period  (TRANSFER * 2 + 3) 
-  ADC->ADC_MR = ADC_MR_TRGEN_DIS | ADC_MR_TRGSEL_ADC_TRIG0 | ADC_MR_LOWRES_BITS_10 |
+  ADC->ADC_MR = ADC_MR_TRGEN_DIS | ADC_MR_TRGSEL_ADC_TRIG0 | ADC_MR_LOWRES_BITS_12 |
             ADC_MR_SLEEP_NORMAL | ADC_MR_FWUP_OFF | ADC_MR_FREERUN_OFF |
             ADC_MR_STARTUP_SUT64 | ADC_MR_SETTLING_AST17 | ADC_MR_ANACH_NONE |
             ADC_MR_USEQ_NUM_ORDER |
@@ -987,36 +997,35 @@ void PWM_TIMER_VECTOR ()
 // read analog values -- only read one per interrupt
 #if ANALOG_INPUTS > 0        
     // conversion finished?
-    //if(ADC->ADC_ISR & ADC_ISR_EOC(adcChannel[osAnalogInputPos]))
-    if(ADC->ADC_ISR & ADC_ISR_EOC(osAnalogInputChannels[osAnalogInputPos]))
-    {
-      //osAnalogInputChannels
-        //osAnalogInputBuildup[osAnalogInputPos] += ADC->ADC_CDR[adcChannel[osAnalogInputPos]];
-        osAnalogInputBuildup[osAnalogInputPos] += ADC->ADC_CDR[osAnalogInputChannels[osAnalogInputPos]];
-        if(++osAnalogInputCounter[osAnalogInputPos] >= (1 << ANALOG_INPUT_SAMPLE))
+    if((ADC->ADC_ISR & adcEnable) == adcEnable) 
+    {          
+      adcCounter++;
+      for(int i = 0; i < ANALOG_INPUTS; i++) {
+        int32_t cur = ADC->ADC_CDR[osAnalogInputChannels[i]];
+        osAnalogInputBuildup[i] += cur;
+        adcSamplesMin[i] = RMath::min(adcSamplesMin[i], cur);
+        adcSamplesMax[i] = RMath::max(adcSamplesMax[i], cur);
+        if(adcCounter >= NUM_ADC_SAMPLES)
         {
-#if ANALOG_INPUT_BITS+ANALOG_INPUT_SAMPLE<12
-            osAnalogInputValues[osAnalogInputPos] =
-                osAnalogInputBuildup[osAnalogInputPos] <<
-                (12-ANALOG_INPUT_BITS-ANALOG_INPUT_SAMPLE);
-#endif
-#if ANALOG_INPUT_BITS+ANALOG_INPUT_SAMPLE>12
-            osAnalogInputValues[osAnalogInputPos] =
-                osAnalogInputBuildup[osAnalogInputPos] >>
-                (ANALOG_INPUT_BITS+ANALOG_INPUT_SAMPLE-12);
-#endif
-#if ANALOG_INPUT_BITS+ANALOG_INPUT_SAMPLE==12
-            osAnalogInputValues[osAnalogInputPos] =
-                osAnalogInputBuildup[osAnalogInputPos];
-#endif
-            osAnalogInputBuildup[osAnalogInputPos] = 0;
-            osAnalogInputCounter[osAnalogInputPos] = 0;
-        }
-        // Start next conversion cycle
-        if(++osAnalogInputPos>=ANALOG_INPUTS) {
-            osAnalogInputPos = 0;
-            ADC->ADC_CR = ADC_CR_START;
-        }
+          // Strip biggest and smallest value and round correctly
+          osAnalogInputBuildup[i] = osAnalogInputBuildup[i] + (1 << (ANALOG_INPUT_SAMPLE - 1)) - (adcSamplesMin[i] + adcSamplesMax[i]);
+          adcSamplesMin[i] = 100000;
+          adcSamplesMax[i] = 0;
+          osAnalogSamples[i][adcSamplePos] = osAnalogInputBuildup[i] >> ANALOG_INPUT_SAMPLE;
+          int sum = 0;
+          for(int j = 0; j < ANALOG_INPUT_MEDIAN; j++)
+            sum += osAnalogSamples[i][j];
+          osAnalogInputValues[i] = sum / ANALOG_INPUT_MEDIAN;
+          osAnalogInputBuildup[i] = 0;
+        } // adcCounter >= NUM_ADC_SAMPLES
+      } // for i
+      if(adcCounter >= NUM_ADC_SAMPLES) {
+          adcCounter = 0;
+          adcSamplePos++;
+          if(adcSamplePos >= ANALOG_INPUT_MEDIAN)
+            adcSamplePos = 0;
+      }
+      ADC->ADC_CR = ADC_CR_START; // reread values
     }
 #endif // ANALOG_INPUTS > 0
     UI_FAST; // Short timed user interface action
