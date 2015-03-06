@@ -246,7 +246,7 @@
 #define UI_TEXT_EXTR1_TEMP       "Extrud. 2:%E1" cDEG "C"
 #define UI_TEXT_EXTR2_TEMP       "Extrud. 3:%E2" cDEG "C"
 #if NUM_EXTRUDER == 1
-#define UI_TEXT_EXTR0_OFF        "SwitchOff Ext  %B4"
+#define UI_TEXT_EXTR0_OFF        "SwitchOff Ext %B4"
 #else
 #define UI_TEXT_EXTR0_OFF        "SwitchOff Ext1%B4"
 #endif
