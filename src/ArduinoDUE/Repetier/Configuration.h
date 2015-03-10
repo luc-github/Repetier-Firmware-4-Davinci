@@ -25,13 +25,15 @@
 #define MODEL  0//"0" for first generation (jumper JP1 to reset ) , "1" for new generation   (jumper J37 to reset)
 #define REPURPOSE_FAN_TO_COOL_EXTRUSIONS 0 //Setting this to 1 will repurpose the main Extruder cooling fan to be controlled VIA M106/M107
                                                                                             //Warning: for DaVinci 1.0 need to add a permanent fan with power supply to cool extruder
+
+// ################ END MANUAL SETTINGS ##########################
+
+//Version
 #define VERSION_MAJOR " 1"
 #define VERSION_MINOR_YEAR "15"
 #define VERSION_MINOR_MONTH "03"
 #define VERSION_MINOR_DAY "02"
 #define VERSION_BUILD "1"
-
-// ################ END MANUAL SETTINGS ##########################
 
 //Decouple Test feature, do not disable it unless you know what you are doing!!!
 //if you have decouple issue it means you have hardware issue or bad air flow management!!!
