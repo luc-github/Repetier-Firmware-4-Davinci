@@ -55,6 +55,7 @@ Currently supported hardware:
 #ifndef _ui_config_h
 #define _ui_config_h
 
+//Davinci Specific, for cheat key
 #define FLAG_OK					1 
 #define FLAG_NEXT				2 
 #define FLAG_PREVIOUS		4 
@@ -85,6 +86,7 @@ works, use the ascii charset 0 as fallback. Not the nicest for everything but wo
 #endif
 
 #if BEEPER_TYPE==1 && !defined(BEEPER_PIN)
+//Davinci Specific, Buzzer pin
 #define BEEPER_PIN 66
 #endif
 #if BEEPER_TYPE==2
@@ -105,6 +107,7 @@ What display type do you use?
                If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
 5 = U8G supported display
 */
+//Davinci Specific, LCD use 8 bits protocole
 #define UI_DISPLAY_TYPE DISPLAY_8BIT
 
 #if UI_DISPLAY_TYPE == DISPLAY_U8G // Special case for graphic displays
@@ -133,6 +136,7 @@ What display type do you use?
 /** Number of columns per row
 Typical values are 16 and 20
 */
+//Davinci Specific, screen has only 16 columns
 #define UI_COLS 16
 /**
 Rows of your display. 2 or 4
@@ -198,6 +202,7 @@ Define the pin
 #define UI_DISPLAY_D7_PIN _BV(9)*/
 
 #else // Direct display connections
+//Davinci Specific, LCD and Back light pins
 #define UI_DISPLAY_RS_PIN		8		// PINK.1, 88, D_RS
 #define UI_DISPLAY_RW_PIN		-1
 #define UI_DISPLAY_RW_PIN_NOT_USED		45 //to set state to low as it is connected
@@ -222,6 +227,7 @@ Define the pin
 0 = No keys attached - disables also menu
 1 = Some keys attached
 */
+//Davinci Specific, there is a key pad (6 keys: left, right,up, down, Ok, Menu)
 #define UI_HAS_KEYS 1
 
 
@@ -348,6 +354,7 @@ const int matrixActions[] PROGMEM = UI_MATRIX_ACTIONS;
 void uiInitKeys() {
 #if UI_HAS_KEYS!=0
   //UI_KEYS_INIT_CLICKENCODER_LOW(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+  //Davinci Specific, Davinci Key pad pins
   UI_KEYS_INIT_BUTTON_LOW(44); // push button, connects gnd to pin
   UI_KEYS_INIT_BUTTON_LOW(10);
   UI_KEYS_INIT_BUTTON_LOW(72);
@@ -362,9 +369,12 @@ void uiInitKeys() {
 }
 void uiCheckKeys(int &action) {
 #if UI_HAS_KEYS!=0
+
+//Davinci Specific, for cheat key
  int key_flag=0;
  //UI_KEYS_CLICKENCODER_LOW_REV(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
- UI_KEYS_BUTTON_LOW(76,UI_ACTION_OK); // push button, connects gnd to pin
+//Davinci Specific, key pad and cheat keys definition 
+UI_KEYS_BUTTON_LOW(76,UI_ACTION_OK); // push button, connects gnd to pin
  if (action==UI_ACTION_OK)key_flag = key_flag|FLAG_OK;
  UI_KEYS_BUTTON_LOW(10,UI_ACTION_NEXT); // push button, connects gnd to pin
   if (action==UI_ACTION_NEXT)key_flag = key_flag|FLAG_NEXT;

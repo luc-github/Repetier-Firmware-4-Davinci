@@ -203,52 +203,53 @@ What display type do you use?
 #define UI_ACTION_Z_BABYSTEPS           1111
 #define UI_ACTION_MAX_INACTIVE          1112
 #define UI_ACTION_TEMP_DEFECT           1113
+
 //Davinci Specific
-#define UI_ACTION_CLEAN_NOZZLE          1114
-#define UI_ACTION_SOUND			1115
-#define UI_ACTION_LOAD_EXTRUDER_0	1116
-#define UI_ACTION_UNLOAD_EXTRUDER_0	1117
+#define UI_ACTION_CLEAN_NOZZLE          1500
+#define UI_ACTION_SOUND			1501
+#define UI_ACTION_LOAD_EXTRUDER_0	1502
+#define UI_ACTION_UNLOAD_EXTRUDER_0	1503
 #if NUM_EXTRUDER > 1
-	#define UI_ACTION_LOAD_EXTRUDER_1	1118
-	#define UI_ACTION_UNLOAD_EXTRUDER_1	1119
+	#define UI_ACTION_LOAD_EXTRUDER_1	1504
+	#define UI_ACTION_UNLOAD_EXTRUDER_1	1505
 #endif
-#define UI_ACTION_AUTOLEVEL		1120
-#define UI_ACTION_DISPLAY_MODE		1121
-#define UI_ACTION_FILAMENT_SENSOR_ONOFF		1122
-#define UI_ACTION_KEEP_LIGHT_ON		1123
-#define UI_ACTION_CLEAN_DRIPBOX         1124
-#define UI_ACTION_LOAD_FAILSAFE          1125
-#define UI_ACTION_X_1 						1126
-#define UI_ACTION_X_10 						1127
-#define UI_ACTION_X_100	 				1128
-#define UI_ACTION_Y_1 						1129
-#define UI_ACTION_Y_10 						1130
-#define UI_ACTION_Y_100	 					1131
-#define UI_ACTION_Z_1 						1132
-#define UI_ACTION_Z_10 						1133
-#define UI_ACTION_Z_100	 					1134
-#define UI_ACTION_E_1 						1135
-#define UI_ACTION_E_10 						1136
-#define UI_ACTION_E_100	 					1137
-#define UI_ACTION_BED_OFF 					1138
-#define UI_ACTION_LIGHT_OFF_AFTER			1139
-#define UI_ACTION_MANUAL_LEVEL				1140
-#define UI_ACTION_NO_FILAMENT				1141
-#define UI_ACTION_EXT_TEMP_ABS				1142
-#define UI_ACTION_EXT_TEMP_PLA				1143
-#define UI_ACTION_BED_TEMP_ABS				1144
-#define UI_ACTION_BED_TEMP_PLA				1145
-#define UI_ACTION_X_LENGTH					1146
-#define UI_ACTION_Y_LENGTH					1147
-#define UI_ACTION_Z_LENGTH					1148
-#define UI_ACTION_VERSION					1149
-#define UI_ACTION_TOP_SENSOR_ONOFF 1150
-#define UI_ACTION_AUTOLEVEL_ON          1151
-#define UI_ACTION_Z_0_1                          1152
-#define UI_ACTION_X_MIN                          1153
-#define UI_ACTION_Y_MIN                          1154
-#define UI_ACTION_Z_MIN                          1155
-#define UI_ACTION_TOGGLE_POWERSAVE	1156
+#define UI_ACTION_AUTOLEVEL		1506
+#define UI_ACTION_DISPLAY_MODE		1507
+#define UI_ACTION_FILAMENT_SENSOR_ONOFF	1508
+#define UI_ACTION_KEEP_LIGHT_ON		1509
+#define UI_ACTION_CLEAN_DRIPBOX         1510
+#define UI_ACTION_LOAD_FAILSAFE         1511
+#define UI_ACTION_X_1 			1512
+#define UI_ACTION_X_10 			1513
+#define UI_ACTION_X_100	 		1514
+#define UI_ACTION_Y_1 			1515
+#define UI_ACTION_Y_10 			1516
+#define UI_ACTION_Y_100	 		1517
+#define UI_ACTION_Z_1 			1518
+#define UI_ACTION_Z_10 			1519
+#define UI_ACTION_Z_100	 		1520
+#define UI_ACTION_E_1 			1521
+#define UI_ACTION_E_10 			1522
+#define UI_ACTION_E_100	 		1523
+#define UI_ACTION_BED_OFF               1524
+#define UI_ACTION_LIGHT_OFF_AFTER	1525
+#define UI_ACTION_MANUAL_LEVEL		1526
+#define UI_ACTION_NO_FILAMENT		1528
+#define UI_ACTION_EXT_TEMP_ABS		1529
+#define UI_ACTION_EXT_TEMP_PLA		1530
+#define UI_ACTION_BED_TEMP_ABS		1531
+#define UI_ACTION_BED_TEMP_PLA		1532
+#define UI_ACTION_X_LENGTH		1533
+#define UI_ACTION_Y_LENGTH		1534
+#define UI_ACTION_Z_LENGTH		1535
+#define UI_ACTION_VERSION		1536
+#define UI_ACTION_TOP_SENSOR_ONOFF      1537
+#define UI_ACTION_AUTOLEVEL_ON          1538
+#define UI_ACTION_Z_0_1                 1539
+#define UI_ACTION_X_MIN                 1540
+#define UI_ACTION_Y_MIN    		1541
+#define UI_ACTION_Z_MIN                 1542
+#define UI_ACTION_TOGGLE_POWERSAVE	1543
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -296,7 +297,7 @@ What display type do you use?
 
 typedef struct {
   const char *text; // Menu text
-  uint8_t menuType; // 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command, 4 = modify action command , 5 = special menu with status
+  uint8_t menuType; // 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command, 4 = modify action command,
   unsigned int action; // must be int so it gets 32 bit on arm!
   uint8_t filter; // allows dynamic menu filtering based on Printer::menuMode bits set.
   uint8_t nofilter; // Hide if one of these bits are set
@@ -553,7 +554,30 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_B           11
 #define UI_ENCODER_CLICK       43
 #define UI_RESET_PIN           46
-#else
+#elif MOTHERBOARD == 301 // Rambo has own pins layout
+#define BEEPER_PIN             79
+#define UI_DISPLAY_RS_PIN      70
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  71
+#define UI_DISPLAY_D0_PIN      -1
+#define UI_DISPLAY_D1_PIN      -1
+#define UI_DISPLAY_D2_PIN      -1
+#define UI_DISPLAY_D3_PIN      -1
+#define UI_DISPLAY_D4_PIN      72
+#define UI_DISPLAY_D5_PIN      73
+#define UI_DISPLAY_D6_PIN      74
+#define UI_DISPLAY_D7_PIN      75
+#define UI_ENCODER_A           76
+#define UI_ENCODER_B           77
+#define UI_ENCODER_CLICK       78
+#define UI_RESET_PIN           80
+#undef SDCARDDETECT
+#define SDCARDDETECT           81
+#undef SDCARDDETECTINVERTED
+#define SDCARDDETECTINVERTED   0
+#undef SDSUPPORT
+#define SDSUPPORT              1
+#else  // RAMPS
 #define BEEPER_PIN             37
 #define UI_DISPLAY_RS_PIN      16
 #define UI_DISPLAY_RW_PIN      -1
@@ -881,7 +905,7 @@ void uiCheckSlowKeys(int &action) {
 #define UI_ENCODER_B           52
 #define UI_ENCODER_CLICK       48
 #define UI_RESET_PIN           -1
-#define UI_DELAYPERCHAR 40
+#define UI_DELAYPERCHAR 50
 #define UI_INVERT_MENU_DIRECTION 0
 #define UI_BUTTON_BACK         71
 #ifdef UI_MAIN
@@ -906,7 +930,7 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_HAS_BACK_KEY 1
 #define UI_DISPLAY_TYPE DISPLAY_4BIT
 #define UI_DISPLAY_CHARSET 1
-#define UI_DELAYPERCHAR 320
+#define UI_DELAYPERCHAR 50
 #define UI_INVERT_MENU_DIRECTION 1
 #define BEEPER_SHORT_SEQUENCE 6,2 // Needs longer beep sequence
 #define BEEPER_LONG_SEQUENCE 24,8
@@ -938,7 +962,7 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_B           62
 #define UI_ENCODER_CLICK       63
 #define UI_RESET_PIN           28
-#define UI_DELAYPERCHAR 320
+#define UI_DELAYPERCHAR 50
 #define UI_BUTTON_OK       49
 #define UI_BUTTON_NEXT     48
 #define UI_BUTTON_PREVIOUS 47
@@ -961,7 +985,7 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_B           31
 #define UI_ENCODER_CLICK       35
 #define UI_RESET_PIN           41
-#define UI_DELAYPERCHAR 320
+#define UI_DELAYPERCHAR 50
 #define UI_BUTTON_OK       4
 #define UI_BUTTON_NEXT     6
 #define UI_BUTTON_PREVIOUS 5
@@ -1013,7 +1037,7 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_A           35
 #define UI_ENCODER_B           37
 #define UI_ENCODER_CLICK       31
-#define UI_DELAYPERCHAR 320
+#define UI_DELAYPERCHAR 50
 #define UI_INVERT_MENU_DIRECTION 0
 #if UI_MAIN
 void uiInitKeys() {
@@ -1053,7 +1077,7 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_B           77
 #define UI_ENCODER_CLICK       78
 #define UI_KILL_PIN            80
-#define UI_DELAYPERCHAR       320
+#define UI_DELAYPERCHAR       50
 #define UI_INVERT_MENU_DIRECTION 0
 #if UI_MAIN
 void uiInitKeys() {
@@ -1215,7 +1239,7 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_A           80
 #define UI_ENCODER_B           73
 #define UI_ENCODER_CLICK       63
-#define UI_DELAYPERCHAR 320
+#define UI_DELAYPERCHAR 50
 #define MIREGLI
 #define SDCARDDETECT -1 //53
 #define BEEPER 78
@@ -1257,6 +1281,54 @@ inline void ui_check_slow_encoder() {}
 void ui_check_slow_keys(int &action) {}
 #endif
 #endif // Controller 17
+#if FEATURE_CONTROLLER == CONTROLLER_GATE_3NOVATICA
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 0
+#define UI_DISPLAY_TYPE DISPLAY_4BIT
+#define UI_DISPLAY_CHARSET 1
+#define UI_COLS 20
+#define UI_ROWS 4
+#define BEEPER_TYPE 1
+#define BEEPER_PIN             -1
+#define UI_DISPLAY_RS_PIN      1
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  3
+#define UI_DISPLAY_D0_PIN      -1
+#define UI_DISPLAY_D1_PIN      -1
+#define UI_DISPLAY_D2_PIN      -1
+#define UI_DISPLAY_D3_PIN      -1
+#define UI_DISPLAY_D4_PIN      0
+#define UI_DISPLAY_D5_PIN      2
+#define UI_DISPLAY_D6_PIN      4
+#define UI_DISPLAY_D7_PIN      6
+#define UI_ENCODER_A           5
+#define UI_ENCODER_B           7
+#define UI_ENCODER_CLICK       39
+#define UI_KILL_PIN            -1
+#define UI_DELAYPERCHAR       320 // bylo 50
+#define UI_INVERT_MENU_DIRECTION 1 // bylo 0
+#define USER_KEY1_PIN     36
+#define USER_KEY1_ACTION  UI_ACTION_LIGHTS_ONOFF
+#define USER_KEY2_PIN     40
+#define USER_KEY2_ACTION  UI_ACTION_PREHEAT_ABS
+#define USER_KEY3_PIN     41
+#define USER_KEY3_ACTION  UI_ACTION_WIZARD_FILAMENTCHANGE
+#define USER_KEY4_PIN     -1
+#define USER_KEY4_ACTION  UI_ACTION_DUMMY
+
+#if UI_MAIN
+void uiInitKeys() {
+  UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B);
+  UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK);
+}
+void uiCheckKeys(int &action) {
+ UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B);
+ UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK);
+}
+inline void uiCheckSlowEncoder() {}
+void uiCheckSlowKeys(int &action) {}
+#endif
+#endif // CONTROLLER_GATE_3NOVATICA
 
 
 #if FEATURE_CONTROLLER != NO_CONTROLLER
@@ -1342,12 +1414,13 @@ void ui_check_slow_keys(int &action) {}
 #define BEEP_LONG beep(BEEPER_LONG_SEQUENCE);
 #endif
 
+//Davinci Specific,move to the end to integrate SDrefresh in class
 class UIDisplay {
   public:
 #if UI_AUTOLIGHTOFF_AFTER!=0
 	static millis_t ui_autolightoff_time;
 #endif
-	static uint8_t display_mode; 
+    static uint8_t display_mode; 
     volatile uint8_t flags; // 1 = fast key action, 2 = slow key action, 4 = slow action running, 8 = key test running
     uint8_t col; // current col for buffer prefill
     uint8_t menuLevel; // current menu level, 0 = info, 1 = group, 2 = groupdata select, 3 = value change
@@ -1413,7 +1486,24 @@ class UIDisplay {
     uint8_t folderLevel;
 };
 extern UIDisplay uid;
-extern void beep(uint8_t duration,uint8_t count);
 extern void playsound(int tone,int duration);
+
+extern void beep(uint8_t duration,uint8_t count);
+
+static void ui_check_Ukeys(int &action) {
+#if defined(USER_KEY1_PIN) && USER_KEY1_PIN > -1 && defined(USER_KEY1_ACTION)
+    UI_KEYS_BUTTON_LOW(USER_KEY1_PIN, USER_KEY1_ACTION);
+#endif
+#if defined(USER_KEY2_PIN) && USER_KEY2_PIN > -1 && defined(USER_KEY2_ACTION)
+    UI_KEYS_BUTTON_LOW(USER_KEY2_PIN, USER_KEY2_ACTION);
+#endif
+#if defined(USER_KEY3_PIN) && USER_KEY3_PIN > -1 && defined(USER_KEY3_ACTION)
+    UI_KEYS_BUTTON_LOW(USER_KEY3_PIN, USER_KEY3_ACTION);
+#endif
+#if defined(USER_KEY4_PIN) && USER_KEY4_PIN > -1 && defined(USER_KEY4_ACTION)
+    UI_KEYS_BUTTON_LOW(USER_KEY4_PIN, USER_KEY4_ACTION);
+#endif
+}
+
 #endif
 

@@ -6401,6 +6401,11 @@ volatile uint8_t *u8g_outClock;
 
 static void u8g_com_arduino_init_shift_out(uint8_t dataPin, uint8_t clockPin)
 {
+  SET_OUTPUT(UI_SPI_MOSI);
+  SET_OUTPUT(UI_SPI_SCK);
+  WRITE(UI_SPI_MOSI, LOW);
+  WRITE(UI_SPI_SCK,  HIGH);
+/*
   u8g_outData = portOutputRegister(digitalPinToPort(dataPin));
   u8g_outClock = portOutputRegister(digitalPinToPort(clockPin));
   u8g_bitData = digitalPinToBitMask(dataPin);
@@ -6411,12 +6416,14 @@ static void u8g_com_arduino_init_shift_out(uint8_t dataPin, uint8_t clockPin)
 
   u8g_bitNotData = u8g_bitData;
   u8g_bitNotData ^= 0x0ff;
+*/
 }
 
 static void u8g_com_arduino_do_shift_out_msb_first(uint8_t val) U8G_NOINLINE;
 static void u8g_com_arduino_do_shift_out_msb_first(uint8_t val)
 {
   uint8_t cnt = 8;
+/*
   uint8_t bitData = u8g_bitData;
   uint8_t bitNotData = u8g_bitNotData;
   uint8_t bitClock = u8g_bitClock;
@@ -6434,14 +6441,6 @@ static void u8g_com_arduino_do_shift_out_msb_first(uint8_t val)
       *outData = bitData;
     else
       *outData = bitNotData;
-
-    /*
-    *outClock |= bitClock;
-    val <<= 1;
-    cnt--;
-    *outClock &= bitNotClock;
-    */
-
     val <<= 1;
     *outClock &= bitNotClock;
     cnt--;
@@ -6450,6 +6449,28 @@ static void u8g_com_arduino_do_shift_out_msb_first(uint8_t val)
     *outClock |= bitClock;
     //u8g_MicroDelay();
   } while( cnt != 0 );
+
+*/
+  U8G_ATOMIC_START();
+  for( cnt=0; cnt<8; cnt++ )
+  {
+    WRITE(UI_SPI_SCK, LOW);
+    WRITE(UI_SPI_MOSI, val&0x80);
+    val<<=1;
+    asm volatile("nop\n\t"
+"nop\n\t"
+"nop\n\t"
+"nop\n\t"
+::);
+    //u8g_MicroDelay();
+    WRITE(UI_SPI_SCK, HIGH);
+asm volatile("nop\n\t"
+"nop\n\t"
+"nop\n\t"
+"nop\n\t"
+::);
+    //u8g_MicroDelay();
+  }
   U8G_ATOMIC_END();
 }
 
@@ -6526,7 +6547,7 @@ static void u8g_com_arduino_do_shift_out_msb_first(uint8_t val)
 	digitalWrite(u8g_data_pin, LOW);
 #endif
     val <<= 1;
-    //u8g_MicroDelay();
+    u8g_MicroDelay();
 #ifdef UI_SPI_SCK
     WRITE(UI_SPI_SCK,LOW);
 #else
@@ -6567,10 +6588,10 @@ static void u8g_com_arduino_st7920_write_byte_seq(uint8_t rs, uint8_t *ptr, uint
     u8g_com_arduino_do_shift_out_msb_first(*ptr << 4);
     ptr++;
     len--;
-    u8g_10MicroDelay();
+//    u8g_10MicroDelay();
   }
 
-  for( i = 0; i < 4; i++ )
+//  for( i = 0; i < 4; i++ )
     u8g_10MicroDelay();
 }
 
@@ -6592,7 +6613,7 @@ static void u8g_com_arduino_st7920_write_byte(uint8_t rs, uint8_t val)
   u8g_com_arduino_do_shift_out_msb_first(val & 0x0f0);
   u8g_com_arduino_do_shift_out_msb_first(val << 4);
 
-  for( i = 0; i < 4; i++ )
+//  for( i = 0; i < 4; i++ )
     u8g_10MicroDelay();
 
 }
