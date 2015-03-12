@@ -20,12 +20,6 @@
 */
 
 #include "Repetier.h"
-#include "pins_arduino.h"
-#include "ui.h"
-#if EEPROM_MODE != 0
-#include "Eeprom.h"
-#endif
-
 
 uint8_t manageMonitor = 255; ///< Temp. we want to monitor with our host. 1+NUM_EXTRUDER is heated bed
 unsigned int counterPeriodical = 0;
