@@ -103,6 +103,7 @@
 #define UI_DELAYPERCHAR             320
 //back light  PIN - reported in uiconfig.h
 #define UI_BACKLIGHT_PIN                78
+#define BEEPER_PIN 66
  */
  
 //USB Connection 

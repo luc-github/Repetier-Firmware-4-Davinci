@@ -95,7 +95,9 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     EEPROM::buselight = bool(CASE_LIGHT_DEFAULT_ON);
     EEPROM::bkeeplighton = bool(CASE_KEEP_LIGHT_DEFAULT_ON);
     UIDisplay::display_mode=CASE_DISPLAY_MODE_DEFAULT;
+    #if FEATURE_BEEPER
     HAL::enablesound = bool(CASE_SOUND_DEFAULT_ON);
+    #endif
     EEPROM::busesensor = bool(CASE_FILAMENT_SENSOR_DEFAULT_ON);
     EEPROM::btopsensor = bool(CASE_TOP_SENSOR_DEFAULT_ON);
     EEPROM::ftemp_ext_pla=UI_SET_PRESET_EXTRUDER_TEMP_PLA;
