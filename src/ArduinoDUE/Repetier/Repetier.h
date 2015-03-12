@@ -146,6 +146,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define CONTROLLER_SANGUINOLOLU_PANELOLU2 15
 #define CONTROLLER_GAMEDUINO2 16
 #define CONTROLLER_MIREGLI 17
+#define CONTROLLER_GATE_3NOVATICA 18
 
 //direction flags
 #define X_DIRPOS 1
