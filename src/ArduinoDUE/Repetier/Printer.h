@@ -80,6 +80,8 @@ public:
     //Davinci Specific, sensor for Top Cover       
     static bool btop_Cover_open;
     static uint8_t menuMode;
+    //Davinci Specific, extra modes
+    static uint8_t menuModeEx;
     static float axisStepsPerMM[];
     static float invAxisStepsPerMM[];
     static float maxFeedrate[];
@@ -209,7 +211,19 @@ public:
     {
         return (menuMode & mode)==mode;
     }
+    //Davinci Specific, extra mode
+	static inline void setMenuModeEx(uint8_t mode,bool on)
+    {
+        if(on)
+            menuModeEx |= mode;
+        else
+            menuModeEx &= ~mode;
+    }
 
+    static inline bool isMenuModeEx(uint8_t mode)
+    {
+        return (menuModeEx & mode)==mode;
+    }
     static inline bool debugEcho()
     {
         return ((debugLevel & 1)!=0);

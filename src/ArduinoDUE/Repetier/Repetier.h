@@ -345,9 +345,9 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define MENU_MODE_FAN_RUNNING 8
 #define MENU_MODE_PRINTING 16
 //Davinci Specific
-#define MENU_MODE_STOP_REQUESTED 32
-#define MENU_MODE_STOP_DONE  64
-#define MENU_MODE_GCODE_PROCESSING  128
+#define MENU_MODE_STOP_REQUESTED 1
+#define MENU_MODE_STOP_DONE  2
+#define MENU_MODE_GCODE_PROCESSING  4
 
 #include "HAL.h"
 #include "gcode.h"

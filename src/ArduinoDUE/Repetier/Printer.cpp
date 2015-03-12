@@ -62,6 +62,8 @@ bool Printer::btop_Cover_open=false;
 uint8_t Printer::debugLevel = 6; ///< Bitfield defining debug output. 1 = echo, 2 = info, 4 = error, 8 = dry run., 16 = Only communication, 32 = No moves
 uint8_t Printer::stepsPerTimerCall = 1;
 uint8_t Printer::menuMode = 0;
+//Davinci Specific, extra modes
+uint8_t Printer::menuModeEx = 0;
 float Printer::extrudeMultiplyError = 0;
 
 #if FEATURE_AUTOLEVEL

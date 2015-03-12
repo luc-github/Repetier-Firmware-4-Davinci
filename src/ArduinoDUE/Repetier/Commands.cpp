@@ -60,7 +60,7 @@ void Commands::commandLoop()
             }
             else
 #endif
-             if(!Printer::isMenuMode(MENU_MODE_STOP_REQUESTED))   Commands::executeGCode(code);
+             if(!Printer::isMenuModeEx(MENU_MODE_STOP_REQUESTED))   Commands::executeGCode(code);
             code->popCurrentCommand();
         }
         Printer::defaultLoopActions();
@@ -128,11 +128,11 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves)
                 }
         }
 #endif
-    if (Printer::isMenuMode(MENU_MODE_STOP_REQUESTED)  && Printer::isMenuMode(MENU_MODE_STOP_DONE) )
+    if (Printer::isMenuModeEx(MENU_MODE_STOP_REQUESTED)  && Printer::isMenuModeEx(MENU_MODE_STOP_DONE) )
         {
             if (delay_flag_change2>10)
                 {
-                Printer::setMenuMode(MENU_MODE_STOP_REQUESTED,false);
+                Printer::setMenuModeEx(MENU_MODE_STOP_REQUESTED,false);
                 //commands to run when stop
                 GCode::executeFString(PSTR(SD_RUN_ON_STOP));
                 UI_STATUS_UPD(UI_TEXT_IDLE);
@@ -141,7 +141,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves)
             else delay_flag_change2++;
         }
     else delay_flag_change2=0;
-    if ( Printer::isMenuMode(MENU_MODE_GCODE_PROCESSING))
+    if ( Printer::isMenuModeEx(MENU_MODE_GCODE_PROCESSING))
         {
         delay_flag_change=0;
         Printer::setMenuMode(MENU_MODE_PRINTING,true);
@@ -684,7 +684,7 @@ void Commands::processGCode(GCode *com)
             GCode::readFromSerial();
             Commands::checkForPeriodicalActions(true);
 	//Davinci Specific, for immediate stop
-            if (Printer::isMenuMode(MENU_MODE_STOP_REQUESTED))break;
+            if (Printer::isMenuModeEx(MENU_MODE_STOP_REQUESTED))break;
         }
         break;
     case 20: // G20 Units to inches
@@ -1374,7 +1374,7 @@ void Commands::processMCode(GCode *com)
             }
             Commands::checkForPeriodicalActions(true);
 	    //Davinci Specific, STOP management
-            if (Printer::isMenuMode(MENU_MODE_STOP_REQUESTED))break;
+            if (Printer::isMenuModeEx(MENU_MODE_STOP_REQUESTED))break;
             //gcode_read_serial();
 #if RETRACT_DURING_HEATUP
             if (actExtruder == Extruder::current && actExtruder->waitRetractUnits > 0 && !retracted && dirRising && actExtruder->tempControl.currentTemperatureC > actExtruder->waitRetractTemperature)
@@ -1426,7 +1426,7 @@ void Commands::processMCode(GCode *com)
             }
             Commands::checkForPeriodicalActions(true);
 	    //Davinci Specific, STOP management
-            if (Printer::isMenuMode(MENU_MODE_STOP_REQUESTED))break;
+            if (Printer::isMenuModeEx(MENU_MODE_STOP_REQUESTED))break;
         }
 #endif
 #endif
@@ -1447,7 +1447,7 @@ void Commands::processMCode(GCode *com)
                     codenum = HAL::timeInMilliseconds();
                 }
                 Commands::checkForPeriodicalActions(true);
-                if (Printer::isMenuMode(MENU_MODE_STOP_REQUESTED))break;
+                if (Printer::isMenuModeEx(MENU_MODE_STOP_REQUESTED))break;
                 for(uint8_t h = 0; h < NUM_TEMPERATURE_LOOPS; h++)
                 {
                     TemperatureController *act = tempController[h];
@@ -1919,7 +1919,7 @@ void Commands::executeGCode(GCode *com)
     //periodical command from repetier should not be taken in account  for wake up
     if(!((com->hasM() &&  ((com->M ==105)||(com->M ==355)||(com->M ==360))) || Printer::isMenuMode(MENU_MODE_SD_PRINTING)))   // Process M Code
     {
-        Printer::setMenuMode(MENU_MODE_GCODE_PROCESSING,true);
+        Printer::setMenuModeEx(MENU_MODE_GCODE_PROCESSING,true);
         Printer::setMenuMode(MENU_MODE_PRINTING,true);
 #if UI_AUTOLIGHTOFF_AFTER!=0
         if (EEPROM::timepowersaving>0 && EEPROM::bkeeplighton )
@@ -1978,7 +1978,7 @@ void Commands::executeGCode(GCode *com)
             }
 #endif
     }
-Printer::setMenuMode(MENU_MODE_GCODE_PROCESSING,false);
+Printer::setMenuModeEx(MENU_MODE_GCODE_PROCESSING,false);
 }
 
 void Commands::emergencyStop()

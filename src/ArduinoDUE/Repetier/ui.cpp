@@ -5062,8 +5062,8 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             menuLevel=0;
             menuPos[0]=0;
             refreshPage();
-             Printer::setMenuMode(MENU_MODE_STOP_REQUESTED,true);
-             Printer::setMenuMode(MENU_MODE_STOP_DONE,false);
+             Printer::setMenuModeEx(MENU_MODE_STOP_REQUESTED,true);
+             Printer::setMenuModeEx(MENU_MODE_STOP_DONE,false);
              Printer::setMenuMode(MENU_MODE_SD_PAUSED,false);
              //to be sure no moving  by dummy movement
               Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
@@ -5078,7 +5078,7 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
              PrintLine::linesPos = 0;                 ///< Position for executing line movement
              PrintLine::lines[0].block();
             executeAction(UI_ACTION_COOLDOWN,true);
-            Printer::setMenuMode(MENU_MODE_STOP_DONE,true);
+            Printer::setMenuModeEx(MENU_MODE_STOP_DONE,true);
             UI_STATUS(UI_TEXT_CANCELED);
             break;
         }
