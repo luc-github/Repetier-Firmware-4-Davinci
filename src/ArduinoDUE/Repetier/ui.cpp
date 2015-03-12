@@ -5175,7 +5175,9 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
              PrintLine::linesWritePos = 0;            ///< Position where we write the next cached line move.
              PrintLine::linesPos = 0;                 ///< Position for executing line movement
              PrintLine::lines[0].block();
+            #if SD_STOP_HEATER_AND_MOTORS_ON_STOP
             executeAction(UI_ACTION_COOLDOWN,true);
+            #endif
             Printer::setMenuModeEx(MENU_MODE_STOP_DONE,true);
             UI_STATUS(UI_TEXT_CANCELED);
             break;

@@ -217,6 +217,8 @@ Overridden if EEPROM activated.*/
 // because at startup you already need 7 seconds until heater starts to rise temp. for sensor
 // then you have 3 seconds of increased heating to reach 1°„C.
 #define DECOUPLING_TEST_MIN_TEMP_RISE 1
+// Set to 1 if you want firmware to kill print on decouple
+#define KILL_IF_SENSOR_DEFECT 1
 
 #endif
 // for each extruder, fan will stay on until extruder temperature is below this value
@@ -1312,6 +1314,8 @@ Always hard to say since the other angle is 89° in this case!
 /** The gcodes in this line get executed, when you stop a sd print befor it was ended.
 Separate commands by \n */
 #define SD_RUN_ON_STOP "G28 XY\nM84"
+/** Disable motors and heaters when print was stopped. */
+#define SD_STOP_HEATER_AND_MOTORS_ON_STOP 1
 // If you want support for G2/G3 arc commands set to true, otherwise false.
 #define ARC_SUPPORT 1
 
