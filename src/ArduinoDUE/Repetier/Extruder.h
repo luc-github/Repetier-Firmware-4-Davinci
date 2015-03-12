@@ -155,6 +155,7 @@ public:
     int32_t xOffset;
     int32_t yOffset;
     float stepsPerMM;        ///< Steps per mm.
+//For Davinci as Pin is 128 int8 is not enough
     int16_t enablePin;          ///< Pin to enable extruder stepper motor.
 //  uint8_t directionPin; ///< Pin number to assign the direction.
 //  uint8_t stepPin; ///< Pin number for a step.

@@ -293,7 +293,6 @@ STEPPER_CURRENT_CONTROL
 #if MOTHERBOARD == 999
 #define KNOWN_BOARD
 #include "userpins.h"
-#define EEPROM_AVAILABLE 1
 #endif
 
 

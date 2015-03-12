@@ -240,8 +240,8 @@ typedef int flag8_t;
 typedef int fast8_t;
 
 #ifndef RFSERIAL
-//#define RFSERIAL Serial   // Programming port of the due
-#define RFSERIAL SerialUSB  // Native USB Port of the due
+#define RFSERIAL Serial   // Programming port of the due
+//#define RFSERIAL SerialUSB  // Native USB Port of the due
 #endif
 
 #define OUT_P_I(p,i) //Com::printF(PSTR(p),(int)(i))
@@ -276,6 +276,7 @@ public:
     
     HAL();
     virtual ~HAL();
+
 #if FEATURE_BEEPER
     static bool enablesound;
 #endif

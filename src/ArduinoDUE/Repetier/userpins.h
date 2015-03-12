@@ -90,7 +90,7 @@
 /*
 // LCD PINS - reported in uiconfig.h line 200
  #define UI_DISPLAY_RS_PIN      8       // PINK.1, 88, D_RS
-#define UI_DISPLAY_RW_PIN       -1
+#define UI_DISPLAY_RW_PIN       45 //but do not use it just set state to LOW
 #define UI_DISPLAY_ENABLE_PIN           125     // PINK.3, 86, D_E
 #define UI_DISPLAY_D0_PIN       34      // PINF.5, 92, D_D4
 #define UI_DISPLAY_D1_PIN       35      // PINK.2, 87, D_D5
@@ -104,8 +104,11 @@
 //back light  PIN - reported in uiconfig.h
 #define UI_BACKLIGHT_PIN                78
  */
-
-
+ 
+//USB Connection 
+#define RFSERIAL SerialUSB  // Native USB Port of the due 
+//EEPROM is on SDCard
+#define EEPROM_AVAILABLE 1
 //EEprom on  SDCard
 #define SDEEPROM
 //Z probe
