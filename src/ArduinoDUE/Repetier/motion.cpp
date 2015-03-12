@@ -150,7 +150,8 @@ void PrintLine::moveRelativeDistanceInStepsReal(int32_t x,int32_t y,int32_t z,in
 */
 void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
 {
-	Printer::setMenuMode(MENU_MODE_PRINTING,true);
+    //Davinci Specific, STOP request
+    Printer::setMenuMode(MENU_MODE_PRINTING,true);
     if (Printer::isMenuMode(MENU_MODE_STOP_REQUESTED))return;
     Printer::unsetAllSteppersDisabled();
     waitForXFreeLines(1);
@@ -1823,7 +1824,7 @@ void PrintLine::arc(float *position, float *target, float *offset, float radius,
   cartesian axis steps may be less than the changing dominant delta axis.
 */
 #if NONLINEAR_SYSTEM
-int lastblk=-1;
+int lastblk =- 1;
 int32_t cur_errupd;
 //#define DEBUG_DELTA_TIMER
 // Current delta segment
@@ -1885,6 +1886,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
         if(Printer::isZProbingActive() && Printer::stepsRemainingAtZHit >= 0)
         {
             removeCurrentLineForbidInterrupt();
+	  //Davinci Specific, no immediate IDLE to avoid to many refresh
           //  if(linesCount == 0) UI_STATUS(UI_TEXT_IDLE);
             return 1000;
         }
@@ -2222,6 +2224,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
         //deltaSegmentCount -= cur->numDeltaSegments; // should always be zero
         removeCurrentLineForbidInterrupt();
         Printer::disableAllowedStepper();
+	//Davinci Specific, no immediate IDLE to avoid to many refresh
         //if(linesCount == 0) UI_STATUS(UI_TEXT_IDLE);
         interval = Printer::interval = interval >> 1; // 50% of time to next call to do cur=0
         DEBUG_MEMORY;
@@ -2247,6 +2250,7 @@ int lastblk = -1;
 int32_t cur_errupd;
 int32_t PrintLine::bresenhamStep() // version for cartesian printer
 {
+	//Davinci Specific, STOP request
         if (Printer::isMenuMode(MENU_MODE_STOP_REQUESTED))
             {
             while(linesCount)removeCurrentLineForbidInterrupt();
@@ -2543,6 +2547,7 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
 #endif
         removeCurrentLineForbidInterrupt();
         Printer::disableAllowedStepper();
+	//Davinci Specific, no immediate IDLE to avoid to many refresh
        // if(linesCount == 0) UI_STATUS(UI_TEXT_IDLE);
         interval = Printer::interval = interval >> 1; // 50% of time to next call to do cur=0
         DEBUG_MEMORY;

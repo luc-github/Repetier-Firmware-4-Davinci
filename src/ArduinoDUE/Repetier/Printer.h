@@ -48,6 +48,7 @@ union floatLong
 #define PRINTER_FLAG1_POWER_ON              64
 #define PRINTER_FLAG1_ALLOW_COLD_EXTRUSION  128
 
+//Davinci Specific       
 #define PRINTER_FLAG_HOME_X		1
 #define PRINTER_FLAG_HOME_Y		2
 #define PRINTER_FLAG_HOME_Z		4
@@ -76,6 +77,7 @@ public:
     static long advanceExecuted;             ///< Executed advance steps
 #endif
 #endif
+    //Davinci Specific, sensor for Top Cover       
     static bool btop_Cover_open;
     static uint8_t menuMode;
     static float axisStepsPerMM[];
@@ -93,6 +95,7 @@ public:
 
     static uint8_t debugLevel;
     static uint8_t flag0,flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
+    //Davinci Specific, flag for each axis       
     static uint8_t flaghome;
     static uint8_t stepsPerTimerCall;
     static uint32_t interval;    ///< Last step duration in ticks.
@@ -102,6 +105,7 @@ public:
     static int32_t currentPositionSteps[E_AXIS_ARRAY];     ///< Position in steps from origin.
     static float currentPosition[Z_AXIS_ARRAY];
     static float lastCmdPos[Z_AXIS_ARRAY]; ///< Last coordinates send by gcodes
+    //Davinci Specific, memorize the used extruder for DUO       
     #if NUM_EXTRUDER>1
     static uint lastextruderID;
     #endif
@@ -200,42 +204,52 @@ public:
         else
             menuMode &= ~mode;
     }
+
     static inline bool isMenuMode(uint8_t mode)
     {
         return (menuMode & mode)==mode;
     }
+
     static inline bool debugEcho()
     {
         return ((debugLevel & 1)!=0);
     }
+
     static inline bool debugInfo()
     {
         return ((debugLevel & 2)!=0);
     }
+
     static inline bool debugErrors()
     {
         return ((debugLevel & 4)!=0);
     }
+
     static inline bool debugDryrun()
     {
         return ((debugLevel & 8)!=0);
     }
+
     static inline bool debugCommunication()
     {
         return ((debugLevel & 16)!=0);
     }
+
     static inline bool debugNoMoves()
     {
         return ((debugLevel & 32)!=0);
     }
+
     static inline bool debugFlag(unsigned long flags)
     {
         return (debugLevel & flags);
     }
+
     static inline void debugSet(unsigned long flags)
     {
         debugLevel |= flags;
     }
+
     static inline void debugReset(unsigned long flags)
     {
         debugLevel &= ~flags;
@@ -251,6 +265,7 @@ public:
         WRITE(X2_ENABLE_PIN,!X_ENABLE_ON);
 #endif
     }
+
     /** \brief Disable stepper motor for y direction. */
     static inline void disableYStepper()
     {
@@ -271,6 +286,7 @@ public:
         WRITE(Z2_ENABLE_PIN,!Z_ENABLE_ON);
 #endif
     }
+
     /** \brief Enable stepper motor for x direction. */
     static inline void  enableXStepper()
     {
@@ -281,6 +297,7 @@ public:
         WRITE(X2_ENABLE_PIN,X_ENABLE_ON);
 #endif
     }
+
     /** \brief Enable stepper motor for y direction. */
     static inline void  enableYStepper()
     {
@@ -301,6 +318,7 @@ public:
         WRITE(Z2_ENABLE_PIN,Z_ENABLE_ON);
 #endif
     }
+
     static inline void setXDirection(bool positive)
     {
         if(positive)
@@ -318,6 +336,7 @@ public:
 #endif
         }
     }
+
     static inline void setYDirection(bool positive)
     {
         if(positive)
@@ -352,39 +371,48 @@ public:
 #endif
         }
     }
+
     static inline bool getZDirection()
     {
         return ((READ(Z_DIR_PIN)!=0) ^ INVERT_Z_DIR);
     }
+
     static inline bool getYDirection()
     {
         return((READ(Y_DIR_PIN)!=0) ^ INVERT_Y_DIR);
     }
+
     static inline bool getXDirection()
     {
         return((READ(X_DIR_PIN)!=0) ^ INVERT_X_DIR);
     }
+
     static inline uint8_t isLargeMachine()
     {
         return flag0 & PRINTER_FLAG0_LARGE_MACHINE;
     }
+
     static inline void setLargeMachine(uint8_t b)
     {
         flag0 = (b ? flag0 | PRINTER_FLAG0_LARGE_MACHINE : flag0 & ~PRINTER_FLAG0_LARGE_MACHINE);
     }
+
     static inline uint8_t isAdvanceActivated()
     {
         return flag0 & PRINTER_FLAG0_SEPERATE_EXTRUDER_INT;
     }
+
     static inline void setAdvanceActivated(uint8_t b)
     {
         flag0 = (b ? flag0 | PRINTER_FLAG0_SEPERATE_EXTRUDER_INT : flag0 & ~PRINTER_FLAG0_SEPERATE_EXTRUDER_INT);
     }
+
     static inline uint8_t isHomed()
     {
+	//Davinci Specific, every axis has a home flag       
         return flaghome & (PRINTER_FLAG_HOME_X|PRINTER_FLAG_HOME_Y|PRINTER_FLAG_HOME_Z);
     }
-    
+    //Davinci Specific, every axis has a home flag       
     static inline uint8_t isXHomed()
     {
         return flaghome & PRINTER_FLAG_HOME_X;
@@ -418,58 +446,72 @@ public:
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_HOMED : flag1 & ~PRINTER_FLAG1_HOMED);
     }
+
     static inline uint8_t isAllKilled()
     {
         return flag1 & PRINTER_FLAG1_ALLKILLED;
     }
+
     static inline void setAllKilled(uint8_t b)
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_ALLKILLED : flag1 & ~PRINTER_FLAG1_ALLKILLED);
     }
+
     static inline uint8_t isAutomount()
     {
         return flag1 & PRINTER_FLAG1_AUTOMOUNT;
     }
+
     static inline void setAutomount(uint8_t b)
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_AUTOMOUNT : flag1 & ~PRINTER_FLAG1_AUTOMOUNT);
     }
+
     static inline uint8_t isAnimation()
     {
         return flag1 & PRINTER_FLAG1_ANIMATION;
     }
+
     static inline void setAnimation(uint8_t b)
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_ANIMATION : flag1 & ~PRINTER_FLAG1_ANIMATION);
     }
+
     static inline uint8_t isUIErrorMessage()
     {
         return flag1 & PRINTER_FLAG1_UI_ERROR_MESSAGE;
     }
+
     static inline void setUIErrorMessage(uint8_t b)
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_UI_ERROR_MESSAGE : flag1 & ~PRINTER_FLAG1_UI_ERROR_MESSAGE);
     }
+
     static inline uint8_t isNoDestinationCheck()
     {
         return flag1 & PRINTER_FLAG1_NO_DESTINATION_CHECK;
     }
+
     static inline void setNoDestinationCheck(uint8_t b)
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_NO_DESTINATION_CHECK : flag1 & ~PRINTER_FLAG1_NO_DESTINATION_CHECK);
     }
+
     static inline uint8_t isPowerOn()
     {
         return flag1 & PRINTER_FLAG1_POWER_ON;
     }
+
     static inline void setPowerOn(uint8_t b)
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_POWER_ON : flag1 & ~PRINTER_FLAG1_POWER_ON);
     }
+
     static inline uint8_t isColdExtrusionAllowed()
     {
         return flag1 & PRINTER_FLAG1_ALLOW_COLD_EXTRUSION;
     }
+
     static inline void setColdExtrusionAllowed(uint8_t b)
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_ALLOW_COLD_EXTRUSION : flag1 & ~PRINTER_FLAG1_ALLOW_COLD_EXTRUSION);
@@ -761,9 +803,10 @@ public:
     static uint8_t moveTo(float x,float y,float z,float e,float f);
     static uint8_t moveToReal(float x,float y,float z,float e,float f);
     static void homeAxis(bool xaxis,bool yaxis,bool zaxis); /// Home axis
-	#if ENABLE_CLEAN_NOZZLE 
-	static void cleanNozzle(bool restoreposition=true);
-	#endif
+//Davinci Specific, clean nozzle feature
+#if ENABLE_CLEAN_NOZZLE 
+    static void cleanNozzle(bool restoreposition=true);
+#endif
     static void setOrigin(float xOff,float yOff,float zOff);
     static bool isPositionAllowed(float x,float y,float z);
     static inline int getFanSpeed()

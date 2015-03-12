@@ -18,6 +18,7 @@
 
 #include "Repetier.h"
 
+//Davinci Specific, for fancy effects
 extern void playsound(int tone,int duration);
 #if USE_ADVANCE
 uint8_t Printer::minExtruderSpeed;            ///< Timer delay for start extruder speed
@@ -55,6 +56,7 @@ long Printer::destinationSteps[E_AXIS_ARRAY];
 float Printer::coordinateOffset[Z_AXIS_ARRAY] = {0,0,0};
 uint8_t Printer::flag0 = 0;
 uint8_t Printer::flag1 = 0;
+//Davinci Specific
 uint8_t Printer::flaghome = 0;
 bool Printer::btop_Cover_open=false;
 uint8_t Printer::debugLevel = 6; ///< Bitfield defining debug output. 1 = echo, 2 = info, 4 = error, 8 = dry run., 16 = Only communication, 32 = No moves
@@ -65,6 +67,7 @@ float Printer::extrudeMultiplyError = 0;
 #if FEATURE_AUTOLEVEL
 float Printer::autolevelTransformation[9]; ///< Transformation matrix
 #endif
+//Davinci Specific, memorize used extruder for Duo
 #if NUM_EXTRUDER>1
 uint Printer::lastextruderID;
 #endif
@@ -162,6 +165,7 @@ float Printer::maxRealJerk = 0;
 int debugWaitLoop = 0;
 #endif
 
+//Davinci Specific, clean nozzle feature
 #if ENABLE_CLEAN_NOZZLE 
 void Printer::cleanNozzle(bool restoreposition)
 	{
@@ -400,6 +404,7 @@ void Printer::kill(uint8_t only_steppers)
     disableXStepper();
     disableYStepper();
     disableZStepper();
+//Davinci Specific, every axis has a home flag
     setHomedX(false);
     setHomedY(false);
     setHomedZ(false);
@@ -632,6 +637,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 
 void Printer::setup()
 {
+//Davinci Specific, we start watch dog from begining
 #if FEATURE_WATCHDOG
     HAL::startWatchdog();
 #endif // FEATURE_WATCHDOG
@@ -747,6 +753,7 @@ void Printer::setup()
 #endif
 #endif
 
+//Davinci Specific, filament sensors
 #if defined(FIL_SENSOR1_PIN)
 SET_INPUT(FIL_SENSOR1_PIN);
 #endif
@@ -878,6 +885,7 @@ SET_INPUT(FIL_SENSOR2_PIN);
 #endif
 #if CASE_LIGHTS_PIN >= 0
     SET_OUTPUT(CASE_LIGHTS_PIN);
+    //Davinci Specific, we power on lights based on state set in EEPROM 
     WRITE(CASE_LIGHTS_PIN, EEPROM::buselight);
 #endif // CASE_LIGHTS_PIN
 #if GANTRY
@@ -935,9 +943,11 @@ SET_INPUT(FIL_SENSOR2_PIN);
     EEPROM::initBaudrate();
     HAL::serialSetBaudrate(baudrate);
     Com::printFLN(Com::tStart);
+    //Davinci Specific, posponed to get sound enabled or not read from EEPROM
     //UI_INITIALIZE;
     HAL::showStartReason();
     Extruder::initExtruder();
+//Davinci Specific, setup SD Card EEPROM
 #if SDSUPPORT
 #ifdef SDEEPROM
     HAL::setupSdEeprom();
@@ -958,6 +968,7 @@ SET_INPUT(FIL_SENSOR2_PIN);
     Commands::checkFreeMemory();
     Commands::writeLowestFreeRAM();
     HAL::setupTimer();
+    //Davinci Specific, to get sound enabled or not when doing UI init
     UI_INITIALIZE;
 
 #if NONLINEAR_SYSTEM
@@ -970,8 +981,10 @@ SET_INPUT(FIL_SENSOR2_PIN);
 #endif // DRIVE_SYSTEM
     Extruder::selectExtruderById(0);
 #if SDSUPPORT
+    //Davinci Specific, SD Card already setup for SD Card EEPROM
     sd.autoPrint();
 #endif
+    //Davinci Specific, fancy effect
     playsound(880,100);
     playsound(1479,150);
     playsound(1174,100);
@@ -981,9 +994,7 @@ SET_INPUT(FIL_SENSOR2_PIN);
 
 void Printer::defaultLoopActions()
 {
-
     Commands::checkForPeriodicalActions(true);  //check heater every n milliseconds
-
     UI_MEDIUM; // do check encoder
     millis_t curtime = HAL::timeInMilliseconds();
     if(PrintLine::hasLines() || isMenuMode(MENU_MODE_SD_PAUSED))
@@ -1001,6 +1012,7 @@ void Printer::defaultLoopActions()
 #if SDCARDDETECT>-1 && SDSUPPORT
     sd.automount();
 #endif
+//Davinci Specific, EEPROM is on SD Card
 #if defined(SDEEPROM)
     if (!HAL::syncSdEeprom())
     {
@@ -1044,7 +1056,6 @@ void Printer::deltaMoveToTopEndstops(float feedrate)
 }
 void Printer::homeXAxis()
 {
-	setHomedX(true);
     destinationSteps[X_AXIS] = 0;
     if (!PrintLine::queueDeltaMove(true,false,false))
     {
@@ -1053,7 +1064,6 @@ void Printer::homeXAxis()
 }
 void Printer::homeYAxis()
 {
-	setHomedY(true);
     Printer::destinationSteps[Y_AXIS] = 0;
     if (!PrintLine::queueDeltaMove(true,false,false))
     {
@@ -1062,7 +1072,6 @@ void Printer::homeYAxis()
 }
 void Printer::homeZAxis() // Delta z homing
 {
-    setHomedZ(true);
     SHOT("homeZAxis ");
     deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]);
     PrintLine::moveRelativeDistanceInSteps(0, 0, 2 * axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_MOVE, 0, Printer::homingFeedrate[Z_AXIS]/ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
@@ -1156,7 +1165,6 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
 void Printer::homeXAxis()
 {
     long steps;
-    setHomedX(true);
     if ((MIN_HARDWARE_ENDSTOP_X && X_MIN_PIN > -1 && X_HOME_DIR==-1 && MIN_HARDWARE_ENDSTOP_Y && Y_MIN_PIN > -1 && Y_HOME_DIR==-1) ||
             (MAX_HARDWARE_ENDSTOP_X && X_MAX_PIN > -1 && X_HOME_DIR==1 && MAX_HARDWARE_ENDSTOP_Y && Y_MAX_PIN > -1 && Y_HOME_DIR==1))
     {
@@ -1204,14 +1212,15 @@ void Printer::homeXAxis()
 void Printer::homeYAxis()
 {
     // Dummy function x and y homing must occur together
-    setHomedY(true);
 }
 #else // cartesian printer
 void Printer::homeXAxis()
 {
     long steps;
-    setHomedX(true);
-	Extruder::selectExtruderById(0,false);
+    
+//Davinci Specific, every axis has a home flag
+setHomedX(true);
+Extruder::selectExtruderById(0,false);
     if ((MIN_HARDWARE_ENDSTOP_X && X_MIN_PIN > -1 && X_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_X && X_MAX_PIN > -1 && X_HOME_DIR==1))
     {
         long offX = 0;
@@ -1244,8 +1253,9 @@ void Printer::homeXAxis()
 void Printer::homeYAxis()
 {
     long steps;
+    //Davinci Specific, every axis has a home flag
     setHomedY(true);
-	Extruder::selectExtruderById(0,false);
+     Extruder::selectExtruderById(0,false);
     if ((MIN_HARDWARE_ENDSTOP_Y && Y_MIN_PIN > -1 && Y_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_Y && Y_MAX_PIN > -1 && Y_HOME_DIR==1))
     {
         long offY = 0;
@@ -1280,6 +1290,7 @@ void Printer::homeYAxis()
 void Printer::homeZAxis() // cartesian homing
 {
     long steps;
+    //Davinci Specific, every axis has a home flag
     setHomedZ(true);
     if ((MIN_HARDWARE_ENDSTOP_Z && Z_MIN_PIN > -1 && Z_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_Z && Z_MAX_PIN > -1 && Z_HOME_DIR==1))
     {
@@ -1635,6 +1646,7 @@ void Printer::buildTransformationMatrix(float h1,float h2,float h3)
 void Printer::setCaseLight(bool on) {
 #if CASE_LIGHTS_PIN > -1
     WRITE(CASE_LIGHTS_PIN,on);
+//Davinci Specific, powersave function
 #if UI_AUTOLIGHTOFF_AFTER!=0
     if (on)UIDisplay::ui_autolightoff_time=HAL::timeInMilliseconds()+EEPROM::timepowersaving;
 #endif
@@ -1722,3 +1734,4 @@ void Printer::showConfiguration() {
         Com::printFLN(PSTR("MaxTemp:"),MAXTEMP);
     }
 }
+

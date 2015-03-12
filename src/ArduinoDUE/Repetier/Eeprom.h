@@ -105,6 +105,7 @@ have problems with other modules using the eeprom */
 #define EPR_DELTA_DIAGONAL_CORRECTION_A 933
 #define EPR_DELTA_DIAGONAL_CORRECTION_B 937
 #define EPR_DELTA_DIAGONAL_CORRECTION_C 941
+//Davinci Specific
 #define EPR_LIGHT_ON 946
 #define EPR_SOUND_ON 947
 #define EPR_POWERSAVE_AFTER_TIME 948
@@ -169,8 +170,9 @@ have problems with other modules using the eeprom */
 #define Z_PROBE_BED_DISTANCE 10.0
 #endif
 
-#define EPR_TYPE_BYTE			0
-#define EPR_TYPE_INT			1
+//Davinci Specific
+#define EPR_TYPE_BYTE		0
+#define EPR_TYPE_INT		1
 #define EPR_TYPE_LONG		2
 #define EPR_TYPE_FLOAT		3
 
@@ -191,6 +193,7 @@ public:
 
     static void init();
     static void initBaudrate();
+    //Davinci Specific
     static bool buselight; 
     static bool busesensor;
     static bool btopsensor;
@@ -205,6 +208,7 @@ public:
     static void restoreEEPROMSettingsFromConfiguration();
     static void writeSettings();
     static void update(GCode *com);
+    //Davinci Specific, for internal update
     static void update(long P,uint8_t T,long S,float X);
     static void updatePrinterUsage();
 
@@ -292,6 +296,7 @@ public:
         return Z_PROBE_BED_DISTANCE;
 #endif
     }
+//Davinci Specific, manual leveling
 static inline float ManualProbeX1() {
 #if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_MANUAL_LEVEL_X1);

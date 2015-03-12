@@ -29,6 +29,7 @@
 #define DISPLAY_U8G  5
 #define DISPLAY_GAMEDUINO2 6
 
+//Davinci Specific, Hide/Easy/Advanced mode menu
 #define NOT_SHOW_MODE 0 //mask 0000
 #define ADVANCED_MODE 1 //mask 0001
 #define EASY_MODE 2		//mask 0010
@@ -55,6 +56,7 @@ What display type do you use?
 // Add UI_ACTION_TOPMENU to show a menu as top menu
 // ----------------------------------------------------------------------------
 
+//Davinci Specific, Custom dialog
 #define UI_CONFIRMATION_TYPE_YES_NO 1
 #define STATUS_OK	1
 #define STATUS_CANCEL	2
@@ -64,6 +66,7 @@ What display type do you use?
 
 #define UI_ACTION_NEXT 1
 #define UI_ACTION_PREVIOUS 2
+//Davinci Specific, key pad and cheat keys definition
 #define UI_ACTION_RIGHT_KEY 3
 
 #define UI_ACTION_OK_TOP_PREV 10
@@ -200,6 +203,7 @@ What display type do you use?
 #define UI_ACTION_Z_BABYSTEPS           1111
 #define UI_ACTION_MAX_INACTIVE          1112
 #define UI_ACTION_TEMP_DEFECT           1113
+//Davinci Specific
 #define UI_ACTION_CLEAN_NOZZLE          1114
 #define UI_ACTION_SOUND			1115
 #define UI_ACTION_LOAD_EXTRUDER_0	1116
@@ -281,10 +285,12 @@ What display type do you use?
 #define UI_MENU_TYPE_INFO 0
 #define UI_MENU_TYPE_FILE_SELECTOR 1
 #define UI_MENU_TYPE_SUBMENU 2
+//Davinci Specific
 #define UI_MENU_TYPE_ACTION_MENU 3
 #define UI_MENU_TYPE_MODIFICATION_MENU 4
 #define UI_MENU_TYPE_MENU_WITH_STATUS 5
 
+//Davinci Specific
 #define UI_MENU_ENTRY_MIN_TYPE_CHECK 2
 #define UI_MENU_ENTRY_MAX_TYPE_CHECK 5
 
@@ -294,6 +300,7 @@ typedef struct {
   unsigned int action; // must be int so it gets 32 bit on arm!
   uint8_t filter; // allows dynamic menu filtering based on Printer::menuMode bits set.
   uint8_t nofilter; // Hide if one of these bits are set
+//Davinci Specific, filter for UI
   uint8_t display_mode; // Easy or advanced or both or none 
   bool showEntry() const;
 } const UIMenuEntry;
@@ -383,7 +390,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define UI_KEYS_I2C_BUTTON_HIGH(pin,action_) if((pin & keymask)!=0) action=action_;
 
 #define UI_STRING(name,text) const char PROGMEM name[] = text
-
+//Davinci Specific, for Easy/Advanced feature
 #define UI_PAGE6(name,row1,row2,row3,row4,row5,row6,dmode) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);UI_STRING(name ## _5txt,row5);UI_STRING(name ## _6txt,row6);\
    UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
    UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
@@ -1272,6 +1279,7 @@ void ui_check_slow_keys(int &action) {}
 #include "uilang.h"
 #endif
 
+//Davinci Specific
 #define UI_VERSION_STRING "Repetier " REPETIER_VERSION "Mod"
 
 #ifdef UI_HAS_I2C_KEYS

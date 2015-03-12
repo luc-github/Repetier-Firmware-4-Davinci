@@ -24,6 +24,8 @@
 const int sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
 int Commands::lowestRAMValue = MAX_RAM;
 int Commands::lowestRAMValueSend = MAX_RAM;
+
+//Davinci Specific, specifi flag and counter
 uint8_t Commands::delay_flag_change=0;
 uint8_t Commands::delay_flag_change2=0;
 uint8_t Commands::countersensor=0;
@@ -68,6 +70,7 @@ void Commands::commandLoop()
 void Commands::checkForPeriodicalActions(bool allowNewMoves)
 {
     if(!executePeriodical) return;
+//Davinci Specific, as we call a lot this function in subfunctions
 #if FEATURE_WATCHDOG
             HAL::pingWatchdog();
 #endif
@@ -79,6 +82,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves)
             writeMonitor();
         counter250ms = 5;
     }
+//Davinci Specific, sensor management
 #if defined(TOP_SENSOR_PIN)
      if(EEPROM::btopsensor)
         {
@@ -158,7 +162,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves)
     // lcd controller can start new moves, so we disallow it if called from within
     // a move command.
     UI_SLOW(allowNewMoves);
-    //check if emergency stop button is pressed
+    //Davinci Specific, check if emergency stop button is pressed
     if(uid.lastButtonAction==UI_ACTION_OK_NEXT_BACK)Commands::emergencyStop();
 }
 
@@ -180,6 +184,7 @@ void Commands::waitUntilEndOfAllMoves()
         UI_MEDIUM;
     }
 }
+
 void Commands::waitUntilEndOfAllBuffers()
 {
     GCode *code = NULL;
@@ -678,6 +683,7 @@ void Commands::processGCode(GCode *com)
         {
             GCode::readFromSerial();
             Commands::checkForPeriodicalActions(true);
+	//Davinci Specific, for immediate stop
             if (Printer::isMenuMode(MENU_MODE_STOP_REQUESTED))break;
         }
         break;
@@ -710,10 +716,11 @@ void Commands::processGCode(GCode *com)
         float sum = 0, last,oldFeedrate = Printer::feedrate;
         Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         sum = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
-        if(sum<0)
+        //Davinci Specific, better error management
+	if(sum<0)
               {
                 Printer::zMin =  zMin_save;
-                Printer::setAutolevelActive(true);
+                Printer::setAutolevelActive(false);
                 if (Printer::realZPosition()<-200)Printer::homeAxis(false,false,true);
                  //to avoid hit on plates, low down bed a little
                 Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+5,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
@@ -721,10 +728,11 @@ void Commands::processGCode(GCode *com)
                 }
         Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         last = Printer::runZProbe(false,false);
-        if(last<0)
+        //Davinci Specific, better error management
+	if(last<0)
              {
                 Printer::zMin =  zMin_save;
-                Printer::setAutolevelActive(true);
+                Printer::setAutolevelActive(false);
                 if (Printer::realZPosition()<-200)Printer::homeAxis(false,false,true);
                  //to avoid hit on plates, low down bed a little
                 Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+5,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
@@ -733,16 +741,17 @@ void Commands::processGCode(GCode *com)
         sum+= last;
         Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         last = Printer::runZProbe(false,true);
-        if(last<0)
+        //Davinci Specific, better error management
+	if(last<0)
                 {
                 Printer::zMin =  zMin_save;
-                Printer::setAutolevelActive(true);
+                Printer::setAutolevelActive(false);
                 if (Printer::realZPosition()<-200)Printer::homeAxis(false,false,true);
                  //to avoid hit on plates, low down bed a little
                 Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+5,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
                 break;
                 }
-        sum+= last;
+        sum += last;
         sum *= 0.33333333333333;
         Com::printFLN(Com::tZProbeAverage,sum);
         if(com->hasS() && com->S)
@@ -784,7 +793,8 @@ void Commands::processGCode(GCode *com)
         Printer::setAutolevelActive(oldAutolevel);
         Printer::updateCurrentPosition(p & 1);
         printCurrentPosition(PSTR("G30 "));
-        if (Printer::realZPosition()<-200)Printer::homeAxis(false,false,true);
+        //Davinci Specific, better error management
+	if (Printer::realZPosition()<-200)Printer::homeAxis(false,false,true);
         //to avoid hit on plates
         Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+5,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
 
@@ -798,6 +808,7 @@ void Commands::processGCode(GCode *com)
 #if FEATURE_AUTOLEVEL
     case 32: // G32 Auto-Bed leveling
     {
+	//Davinci Specific, better error management
         float zMin_save=Printer::zMin;
          if(!Printer::isHomed()) Printer::homeAxis(true,true,true);
         //to avoid hit on plates, low down bed a little
@@ -809,7 +820,8 @@ void Commands::processGCode(GCode *com)
         float h1,h2,h3,hc,oldFeedrate = Printer::feedrate;
         Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h1 = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
-        if(h1<0)
+        //Davinci Specific, better error management
+	if(h1<0)
                 {
                 Printer::zMin =  zMin_save;
                 Printer::setAutolevelActive(true);
@@ -820,7 +832,8 @@ void Commands::processGCode(GCode *com)
                 }
         Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h2 = Printer::runZProbe(false,false);
-        if(h2<0)
+        //Davinci Specific, better error management
+	if(h2<0)
               {
                 Printer::zMin =  zMin_save;
                 Printer::setAutolevelActive(true);
@@ -831,7 +844,8 @@ void Commands::processGCode(GCode *com)
                 }
         Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h3 = Printer::runZProbe(false,true);
-        if(h3<0)
+        //Davinci Specific, better error management
+	if(h3<0)
               {
                 Printer::zMin =  zMin_save;
                 Printer::setAutolevelActive(true);
@@ -1175,6 +1189,7 @@ void Commands::processMCode(GCode *com)
         break;
 #endif
     case 42: //M42 -Change pin status via gcode
+	//Davinci Specific, better error management
         if (com->hasS() && com->hasP() && com->S>=0 && com->S<=255)
         {
             int pin_number = com->P;
@@ -1196,6 +1211,8 @@ void Commands::processMCode(GCode *com)
             }
         }
         break;
+
+//Davinci Specific, Stop Printing
     case 50://kill print
     uid.executeAction(UI_ACTION_SD_STOP,true);
     break;
@@ -1277,6 +1294,8 @@ void Commands::processMCode(GCode *com)
             Printer::enableZStepper();
     }
     break;
+
+//Davinci Specific, Clean noozle and light management
 #if ENABLE_CLEAN_NOZZLE
         case 100:
             Printer::cleanNozzle();
@@ -1294,6 +1313,7 @@ void Commands::processMCode(GCode *com)
             WRITE(CASE_LIGHTS_PIN,0);
             break;
 #endif // CASE_LIGHTS_PIN
+
     case 104: // M104 temperature
 #if NUM_EXTRUDER > 0
         if(reportTempsensorError()) break;
@@ -1353,6 +1373,7 @@ void Commands::processMCode(GCode *com)
                 printedTime = currentTime;
             }
             Commands::checkForPeriodicalActions(true);
+	    //Davinci Specific, STOP management
             if (Printer::isMenuMode(MENU_MODE_STOP_REQUESTED))break;
             //gcode_read_serial();
 #if RETRACT_DURING_HEATUP
@@ -1366,11 +1387,11 @@ void Commands::processMCode(GCode *com)
                     (dirRising ? actExtruder->tempControl.currentTemperatureC >= actExtruder->tempControl.targetTemperatureC - 1
                      : actExtruder->tempControl.currentTemperatureC <= actExtruder->tempControl.targetTemperatureC + 1))
 #if defined(TEMP_HYSTERESIS) && TEMP_HYSTERESIS>=1
-                    || (waituntil!=0 && (abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC))>TEMP_HYSTERESIS)
+                    || (waituntil!=0 && (abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC)) > TEMP_HYSTERESIS)
 #endif
               )
             {
-                waituntil = currentTime+1000UL*(millis_t)actExtruder->watchPeriod; // now wait for temp. to stabalize
+                waituntil = currentTime + 1000UL*(millis_t)actExtruder->watchPeriod; // now wait for temp. to stabalize
             }
         }
         while(waituntil == 0 || (waituntil != 0 && (millis_t)(waituntil-currentTime) < 2000000000UL));
@@ -1404,6 +1425,7 @@ void Commands::processMCode(GCode *com)
                 codenum = previousMillisCmd = HAL::timeInMilliseconds();
             }
             Commands::checkForPeriodicalActions(true);
+	    //Davinci Specific, STOP management
             if (Printer::isMenuMode(MENU_MODE_STOP_REQUESTED))break;
         }
 #endif
@@ -1438,10 +1460,10 @@ void Commands::processMCode(GCode *com)
 
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
     case 106: // M106 Fan On
-        setFanSpeed(com->hasS()?com->S:255,com->hasP());
+        setFanSpeed(com->hasS() ? com->S : 255, com->hasP());
         break;
     case 107: // M107 Fan Off
-        setFanSpeed(0,com->hasP());
+        setFanSpeed(0, com->hasP());
         break;
 #endif
     case 111: // M111 enable/disable run time debug flags
@@ -1453,12 +1475,12 @@ void Commands::processMCode(GCode *com)
         }
         if(Printer::debugDryrun())   // simulate movements without printing
         {
-            Extruder::setTemperatureForExtruder(0,0);
+            Extruder::setTemperatureForExtruder(0, 0);
 #if NUM_EXTRUDER>1
-            for(uint8_t i=0; i<NUM_EXTRUDER; i++)
-                Extruder::setTemperatureForExtruder(0,i);
+            for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
+                Extruder::setTemperatureForExtruder(0, i);
 #else
-            Extruder::setTemperatureForExtruder(0,0);
+            Extruder::setTemperatureForExtruder(0, 0);
 #endif
 #if HEATED_BED_TYPE!=0
             target_bed_raw = 0;
@@ -1509,13 +1531,13 @@ void Commands::processMCode(GCode *com)
 #if BEEPER_TYPE>0
     case 120: // M120 Test beeper function
         if(com->hasS() && com->hasP())
-            beep(com->S,com->P); // Beep test
+            beep(com->S, com->P); // Beep test
         break;
 #endif
 #if MIXING_EXTRUDER > 0
     case 163: // M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive
         if(com->hasS() && com->hasP() && com->S < NUM_EXTRUDER && com->S >= 0)
-            Extruder::setMixingWeight(com->S,com->P);
+            Extruder::setMixingWeight(com->S, com->P);
         break;
     case 164: /// M164 S<virtNum> P<0 = dont store eeprom,1 = store to eeprom> - Store weights as virtual extruder S
         if(!com->hasS() || com->S < 0 || com->S >= VIRTUAL_EXTRUDER) break; // ignore illigal values
@@ -1675,6 +1697,7 @@ void Commands::processMCode(GCode *com)
     Com::printInfoFLN(PSTR("Watchdog feature was not compiled into this version!"));
 #endif
     break;
+
 #if defined(BEEPER_PIN) && BEEPER_PIN>=0 && FEATURE_BEEPER
     case 300: // M300
     {
@@ -1755,9 +1778,11 @@ void Commands::processMCode(GCode *com)
     }
     break;
     case 355: // M355 S<0/1> - Turn case light on/off, no S = report status
-        if(com->hasS()) {
+        if(com->hasS())
+        {
             Printer::setCaseLight(com->S);
-        } else
+        }
+        else
             Printer::reportCaseLightStatus();
         break;
     case 360: // M360 - show configuration
@@ -1805,33 +1830,33 @@ void Commands::processMCode(GCode *com)
         if(PrintLine::cur == NULL)
         {
             Com::printFLN(PSTR("No move"));
-            if(PrintLine::linesCount>0)
+            if(PrintLine::linesCount > 0)
             {
                 PrintLine &cur = PrintLine::lines[PrintLine::linesPos];
-                Com::printF(PSTR("JFlags:"),(int)cur.joinFlags);
-                Com::printFLN(PSTR("Flags:"),(int)cur.flags);
+                Com::printF(PSTR("JFlags:"), (int)cur.joinFlags);
+                Com::printFLN(PSTR("Flags:"), (int)cur.flags);
                 if(cur.isWarmUp())
                 {
-                    Com::printFLN(PSTR("warmup:"),(int)cur.getWaitForXLinesFilled());
+                    Com::printFLN(PSTR("warmup:"), (int)cur.getWaitForXLinesFilled());
                 }
             }
         }
         else
         {
-            Com::printF(PSTR("Rem:"),PrintLine::cur->stepsRemaining);
-            Com::printFLN(PSTR("Int:"),Printer::interval);
+            Com::printF(PSTR("Rem:"), PrintLine::cur->stepsRemaining);
+            Com::printFLN(PSTR("Int:"), Printer::interval);
         }
         break;
 #endif // DEBUG_QUEUE_MOVE
 #ifdef DEBUG_SEGMENT_LENGTH
     case 534: // M534
-        Com::printFLN(PSTR("Max. segment size:"),Printer::maxRealSegmentLength);
+        Com::printFLN(PSTR("Max. segment size:"), Printer::maxRealSegmentLength);
         if(com->hasS())
             Printer::maxRealSegmentLength = 0;
         break;
 #endif
 #ifdef DEBUG_REAL_JERK
-        Com::printFLN(PSTR("Max. jerk measured:"),Printer::maxRealJerk);
+        Com::printFLN(PSTR("Max. jerk measured:"), Printer::maxRealJerk);
         if(com->hasS())
             Printer::maxRealJerk = 0;
         break;
@@ -1890,6 +1915,7 @@ void Commands::executeGCode(GCode *com)
             }
         }
     }
+    //Davinci Specific, for power and light management 
     //periodical command from repetier should not be taken in account  for wake up
     if(!((com->hasM() &&  ((com->M ==105)||(com->M ==355)||(com->M ==360))) || Printer::isMenuMode(MENU_MODE_SD_PRINTING)))   // Process M Code
     {
@@ -1926,7 +1952,7 @@ void Commands::executeGCode(GCode *com)
             com->printCommand();
         }
     }
-         //if some extruder command and we are not in pause - check filament sensor
+         //Davinci Specific, if some extruder command and we are not in pause - check filament sensor
         if (com->hasE() && !Printer:: isMenuMode(MENU_MODE_SD_PAUSED))
         {
             if ((Extruder::current->id)==0)//check correct extruder sensor
@@ -1965,29 +1991,29 @@ void Commands::emergencyStop()
     Extruder::manageTemperatures();
     for(uint8_t i = 0; i < NUM_EXTRUDER + 3; i++)
         pwm_pos[i] = 0;
-#if EXT0_HEATER_PIN>-1
+#if EXT0_HEATER_PIN > -1
     WRITE(EXT0_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
-    WRITE(EXT1_HEATER_PIN,HEATER_PINS_INVERTED);
+#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1
+    WRITE(EXT1_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1 && NUM_EXTRUDER>2
-    WRITE(EXT2_HEATER_PIN,HEATER_PINS_INVERTED);
+#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN > -1 && NUM_EXTRUDER > 2
+    WRITE(EXT2_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN>-1 && NUM_EXTRUDER>3
-    WRITE(EXT3_HEATER_PIN,HEATER_PINS_INVERTED);
+#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN > -1 && NUM_EXTRUDER > 3
+    WRITE(EXT3_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN>-1 && NUM_EXTRUDER>4
-    WRITE(EXT4_HEATER_PIN,HEATER_PINS_INVERTED);
+#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN > -1 && NUM_EXTRUDER > 4
+    WRITE(EXT4_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1 && NUM_EXTRUDER>5
-    WRITE(EXT5_HEATER_PIN,HEATER_PINS_INVERTED);
+#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN > -1 && NUM_EXTRUDER > 5
+    WRITE(EXT5_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
-#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
-    WRITE(FAN_PIN,0);
+#if FAN_PIN > -1 && FEATURE_FAN_CONTROL
+    WRITE(FAN_PIN, 0);
 #endif
-#if HEATED_BED_HEATER_PIN>-1
-    WRITE(HEATED_BED_HEATER_PIN,HEATER_PINS_INVERTED);
+#if HEATED_BED_HEATER_PIN > -1
+    WRITE(HEATED_BED_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
     HAL::delayMilliseconds(200);
     InterruptProtectedBlock noInts;
@@ -2004,7 +2030,7 @@ void Commands::checkFreeMemory()
 
 void Commands::writeLowestFreeRAM()
 {
-    if(lowestRAMValueSend>lowestRAMValue)
+    if(lowestRAMValueSend > lowestRAMValue)
     {
         lowestRAMValueSend = lowestRAMValue;
         Com::printFLN(Com::tFreeRAM, lowestRAMValue);

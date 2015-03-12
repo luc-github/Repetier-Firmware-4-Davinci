@@ -277,15 +277,17 @@ public:
     HAL();
     virtual ~HAL();
 
+//Davinci Specific
 #if FEATURE_BEEPER
     static bool enablesound;
-#endif
+#endif //FEATURE_BEEPER
     // do any hardware-specific initialization here
     static inline void hwSetup(void)
     {
+//Davinci Specific
 #ifdef TWI_CLOCK_FREQ
         HAL::i2cInit(TWI_CLOCK_FREQ);
-#endif
+#endif //TWI_CLOCK_FREQ
 // make debugging startup easier
 //Serial.begin(115200);
         TimeTick_Configure(F_CPU_TRUE);
@@ -296,6 +298,8 @@ public:
                      TC_CMR_WAVE | DELAY_TIMER_CLOCK);
         TC_Start(DELAY_TIMER, DELAY_TIMER_CHANNEL);
     }
+ //Davinci Specific
+ //EEPROM is on SD Card so need to setup SD Access first
  static inline void loadVirtualEEPROM(void)
     {
 #if EEPROM_AVAILABLE && EEPROM_MODE != 0
@@ -379,9 +383,10 @@ public:
     static inline void tone(uint8_t pin,int frequency) {
         // set up timer counter 1 channel 0 to generate interrupts for
         // toggling output pin.  
-		#if FEATURE_BEEPER
-		if (!enablesound)return;
-		#endif
+	//Davinci Specific
+	#if FEATURE_BEEPER
+	if (!enablesound)return;
+	#endif
         SET_OUTPUT(pin);
         tone_pin = pin;
         pmc_set_writeprotect(false);
@@ -473,6 +478,7 @@ public:
     // Write any data type to EEPROM
     static inline void eprBurnValue(unsigned int pos, int size, union eeval_t newvalue) 
     {
+//Davinci Specific
 #if EEPROM_MODE!=0
 #ifdef SDEEPROM
         for (int i = 0; i < size; i++)
@@ -496,8 +502,8 @@ public:
         }
         i2cStop();          // signal end of transaction
         delayMilliseconds(EEPROM_PAGE_WRITE_TIME);   // wait for page write to complete
-#endif
-#endif
+#endif //SDEEPROM
+#endif //EEPROM_MODE!=0
     }
 
     // Read any data type from EEPROM that was previously written by eprBurnValue
@@ -506,6 +512,7 @@ public:
         int i;
         eeval_t v;
 
+//Davinci Specific
 #if EEPROM_MODE!=0
 #ifdef SDEEPROM
         for (int i = 0; i < size; i++)
@@ -522,8 +529,8 @@ public:
         }
         // read last byte 
         v.b[i] = i2cReadNak();
-#endif
-#endif
+#endif //SDEEPROM
+#endif //EEPROM_MODE!=0
         return v;
     }
 
@@ -715,7 +722,8 @@ public:
 #if USE_ADVANCE
     static void resetExtruderDirection();
 #endif
-    static volatile uint8_t insideTimer1;        
+    static volatile uint8_t insideTimer1; 
+//Davinci Specific       
 #ifdef SDEEPROM
     static void setupSdEeprom();
     static bool syncSdEeprom();

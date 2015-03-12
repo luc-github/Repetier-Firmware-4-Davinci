@@ -55,11 +55,12 @@ public:
     float tempArray[4];
 #endif
     uint8_t flags;
+//Davinci Specific, be able to disable decouple test
 #if FEATURE_DECOUPLE_TEST
     millis_t lastDecoupleTest;  ///< Last time of decoupling sensor-heater test
     float  lastDecoupleTemp;  ///< Temperature on last test
     millis_t decoupleTestPeriod; ///< Time between setting and testing decoupling.
-#endif
+#endif //FEATURE_DECOUPLE_TEST
 
     void setTargetTemperature(float target);
     void updateCurrentTemperature();
@@ -73,6 +74,7 @@ public:
         if(on) flags |= TEMPERATURE_CONTROLLER_FLAG_ALARM;
         else flags &= ~TEMPERATURE_CONTROLLER_FLAG_ALARM;
     }
+//Davinci Specific, be able to disable decouple test
 #if FEATURE_DECOUPLE_TEST
     inline bool isDecoupleFull()
     {
@@ -115,23 +117,23 @@ public:
     {
         setDecoupleFull(false);
     }
-#endif
+#endif //FEATURE_DECOUPLE_TEST
     inline bool isSensorDefect()
     {
         return flags & TEMPERATURE_CONTROLLER_FLAG_SENSDEFECT;
     }
+//Davinci Specific, be able to disable decouple test
 #if FEATURE_DECOUPLE_TEST
     inline bool isSensorDecoupled()
     {
         return flags & TEMPERATURE_CONTROLLER_FLAG_SENSDECOUPLED;
     }
-#endif
+#endif //FEATURE_DECOUPLE_TEST
 
 #if TEMP_PID
     void autotunePID(float temp,uint8_t controllerId,bool storeResult);
 #endif
 };
-
 class Extruder;
 extern Extruder extruder[];
 
@@ -155,7 +157,7 @@ public:
     int32_t xOffset;
     int32_t yOffset;
     float stepsPerMM;        ///< Steps per mm.
-//For Davinci as Pin is 128 int8 is not enough
+////Davinci Specific, as Pin is 128 int8 is not enough
     int16_t enablePin;          ///< Pin to enable extruder stepper motor.
 //  uint8_t directionPin; ///< Pin number to assign the direction.
 //  uint8_t stepPin; ///< Pin number for a step.
@@ -420,11 +422,13 @@ public:
     static void manageTemperatures();
     static void disableCurrentExtruderMotor();
     static void disableAllExtruderMotors();
+//Davinci Specific, be able to not move extruder if Duo
     static void selectExtruderById(uint8_t extruderId, bool changepos=true);
     static void disableAllHeater();
     static void initExtruder();
     static void initHeatedBed();
     static void setHeatedBedTemperature(float temp_celsius,bool beep = false);
+//Davinci Specific, allow to cool down but not heat for a period
     static  millis_t disableheat_time;
     static float getHeatedBedTemperature();
     static void setTemperatureForExtruder(float temp_celsius,uint8_t extr,bool beep = false);

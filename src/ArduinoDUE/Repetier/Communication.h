@@ -25,6 +25,7 @@
 class Com
 {
     public:
+//Davinci Specific
 FSTRINGVAR(tReset)
 FSTRINGVAR(tTempExtABS)
 FSTRINGVAR(tTempExtPLA)
@@ -129,7 +130,7 @@ FSTRINGVAR(tLinearLColon)
 FSTRINGVAR(tQuadraticKColon)
 FSTRINGVAR(tEEPROMUpdated)
 
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
 FSTRINGVAR(tMeasurementReset)
 FSTRINGVAR(tMeasureDeltaSteps)
 FSTRINGVAR(tMeasureDelta)
@@ -257,6 +258,7 @@ FSTRINGVAR(tZProbeY2)
 FSTRINGVAR(tZProbeX3)
 FSTRINGVAR(tZProbeY3)
 #endif
+//Davinci Specific, manual leveling
 FSTRINGVAR(tManualProbeX1)
 FSTRINGVAR(tManualProbeY1)
 FSTRINGVAR(tManualProbeX2)
@@ -378,6 +380,7 @@ FSTRINGVAR(tDirectoryCreated)
 FSTRINGVAR(tCreationFailed)
 FSTRINGVAR(tSDErrorCode)
 #endif // SDSUPPORT
+//Davinci Specific, be able to disable decouple test
 #if FEATURE_DECOUPLE_TEST
 FSTRINGVAR(tHeaterDecoupled)
 FSTRINGVAR(tHeaterDecoupledWarning)

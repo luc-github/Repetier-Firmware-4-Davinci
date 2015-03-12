@@ -39,7 +39,7 @@ SDCard::SDCard()
 
 void SDCard::automount()
 {
-#if SDCARDDETECT>-1
+#if SDCARDDETECT > -1
     if(READ(SDCARDDETECT) != SDCARDDETECTINVERTED)
     {
         if(sdactive)   // Card removed
@@ -59,6 +59,7 @@ void SDCard::automount()
             UI_STATUS(UI_TEXT_SD_INSERTED);
             Com::printFLN(PSTR("SD card inserted")); // Not translateable or host will not understand signal
             initsd();
+	    //Davinci Specific, init and autoprint are separated
             autoPrint();
 #if UI_DISPLAY_TYPE != NO_DISPLAY
             if(sdactive) {
@@ -74,8 +75,8 @@ void SDCard::automount()
 void SDCard::initsd()
 {
     sdactive = false;
-#if SDSS >- 1
-#if SDCARDDETECT>-1
+#if SDSS > -1
+#if SDCARDDETECT > -1
     if(READ(SDCARDDETECT) != SDCARDDETECTINVERTED)
         return;
 #endif
@@ -90,6 +91,7 @@ void SDCard::initsd()
     Printer::setMenuMode(MENU_MODE_SD_MOUNTED, true);
 
     fat.chdir();
+//Davinci Specific,EEPROM is on SD Card
 #ifdef SDEEPROM
 	if (eepromBuffer != NULL && eepromSize > 0)
 	{
@@ -125,7 +127,7 @@ void SDCard::autoPrint() {
 	if (!sdactive)
 		return;
 
-    if(selectFile("init.g",true))
+    if(selectFile("init.g", true))
     {
         startPrint();
     }
@@ -135,6 +137,7 @@ void SDCard::mount()
 {
     sdmode = 0;
     initsd();
+    //Davinci Specific, Init and autoprint are separated 
     autoPrint();
 }
 
@@ -171,7 +174,7 @@ void SDCard::pausePrint(bool intern)
         Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE,
                             Printer::memoryE - RETRACT_ON_PAUSE,
                             Printer::maxFeedrate[E_AXIS] / 2);
-        //save position and extruder ID
+        //Davinci Specific, save extruder ID for DUO
         #if NUM_EXTRUDER>1
         Printer::lastextruderID=Extruder::current->id;
         Extruder::selectExtruderById(0);
@@ -182,7 +185,8 @@ void SDCard::pausePrint(bool intern)
 #if DRIVE_SYSTEM == DELTA
         Printer::moveToReal(0, 0.9 * EEPROM::deltaMaxRadius(), IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::maxFeedrate[X_AXIS]);
 #else
-         if (Printer::lastCmdPos[Z_AXIS]+10<Printer::zMin+Printer::zLength)
+        //Davinci Specific, down bed and pause on Drip Box instead of front
+	if (Printer::lastCmdPos[Z_AXIS]+10<Printer::zMin+Printer::zLength)
           Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::lastCmdPos[Z_AXIS]+10,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
         Printer::moveToReal(Printer::xMin,Printer::yMin,IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
 #endif
@@ -194,6 +198,7 @@ void SDCard::continuePrint(bool intern)
 {
     if(!sd.sdactive) return;
     if(intern) {
+		//Davinci Specific, restore extruder for DUO
 		#if NUM_EXTRUDER>1
 		Extruder::selectExtruderById(Printer::lastextruderID);
 		#endif
@@ -361,6 +366,7 @@ bool SDCard::showFilename(const uint8_t *name)
     if (*name == DIR_NAME_DELETED || *name == '.') return false;
     return true;
 }
+//Davinci Specific, Hide some extension for easy reading and avoid to delete EEPROM
  #if HIDE_BINARY_ON_SD
 bool SDCard::showFilename(dir_t *p,const char *filename)
 {

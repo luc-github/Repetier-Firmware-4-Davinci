@@ -311,6 +311,7 @@ STEPPER_CURRENT_CONTROL
 
 #if NUM_EXTRUDER==1
 #define E1_PINS
+//Davinci Specific, second extruder pins are in sensitive pins
 #define HEATER_2_PIN -1
 #define TEMP_2_PIN -1
 #endif
@@ -341,6 +342,7 @@ STEPPER_CURRENT_CONTROL
 #define MISO_PIN        74
 #define SCK_PIN         76
 //#define DUE_SOFTWARE_SPI
+//Davinci Specific, SD Card pins are defined in Userpins.h
 #elsif MOTHERBOARD != 999
 #define DUE_SOFTWARE_SPI
 #define MOSI_PIN		51
@@ -395,7 +397,7 @@ STEPPER_CURRENT_CONTROL
 #define FAN_PIN ORIG_FAN_PIN
 #define FAN2_PIN ORIG_FAN2_PIN
 #define PS_ON_PIN ORIG_PS_ON_PIN
-
+//Davinci Specific, sensitive pins need second extruder pins
 #define SENSITIVE_PINS {0, 1, X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, X_MIN_PIN, X_MAX_PIN, Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, Y_MIN_PIN, Y_MAX_PIN, Z_STEP_PIN, Z_DIR_PIN, Z_ENABLE_PIN, Z_MIN_PIN, Z_MAX_PIN, LED_PIN, ORIG_PS_ON_PIN, \
                         HEATER_0_PIN, HEATER_1_PIN, HEATER_2_PIN,FAN_PIN, E0_PINS E1_PINS E2_PINS TEMP_0_PIN, TEMP_1_PIN, TEMP_2_PIN, SDSS }
 #endif

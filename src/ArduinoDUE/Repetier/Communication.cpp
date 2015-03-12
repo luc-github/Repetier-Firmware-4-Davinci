@@ -25,12 +25,13 @@
 FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Delta EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:3")
 #else
 #if DRIVE_SYSTEM == CARTESIAN
+//Davinci Specific
 FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/luc-github/Repetier-Firmware-0.92 PROTOCOL_VERSION:1.0 MACHINE_TYPE:DaVinci EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:3")
 #else
 FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Core_XY EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:3")
 #endif
 #endif
-
+//Davinci Specific
 FSTRINGVALUE(Com::tReset,RESET_IDENTIFIER)
 FSTRINGVALUE(Com::tTempExtABS,"Temp Ext ABS:")
 FSTRINGVALUE(Com::tTempExtPLA,"Temp Ext PLA:")
@@ -134,7 +135,7 @@ FSTRINGVALUE(Com::tEEPROMUpdated,"EEPROM updated")
 
 FSTRINGVALUE(Com::tLinearLColon,"linear L:")
 FSTRINGVALUE(Com::tQuadraticKColon," quadratic K:")
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
 FSTRINGVALUE(Com::tMeasurementReset,"Measurement reset.")
 FSTRINGVALUE(Com::tMeasureDeltaSteps,"Measure/delta (Steps) =")
 FSTRINGVALUE(Com::tMeasureDelta,"Measure/delta =")
@@ -243,6 +244,7 @@ FSTRINGVALUE(Com::tWait,WAITING_IDENTIFIER)
 #if EEPROM_MODE == 0
 FSTRINGVALUE(Com::tNoEEPROMSupport,"No EEPROM support compiled.\r\n")
 #else
+//Davinci Specific, manual leveling positions
 FSTRINGVALUE(Com::tManualProbeX1,"Manual-probe X1")
 FSTRINGVALUE(Com::tManualProbeY1,"Manual-probe Y1")
 FSTRINGVALUE(Com::tManualProbeX2,"Manual-probe X2")
@@ -393,6 +395,7 @@ FSTRINGVALUE(Com::tDirectoryCreated,"Directory created")
 FSTRINGVALUE(Com::tCreationFailed,"Creation failed")
 FSTRINGVALUE(Com::tSDErrorCode,"SD errorCode:")
 #endif // SDSUPPORT
+//Davinci Specific, be able to disable decouple test
 #if FEATURE_DECOUPLE_TEST
 FSTRINGVALUE(Com::tHeaterDecoupled,"Heater decoupled")
 FSTRINGVALUE(Com::tHeaterDecoupledWarning,"One heater seems decoupled from thermistor - disabling all for safety!")

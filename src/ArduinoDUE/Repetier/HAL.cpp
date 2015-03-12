@@ -59,6 +59,7 @@ HAL::~HAL()
     //dtor
 }
 
+//Davinci Specific
 #ifdef SDEEPROM
 #if !SDSUPPORT
 #error SDEEPROM requires SDCARSUPPORT
@@ -264,7 +265,8 @@ int HAL::getFreeRam() {
 
 // Reset peripherals and cpu
 void HAL::resetHardware() {
-	playsound (1000,400);
+    //Davinci Specific, fancy effect
+    playsound (1000,400);
     RSTC->RSTC_CR = RSTC_CR_KEY(0xA5) | RSTC_CR_PERRST | RSTC_CR_PROCRST;
 }
 
@@ -415,6 +417,7 @@ uint32_t HAL::integer64Sqrt(uint64_t a_nInput) {
    }
 #endif
 
+//Davinci Specific
 #ifdef TWI_CLOCK_FREQ
 /*************************************************************************
  Initialization of the I2C bus interface. Need to be called only once
@@ -620,7 +623,8 @@ unsigned char HAL::i2cReadNak(void)
     i2cCompleted();
     return data;
 }
-#endif
+#endif //TWI_CLOCK_FREQ
+
 
 #if FEATURE_SERVO
 // may need further restrictions here in the future
@@ -875,7 +879,7 @@ void PWM_TIMER_VECTOR ()
         if((pwm_cooler_pos_set[5] = extruder[5].coolerPWM)>0) WRITE(EXT5_EXTRUDER_COOLER_PIN, 1);
 #endif
 #endif
-#if FAN_BOARD_PIN > -1 && !defined(SHARED_COOLER_BOARD_EXT)
+#if FAN_BOARD_PIN > -1 && SHARED_COOLER_BOARD_EXT == 0
         if((pwm_pos_set[NUM_EXTRUDER + 1] = pwm_pos[NUM_EXTRUDER + 1]) > 0) WRITE(FAN_BOARD_PIN, 1);
 #endif
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
@@ -966,7 +970,7 @@ void PWM_TIMER_VECTOR ()
 #endif
 #endif
 #endif
-#if FAN_BOARD_PIN > -1 && !defined(SHARED_COOLER_BOARD_EXT)
+#if FAN_BOARD_PIN > -1 && SHARED_COOLER_BOARD_EXT == 0
 #if PDM_FOR_COOLER
     pulseDensityModulate(FAN_BOARD_PIN, pwm_pos[NUM_EXTRUDER + 1], pwm_pos_set[NUM_EXTRUDER + 1], false);
 #else
@@ -1093,7 +1097,7 @@ void BEEPER_TIMER_VECTOR () {
 
     TC_GetStatus(BEEPER_TIMER, BEEPER_TIMER_CHANNEL);
 
-    //WRITE(tone_pin, toggle);
+//Davinci Specific       
     WRITE(BEEPER_PIN, toggle);
     toggle = !toggle;
 }

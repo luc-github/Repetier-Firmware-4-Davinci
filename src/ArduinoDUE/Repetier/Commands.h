@@ -27,6 +27,7 @@
 class Commands
 {
 public:
+    //Davinci Specific, specific flaggs and counter
     static uint8_t delay_flag_change;
     static uint8_t delay_flag_change2;
     static uint8_t countersensor;

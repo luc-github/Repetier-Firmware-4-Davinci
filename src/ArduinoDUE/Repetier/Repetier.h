@@ -28,8 +28,8 @@
 // ##                                  Debug configuration                                 ##
 // ##########################################################################################
 // These are run time sqitchable debug flags
-enum debugFlags {DEB_ECHO= 0x1, DEB_INFO=0x2, DEB_ERROR =0x4,DEB_DRYRUN=0x8,
-                 DEB_COMMUNICATION=0x10, DEB_NOMOVES=0x20, DEB_DEBUG=0x40};
+enum debugFlags {DEB_ECHO = 0x1, DEB_INFO = 0x2, DEB_ERROR = 0x4,DEB_DRYRUN = 0x8,
+                 DEB_COMMUNICATION = 0x10, DEB_NOMOVES = 0x20, DEB_DEBUG = 0x40};
 
 /** Uncomment, to see detailed data for every move. Only for debugging purposes! */
 //#define DEBUG_QUEUE_MOVE
@@ -344,6 +344,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define MENU_MODE_SD_PAUSED 4
 #define MENU_MODE_FAN_RUNNING 8
 #define MENU_MODE_PRINTING 16
+//Davinci Specific
 #define MENU_MODE_STOP_REQUESTED 32
 #define MENU_MODE_STOP_DONE  64
 #define MENU_MODE_GCODE_PROCESSING  128
@@ -525,7 +526,7 @@ public:
   //int16_t n;
   bool savetosd;
   SdBaseFile parentFound;
-
+//Davinci Specific
 #ifdef SDEEPROM
 #define SD_EEPROM_FILENAME "eeprom.bin"
   char * eepromBuffer;
@@ -540,6 +541,7 @@ public:
 
   SDCard();
   void initsd();
+  //Davinci Specific, SD Card Initialisation and autoprint are separated
   void autoPrint();
   void writeCommand(GCode *code);
   bool selectFile(const char *filename,bool silent=false);
@@ -547,7 +549,7 @@ public:
   void unmount();
   void startPrint();
   void pausePrint(bool intern = false);
-  void continuePrint(bool intern=false);
+  void continuePrint(bool intern = false);
   void stopPrint();
   inline void setIndex(uint32_t  newpos) { if(!sdactive) return; sdpos = newpos;file.seekSet(sdpos);}
   void printStatus();
@@ -558,6 +560,7 @@ public:
   char *createFilename(char *buffer,const dir_t &p);
   void makeDirectory(char *filename);
   bool showFilename(const uint8_t *name);
+//Davinci Specific, to have clean list and avoid user to delete EEPROM
  #if HIDE_BINARY_ON_SD
  static bool showFilename( dir_t*p,const char *filename);
  #endif
@@ -591,8 +594,10 @@ extern int debugWaitLoop;
 
 #if CPU_ARCH == ARCH_AVR
 #define DELAY1MICROSECOND        __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t")
+#define DELAY2MICROSECOND        __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\tnop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t")
 #else
 #define DELAY1MICROSECOND     HAL::delayMicroseconds(1);
+#define DELAY2MICROSECOND     HAL::delayMicroseconds(2);
 #endif
 
 #ifdef FAST_INTEGER_SQRT

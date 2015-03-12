@@ -22,6 +22,9 @@
 */
 
 #include "Repetier.h"
+
+
+//Davinci Specific
 //internal usage of update value
 void EEPROM:: update(long P,uint8_t T,long S,float X)
 {
@@ -57,21 +60,25 @@ void EEPROM::update(GCode *com)
     if(com->hasT() && com->hasP()) switch(com->T)
         {
         case 0:
-            if(com->hasS()) HAL::eprSetByte(com->P,(uint8_t)com->S);
+            if(com->hasS())
+                HAL::eprSetByte(com->P, (uint8_t)com->S);
             break;
         case 1:
-            if(com->hasS()) HAL::eprSetInt16(com->P,(int)com->S);
+            if(com->hasS())
+                HAL::eprSetInt16(com->P, (int16_t)com->S);
             break;
         case 2:
-            if(com->hasS()) HAL::eprSetInt32(com->P,(int32_t)com->S);
+            if(com->hasS())
+                HAL::eprSetInt32(com->P, (int32_t)com->S);
             break;
         case 3:
-            if(com->hasX()) HAL::eprSetFloat(com->P,com->X);
+            if(com->hasX())
+                HAL::eprSetFloat(com->P, com->X);
             break;
         }
     uint8_t newcheck = computeChecksum();
     if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
-        HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
+        HAL::eprSetByte(EPR_INTEGRITY_BYTE, newcheck);
     readDataFromEEPROM();
     Extruder::selectExtruderById(Extruder::current->id);
 #else
@@ -83,7 +90,8 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 {
 #if EEPROM_MODE != 0
     baudrate = BAUDRATE;
-    maxInactiveTime = MAX_INACTIVE_TIME*1000L;
+    maxInactiveTime = MAX_INACTIVE_TIME * 1000L;
+    //Davinci Specific
     EEPROM::buselight = bool(CASE_LIGHT_DEFAULT_ON);
     EEPROM::bkeeplighton = bool(CASE_KEEP_LIGHT_DEFAULT_ON);
     UIDisplay::display_mode=CASE_DISPLAY_MODE_DEFAULT;
@@ -94,10 +102,10 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     EEPROM::ftemp_ext_abs=UI_SET_PRESET_EXTRUDER_TEMP_ABS;
     EEPROM::ftemp_bed_pla=UI_SET_PRESET_HEATED_BED_TEMP_PLA;
     EEPROM::ftemp_bed_abs=UI_SET_PRESET_HEATED_BED_TEMP_ABS;
-	#if CASE_LIGHTS_PIN>=0
-        WRITE(CASE_LIGHTS_PIN, byte(EEPROM::buselight));
-	#endif // CASE_LIGHTS_PIN
-    stepperInactiveTime = STEPPER_INACTIVE_TIME*1000L;
+    #if CASE_LIGHTS_PIN>=0
+    WRITE(CASE_LIGHTS_PIN, byte(EEPROM::buselight)); 
+    #endif // CASE_LIGHTS_PIN
+    stepperInactiveTime = STEPPER_INACTIVE_TIME * 1000L;
     Printer::axisStepsPerMM[X_AXIS] = XAXIS_STEPS_PER_MM;
     Printer::axisStepsPerMM[Y_AXIS] = YAXIS_STEPS_PER_MM;
     Printer::axisStepsPerMM[Z_AXIS] = ZAXIS_STEPS_PER_MM;
@@ -340,7 +348,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 #endif
 
 }
-
+//Davinci Specific
 bool EEPROM::buselight=false;
 bool EEPROM::busesensor=false;
 bool EEPROM::btopsensor=false;
@@ -411,10 +419,11 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
     HAL::eprSetFloat(EPR_X_LENGTH,Printer::xLength);
     HAL::eprSetFloat(EPR_Y_LENGTH,Printer::yLength);
     HAL::eprSetFloat(EPR_Z_LENGTH,Printer::zLength);
-
 #if NONLINEAR_SYSTEM
     HAL::eprSetFloat(EPR_DELTA_HORIZONTAL_RADIUS, Printer::radius0);
 #endif
+
+//Davinci Specific
     HAL::eprSetByte(EPR_LIGHT_ON,EEPROM::buselight);
     HAL::eprSetByte(EPR_KEEP_LIGHT_ON,EEPROM::bkeeplighton);
     
@@ -529,6 +538,7 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_Z_PROBE_Y2,Z_PROBE_Y2);
     HAL::eprSetFloat(EPR_Z_PROBE_X3,Z_PROBE_X3);
     HAL::eprSetFloat(EPR_Z_PROBE_Y3,Z_PROBE_Y3);
+    //Davinci Specific
     HAL::eprSetFloat(EPR_MANUAL_LEVEL_X1, MANUAL_LEVEL_X1);
     HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y1, MANUAL_LEVEL_Y1);
     HAL::eprSetFloat(EPR_MANUAL_LEVEL_X2, MANUAL_LEVEL_X2);
@@ -618,6 +628,7 @@ void EEPROM::readDataFromEEPROM()
 #if NONLINEAR_SYSTEM
     Printer::radius0 = HAL::eprGetFloat(EPR_DELTA_HORIZONTAL_RADIUS);
 #endif
+//Davinci Specific
 	EEPROM::buselight=HAL::eprGetByte(EPR_LIGHT_ON);
 	EEPROM::bkeeplighton=HAL::eprGetByte(EPR_KEEP_LIGHT_ON);
 	UIDisplay::display_mode=HAL::eprGetByte(EPR_DISPLAY_MODE);
@@ -730,14 +741,15 @@ EEPROM::ftemp_bed_abs= HAL::eprGetFloat(EPR_TEMP_BED_ABS);
             HAL::eprSetFloat(EPR_Z_PROBE_Y2,Z_PROBE_Y2);
             HAL::eprSetFloat(EPR_Z_PROBE_X3,Z_PROBE_X3);
             HAL::eprSetFloat(EPR_Z_PROBE_Y3,Z_PROBE_Y3);
+	    //Davinci Specific
             HAL::eprSetFloat(EPR_MANUAL_LEVEL_X1, MANUAL_LEVEL_X1);
-			HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y1, MANUAL_LEVEL_Y1);
-			HAL::eprSetFloat(EPR_MANUAL_LEVEL_X2, MANUAL_LEVEL_X2);
-			HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y2, MANUAL_LEVEL_Y2);
-			HAL::eprSetFloat(EPR_MANUAL_LEVEL_X3, MANUAL_LEVEL_X3);
-			HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y3, MANUAL_LEVEL_Y3);
-			HAL::eprSetFloat(EPR_MANUAL_LEVEL_X4, MANUAL_LEVEL_X4);
-			HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y4, MANUAL_LEVEL_Y4);
+	    HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y1, MANUAL_LEVEL_Y1);
+	    HAL::eprSetFloat(EPR_MANUAL_LEVEL_X2, MANUAL_LEVEL_X2);
+	    HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y2, MANUAL_LEVEL_Y2);
+	    HAL::eprSetFloat(EPR_MANUAL_LEVEL_X3, MANUAL_LEVEL_X3);
+	    HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y3, MANUAL_LEVEL_Y3);
+	    HAL::eprSetFloat(EPR_MANUAL_LEVEL_X4, MANUAL_LEVEL_X4);
+	    HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y4, MANUAL_LEVEL_Y4);
         }
         if(version < 4)
         {
@@ -782,7 +794,8 @@ EEPROM::ftemp_bed_abs= HAL::eprGetFloat(EPR_TEMP_BED_ABS);
             storeMixingRatios(false);
 #endif
         }
-        if(version < 10) {
+        if(version < 10)
+        {
             HAL::eprSetFloat(EPR_AXISCOMP_TANXY,AXISCOMP_TANXY);
             HAL::eprSetFloat(EPR_AXISCOMP_TANYZ,AXISCOMP_TANYZ);
             HAL::eprSetFloat(EPR_AXISCOMP_TANXZ,AXISCOMP_TANXZ);
@@ -888,6 +901,7 @@ void EEPROM::writeSettings()
 {
 #if EEPROM_MODE != 0
     writeLong(EPR_BAUDRATE, Com::tEPRBaudrate);
+//Davinci Specific
     writeByte(EPR_DISPLAY_MODE, Com::tDisplayMode);
     writeByte(EPR_LIGHT_ON,Com::tLightOn);
     writeByte(EPR_KEEP_LIGHT_ON,Com::tKeepLightOn);
@@ -904,6 +918,7 @@ void EEPROM::writeSettings()
     writeLong(EPR_PRINTING_TIME, Com::tEPRPrinterActive);
     writeLong(EPR_MAX_INACTIVE_TIME, Com::tEPRMaxInactiveTime);
     writeLong(EPR_STEPPER_INACTIVE_TIME, Com::tEPRStopAfterInactivty);
+//Davinci Specific
 #if UI_AUTOLIGHTOFF_AFTER !=0
 	writeLong(EPR_POWERSAVE_AFTER_TIME,Com::tPowerSave);
 #endif
@@ -979,6 +994,7 @@ void EEPROM::writeSettings()
     writeFloat(EPR_Z_MAX_TRAVEL_ACCEL, Com::tEPRZTravelAcceleration);
 #endif
 #endif
+     //Davinci Specific
      writeFloat(EPR_MANUAL_LEVEL_X1, Com::tManualProbeX1);
      writeFloat(EPR_MANUAL_LEVEL_Y1, Com::tManualProbeY1);
      writeFloat(EPR_MANUAL_LEVEL_X2, Com::tManualProbeX2);
