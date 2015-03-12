@@ -129,7 +129,7 @@ public:
         return flags & TEMPERATURE_CONTROLLER_FLAG_SENSDECOUPLED;
     }
 #endif //FEATURE_DECOUPLE_TEST
-
+    void waitForTargetTemperature();
 #if TEMP_PID
     void autotunePID(float temp,uint8_t controllerId,bool storeResult);
 #endif

@@ -302,6 +302,26 @@ void Extruder::manageTemperatures()
 
 }
 
+void TemperatureController::waitForTargetTemperature()
+{
+    if(targetTemperatureC < 30) return;
+    if(Printer::debugDryrun()) return;
+    millis_t time = HAL::timeInMilliseconds();
+    while(true)
+    {
+	//Davinci Specific, STOP request
+	if (Printer::isMenuModeEx(MENU_MODE_STOP_REQUESTED))return;
+        if( (HAL::timeInMilliseconds() - time) > 1000 )   //Print Temp Reading every 1 second while heating up.
+        {
+            Commands::printTemperatures();
+            time = HAL::timeInMilliseconds();
+        }
+        Commands::checkForPeriodicalActions(true);
+        if(fabs(targetTemperatureC - currentTemperatureC) <= 1)
+            return;
+    }
+}
+
 
 void Extruder::initHeatedBed()
 {

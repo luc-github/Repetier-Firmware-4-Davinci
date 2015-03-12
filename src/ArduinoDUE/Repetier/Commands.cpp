@@ -1434,28 +1434,10 @@ void Commands::processMCode(GCode *com)
         previousMillisCmd = HAL::timeInMilliseconds();
         break;
     case 116: // Wait for temperatures to reach target temperature
-        if(Printer::debugDryrun()) break;
-        {
-            bool allReached = false;
-            codenum = HAL::timeInMilliseconds();
-            while(!allReached)
-            {
-                allReached = true;
-                if( (HAL::timeInMilliseconds()-codenum) > 1000 )   //Print Temp Reading every 1 second while heating up.
-                {
-                    printTemperatures();
-                    codenum = HAL::timeInMilliseconds();
-                }
-                Commands::checkForPeriodicalActions(true);
-                if (Printer::isMenuModeEx(MENU_MODE_STOP_REQUESTED))break;
-                for(uint8_t h = 0; h < NUM_TEMPERATURE_LOOPS; h++)
-                {
-                    TemperatureController *act = tempController[h];
-                    if(act->targetTemperatureC > 30 && fabs(act->targetTemperatureC-act->currentTemperatureC) > 1)
-                        allReached = false;
-                }
-            }
-        }
+        for(fast8_t h = 0; h < NUM_TEMPERATURE_LOOPS; h++)
+            tempController[h]->waitForTargetTemperature();
+            //Davinci Specific, STOP request
+	if (Printer::isMenuModeEx(MENU_MODE_STOP_REQUESTED))break;
         break;
 
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
