@@ -18,6 +18,15 @@
 #if !defined(_UI_MENU_H)
 #define _UI_MENU_H
 
+/*moved to uilang.h
+#define cUP "\001"
+#define cDEG "\002"
+#define cSEL "\003"
+#define cUNSEL "\004"
+#define cTEMP "\005"
+#define cFOLD "\006"
+#define cARROW "\176"
+*/
 /*
 The menu configuration uses dynamic strings. These dynamic strings can contain
 a placeholder for special values. During print these placeholder are exchanged
@@ -93,6 +102,8 @@ random stuff
 %oC : Output level current extruder
 %ob : Output level heated bed
 %PN : Printer name
+%on : current extruder number (1,2,3...)
+%Ne : current extruder number (1,2,3...) if Num extruder >1 , else nothing
 
 stops
 %sx : State of x min endstop.

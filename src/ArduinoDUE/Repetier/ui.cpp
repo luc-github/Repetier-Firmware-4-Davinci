@@ -1514,6 +1514,11 @@ void UIDisplay::parse(const char *txt,bool ram)
                 addInt(Printer::feedrateMultiply, 3);
                 break;
             }
+            if(c2 == 'n')
+            {
+                addInt(Extruder::current->id + 1, 1);
+                break;
+            }
             // Extruder output level
             if(c2 >= '0' && c2 <= '9') ivalue = pwm_pos[c2 - '0'];
 #if HAVE_HEATED_BED
