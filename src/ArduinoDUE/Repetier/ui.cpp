@@ -403,10 +403,10 @@ void initializeLCD()
     HAL::delayMicroseconds(180);
     // finally, set # lines, font size, etc.
     lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);
-    lcdCommand(LCD_CLEAR);                  //- Clear Screen
-    HAL::delayMilliseconds(2); // clear is slow operation
-    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF); //- Entrymode (Display Shift: off, Increment Address Counter)
-    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);    //- Display on
+    lcdCommand(LCD_CLEAR);					//-	Clear Screen
+    HAL::delayMilliseconds(4); // clear is slow operation
+    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF);	//-	Entrymode (Display Shift: off, Increment Address Counter)
+    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);	//-	Display on
     uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
     uid.createChar(1,character_back);
     uid.createChar(2,character_degree);
@@ -1254,9 +1254,9 @@ void UIDisplay::addGCode(GCode *code)
         addFloat(code->R);
     }
 #endif
-  // cannot print string, it isnt part of the gcode structure.
-  //it points to temp memory in a buffer.
-  //if(code->hasSTRING())
+    // cannot print string, it isnt part of the gcode structure.
+    //it points to temp memory in a buffer.
+    //if(code->hasSTRING())
 }
 
 
@@ -1280,8 +1280,8 @@ void UIDisplay::parse(const char *txt,bool ram)
         {
         case '%':
         {
-// print % for input '%%' or '%%%'
-            if(col<UI_COLS) uid.printCols[col++]='%'; // if data = '%%?' escaped percent, with left over ? char
+            // print % for input '%%' or '%%%'
+            if(col < UI_COLS) uid.printCols[col++] = '%'; // if data = '%%?' escaped percent, with left over ? char
             if (c2 != '%') txt--; // Be flexible and accept 2 or 3 chars
             break;
         } // case '%'
@@ -1298,12 +1298,8 @@ void UIDisplay::parse(const char *txt,bool ram)
             break;
         }
         case 'a': // Acceleration settings
-            if(c2=='x') addFloat(Printer::maxAccelerationMMPerSquareSecond[X_AXIS],5,0);
-            else if(c2=='y') addFloat(Printer::maxAccelerationMMPerSquareSecond[Y_AXIS],5,0);
-            else if(c2=='z') addFloat(Printer::maxAccelerationMMPerSquareSecond[Z_AXIS],5,0);
-            else if(c2=='X') addFloat(Printer::maxTravelAccelerationMMPerSquareSecond[X_AXIS],5,0);
-            else if(c2=='Y') addFloat(Printer::maxTravelAccelerationMMPerSquareSecond[Y_AXIS],5,0);
-            else if(c2=='Z') addFloat(Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS],5,0);
+            if(c2 >= 'x' && c2 <= 'z')       addFloat(Printer::maxAccelerationMMPerSquareSecond[c2 - 'x'], 5, 0);
+            else if(c2 >= 'X' &&  c2 <= 'Z') addFloat(Printer::maxTravelAccelerationMMPerSquareSecond[c2-'X'], 5, 0);
             else if(c2 == 'j') addFloat(Printer::maxJerk, 3, 1);
 #if DRIVE_SYSTEM!=DELTA
             else if(c2 == 'J') addFloat(Printer::maxZJerk, 3, 1);
@@ -1400,6 +1396,7 @@ void UIDisplay::parse(const char *txt,bool ram)
             break;
 
         case 'e': // Extruder temperature
+        {
             if(c2 == 'I')
             {
                 //give integer display
@@ -1428,6 +1425,7 @@ void UIDisplay::parse(const char *txt,bool ram)
             }
             addFloat(fvalue, 3, ivalue);
             break;
+        }
         case 'E': // Target extruder temperature
             if(c2 == 'c') fvalue = Extruder::current->tempControl.targetTemperatureC;
             else if(c2 >= '0' && c2 <= '9') fvalue = extruder[c2 - '0'].tempControl.targetTemperatureC;
@@ -1442,12 +1440,8 @@ void UIDisplay::parse(const char *txt,bool ram)
             break;
 #endif
         case 'f':
-            if(c2=='x') addFloat(Printer::maxFeedrate[X_AXIS],5,0);
-            else if(c2=='y') addFloat(Printer::maxFeedrate[Y_AXIS],5,0);
-            else if(c2=='z') addFloat(Printer::maxFeedrate[Z_AXIS],5,0);
-            else if(c2=='X') addFloat(Printer::homingFeedrate[X_AXIS],5,0);
-            else if(c2=='Y') addFloat(Printer::homingFeedrate[Y_AXIS],5,0);
-            else if(c2=='Z') addFloat(Printer::homingFeedrate[Z_AXIS],5,0);
+            if(c2 >= 'x' && c2 <= 'z') addFloat(Printer::maxFeedrate[c2 - 'x'], 5, 0);
+            else if(c2 >= 'X' && c2 <= 'Z') addFloat(Printer::homingFeedrate[c2 - 'X'], 5, 0);
             break;
         case 'H':
                 if(c2=='x') addFloat(Printer::xMin,4,2);
@@ -1483,10 +1477,10 @@ void UIDisplay::parse(const char *txt,bool ram)
                 if(sd.sdactive && sd.sdmode)
                 {
                     addStringP(PSTR( UI_TEXT_PRINT_POS));
-                    unsigned long percent;
-                    if(sd.filesize < 20000000) percent = sd.sdpos * 100 / sd.filesize;
-                    else percent = (sd.sdpos >> 8) * 100 / (sd.filesize >> 8);
-                    addInt((int)percent, 3);
+                    float percent;
+                    if(sd.filesize < 2000000) percent = sd.sdpos * 100.0 / sd.filesize;
+                    else percent = (sd.sdpos >> 8) * 100.0 / (sd.filesize >> 8);
+                    addFloat(percent, 3, 1);
                     if(col<MAX_COLS)
                         uid.printCols[col++] = '%';
                 }
@@ -1621,10 +1615,8 @@ case 'P':
 #endif
             break;
         case 'S':
-            if(c2=='x') addFloat(Printer::axisStepsPerMM[X_AXIS],3,1);
-            if(c2=='y') addFloat(Printer::axisStepsPerMM[Y_AXIS],3,1);
-            if(c2=='z') addFloat(Printer::axisStepsPerMM[Z_AXIS],3,1);
-            if(c2=='e') addFloat(Extruder::current->stepsPerMM,3,1);
+            if(c2 >= 'x' && c2 <= 'z') addFloat(Printer::axisStepsPerMM[c2 - 'x'], 3, 1);
+            if(c2 == 'e') addFloat(Extruder::current->stepsPerMM, 3, 1);
             break;
         case 'T':
             if(c2=='1')addFloat(EEPROM::ftemp_ext_abs,3,0 );
@@ -1643,7 +1635,7 @@ case 'P':
                 for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
                     if(tempController[i]->targetTemperatureC > 15) alloff = false;
 
-                long seconds = (alloff ? 0 : (HAL::timeInMilliseconds() - Printer::msecondsPrinting)/1000)+HAL::eprGetInt32(EPR_PRINTING_TIME);
+                long seconds = (alloff ? 0 : (HAL::timeInMilliseconds() - Printer::msecondsPrinting) / 1000) + HAL::eprGetInt32(EPR_PRINTING_TIME);
                 long tmp = seconds / 86400;
                 seconds -= tmp * 86400;
                 addInt(tmp, 5);
@@ -1677,8 +1669,8 @@ case 'P':
                     fvalue = Printer::realZPosition();
                 else
                     fvalue = (float)Printer::currentPositionSteps[E_AXIS] * Printer::invAxisStepsPerMM[E_AXIS];
+                addFloat(fvalue,4,2);
             }
-            addFloat(fvalue,4,2);
             break;
 
         case 'X': // Extruder related
@@ -1815,7 +1807,7 @@ void UIDisplay::setStatusP(PGM_P txt,bool error)
 {
     if(!error && Printer::isUIErrorMessage()) return;
     uint8_t i=0;
-    while(i<16)
+    while(i<20)
     {
         uint8_t c = pgm_read_byte(txt++);
         if(!c) break;
@@ -1829,7 +1821,7 @@ void UIDisplay::setStatus(const char *txt,bool error)
 {
     if(!error && Printer::isUIErrorMessage()) return;
     uint8_t i=0;
-    while(*txt && i<16)
+    while(*txt && i<20)
         statusMsg[i++] = *txt++;
     statusMsg[i]=0;
     if(error)
@@ -1925,6 +1917,7 @@ void UIDisplay::goDir(char *name)
     updateSDFileCount();
 #endif
 }
+
 //Davinci Specific, integrate function in class
 void UIDisplay::sdrefresh(uint16_t &r,char cache[UI_ROWS][MAX_COLS+1])
 {
@@ -1955,7 +1948,7 @@ void UIDisplay::sdrefresh(uint16_t &r,char cache[UI_ROWS][MAX_COLS+1])
             //hide unwished files
             if (!SDCard::showFilename(p,tempLongFilename))continue;
  #endif
-            if(skip>0)
+            if(skip > 0)
             {
                 skip--;
                 continue;
@@ -5095,16 +5088,16 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
 #if EEPROM_MODE != 0
         case UI_ACTION_STORE_EEPROM:
             EEPROM::storeDataIntoEEPROM(false);
-            pushMenu(&ui_menu_eeprom_saved,false);
+            pushMenu(&ui_menu_eeprom_saved, false);
             BEEP_LONG;
-            skipBeep = true;
+//            skipBeep = true;
             break;
         case UI_ACTION_LOAD_EEPROM:
             EEPROM::readDataFromEEPROM();
             Extruder::selectExtruderById(Extruder::current->id);
-            pushMenu(&ui_menu_eeprom_loaded,false);
+            pushMenu(&ui_menu_eeprom_loaded, false);
             BEEP_LONG;
-            skipBeep = true;
+//            skipBeep = true;
             break;
          case UI_ACTION_LOAD_FAILSAFE:
             EEPROM::restoreEEPROMSettingsFromConfiguration();
@@ -5123,7 +5116,7 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
         case UI_ACTION_SD_DELETE:
             if(sd.sdactive)
             {
-                pushMenu(&ui_menu_sd_fileselector,false);
+                pushMenu(&ui_menu_sd_fileselector, false);
             }
             else
             {
@@ -5133,7 +5126,7 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
         case UI_ACTION_SD_PRINT:
             if(sd.sdactive)
             {
-                pushMenu(&ui_menu_sd_fileselector,false);
+                pushMenu(&ui_menu_sd_fileselector, false);
             }
             break;
         case UI_ACTION_SD_PAUSE:
@@ -5191,7 +5184,7 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             sd.mount();
             break;
         case UI_ACTION_MENU_SDCARD:
-            pushMenu(&ui_menu_sd,false);
+            pushMenu(&ui_menu_sd, false);
             break;
 #endif
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
@@ -5212,81 +5205,81 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             break;
 #endif
         case UI_ACTION_MENU_XPOS:
-            pushMenu(&ui_menu_xpos,false);
+            pushMenu(&ui_menu_xpos, false);
             break;
         case UI_ACTION_MENU_YPOS:
-            pushMenu(&ui_menu_ypos,false);
+            pushMenu(&ui_menu_ypos, false);
             break;
         case UI_ACTION_MENU_ZPOS:
-            pushMenu(&ui_menu_zpos,false);
+            pushMenu(&ui_menu_zpos, false);
             break;
         case UI_ACTION_MENU_XPOSFAST:
-            pushMenu(&ui_menu_xpos_fast,false);
+            pushMenu(&ui_menu_xpos_fast, false);
             break;
         case UI_ACTION_MENU_YPOSFAST:
-            pushMenu(&ui_menu_ypos_fast,false);
+            pushMenu(&ui_menu_ypos_fast, false);
             break;
         case UI_ACTION_MENU_ZPOSFAST:
-            pushMenu(&ui_menu_zpos_fast,false);
+            pushMenu(&ui_menu_zpos_fast, false);
             break;
         case UI_ACTION_MENU_QUICKSETTINGS:
+	    //Davinci Specific, No quicksettings for Davinci UI
             //pushMenu(&ui_menu_quick,false);
-            pushMenu(&ui_menu_settings,false);
             break;
         case UI_ACTION_MENU_EXTRUDER:
-            pushMenu(&ui_menu_extruder,false);
+            pushMenu(&ui_menu_extruder, false);
             break;
         case UI_ACTION_MENU_POSITIONS:
-            pushMenu(&ui_menu_positions,false);
+            pushMenu(&ui_menu_positions, false);
             break;
 #ifdef UI_USERMENU1
         case UI_ACTION_SHOW_USERMENU1:
-            pushMenu(&UI_USERMENU1,false);
+            pushMenu(&UI_USERMENU1, false);
             break;
 #endif
 #ifdef UI_USERMENU2
         case UI_ACTION_SHOW_USERMENU2:
-            pushMenu(&UI_USERMENU2,false);
+            pushMenu(&UI_USERMENU2, false);
             break;
 #endif
 #ifdef UI_USERMENU3
         case UI_ACTION_SHOW_USERMENU3:
-            pushMenu(&UI_USERMENU3,false);
+            pushMenu(&UI_USERMENU3, false);
             break;
 #endif
 #ifdef UI_USERMENU4
         case UI_ACTION_SHOW_USERMENU4:
-            pushMenu(&UI_USERMENU4,false);
+            pushMenu(&UI_USERMENU4, false);
             break;
 #endif
 #ifdef UI_USERMENU5
         case UI_ACTION_SHOW_USERMENU5:
-            pushMenu(&UI_USERMENU5,false);
+            pushMenu(&UI_USERMENU5, false);
             break;
 #endif
 #ifdef UI_USERMENU6
         case UI_ACTION_SHOW_USERMENU6:
-            pushMenu(&UI_USERMENU6,false);
+            pushMenu(&UI_USERMENU6, false);
             break;
 #endif
 #ifdef UI_USERMENU7
         case UI_ACTION_SHOW_USERMENU7:
-            pushMenu(&UI_USERMENU7,false);
+            pushMenu(&UI_USERMENU7, false);
             break;
 #endif
 #ifdef UI_USERMENU8
         case UI_ACTION_SHOW_USERMENU8:
-            pushMenu(&UI_USERMENU8,false);
+            pushMenu(&UI_USERMENU8, false);
             break;
 #endif
 #ifdef UI_USERMENU9
         case UI_ACTION_SHOW_USERMENU9:
-            pushMenu(&UI_USERMENU9,false);
+            pushMenu(&UI_USERMENU9, false);
             break;
 #endif
 #ifdef UI_USERMENU10
         case UI_ACTION_SHOW_USERMENU10:
-            pushMenu(&UI_USERMENU10,false);
+            pushMenu(&UI_USERMENU10, false);
             break;
 #endif
         case UI_ACTION_X_UP:
@@ -5323,25 +5316,25 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             break;
         case UI_ACTION_EXTRUDER_TEMP_UP:
         {
-            int tmp = (int)(Extruder::current->tempControl.targetTemperatureC)+1;
-            if(tmp==1) tmp = UI_SET_MIN_EXTRUDER_TEMP;
-            else if(tmp>UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
-            Extruder::setTemperatureForExtruder(tmp,Extruder::current->id);
+            int tmp = (int)(Extruder::current->tempControl.targetTemperatureC) + 1;
+            if(tmp == 1) tmp = UI_SET_MIN_EXTRUDER_TEMP;
+            else if(tmp > UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
+            Extruder::setTemperatureForExtruder(tmp, Extruder::current->id);
         }
         break;
         case UI_ACTION_EXTRUDER_TEMP_DOWN:
         {
-            int tmp = (int)(Extruder::current->tempControl.targetTemperatureC)-1;
+            int tmp = (int)(Extruder::current->tempControl.targetTemperatureC) - 1;
             if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
-            Extruder::setTemperatureForExtruder(tmp,Extruder::current->id);
+            Extruder::setTemperatureForExtruder(tmp, Extruder::current->id);
         }
         break;
         case UI_ACTION_HEATED_BED_UP:
 #if HAVE_HEATED_BED
         {
-            int tmp = (int)heatedBedController.targetTemperatureC+1;
-            if(tmp==1) tmp = UI_SET_MIN_HEATED_BED_TEMP;
-            else if(tmp>UI_SET_MAX_HEATED_BED_TEMP) tmp = UI_SET_MAX_HEATED_BED_TEMP;
+            int tmp = (int)heatedBedController.targetTemperatureC + 1;
+            if(tmp == 1) tmp = UI_SET_MIN_HEATED_BED_TEMP;
+            else if(tmp > UI_SET_MAX_HEATED_BED_TEMP) tmp = UI_SET_MAX_HEATED_BED_TEMP;
             Extruder::setHeatedBedTemperature(tmp);
         }
 #endif
@@ -5357,7 +5350,7 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
 #endif
             Printer::updateCurrentPosition(true);
-            Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
+            Com::printFLN(Com::tZProbePrinterHeight, Printer::zLength);
 #if EEPROM_MODE != 0
             EEPROM::storeDataIntoEEPROM(false);
             Com::printFLN(Com::tEEPROMUpdated);
@@ -5368,7 +5361,7 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
 #endif
         case UI_ACTION_SET_P1:
 #if SOFTWARE_LEVELING
-            for (uint8_t i=0; i<3; i++)
+            for (uint8_t i = 0; i < 3; i++)
             {
                 Printer::levelingP1[i] = Printer::currentPositionSteps[i];
             }
@@ -5376,7 +5369,7 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             break;
         case UI_ACTION_SET_P2:
 #if SOFTWARE_LEVELING
-            for (uint8_t i=0; i<3; i++)
+            for (uint8_t i = 0; i < 3; i++)
             {
                 Printer::levelingP2[i] = Printer::currentPositionSteps[i];
             }
@@ -5384,7 +5377,7 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             break;
         case UI_ACTION_SET_P3:
 #if SOFTWARE_LEVELING
-            for (uint8_t i=0; i<3; i++)
+            for (uint8_t i = 0; i < 3; i++)
             {
                 Printer::levelingP3[i] = Printer::currentPositionSteps[i];
             }
@@ -5403,17 +5396,17 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
         case UI_ACTION_HEATED_BED_DOWN:
 #if HAVE_HEATED_BED
         {
-            int tmp = (int)heatedBedController.targetTemperatureC-1;
-            if(tmp<UI_SET_MIN_HEATED_BED_TEMP) tmp = 0;
+            int tmp = (int)heatedBedController.targetTemperatureC - 1;
+            if(tmp < UI_SET_MIN_HEATED_BED_TEMP) tmp = 0;
             Extruder::setHeatedBedTemperature(tmp);
         }
 #endif
         break;
         case UI_ACTION_FAN_UP:
-            Commands::setFanSpeed(Printer::getFanSpeed()+32,false);
+            Commands::setFanSpeed(Printer::getFanSpeed() + 32,false);
             break;
         case UI_ACTION_FAN_DOWN:
-            Commands::setFanSpeed(Printer::getFanSpeed()-32,false);
+            Commands::setFanSpeed(Printer::getFanSpeed() - 32,false);
             break;
         case UI_ACTION_KILL:
             Commands::emergencyStop();
@@ -5455,11 +5448,12 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             break;
         }
     refreshPage();
-    if(!skipBeep)
-        BEEP_SHORT
+//    if(!skipBeep)
+//        BEEP_SHORT
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
-        ui_autoreturn_time = HAL::timeInMilliseconds() + UI_AUTORETURN_TO_MENU_AFTER;
+    ui_autoreturn_time = HAL::timeInMilliseconds() + UI_AUTORETURN_TO_MENU_AFTER;
 #endif
+//Davinci Specific, powersave light management
 #if UI_AUTOLIGHTOFF_AFTER!=0
         UIDisplay::ui_autolightoff_time=HAL::timeInMilliseconds()+EEPROM::timepowersaving;
 #endif
@@ -5476,11 +5470,12 @@ void UIDisplay::mediumAction()
 // Gets calles from main tread
 void UIDisplay::slowAction(bool allowMoves)
 {
-    unsigned long time = HAL::timeInMilliseconds();
+    millis_t time = HAL::timeInMilliseconds();
     uint8_t refresh = 0;
-#if UI_HAS_KEYS==1
+#if UI_HAS_KEYS == 1
     // delayed action open?
-    if(allowMoves && delayedAction != 0) {
+    if(allowMoves && delayedAction != 0)
+    {
         executeAction(delayedAction, true);
         delayedAction = 0;
     }
@@ -5510,6 +5505,7 @@ void UIDisplay::slowAction(bool allowMoves)
 #endif
         int nextAction = 0;
         uiCheckSlowKeys(nextAction);
+        ui_check_Ukeys(nextAction);
         if(lastButtonAction != nextAction)
         {
             lastButtonStart = time;
@@ -5548,10 +5544,14 @@ void UIDisplay::slowAction(bool allowMoves)
             else if(time - lastButtonStart > UI_KEY_BOUNCETIME)     // New key pressed
             {
                 lastAction = lastButtonAction;
-                if(executeAction(lastAction, allowMoves)) {
+                BEEP_SHORT
+                if(executeAction(lastAction, allowMoves))
+                {
                     nextRepeat = time + UI_KEY_FIRST_REPEAT;
                     repeatDuration = UI_KEY_FIRST_REPEAT;
-                } else {
+                }
+                else
+                {
                     if(delayedAction == 0)
                         delayedAction = lastAction;
                 }
@@ -5568,6 +5568,7 @@ void UIDisplay::slowAction(bool allowMoves)
                 repeatDuration -= UI_KEY_REDUCE_REPEAT;
                 if(repeatDuration < UI_KEY_MIN_REPEAT) repeatDuration = UI_KEY_MIN_REPEAT;
                 nextRepeat = time + repeatDuration;
+                BEEP_SHORT
             }
         }
         noInts.protect();
@@ -5575,7 +5576,7 @@ void UIDisplay::slowAction(bool allowMoves)
     }
     noInts.unprotect();
 #endif
-#if UI_AUTORETURN_TO_MENU_AFTER!=0
+#if UI_AUTORETURN_TO_MENU_AFTER != 0
     if(menuLevel > 0 && ui_autoreturn_time < time && benable_autoreturn) // Go to top menu after x seoonds
     {
         lastSwitch = time;
@@ -5651,6 +5652,7 @@ void UIDisplay::fastAction()
         flags |= UI_FLAG_KEY_TEST_RUNNING;
         int nextAction = 0;
         uiCheckKeys(nextAction);
+//        ui_check_Ukeys(nextAction);
         if(lastButtonAction != nextAction)
         {
             lastButtonStart = HAL::timeInMilliseconds();
