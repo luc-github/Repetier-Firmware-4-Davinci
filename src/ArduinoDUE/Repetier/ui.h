@@ -119,7 +119,9 @@ What display type do you use?
 #define UI_ACTION_HOME_X                1022
 #define UI_ACTION_HOME_Y                1023
 #define UI_ACTION_HOME_Z                1024
-#define UI_ACTION_SELECT_EXTRUDER1      1025
+#define UI_ACTION_SELECT_EXTRUDER0      1025
+#define UI_ACTION_SELECT_EXTRUDER1      1026
+#define UI_ACTION_SELECT_EXTRUDER2      1027
 #define UI_ACTION_STORE_EEPROM          1030
 #define UI_ACTION_LOAD_EEPROM           1031
 #define UI_ACTION_PRINT_ACCEL_X         1032
@@ -248,9 +250,7 @@ What display type do you use?
 #define UI_ACTION_Y_MIN    		1541
 #define UI_ACTION_Z_MIN                 1542
 #define UI_ACTION_TOGGLE_POWERSAVE	1543
-#define UI_ACTION_SELECT_EXTRUDER0      1544
-#define UI_ACTION_SELECT_EXTRUDER1      1545
-#define UI_ACTION_SELECT_EXTRUDER2      1546
+
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -538,7 +538,20 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_CLICK       31
 #define UI_RESET_PIN           41
 #else  // Smartcontroller
-#if MOTHERBOARD == 80 // Rumba has different pins as RAMPS!
+#if MOTHERBOARD == 701 // Megatronics v2.0
+#define UI_DISPLAY_RS_PIN 14
+#define UI_DISPLAY_RW_PIN -1
+#define UI_DISPLAY_ENABLE_PIN 15
+#define UI_DISPLAY_D4_PIN 30
+#define UI_DISPLAY_D5_PIN 31
+#define UI_DISPLAY_D6_PIN 32
+#define UI_DISPLAY_D7_PIN 33
+#define UI_ENCODER_A 61
+#define UI_ENCODER_B 59
+#define UI_ENCODER_CLICK 43
+#define UI_RESET_PIN 66 // was 41 //AE3 was here and added this line 1/25/2014  (Note pin 41 is Y- endstop!)
+#define UI_INVERT_MENU_DIRECTION true
+#elif MOTHERBOARD == 80 // Rumba has different pins as RAMPS!
 #define BEEPER_PIN             44
 #define UI_DISPLAY_RS_PIN      19
 #define UI_DISPLAY_RW_PIN      -1
@@ -597,7 +610,7 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_RESET_PIN           41
 #endif
 #endif
-#define UI_DELAYPERCHAR 320
+#define UI_DELAYPERCHAR 50
 #define UI_INVERT_MENU_DIRECTION 0
 #if UI_MAIN
 void uiInitKeys() {
@@ -690,7 +703,7 @@ void uiCheckSlowKeys(int &action) {
 #define UI_DISPLAY_D5_PIN		64		// PINK.2, 87, D_D5
 #define UI_DISPLAY_D6_PIN		44		// PINL.5, 40, D_D6
 #define UI_DISPLAY_D7_PIN		66		// PINK.4, 85, D_D7
-#define UI_DELAYPERCHAR		   320
+#define UI_DELAYPERCHAR		   50
 #define UI_INVERT_MENU_DIRECTION 0
 #if UI_MAIN
 void uiInitKeys() {
@@ -832,7 +845,7 @@ void uiCheckSlowKeys(int &action) {
 #define UI_SHIFT_CLK 44
 #endif
 
-#define UI_DELAYPERCHAR 320
+#define UI_DELAYPERCHAR 50
 #define UI_INVERT_MENU_DIRECTION 1
 #if UI_MAIN
 void uiInitKeys() {
@@ -859,7 +872,7 @@ void uiCheckSlowKeys(int &action) {
     WRITE(UI_SHIFT_LD,LOW);
     WRITE(UI_SHIFT_LD,HIGH);
 
-    for(int8_t i=1;i<=8;i++) {
+    for(int8_t i = 1; i <= 8;i++) {
         if(!READ(UI_SHIFT_OUT)) { // pressed button = logical 0 (false)
             switch (i) {
                 case 1: action = UI_ACTION_Z_DOWN; break; // F3

@@ -2208,24 +2208,25 @@ void UIDisplay::refreshPage()
         if(menuLevel == 0 && menuPos[0] == 0 ) // Main menu with special graphics
         {
 //ext1 and ext2 animation symbols
-            if(extruder[0].tempControl.targetTemperatureC > 0)
+            if(pwm_pos[extruder[0].tempControl.pwmIndex] > 0)
                 cache[0][0] = Printer::isAnimation()?'\x08':'\x09';
             else
                 cache[0][0] = '\x0a'; //off
 #if NUM_EXTRUDER>1
-            if(extruder[1].tempControl.targetTemperatureC > 0)
+            if(pwm_pos[extruder[1].tempControl.pwmIndex] > 0)
                 cache[1][0] = Printer::isAnimation()?'\x08':'\x09';
             else
-#endif
                 cache[1][0] = '\x0a'; //off
-#if HAVE_HEATED_BED
-
-            //heatbed animated icons
-            if(heatedBedController.targetTemperatureC > 0)
-                cache[2][0] = Printer::isAnimation() ? '\x0c':'\x0d';
-            else
-                cache[2][0] = '\x0b';
 #endif
+#if HAVE_HEATED_BED
+            //heatbed animated icons
+            uint8_t lin = 2 - ((NUM_EXTRUDER < 2) ? 1 : 0);
+            if(pwm_pos[heatedBedController.pwmIndex] > 0)
+                cache[lin][0] = Printer::isAnimation() ? '\x0c' : '\x0d';
+            else
+                cache[lin][0] = '\x0b';
+#endif
+#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
             //fan
             fanPercent = Printer::getFanSpeed() * 100 / 255;
             fanString[1] = 0;
@@ -2237,6 +2238,7 @@ void UIDisplay::refreshPage()
             {
                 fanString[0] = '\x0e';
             }
+#endif
 #if SDSUPPORT
             //SD Card
             if(sd.sdactive)
@@ -2279,7 +2281,7 @@ void UIDisplay::refreshPage()
                     drawVProgressBar(116, 0, 9, 20, fanPercent);
                     if(u8g_IsBBXIntersection(&u8g, 0, 42 - UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
                         printU8GRow(0,42,cache[3]); //mul + extruded
-                  if(u8g_IsBBXIntersection(&u8g, 0, 52 - UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
+                    if(u8g_IsBBXIntersection(&u8g, 0, 52 - UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
                         printU8GRow(0,52,cache[4]); //buf
 #endif
 #if SDSUPPORT
@@ -2374,7 +2376,6 @@ void UIDisplay::refreshPage()
                         printRow(y, cache[y] + UI_COLS - scroll, &displayCache[y][off[y]], scroll);
                     }
                 }
-//Bug : fix reported
 #if UI_DISPLAY_TYPE != DISPLAY_U8G
                 HAL::delayMilliseconds(transition < 3 ? 200 : 70);
 #endif
@@ -2444,6 +2445,7 @@ bool UIDisplay::okAction(bool allowMoves)
         Printer::setUIErrorMessage(false);
         return true;
     }
+    BEEP_SHORT
 #if UI_HAS_KEYS == 1
     if(menuLevel == 0)   // Enter menu
     {
