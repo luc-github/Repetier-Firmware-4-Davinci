@@ -2444,7 +2444,14 @@ void UIDisplay::pushMenu(const UIMenu *men, bool refresh)
     if(refresh)
         refreshPage();
 }
-
+void UIDisplay::popMenu(bool refresh)
+{
+    if(menuLevel > 0) menuLevel--;
+    Printer::setAutomount(false);
+    activeAction = 0;
+    if(refresh)
+        refreshPage();
+}
 bool UIDisplay::okAction(bool allowMoves)
 {
     if(Printer::isUIErrorMessage())
@@ -3422,9 +3429,7 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             skipBeep = true; // Prevent double beep
             break;
         case UI_ACTION_BACK:
-            if(menuLevel > 0) menuLevel--;
-            Printer::setAutomount(false);
-            activeAction = 0;
+            popMenu(false);
             break;
         case UI_ACTION_NEXT:
             ret = nextPreviousAction(1, allowMoves);

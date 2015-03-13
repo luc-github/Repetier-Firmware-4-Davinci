@@ -1488,6 +1488,7 @@ class UIDisplay {
     void mediumAction();
     bool confirmationDialog(char * title,char * line1,char * line2,int type=UI_CONFIRMATION_TYPE_YES_NO, bool defaultresponse=false);
     void pushMenu(const UIMenu *men, bool refresh);
+    void popMenu(bool refresh);
     void adjustMenuPos();
     void setStatusP(PGM_P txt, bool error = false);
     void setStatus(const char *txt, bool error = false);
