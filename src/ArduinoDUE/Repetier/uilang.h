@@ -142,7 +142,6 @@
 #define UI_TEXT_X_MIN_SETTING "Xmin: %Hxmm"
 #define UI_TEXT_Y_MIN_SETTING "Ymin: %Hymm"
 #define UI_TEXT_Z_MIN_SETTING "Zmin: %Hzmm"
-#define UI_TEXT_AUTOLEVEL_SETTING "Auto Level: %Am"
 #define UI_TEXT_TOP_COVER_OPEN "Top cover open!"
 #define UI_TEXT_TOP_SENSOR_ONOFF "Top Sensor: %st"
 #define UI_TEXT_VERSION_MENU "System Version"
@@ -387,6 +386,7 @@
 #define UI_TEXT_STRING_HM_SLOWBANG     "SlowBang"
 #define UI_TEXT_STOP_PRINT "Stop Print"
 #define UI_TEXT_Z_BABYSTEPPING "Z Babystepping"
+#define UI_TEXT_AUTOLEVEL_ONOFF  "Autolevel: %ll"
 
 // *************** German translation ****************
 
@@ -1376,7 +1376,7 @@
 #define UI_TEXT_X_MIN_SETTING       "Xmin: %Hxmm"
 #define UI_TEXT_Y_MIN_SETTING       "Ymin: %Hymm"
 #define UI_TEXT_Z_MIN_SETTING       "Zmin: %Hzmm"
-#define UI_TEXT_AUTOLEVEL_SETTING   "Niveau Auto:%Am"
+#define UI_TEXT_AUTOLEVEL_ONOFF   "Niveau Auto:%ll"
 #define UI_TEXT_TOP_COVER_OPEN      "Porte Ouverte!"
 #define UI_TEXT_TOP_SENSOR_ONOFF    "Capt. Porte:%st"
 #define UI_TEXT_VERSION_MENU        "Version Systeme"

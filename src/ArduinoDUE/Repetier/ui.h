@@ -173,16 +173,16 @@ What display type do you use?
 #define UI_ACTION_HEATED_BED_OFF        1081
 #define UI_ACTION_EXTRUDER0_OFF         1082
 #define UI_ACTION_EXTRUDER1_OFF         1083
-#define UI_ACTION_HEATED_BED_TEMP       1084
-#define UI_ACTION_EXTRUDER0_TEMP        1085
-#define UI_ACTION_EXTRUDER1_TEMP        1086
-#define UI_ACTION_OPS_OFF               1087
-#define UI_ACTION_OPS_CLASSIC           1088
-#define UI_ACTION_OPS_FAST              1089
-#define UI_ACTION_DISABLE_STEPPER       1090
-#define UI_ACTION_RESET_EXTRUDER        1091
-#define UI_ACTION_EXTRUDER_RELATIVE     1092
-#define UI_ACTION_SELECT_EXTRUDER0      1093
+#define UI_ACTION_EXTRUDER2_OFF         1184
+#define UI_ACTION_HEATED_BED_TEMP       1085
+#define UI_ACTION_EXTRUDER0_TEMP        1086
+#define UI_ACTION_EXTRUDER1_TEMP        1087
+#define UI_ACTION_OPS_OFF               1088
+#define UI_ACTION_OPS_CLASSIC           1089
+#define UI_ACTION_OPS_FAST              1090
+#define UI_ACTION_DISABLE_STEPPER       1091
+#define UI_ACTION_RESET_EXTRUDER        1092
+#define UI_ACTION_EXTRUDER_RELATIVE     1093
 #define UI_ACTION_ADVANCE_L             1094
 #define UI_ACTION_PREHEAT_ABS           1095
 #define UI_ACTION_FLOWRATE_MULTIPLY     1096
@@ -191,9 +191,7 @@ What display type do you use?
 #define UI_ACTION_PAUSE                 1099
 #define UI_ACTION_EXTR_WAIT_RETRACT_TEMP 1100
 #define UI_ACTION_EXTR_WAIT_RETRACT_UNITS 1101
-#define UI_ACTION_EXTRUDER2_OFF         1102
 #define UI_ACTION_EXTRUDER2_TEMP        1103
-#define UI_ACTION_SELECT_EXTRUDER2      1104
 #define UI_ACTION_WRITE_DEBUG           1105
 #define UI_ACTION_FANSPEED              1106
 #define UI_ACTION_LIGHTS_ONOFF          1107
@@ -203,6 +201,7 @@ What display type do you use?
 #define UI_ACTION_Z_BABYSTEPS           1111
 #define UI_ACTION_MAX_INACTIVE          1112
 #define UI_ACTION_TEMP_DEFECT           1113
+#define UI_ACTION_AUTOLEVEL_ONOFF       1202
 
 //Davinci Specific
 #define UI_ACTION_CLEAN_NOZZLE          1500
@@ -244,12 +243,14 @@ What display type do you use?
 #define UI_ACTION_Z_LENGTH		1535
 #define UI_ACTION_VERSION		1536
 #define UI_ACTION_TOP_SENSOR_ONOFF      1537
-#define UI_ACTION_AUTOLEVEL_ON          1538
 #define UI_ACTION_Z_0_1                 1539
 #define UI_ACTION_X_MIN                 1540
 #define UI_ACTION_Y_MIN    		1541
 #define UI_ACTION_Z_MIN                 1542
 #define UI_ACTION_TOGGLE_POWERSAVE	1543
+#define UI_ACTION_SELECT_EXTRUDER0      1544
+#define UI_ACTION_SELECT_EXTRUDER1      1545
+#define UI_ACTION_SELECT_EXTRUDER2      1546
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001

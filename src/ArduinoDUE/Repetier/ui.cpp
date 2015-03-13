@@ -1310,9 +1310,6 @@ void UIDisplay::parse(const char *txt,bool ram)
 #endif
             break;
 //Davinci Specific,
-        case 'A':
-            if(c2=='m') addStringP(Printer:: isAutolevelActive()?ui_text_on:ui_text_off);
-        break;
         case 'B':
         if(c2=='1') //heat PLA
                 {
@@ -1475,9 +1472,12 @@ void UIDisplay::parse(const char *txt,bool ram)
             else if(c2 == 'o') addStringOnOff(READ(CASE_LIGHTS_PIN));        // Lights on/off
             else if(c2 == 'k') addStringOnOff(EEPROM::bkeeplighton);        // Keep Lights on/off
 #endif
+#if FEATURE_AUTOLEVEL
+            else if(c2 == 'l') addStringOnOff((Printer::isAutolevelActive()));        // Autolevel on/off
+#endif
             break;
         case 'o':
-            if(c2=='s')
+            if(c2 == 's')
             {
 #if SDSUPPORT
                 if(sd.sdactive && sd.sdmode)
@@ -4240,10 +4240,6 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
         break;
         }
 #if FEATURE_AUTOLEVEL
-        case UI_ACTION_AUTOLEVEL_ON :
-            Printer::setAutolevelActive(!Printer:: isAutolevelActive());
-            EEPROM:: update(EPR_AUTOLEVEL_ACTIVE,EPR_TYPE_BYTE,Printer:: isAutolevelActive(),0);
-        break;
         case UI_ACTION_AUTOLEVEL:
         {
         Z_probe[0]=-1000;
@@ -5428,6 +5424,13 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
         case UI_ACTION_PAUSE:
             Com::printFLN(PSTR("RequestPause:"));
             break;
+#if FEATURE_AUTOLEVEL
+        case UI_ACTION_AUTOLEVEL_ONOFF:
+            Printer::setAutolevelActive(!Printer::isAutolevelActive());
+	    //Davinci Specific, direct EEPROM update
+            EEPROM:: update(EPR_AUTOLEVEL_ACTIVE,EPR_TYPE_BYTE,Printer::isAutolevelActive(),0);
+            break;
+#endif
 #ifdef DEBUG_PRINT
         case UI_ACTION_WRITE_DEBUG:
             Com::printF(PSTR("Buf. Read Idx:"),(int)GCode::bufferReadIndex);
