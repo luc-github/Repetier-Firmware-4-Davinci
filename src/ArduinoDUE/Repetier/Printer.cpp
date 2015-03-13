@@ -413,9 +413,6 @@ void Printer::kill(uint8_t only_steppers)
     setHomedZ(false);
     setHomed(false);
     Extruder::disableAllExtruderMotors();
-#if FAN_BOARD_PIN>-1
-    pwm_pos[NUM_EXTRUDER + 1] = 0;
-#endif // FAN_BOARD_PIN
     if(!only_steppers)
     {
         for(uint8_t i = 0; i < NUM_TEMPERATURE_LOOPS; i++)
@@ -431,6 +428,12 @@ void Printer::kill(uint8_t only_steppers)
         Printer::setAllKilled(true);
     }
     else UI_STATUS_UPD(UI_TEXT_STEPPER_DISABLED);
+#if FAN_BOARD_PIN>-1
+#if HAVE_HEATED_BED
+    if(heatedBedController.targetTemperatureC < 15)      // turn off FAN_BOARD only if bed heater is off
+#endif
+       pwm_pos[NUM_EXTRUDER + 1] = 0;
+#endif // FAN_BOARD_PIN
 }
 
 void Printer::updateAdvanceFlags()
