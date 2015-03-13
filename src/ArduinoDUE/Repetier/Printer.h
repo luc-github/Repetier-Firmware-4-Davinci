@@ -47,6 +47,12 @@ union floatLong
 #define PRINTER_FLAG1_NO_DESTINATION_CHECK  32
 #define PRINTER_FLAG1_POWER_ON              64
 #define PRINTER_FLAG1_ALLOW_COLD_EXTRUSION  128
+#define PRINTER_FLAG2_BLOCK_RECEIVING       1
+#define PRINTER_FLAG2_AUTORETRACT           2
+#define PRINTER_FLAG2_RESET_FILAMENT_USAGE  4
+#define PRINTER_FLAG2_IGNORE_M106_COMMAND   8
+#define PRINTER_FLAG2_DEBUG_JAM             16
+#define PRINTER_FLAG2_JAMCONTROL_DISABLED   32
 
 //Davinci Specific       
 #define PRINTER_FLAG_HOME_X		1
@@ -97,6 +103,7 @@ public:
 
     static uint8_t debugLevel;
     static uint8_t flag0,flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
+    static uint8_t flag2;
     //Davinci Specific, flag for each axis       
     static uint8_t flaghome;
     static uint8_t stepsPerTimerCall;

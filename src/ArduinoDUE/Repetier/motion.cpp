@@ -174,6 +174,7 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
             Printer::extrudeMultiplyError += ((p->delta[E_AXIS] * (float)Printer::extrudeMultiply) * 0.01f);
             p->delta[E_AXIS] = static_cast<int32_t>(Printer::extrudeMultiplyError);
             Printer::extrudeMultiplyError -= p->delta[E_AXIS];
+            Printer::filamentPrinted += p->delta[E_AXIS] * Printer::invAxisStepsPerMM[axis];
         }
         if(p->delta[axis] >= 0)
             p->setPositiveDirectionForAxis(axis);
@@ -189,7 +190,6 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
             resetPathPlanner();
         return; // No steps included
     }
-    Printer::filamentPrinted += axis_diff[E_AXIS];
     float xydist2;
 #if ENABLE_BACKLASH_COMPENSATION
     if((p->isXYZMove()) && ((p->dir & XYZ_DIRPOS)^(Printer::backlashDir & XYZ_DIRPOS)) & (Printer::backlashDir >> 3))   // We need to compensate backlash, add a move
@@ -288,7 +288,7 @@ void PrintLine::calculateMove(float axis_diff[], uint8_t pathOptimize)
     else axisInterval[Y_AXIS] = 0;
     if(isZMove())   // normally no move in z direction
     {
-        axisInterval[Z_AXIS] = fabs((float)axis_diff[Z_AXIS]) * (float)F_CPU / (float)(Printer::maxFeedrate[Z_AXIS] * stepsRemaining); // must prevent overflow!
+        axisInterval[Z_AXIS] = fabs(axis_diff[Z_AXIS]) * (float)F_CPU / (float)(Printer::maxFeedrate[Z_AXIS] * stepsRemaining); // must prevent overflow!
 #if !NONLINEAR_SYSTEM
         limitInterval = RMath::max(axisInterval[Z_AXIS], limitInterval);
 #endif

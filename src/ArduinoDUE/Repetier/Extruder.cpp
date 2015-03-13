@@ -594,7 +594,11 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius,uint8_t extr
         EEPROM::updatePrinterUsage();
 #endif
     if(alloffs && !alloff)   // heaters are turned on, start measuring printing time
+    {
         Printer::msecondsPrinting = HAL::timeInMilliseconds();
+        Printer::filamentPrinted = 0;  // new print, new counter
+        Printer::flag2 &= ~PRINTER_FLAG2_RESET_FILAMENT_USAGE;
+    }
 }
 
 void Extruder::setHeatedBedTemperature(float temperatureInCelsius,bool beep)

@@ -56,6 +56,7 @@ long Printer::destinationSteps[E_AXIS_ARRAY];
 float Printer::coordinateOffset[Z_AXIS_ARRAY] = {0,0,0};
 uint8_t Printer::flag0 = 0;
 uint8_t Printer::flag1 = 0;
+uint8_t Printer::flag2 = 0;
 //Davinci Specific
 uint8_t Printer::flaghome = 0;
 bool Printer::btop_Cover_open=false;

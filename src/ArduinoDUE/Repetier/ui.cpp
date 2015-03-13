@@ -1658,14 +1658,21 @@ case 'P':
             {
 #if EEPROM_MODE
                 float dist = Printer::filamentPrinted * 0.001 + HAL::eprGetFloat(EPR_PRINTING_DISTANCE);
-                addFloat(dist, 6, 1);
+#else
+                float dist = Printer::filamentPrinted * 0.001;
 #endif
+                addFloat(dist, 6, 1);
             }
             break;
 
         case 'x':
-            if(c2>='0' && c2<='3') 
+            if(c2>='0' && c2<='4')
             {
+                if(c2=='4') // this sequence save 14 bytes of flash
+                {
+                    addFloat(Printer::filamentPrinted * 0.001,3,2);
+                    break;
+                }
                 if(c2=='0')
                     fvalue = Printer::realXPosition();
                 else if(c2=='1')
