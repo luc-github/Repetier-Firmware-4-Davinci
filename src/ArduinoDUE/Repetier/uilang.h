@@ -191,7 +191,7 @@
 #define UI_TEXT_NO               "No"
 #define UI_TEXT_SEL              cSEL
 #define UI_TEXT_NOSEL            cUNSEL
-#define UI_TEXT_PRINT_POS        "Printing..."
+#define UI_TEXT_PRINT_POS        "Printing.."
 #define UI_TEXT_PRINTING         "Printing"
 #define UI_TEXT_IDLE             "Idle"
 #define UI_TEXT_NOSDCARD         "No SD Card"
