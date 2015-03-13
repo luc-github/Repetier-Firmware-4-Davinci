@@ -196,8 +196,7 @@ void Extruder::manageTemperatures()
         if(act->targetTemperatureC < 20.0f) // heating is off
         {
             output = 0; // off is off, even if damping term wants a heat peak!
-            pwm_pos[act->pwmIndex] = output; // set pwm signal
-	//Davinci Specific, be able to disable decouple test
+         //Davinci Specific, be able to disable decouple test
 	#if FEATURE_DECOUPLE_TEST
             act->stopDecouple();
 	#endif
@@ -205,17 +204,13 @@ void Extruder::manageTemperatures()
         else if(error > PID_CONTROL_RANGE) // Phase 1: full heating until control range reached
         {
             output = act->pidMax;
-            pwm_pos[act->pwmIndex] = output; // set pwm signal
 	    //Davinci Specific, be able to disable decouple test
 	    #if FEATURE_DECOUPLE_TEST
             act->startFullDecouple(time);
 	    #endif
         }
         else if(error < -PID_CONTROL_RANGE) // control ramge left upper side!
-            {
             output = 0;
-            pwm_pos[act->pwmIndex] = output; // set pwm signal
-            }
         else // control range handle by heat manager
         {
             if(act->heatManager == HTR_PID)
@@ -233,7 +228,6 @@ void Extruder::manageTemperatures()
                 pidTerm = (pidTerm * act->pidMax) * 0.0039215;
 #endif
                 output = constrain((int)pidTerm, 0, act->pidMax);
-                pwm_pos[act->pwmIndex] = output; // set pwm signal
             }
             else if(act->heatManager == HTR_DEADTIME)     // dead-time control
             {
@@ -244,7 +238,6 @@ void Extruder::manageTemperatures()
                 float raising = 3.333 * (act->currentTemperatureC - act->tempArray[act->tempPointer]); // raising dT/dt, 3.33 = reciproke of time interval (300 ms)
                 act->tempIState = 0.25 * (3.0 * act->tempIState + raising); // damp raising
                 output = (act->currentTemperatureC + act->tempIState * act->deadTime > act->targetTemperatureC ? 0 : act->pidDriveMax);
-                pwm_pos[act->pwmIndex] = output; // set pwm signal
             }
             else // bang bang and slow bang bang
 #endif
@@ -257,19 +250,17 @@ void Extruder::manageTemperatures()
                     if (time - act->lastTemperatureUpdate > HEATED_BED_SET_INTERVAL)
                     {
                         output = (on ? act->pidMax : 0);
-                        pwm_pos[act->pwmIndex] = output; // set pwm signal
                         act->lastTemperatureUpdate = time;
 			//Davinci Specific, be able to disable decouple test
 			#if FEATURE_DECOUPLE_TEST 
                         if(on) act->startFullDecouple(time);
                         else act->stopDecouple();
 			#endif
-                    }
+                    } else continue;
                 }
                 else     // Fast Bang-Bang fallback
                 {
                     output = (on ? act->pidMax : 0);
-                    pwm_pos[act->pwmIndex] = output; // set pwm signal
 		    //Davinci Specific, be able to disable decouple test
 		    #if FEATURE_DECOUPLE_TEST 
                     if(on) act->startFullDecouple(time);
@@ -279,17 +270,14 @@ void Extruder::manageTemperatures()
         } // Temperatur control
 #ifdef MAXTEMP
         if(act->currentTemperatureC > MAXTEMP) // Force heater off if MAXTEMP is exceeded
-            {
             output = 0;
-            pwm_pos[act->pwmIndex] = output; // set pwm signal
-            }
 #endif
-        //pwm_pos[act->pwmIndex] = output; // set pwm signal
+        pwm_pos[act->pwmIndex] = output; // set pwm signal
 #if LED_PIN > -1
         if(act == &Extruder::current->tempControl)
             WRITE(LED_PIN,on);
 #endif
-    }
+    } // for controller
     if(errorDetected == 0 && extruderTempErrors > 0)
         extruderTempErrors--;
     if(Printer::isAnyTempsensorDefect()
