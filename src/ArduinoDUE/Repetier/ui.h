@@ -1451,6 +1451,7 @@ class UIDisplay {
     void addFloat(float number, char fixdigits,uint8_t digits);
     inline void addFloat(float number) {addFloat(number, -9,2);};
     void addStringP(PGM_P text);
+    void addStringOnOff(uint8_t);
     void addChar(const char c);
     void addGCode(GCode *code);
     bool okAction(bool allowMoves);

@@ -1168,6 +1168,11 @@ void UIDisplay::addStringP(FSTRINGPARAM(text))
     }
 }
 
+void UIDisplay::addStringOnOff(uint8_t on)
+{
+    addStringP(on ? ui_text_on : ui_text_off);
+}
+
 void UIDisplay::addChar(const char c)
 {
     if(col < UI_COLS)
@@ -1391,10 +1396,10 @@ void UIDisplay::parse(const char *txt,bool ram)
 	    break;
 
         case 'd':
-            if(c2 == 'o') addStringP(Printer::debugEcho()?ui_text_on:ui_text_off);
-            else if(c2 == 'i') addStringP(Printer::debugInfo()?ui_text_on:ui_text_off);
-            else if(c2 == 'e') addStringP(Printer::debugErrors()?ui_text_on:ui_text_off);
-            else if(c2 == 'd') addStringP(Printer::debugDryrun()?ui_text_on:ui_text_off);
+            if(c2 == 'o') addStringOnOff(Printer::debugEcho());
+            else if(c2 == 'i') addStringOnOff(Printer::debugInfo());
+            else if(c2 == 'e') addStringOnOff(Printer::debugErrors());
+            else if(c2 == 'd') addStringOnOff(Printer::debugDryrun());
             break;
 
         case 'e': // Extruder temperature
@@ -1467,8 +1472,8 @@ void UIDisplay::parse(const char *txt,bool ram)
         case 'l':
             if(c2 == 'a') addInt(lastAction,4);
 #if defined(CASE_LIGHTS_PIN) && CASE_LIGHTS_PIN >= 0
-            else if(c2 == 'o') addStringP(READ(CASE_LIGHTS_PIN)?ui_text_on:ui_text_off);        // Lights on/off
-            else if(c2 == 'k') addStringP(EEPROM::bkeeplighton?ui_text_on:ui_text_off);        // Keep Lights on/off
+            else if(c2 == 'o') addStringOnOff(READ(CASE_LIGHTS_PIN));        // Lights on/off
+            else if(c2 == 'k') addStringOnOff(EEPROM::bkeeplighton);        // Keep Lights on/off
 #endif
             break;
         case 'o':
@@ -1579,38 +1584,38 @@ case 'P':
             if(c2 == 'x')
             {
 #if (X_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_X
-                addStringP(Printer::isXMinEndstopHit()?ui_text_on:ui_text_off);
+                addStringOnOff(Printer::isXMinEndstopHit());
 #else
                 addStringP(ui_text_na);
 #endif
             }
             if(c2 == 'X')
 #if (X_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_X
-                addStringP(Printer::isXMaxEndstopHit()?ui_text_on:ui_text_off);
+                addStringOnOff(Printer::isXMaxEndstopHit());
 #else
                 addStringP(ui_text_na);
 #endif
             if(c2 == 'y')
 #if (Y_MIN_PIN > -1)&& MIN_HARDWARE_ENDSTOP_Y
-                addStringP(Printer::isYMinEndstopHit()?ui_text_on:ui_text_off);
+                addStringOnOff(Printer::isYMinEndstopHit());
 #else
                 addStringP(ui_text_na);
 #endif
             if(c2 == 'Y')
 #if (Y_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Y
-                addStringP(Printer::isYMaxEndstopHit()?ui_text_on:ui_text_off);
+                addStringOnOff(Printer::isYMaxEndstopHit());
 #else
                 addStringP(ui_text_na);
 #endif
             if(c2 == 'z')
 #if (Z_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Z
-                addStringP(Printer::isZMinEndstopHit()?ui_text_on:ui_text_off);
+                addStringOnOff(Printer::isZMinEndstopHit());
 #else
                 addStringP(ui_text_na);
 #endif
             if(c2=='Z')
 #if (Z_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Z
-                addStringP(Printer::isZMaxEndstopHit()?ui_text_on:ui_text_off);
+                addStringOnOff(Printer::isZMaxEndstopHit());
 #else
                 addStringP(ui_text_na);
 #endif
@@ -1629,6 +1634,7 @@ case 'P':
              else if(c2=='4')addFloat(EEPROM::ftemp_bed_pla,3,0 );
              #endif
         break;
+
         case 'U':
             if(c2 == 't')   // Printing time
             {
