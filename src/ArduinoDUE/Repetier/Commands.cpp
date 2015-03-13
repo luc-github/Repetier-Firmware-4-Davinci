@@ -297,6 +297,7 @@ void Commands::changeFlowrateMultiply(int factor)
     Com::printFLN(Com::tFlowMultiply, factor);
 }
 
+uint8_t fanKickstart;
 void Commands::setFanSpeed(int speed,bool wait)
 {
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
@@ -305,7 +306,12 @@ void Commands::setFanSpeed(int speed,bool wait)
     if(wait)
         Commands::waitUntilEndOfAllMoves(); // use only if neededthis to change the speed exactly at that point, but it may cause blobs if you do!
     if(speed != pwm_pos[NUM_EXTRUDER + 2])
+    {
         Com::printFLN(Com::tFanspeed,speed); // send only new values to break update loops!
+#if FAN_KICKSTART_TIME
+        if(fanKickstart == 0 && speed > pwm_pos[NUM_EXTRUDER + 2]) fanKickstart = FAN_KICKSTART_TIME/100;
+#endif
+    }
     pwm_pos[NUM_EXTRUDER + 2] = speed;
 #endif
 }

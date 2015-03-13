@@ -978,11 +978,14 @@ void PWM_TIMER_VECTOR ()
 #endif
 #endif
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
+    if(fanKickstart == 0)
+    {
 #if PDM_FOR_COOLER
     pulseDensityModulate(FAN_PIN, pwm_pos[NUM_EXTRUDER + 2], pwm_pos_set[NUM_EXTRUDER+2], false);
 #else
     if(pwm_pos_set[NUM_EXTRUDER + 2] == pwm_count && pwm_pos_set[NUM_EXTRUDER + 2] != 255) WRITE(FAN_PIN, 0);
 #endif
+    }
 #endif
 #if HEATED_BED_HEATER_PIN > -1 && HAVE_HEATED_BED
 #if PDM_FOR_EXTRUDER
@@ -997,6 +1000,7 @@ void PWM_TIMER_VECTOR ()
     {
         counterPeriodical = 0;
         executePeriodical = 1;
+        if(fanKickstart) fanKickstart--;
     }
 // read analog values -- only read one per interrupt
 #if ANALOG_INPUTS > 0        

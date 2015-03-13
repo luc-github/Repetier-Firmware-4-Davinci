@@ -1131,7 +1131,7 @@ boards you might need to make it inverting.
 #define KILL_METHOD 1
 
 /** Appends the linenumber after every ok send, to acknowledge the received command. Uncomment for plain ok ACK if your host has problems with this */
-#define ACK_WITH_LINENUMBER 1
+#define ACK_WITH_LINENUMBER 1       
 /** Communication errors can swollow part of the ok, which tells the host software to send
 the next command. Not receiving it will cause your printer to stop. Sending this string every
 second, if our queue is empty should prevent this. Comment it, if you don't wan't this feature. */
@@ -1206,12 +1206,17 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 #define SERVO1_PIN 6
 #define SERVO2_PIN 5
 #define SERVO3_PIN 4
+/** Some fans won't start for low values, but would run if started with higher power at the beginning.
+This defines the full power duration before returning to set value. Time is in milliseconds */
+#define FAN_KICKSTART_TIME  200
+
+
 
 /* A watchdog resets the printer, if a signal is not send within predifined time limits. That way we can be sure that the board
-is always running and is not hung up for some unknown reason.
+is always running and is not hung up for some unknown reason. 
 
-IMPORTANT: The ARM processors need a special board definition to work properly.
-See: AdditionalArduinoFiles: README.txt on how to install them.
+IMPORTANT: The ARM processors need a special board definition to work properly. 
+See: AdditionalArduinoFiles: README.txt on how to install them. 
 */
 #define FEATURE_WATCHDOG 1
 

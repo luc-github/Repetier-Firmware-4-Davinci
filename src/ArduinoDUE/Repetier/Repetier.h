@@ -361,6 +361,13 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #include "Communication.h"
 
 
+#if UI_DISPLAY_TYPE != DISPLAY_U8G
+  #if (defined(USER_KEY1_PIN) && (USER_KEY1_PIN==UI_DISPLAY_D5_PIN || USER_KEY1_PIN==UI_DISPLAY_D6_PIN || USER_KEY1_PIN==UI_DISPLAY_D7_PIN)) || (defined(USER_KEY2_PIN) && (USER_KEY2_PIN==UI_DISPLAY_D5_PIN || USER_KEY2_PIN==UI_DISPLAY_D6_PIN || USER_KEY2_PIN==UI_DISPLAY_D7_PIN)) || (defined(USER_KEY3_PIN) && (USER_KEY3_PIN==UI_DISPLAY_D5_PIN || USER_KEY3_PIN==UI_DISPLAY_D6_PIN || USER_KEY3_PIN==UI_DISPLAY_D7_PIN)) || (defined(USER_KEY4_PIN) && (USER_KEY4_PIN==UI_DISPLAY_D5_PIN || USER_KEY4_PIN==UI_DISPLAY_D6_PIN || USER_KEY4_PIN==UI_DISPLAY_D7_PIN))
+    #error "You cannot use DISPLAY_D5_PIN, DISPLAY_D6_PIN or DISPLAY_D7_PIN for "User Keys" with character LCD display"
+  #endif
+#endif
+
+
 #ifndef SDCARDDETECT
 #define SDCARDDETECT       -1
 #endif
@@ -499,7 +506,7 @@ extern unsigned int counterPeriodical;
 extern volatile uint8_t executePeriodical;
 extern uint8_t counter250ms;
 extern void writeMonitor();
-
+extern uint8_t fanKickstart;
 
 
 #if SDSUPPORT
