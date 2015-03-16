@@ -39,10 +39,15 @@ char uipagedialog[4][MAX_COLS+1];
 #endif
 #endif
 
+static TemperatureController *currHeaterForSetup;    // pointer to extruder or heatbed temperature controller
+
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
 long ui_autoreturn_time=0;
 //Davinci Specific, to block auto return when in sub menu
 bool benable_autoreturn=true;
+#endif
+#if FEATURE_BABYSTEPPING
+int zBabySteps = 0;
 #endif
 //Davinci Specific, to be able to disable feature
 #if FEATURE_BEEPER
@@ -295,7 +300,7 @@ const long baudrates[] PROGMEM = {9600,14400,19200,28800,38400,56000,57600,76800
 //for HD44780 and clones
 #define LCD_5X10		LCD_CONFIGURATION | 0x04	/**<	5 X 10 dots */
 #define LCD_5X7			LCD_CONFIGURATION | 0x00	/**<	5 X 7 dots */
-//for Winstar 1604A 
+//Davinci Specific, for Winstar 1604A 
 #define LCD_5X11        LCD_CONFIGURATION | 0x04    /**<    5 X 18 dots */
 #define LCD_5X8         LCD_CONFIGURATION | 0x00    /**<    5 X 8 dots */
 
@@ -418,6 +423,138 @@ void initializeLCD()
     lcdStopWrite();
 }
 #endif
+//Davinci Specific, if not winstar screen it is standard Text LCD
+#if !WINSTAR_SCREEN
+#if UI_DISPLAY_TYPE == DISPLAY_4BIT || UI_DISPLAY_TYPE == DISPLAY_8BIT
+
+void lcdWriteNibble(uint8_t value)
+{
+    WRITE(UI_DISPLAY_D4_PIN,value & 1);
+    WRITE(UI_DISPLAY_D5_PIN,value & 2);
+    WRITE(UI_DISPLAY_D6_PIN,value & 4);
+    WRITE(UI_DISPLAY_D7_PIN,value & 8);
+    DELAY1MICROSECOND;
+    WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);// enable pulse must be >450ns
+    HAL::delayMicroseconds(2);
+    WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
+    HAL::delayMicroseconds(UI_DELAYPERCHAR);
+}
+
+void lcdWriteByte(uint8_t c,uint8_t rs)
+{
+#if false && UI_DISPLAY_RW_PIN >= 0 // not really needed
+    SET_INPUT(UI_DISPLAY_D4_PIN);
+    SET_INPUT(UI_DISPLAY_D5_PIN);
+    SET_INPUT(UI_DISPLAY_D6_PIN);
+    SET_INPUT(UI_DISPLAY_D7_PIN);
+    WRITE(UI_DISPLAY_RW_PIN, HIGH);
+    WRITE(UI_DISPLAY_RS_PIN, LOW);
+    uint8_t busy;
+    do
+    {
+        WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);
+        DELAY1MICROSECOND;
+        busy = READ(UI_DISPLAY_D7_PIN);
+        WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
+        DELAY2MICROSECOND;
+
+        WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);
+        DELAY2MICROSECOND;
+
+        WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
+        DELAY2MICROSECOND;
+
+    }
+    while (busy);
+    SET_OUTPUT(UI_DISPLAY_D4_PIN);
+    SET_OUTPUT(UI_DISPLAY_D5_PIN);
+    SET_OUTPUT(UI_DISPLAY_D6_PIN);
+    SET_OUTPUT(UI_DISPLAY_D7_PIN);
+    WRITE(UI_DISPLAY_RW_PIN, LOW);
+#endif
+    WRITE(UI_DISPLAY_RS_PIN, rs);
+
+    WRITE(UI_DISPLAY_D4_PIN, c & 0x10);
+    WRITE(UI_DISPLAY_D5_PIN, c & 0x20);
+    WRITE(UI_DISPLAY_D6_PIN, c & 0x40);
+    WRITE(UI_DISPLAY_D7_PIN, c & 0x80);
+    HAL::delayMicroseconds(2);
+    WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
+    HAL::delayMicroseconds(2);
+    WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
+
+    WRITE(UI_DISPLAY_D4_PIN, c & 0x01);
+    WRITE(UI_DISPLAY_D5_PIN, c & 0x02);
+    WRITE(UI_DISPLAY_D6_PIN, c & 0x04);
+    WRITE(UI_DISPLAY_D7_PIN, c & 0x08);
+    HAL::delayMicroseconds(2);
+    WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
+    HAL::delayMicroseconds(2);
+    WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
+    HAL::delayMicroseconds(100);
+}
+
+void initializeLCD()
+{
+    // SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
+    // according to datasheet, we need at least 40ms after power rises above 2.7V
+    // before sending commands. Arduino can turn on way before 4.5V.
+    // is this delay long enough for all cases??
+    HAL::delayMilliseconds(235);
+    SET_OUTPUT(UI_DISPLAY_D4_PIN);
+    SET_OUTPUT(UI_DISPLAY_D5_PIN);
+    SET_OUTPUT(UI_DISPLAY_D6_PIN);
+    SET_OUTPUT(UI_DISPLAY_D7_PIN);
+    SET_OUTPUT(UI_DISPLAY_RS_PIN);
+#if UI_DISPLAY_RW_PIN > -1
+    SET_OUTPUT(UI_DISPLAY_RW_PIN);
+#endif
+    SET_OUTPUT(UI_DISPLAY_ENABLE_PIN);
+
+    // Now we pull both RS and R/W low to begin commands
+    WRITE(UI_DISPLAY_RS_PIN, LOW);
+    WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
+
+    //put the LCD into 4 bit mode
+    // this is according to the hitachi HD44780 datasheet
+    // figure 24, pg 46
+
+    // we start in 8bit mode, try to set 4 bit mode
+    // at this point we are in 8 bit mode but of course in this
+    // interface 4 pins are dangling unconnected and the values
+    // on them don't matter for these instructions.
+    WRITE(UI_DISPLAY_RS_PIN, LOW);
+    HAL::delayMicroseconds(20);
+    lcdWriteNibble(0x03);
+    HAL::delayMicroseconds(5000); // I have one LCD for which 4500 here was not long enough.
+    // second try
+    lcdWriteNibble(0x03);
+    HAL::delayMicroseconds(5000); // wait
+    // third go!
+    lcdWriteNibble(0x03);
+    HAL::delayMicroseconds(160);
+    // finally, set to 4-bit interface
+    lcdWriteNibble(0x02);
+    HAL::delayMicroseconds(160);
+    // finally, set # lines, font size, etc.
+    lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);
+
+    lcdCommand(LCD_CLEAR);					//-	Clear Screen
+    HAL::delayMilliseconds(3); // clear is slow operation
+    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF);	//-	Entrymode (Display Shift: off, Increment Address Counter)
+    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);	//-	Display on
+    uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
+    uid.createChar(1, character_back);
+    uid.createChar(2, character_degree);
+    uid.createChar(3, character_selected);
+    uid.createChar(4, character_unselected);
+    uid.createChar(5, character_temperature);
+    uid.createChar(6, character_folder);
+    uid.createChar(7, character_ready);
+}
+// ----------- end direct LCD driver
+#endif
+#else //Davinci Specific, Special LCD from Winstar 16X4
 #if UI_DISPLAY_TYPE == DISPLAY_4BIT || UI_DISPLAY_TYPE == DISPLAY_8BIT
 //Davinci Specific, separate 8bts form 4 bits initialization
 #if  UI_DISPLAY_TYPE == DISPLAY_4BIT
@@ -644,6 +781,8 @@ void initializeLCD()
 }
 // ----------- end direct LCD driver
 #endif
+#endif //DAVINCI LCD or Not
+
 #if UI_DISPLAY_TYPE < DISPLAY_ARDUINO_LIB
 void UIDisplay::printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol)
 {
@@ -1262,6 +1401,7 @@ void UIDisplay::addGCode(GCode *code)
 
 void UIDisplay::parse(const char *txt,bool ram)
 {
+    static uint8_t beepdelay = 0;
     int ivalue = 0;
     float fvalue = 0;
     while(col < MAX_COLS)
@@ -1410,11 +1550,29 @@ void UIDisplay::parse(const char *txt,bool ram)
                 addStringP(Printer::relativeExtruderCoordinateMode ? ui_yes : ui_no);
                 break;
             }
-            if(Printer::flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT)
+            uint8_t eid = NUM_EXTRUDER;    // default = BED if c2 not specified extruder number
+            if(c2 == 'c') eid = Extruder::current->id;
+            else if(c2 >= '0' && c2 <= '9') eid = c2 - '0';
+            if(Printer::isAnyTempsensorDefect())
             {
-                addStringP(PSTR(" def "));
-                break;
+                if(eid == 0 && ++beepdelay > 30) beepdelay = 0; // beep every 30 seconds
+                if(beepdelay == 1) BEEP_LONG;
+                if(tempController[eid]->isSensorDefect())
+                {
+                    addStringP(PSTR(" def "));
+                    break;
+                }
+//Davinci Specific, be able to disable decouple test
+#if FEATURE_DECOUPLE_TEST
+                else if(tempController[eid]->isSensorDecoupled())
+                {
+                    addStringP(PSTR(" dec "));
+                    break;
+                }
+#endif
             }
+#if EXTRUDER_JAM_CONTROL
+#endif
             if(c2 == 'c') fvalue = Extruder::current->tempControl.currentTemperatureC;
             else if(c2 >= '0' && c2 <= '9') fvalue=extruder[c2 - '0'].tempControl.currentTemperatureC;
             else if(c2 == 'b') fvalue = Extruder::getHeatedBedTemperature();
@@ -1436,13 +1594,14 @@ void UIDisplay::parse(const char *txt,bool ram)
             break;
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
         case 'F': // FAN speed
-            if(c2 == 's') addInt(Printer::getFanSpeed() * 100 / 255, 3);
+            if(c2 == 's') addInt(floor(Printer::getFanSpeed() * 100 / 255 + 0.5f), 3);
             break;
 #endif
         case 'f':
             if(c2 >= 'x' && c2 <= 'z') addFloat(Printer::maxFeedrate[c2 - 'x'], 5, 0);
             else if(c2 >= 'X' && c2 <= 'Z') addFloat(Printer::homingFeedrate[c2 - 'X'], 5, 0);
             break;
+//Davinci Specific, XYZ Min
         case 'H':
                 if(c2=='x') addFloat(Printer::xMin,4,2);
                 else if(c2=='y') addFloat(Printer::yMin,4,2);
@@ -1451,10 +1610,12 @@ void UIDisplay::parse(const char *txt,bool ram)
         case 'i':
             if(c2 == 's') addLong(stepperInactiveTime/1000,4);
             else if(c2 == 'p') addLong(maxInactiveTime/1000,4);
+//Davinci Specific, powersave
             else if(c2 == 'l') addLong(EEPROM::timepowersaving/1000,4);
             break;
         case 'O': // ops related stuff
             break;
+//Davinci Specific, XYZ Lenght
          case 'L':
              if(c2=='x') addFloat(Printer::xLength,4,0);
              else if(c2=='y') addFloat(Printer::yLength,4,0);
@@ -1464,6 +1625,7 @@ void UIDisplay::parse(const char *txt,bool ram)
             if(c2 == 'a') addInt(lastAction,4);
 #if defined(CASE_LIGHTS_PIN) && CASE_LIGHTS_PIN >= 0
             else if(c2 == 'o') addStringOnOff(READ(CASE_LIGHTS_PIN));        // Lights on/off
+//Davinci Specific, Light management
             else if(c2 == 'k') addStringOnOff(EEPROM::bkeeplighton);        // Keep Lights on/off
 #endif
 #if FEATURE_AUTOLEVEL
@@ -1519,6 +1681,14 @@ void UIDisplay::parse(const char *txt,bool ram)
                 addInt(Extruder::current->id + 1, 1);
                 break;
             }
+#if FEATURE_BABYSTEPPING
+            if(c2 == 'Y')
+            {
+//                addInt(zBabySteps,0);
+                addFloat((float)zBabySteps * Printer::invAxisStepsPerMM[Z_AXIS], 2, 2);
+                break;
+            }
+#endif
             // Extruder output level
             if(c2 >= '0' && c2 <= '9') ivalue = pwm_pos[c2 - '0'];
 #if HAVE_HEATED_BED
@@ -1623,6 +1793,7 @@ case 'P':
             if(c2 >= 'x' && c2 <= 'z') addFloat(Printer::axisStepsPerMM[c2 - 'x'], 3, 1);
             if(c2 == 'e') addFloat(Extruder::current->stepsPerMM, 3, 1);
             break;
+//Davinci Specific, Temperature for Extruder/bed ABS and PLA
         case 'T':
             if(c2=='1')addFloat(EEPROM::ftemp_ext_abs,3,0 );
             else if(c2=='2')addFloat(EEPROM::ftemp_ext_pla,3,0 );
@@ -1694,27 +1865,27 @@ case 'P':
 #if TEMP_PID
             else if(c2=='i')
             {
-                addFloat(Extruder::current->tempControl.pidIGain,4,2);
+                addFloat(currHeaterForSetup->pidIGain, 4,2);
             }
             else if(c2=='p')
             {
-                addFloat(Extruder::current->tempControl.pidPGain,4,2);
+                addFloat(currHeaterForSetup->pidPGain, 4,2);
             }
             else if(c2=='d')
             {
-                addFloat(Extruder::current->tempControl.pidDGain,4,2);
+                addFloat(currHeaterForSetup->pidDGain, 4,2);
             }
             else if(c2=='m')
             {
-                addInt(Extruder::current->tempControl.pidDriveMin,3);
+                addInt(currHeaterForSetup->pidDriveMin, 3);
             }
             else if(c2=='M')
             {
-                addInt(Extruder::current->tempControl.pidDriveMax,3);
+                addInt(currHeaterForSetup->pidDriveMax, 3);
             }
             else if(c2=='D')
             {
-                addInt(Extruder::current->tempControl.pidMax,3);
+                addInt(currHeaterForSetup->pidMax, 3);
             }
 #endif
             else if(c2=='w')
@@ -1733,7 +1904,7 @@ case 'P':
 #endif
             else if(c2=='h')
             {
-                uint8_t hm = Extruder::current->tempControl.heatManager;
+                uint8_t hm = currHeaterForSetup->heatManager;
                 if(hm == HTR_PID)
                     addStringP(PSTR(UI_TEXT_STRING_HM_PID));
                 else if(hm == HTR_DEADTIME)
@@ -1757,11 +1928,11 @@ case 'P':
 #endif
             else if(c2=='x')
             {
-                addFloat(Extruder::current->xOffset, 4, 2);
+                addFloat(Extruder::current->xOffset * Printer::invAxisStepsPerMM[X_AXIS], 3, 2);
             }
             else if(c2=='y')
             {
-                addFloat(Extruder::current->yOffset,4,2);
+                addFloat(Extruder::current->yOffset * Printer::invAxisStepsPerMM[Y_AXIS], 3, 2);
             }
             else if(c2=='f')
             {
@@ -1810,8 +1981,7 @@ case 'P':
              {
              addFloat(Printer::zMin,4,2);
              }
-
-      }
+        }
     }
     uid.printCols[col] = 0;
 }
@@ -2452,12 +2622,12 @@ void UIDisplay::popMenu(bool refresh)
     if(refresh)
         refreshPage();
 }
-bool UIDisplay::okAction(bool allowMoves)
+int UIDisplay::okAction(bool allowMoves)
 {
     if(Printer::isUIErrorMessage())
-{
+    {
         Printer::setUIErrorMessage(false);
-        return true;
+        return 0;
     }
     BEEP_SHORT
 #if UI_HAS_KEYS == 1
@@ -2467,8 +2637,7 @@ bool UIDisplay::okAction(bool allowMoves)
         menuTop[1] = 0;
         menuPos[1] =  UI_MENU_BACKCNT; // if top entry is back, default to next useful item
         menu[1] = &ui_menu_main;
-        BEEP_SHORT
-        return true;
+        return 0;
     }
     UIMenu *men = (UIMenu*)menu[menuLevel];
     //uint8_t nr = pgm_read_word_near(&(menu->numEntries));
@@ -2482,12 +2651,11 @@ bool UIDisplay::okAction(bool allowMoves)
     {
         if(menuPos[menuLevel] == 0)   // Selected back instead of file
         {
-            executeAction(UI_ACTION_BACK, allowMoves);
-            return true;
+            return executeAction(UI_ACTION_BACK, allowMoves);
         }
 
         if(!sd.sdactive)
-            return true;
+            return 0;
         uint8_t filePos = menuPos[menuLevel] - 1;
         char filename[LONG_FILENAME_LENGTH + 1];
 
@@ -2499,7 +2667,7 @@ bool UIDisplay::okAction(bool allowMoves)
             menuPos[menuLevel] = 1;
             refreshPage();
             oldMenuLevel = -1;
-            return true;
+            return 0;
         }
 
         int16_t shortAction; // renamed to avoid scope confusion
@@ -2544,7 +2712,7 @@ bool UIDisplay::okAction(bool allowMoves)
             }
             break;
         }
-        return true;
+        return 0;
     }
 #endif
     entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
@@ -2556,8 +2724,7 @@ bool UIDisplay::okAction(bool allowMoves)
     {
         action = pgm_read_word(&(men->id));
         finishAction(action);
-        executeAction(UI_ACTION_BACK, true);
-        return true;
+        return executeAction(UI_ACTION_BACK, true);
     }
      //Davinci Specific, readibility
     if(((mtype == UI_MENU_TYPE_SUBMENU) ||(mtype == UI_MENU_TYPE_MENU_WITH_STATUS) )&& entType == UI_MENU_TYPE_MODIFICATION_MENU)   // Modify action
@@ -2569,13 +2736,22 @@ bool UIDisplay::okAction(bool allowMoves)
         }
         else
             activeAction = action;
-        return true;
+        return 0;
     }
+  //Davinci Specific, readibility
     if(entType==UI_MENU_TYPE_MENU_WITH_STATUS || entType==UI_MENU_TYPE_SUBMENU)   // Enter submenu
     {
         pushMenu((UIMenu*)action, false);
-        BEEP_SHORT
-        return true;
+//        BEEP_SHORT
+#if FEATURE_BABYSTEPPING
+        zBabySteps = 0;
+#endif
+#if HAVE_HEATED_BED
+#endif
+            currHeaterForSetup = &(Extruder::current->tempControl);
+        Printer::setMenuMode(MENU_MODE_FULL_PID, currHeaterForSetup->heatManager == 1);
+        Printer::setMenuMode(MENU_MODE_DEADTIME, currHeaterForSetup->heatManager == 3);
+        return 0;
     }
     if(entType == 3)
     {
@@ -2585,7 +2761,10 @@ bool UIDisplay::okAction(bool allowMoves)
 #endif
 }
 
-#define INCREMENT_MIN_MAX(a,steps,_min,_max) if ( (increment<0) && (_min>=0) && (a<_min-increment*steps) ) {a=_min;} else { a+=increment*steps; if(a<_min) a=_min; else if(a>_max) a=_max;};
+//#define INCREMENT_MIN_MAX(a,steps,_min,_max) if ( (increment<0) && (_min>=0) && (a<_min-increment*steps) ) {a=_min;} else { a+=increment*steps; if(a<_min) a=_min; else if(a>_max) a=_max;};
+
+// this version not have single byte variable rollover bug
+#define INCREMENT_MIN_MAX(a,steps,_min,_max) a = constrain((a + increment*steps), _min, _max);
 
 void UIDisplay::adjustMenuPos()
 {
@@ -2646,9 +2825,10 @@ void UIDisplay::adjustMenuPos()
     while(modified);
 }
 
-bool UIDisplay::nextPreviousAction(int8_t next, bool allowMoves)
+bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
 {
-    if(Printer::isUIErrorMessage()) {
+    if(Printer::isUIErrorMessage())
+    {
         Printer::setUIErrorMessage(false);
         return true;
     }
@@ -2664,6 +2844,12 @@ bool UIDisplay::nextPreviousAction(int8_t next, bool allowMoves)
     }
     float f = (float)(SPEED_MIN_MILLIS - dt) / (float)(SPEED_MIN_MILLIS - SPEED_MAX_MILLIS);
     lastNextAccumul = 1.0f + (float)SPEED_MAGNIFICATION * f * f * f;
+#if UI_DYNAMIC_ENCODER_SPEED
+    uint16_t dynSp = lastNextAccumul / 16;
+    if(dynSp < 1)  dynSp = 1;
+    if(dynSp > 30) dynSp = 30;
+    next *= dynSp;
+#endif
 
 #if UI_HAS_KEYS == 1
     if(menuLevel == 0)
@@ -2724,10 +2910,16 @@ bool UIDisplay::nextPreviousAction(int8_t next, bool allowMoves)
     {
         if((UI_INVERT_MENU_DIRECTION && next < 0) || (!UI_INVERT_MENU_DIRECTION && next > 0))
         {
-            if(menuPos[menuLevel] < nFilesOnCard) menuPos[menuLevel]++;
+            menuPos[menuLevel] += abs(next);
+            if(menuPos[menuLevel] > nFilesOnCard) menuPos[menuLevel] = nFilesOnCard;
         }
         else if(menuPos[menuLevel] > 0)
-            menuPos[menuLevel]--;
+        {
+            if(menuPos[menuLevel] > abs(next))
+                menuPos[menuLevel] -= abs(next);
+            else
+                menuPos[menuLevel] = 0;
+        }
         if(menuTop[menuLevel] > menuPos[menuLevel])
             menuTop[menuLevel] = menuPos[menuLevel];
         else if(menuTop[menuLevel] + UI_ROWS - 1 < menuPos[menuLevel])
@@ -2736,6 +2928,7 @@ bool UIDisplay::nextPreviousAction(int8_t next, bool allowMoves)
         return true;
     }
 #endif
+//BUG ?? 
     if(mtype == UI_MENU_TYPE_ACTION_MENU) action = pgm_read_word(&(men->id));
     else action = activeAction;
      //Davinci Specific, use key Up for - and down for +
@@ -2789,10 +2982,102 @@ bool UIDisplay::nextPreviousAction(int8_t next, bool allowMoves)
             PrintLine::moveRelativeDistanceInStepsReal(0,0,steps,0,Printer::maxFeedrate[Z_AXIS],true);
         }
 #else
-        PrintLine::moveRelativeDistanceInStepsReal(0, 0,increment, 0,Printer::homingFeedrate[Z_AXIS],true);
+        PrintLine::moveRelativeDistanceInStepsReal(0, 0, ((long)increment * Printer::axisStepsPerMM[Z_AXIS]) / 100, 0, Printer::homingFeedrate[Z_AXIS],true);
 #endif
         Commands::printCurrentPosition(PSTR("UI_ACTION_ZPOSITION "));
         break;
+    case UI_ACTION_XPOSITION_FAST:
+        if(!allowMoves) return false;
+        PrintLine::moveRelativeDistanceInStepsReal(Printer::axisStepsPerMM[X_AXIS] * increment,0,0,0,Printer::homingFeedrate[X_AXIS],true);
+        Commands::printCurrentPosition(PSTR("UI_ACTION_XPOSITION_FAST "));
+        break;
+    case UI_ACTION_YPOSITION_FAST:
+        if(!allowMoves) return false;
+        PrintLine::moveRelativeDistanceInStepsReal(0,Printer::axisStepsPerMM[Y_AXIS] * increment,0,0,Printer::homingFeedrate[Y_AXIS],true);
+        Commands::printCurrentPosition(PSTR("UI_ACTION_YPOSITION_FAST "));
+        break;
+    case UI_ACTION_ZPOSITION_FAST:
+        if(!allowMoves) return false;
+        PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS] * increment,0,Printer::homingFeedrate[Z_AXIS],true);
+        Commands::printCurrentPosition(PSTR("UI_ACTION_ZPOSITION_FAST "));
+        break;
+    case UI_ACTION_EPOSITION:
+        if(!allowMoves) return false;
+	//TO BE FIXED by Extrusion import
+        //PrintLine::moveRelativeDistanceInSteps(0,0,0,Printer::axisStepsPerMM[E_AXIS]*increment / Printer::extrusionFactor,UI_SET_EXTRUDER_FEEDRATE,true,false);
+        Commands::printCurrentPosition(PSTR("UI_ACTION_EPOSITION "));
+        break;
+#if FEATURE_RETRACTION
+#endif
+    case UI_ACTION_ZPOSITION_NOTEST:
+        if(!allowMoves) return false;
+        Printer::setNoDestinationCheck(true);
+#if UI_SPEEDDEPENDENT_POSITIONING
+        {
+            float d = 0.01 * (float)increment * lastNextAccumul;
+            if(fabs(d) * 2000>Printer::maxFeedrate[Z_AXIS] * dtReal)
+                d *= Printer::maxFeedrate[Z_AXIS] * dtReal / (2000 * fabs(d));
+            long steps = (long)(d * Printer::axisStepsPerMM[Z_AXIS]);
+            steps = ( increment < 0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
+            PrintLine::moveRelativeDistanceInStepsReal(0, 0, steps, 0, Printer::maxFeedrate[Z_AXIS], true);
+        }
+#else
+        PrintLine::moveRelativeDistanceInStepsReal(0, 0, increment, 0, Printer::homingFeedrate[Z_AXIS], true);
+#endif
+        Commands::printCurrentPosition(PSTR("UI_ACTION_ZPOSITION_NOTEST "));
+        Printer::setNoDestinationCheck(false);
+        break;
+    case UI_ACTION_ZPOSITION_FAST_NOTEST:
+        Printer::setNoDestinationCheck(true);
+        PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS]*increment,0,Printer::homingFeedrate[Z_AXIS],true);
+        Commands::printCurrentPosition(PSTR("UI_ACTION_ZPOSITION_FAST_NOTEST "));
+        Printer::setNoDestinationCheck(false);
+        break;
+    case UI_ACTION_Z_BABYSTEPS:
+#if FEATURE_BABYSTEPPING
+    {
+        previousMillisCmd = HAL::timeInMilliseconds();
+        if((abs((int)Printer::zBabystepsMissing + (increment * BABYSTEP_MULTIPLICATOR))) < 127)
+        {
+            Printer::zBabystepsMissing += increment * BABYSTEP_MULTIPLICATOR;
+            zBabySteps += increment * BABYSTEP_MULTIPLICATOR;
+        }
+    }
+#endif
+    break;
+    case UI_ACTION_HEATED_BED_TEMP:
+#if HAVE_HEATED_BED
+    {
+        int tmp = (int)heatedBedController.targetTemperatureC;
+        if(tmp < UI_SET_MIN_HEATED_BED_TEMP) tmp = 0;
+        if(tmp == 0 && increment > 0) tmp = UI_SET_MIN_HEATED_BED_TEMP;
+        else tmp += increment;
+        if(tmp < UI_SET_MIN_HEATED_BED_TEMP) tmp = 0;
+        else if(tmp > UI_SET_MAX_HEATED_BED_TEMP) tmp = UI_SET_MAX_HEATED_BED_TEMP;
+        Extruder::setHeatedBedTemperature(tmp);
+    }
+#endif
+    break;
+
+#if NUM_EXTRUDER>2
+    case UI_ACTION_EXTRUDER2_TEMP:
+#endif
+#if NUM_EXTRUDER>1
+    case UI_ACTION_EXTRUDER1_TEMP:
+#endif
+    case UI_ACTION_EXTRUDER0_TEMP:
+    {
+        int tmp = (int)extruder[action - UI_ACTION_EXTRUDER0_TEMP].tempControl.targetTemperatureC;
+        if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
+        if(tmp == 0 && increment > 0) tmp = UI_SET_MIN_EXTRUDER_TEMP;
+        else tmp += increment;
+        if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
+        else if(tmp > UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
+        Extruder::setTemperatureForExtruder(tmp, action - UI_ACTION_EXTRUDER0_TEMP);
+    }
+    break;
+
+
  //Davinci Specific, special commands
     case UI_ACTION_X_1:
     case UI_ACTION_X_10:
@@ -2932,36 +3217,9 @@ bool UIDisplay::nextPreviousAction(int8_t next, bool allowMoves)
     break;
     }
 
-    case UI_ACTION_EPOSITION:
-         //need to check temperature ?
-        PrintLine::moveRelativeDistanceInSteps(0,0,0,Printer::axisStepsPerMM[3]*increment,UI_SET_EXTRUDER_FEEDRATE,true,false);
-        Commands::printCurrentPosition(PSTR("UI_ACTION_EPOSITION "));
-        break;
-    case UI_ACTION_Z_BABYSTEPS:
-        {
-            previousMillisCmd = HAL::timeInMilliseconds();
-            if(increment > 0) {
-                if((int)Printer::zBabystepsMissing+BABYSTEP_MULTIPLICATOR<127)
-                    Printer::zBabystepsMissing+=BABYSTEP_MULTIPLICATOR;
-            } else {
-                if((int)Printer::zBabystepsMissing-BABYSTEP_MULTIPLICATOR>-127)
-                    Printer::zBabystepsMissing-=BABYSTEP_MULTIPLICATOR;
-            }
-        }
-        break;
-    case UI_ACTION_HEATED_BED_TEMP:
-#if HAVE_HEATED_BED
-    {
-        int tmp = (int)heatedBedController.targetTemperatureC;
-        if(tmp < UI_SET_MIN_HEATED_BED_TEMP) tmp = 0;
-        tmp += increment;
-        if(tmp == 1) tmp = UI_SET_MIN_HEATED_BED_TEMP;
-        if(tmp < UI_SET_MIN_HEATED_BED_TEMP) tmp = 0;
-        else if(tmp>UI_SET_MAX_HEATED_BED_TEMP) tmp = UI_SET_MAX_HEATED_BED_TEMP;
-        Extruder::setHeatedBedTemperature(tmp);
-    }
-#endif
-    break;
+
+
+
  //Davinci Specific, 
     case UI_ACTION_EXT_TEMP_ABS :
     {
@@ -3007,43 +3265,7 @@ case UI_ACTION_BED_TEMP_PLA :
         EEPROM::ftemp_bed_pla=tmp;
     }
     break;
-    case UI_ACTION_EXTRUDER0_TEMP:
-    {
-        int tmp = (int)extruder[0].tempControl.targetTemperatureC;
-        if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
-        tmp += increment;
-        if(tmp == 1) tmp = UI_SET_MIN_EXTRUDER_TEMP;
-        if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
-        else if(tmp > UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
-        Extruder::setTemperatureForExtruder(tmp,0);
-    }
-    break;
-    case UI_ACTION_EXTRUDER1_TEMP:
-#if NUM_EXTRUDER>1
-    {
-        int tmp = (int)extruder[1].tempControl.targetTemperatureC;
-        if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
-        tmp += increment;
-        if(tmp == 1) tmp = UI_SET_MIN_EXTRUDER_TEMP;
-        if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
-        else if(tmp > UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
-        Extruder::setTemperatureForExtruder(tmp,1);
-    }
-#endif
-    break;
-    case UI_ACTION_EXTRUDER2_TEMP:
-#if NUM_EXTRUDER>2
-    {
-        int tmp = (int)extruder[2].tempControl.targetTemperatureC;
-        if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
-        tmp += increment;
-        if(tmp == 1) tmp = UI_SET_MIN_EXTRUDER_TEMP;
-        if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
-        else if(tmp > UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
-        Extruder::setTemperatureForExtruder(tmp,2);
-    }
-#endif
-    break;
+   
     case UI_ACTION_FEEDRATE_MULTIPLY:
     {
         int fr = Printer::feedrateMultiply;
@@ -3077,34 +3299,22 @@ case UI_ACTION_BED_TEMP_PLA :
         break;
 
     case UI_ACTION_PRINT_ACCEL_X:
-        INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[X_AXIS],100,0,10000);
-        Printer::updateDerivedParameter();
-        break;
     case UI_ACTION_PRINT_ACCEL_Y:
+    case UI_ACTION_PRINT_ACCEL_Z:
 #if DRIVE_SYSTEM!=DELTA
-        INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[Y_AXIS],1,0,10000);
+        INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[action - UI_ACTION_PRINT_ACCEL_X],((action == UI_ACTION_PRINT_ACCEL_Z) ? 1 : 100),0,10000);
 #else
-        INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[Y_AXIS],100,0,10000);
+        INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[action - UI_ACTION_PRINT_ACCEL_X],100,0,10000);
 #endif
         Printer::updateDerivedParameter();
         break;
-    case UI_ACTION_PRINT_ACCEL_Z:
-        INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[Z_AXIS],100,0,10000);
-        Printer::updateDerivedParameter();
-        break;
     case UI_ACTION_MOVE_ACCEL_X:
-        INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[X_AXIS],100,0,10000);
-        Printer::updateDerivedParameter();
-        break;
     case UI_ACTION_MOVE_ACCEL_Y:
-        INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[Y_AXIS],100,0,10000);
-        Printer::updateDerivedParameter();
-        break;
     case UI_ACTION_MOVE_ACCEL_Z:
 #if DRIVE_SYSTEM != DELTA
-        INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS],1,0,10000);
+        INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[action - UI_ACTION_MOVE_ACCEL_X],((action == UI_ACTION_MOVE_ACCEL_Z) ? 1 : 100),0,10000);
 #else
-        INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS],100,0,10000);
+        INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[action - UI_ACTION_MOVE_ACCEL_X],100,0,10000);
 #endif
         Printer::updateDerivedParameter();
         break;
@@ -3117,33 +3327,21 @@ case UI_ACTION_BED_TEMP_PLA :
         break;
 #endif
     case UI_ACTION_HOMING_FEEDRATE_X:
-        INCREMENT_MIN_MAX(Printer::homingFeedrate[X_AXIS],1,5,1000);
-        break;
     case UI_ACTION_HOMING_FEEDRATE_Y:
-        INCREMENT_MIN_MAX(Printer::homingFeedrate[Y_AXIS],1,5,1000);
-        break;
     case UI_ACTION_HOMING_FEEDRATE_Z:
-        INCREMENT_MIN_MAX(Printer::homingFeedrate[Z_AXIS],1,1,1000);
+        INCREMENT_MIN_MAX(Printer::homingFeedrate[action - UI_ACTION_HOMING_FEEDRATE_X], 1, 1, 1000);
         break;
+
     case UI_ACTION_MAX_FEEDRATE_X:
-        INCREMENT_MIN_MAX(Printer::maxFeedrate[X_AXIS],1,1,1000);
-        break;
     case UI_ACTION_MAX_FEEDRATE_Y:
-        INCREMENT_MIN_MAX(Printer::maxFeedrate[Y_AXIS],1,1,1000);
-        break;
     case UI_ACTION_MAX_FEEDRATE_Z:
-        INCREMENT_MIN_MAX(Printer::maxFeedrate[Z_AXIS],1,1,1000);
+        INCREMENT_MIN_MAX(Printer::maxFeedrate[action - UI_ACTION_MAX_FEEDRATE_X], 1, 1, 1000);
         break;
+
     case UI_ACTION_STEPS_X:
-        INCREMENT_MIN_MAX(Printer::axisStepsPerMM[X_AXIS],0.1,0,999);
-        Printer::updateDerivedParameter();
-        break;
     case UI_ACTION_STEPS_Y:
-        INCREMENT_MIN_MAX(Printer::axisStepsPerMM[Y_AXIS],0.1,0,999);
-        Printer::updateDerivedParameter();
-        break;
     case UI_ACTION_STEPS_Z:
-        INCREMENT_MIN_MAX(Printer::axisStepsPerMM[Z_AXIS],0.1,0,999);
+        INCREMENT_MIN_MAX(Printer::axisStepsPerMM[action - UI_ACTION_STEPS_X], 0.1, 0, 999);
         Printer::updateDerivedParameter();
         break;
     case UI_ACTION_BAUDRATE:
@@ -3161,33 +3359,36 @@ case UI_ACTION_BED_TEMP_PLA :
         if(rate == 0) p -= 2;
         p += increment;
         if(p < 0) p = 0;
-        rate = pgm_read_dword(&(baudrates[p]));
-        if(rate == 0) p--;
+        if(p > sizeof(baudrates)/4 - 2) p = sizeof(baudrates)/4 - 2;
+//        rate = pgm_read_dword(&(baudrates[p]));
+//        if(rate == 0) p--;
         baudrate = pgm_read_dword(&(baudrates[p]));
     }
 #endif
     break;
 #if TEMP_PID
     case UI_ACTION_PID_PGAIN:
-        INCREMENT_MIN_MAX(Extruder::current->tempControl.pidPGain,0.1,0,200);
+        INCREMENT_MIN_MAX(currHeaterForSetup->pidPGain, 0.1, 0, 200);
         break;
     case UI_ACTION_PID_IGAIN:
-        INCREMENT_MIN_MAX(Extruder::current->tempControl.pidIGain,0.01,0,100);
-        Extruder::selectExtruderById(Extruder::current->id);
+        INCREMENT_MIN_MAX(currHeaterForSetup->pidIGain, 0.01, 0, 100);
+        if(&Extruder::current->tempControl == currHeaterForSetup)
+            Extruder::selectExtruderById(Extruder::current->id);
         break;
     case UI_ACTION_PID_DGAIN:
-        INCREMENT_MIN_MAX(Extruder::current->tempControl.pidDGain,0.1,0,200);
+        INCREMENT_MIN_MAX(currHeaterForSetup->pidDGain, 0.1, 0, 200);
         break;
     case UI_ACTION_DRIVE_MIN:
-        INCREMENT_MIN_MAX(Extruder::current->tempControl.pidDriveMin,1,1,255);
+        INCREMENT_MIN_MAX(currHeaterForSetup->pidDriveMin, 1, 1, 255);
         break;
     case UI_ACTION_DRIVE_MAX:
-        INCREMENT_MIN_MAX(Extruder::current->tempControl.pidDriveMax,1,1,255);
+        INCREMENT_MIN_MAX(currHeaterForSetup->pidDriveMax, 1, 1, 255);
         break;
     case UI_ACTION_PID_MAX:
-        INCREMENT_MIN_MAX(Extruder::current->tempControl.pidMax,1,1,255);
+        INCREMENT_MIN_MAX(currHeaterForSetup->pidMax, 1, 1, 255);
         break;
 #endif
+//Davinci Specific, XYZ Length
     case UI_ACTION_X_LENGTH:
                 Printer::xLength = roundf(Printer::xLength );
                 INCREMENT_MIN_MAX(Printer::xLength,1,0,250);
@@ -3213,51 +3414,53 @@ case UI_ACTION_BED_TEMP_PLA :
                 INCREMENT_MIN_MAX( Printer::zMin,0.1,-200,250);
                break;
     case UI_ACTION_X_OFFSET:
-        INCREMENT_MIN_MAX(Extruder::current->xOffset,1,-99999,99999);
+        INCREMENT_MIN_MAX(Extruder::current->xOffset, 1, -99999, 99999);
         Extruder::selectExtruderById(Extruder::current->id);
         break;
     case UI_ACTION_Y_OFFSET:
-        INCREMENT_MIN_MAX(Extruder::current->yOffset,1,-99999,99999);
+        INCREMENT_MIN_MAX(Extruder::current->yOffset, 1, -99999, 99999);
         Extruder::selectExtruderById(Extruder::current->id);
         break;
     case UI_ACTION_EXTR_STEPS:
-        INCREMENT_MIN_MAX(Extruder::current->stepsPerMM,1,1,9999);
+        INCREMENT_MIN_MAX(Extruder::current->stepsPerMM, 0.1, 1, 9999);
         Extruder::selectExtruderById(Extruder::current->id);
         break;
     case UI_ACTION_EXTR_ACCELERATION:
-        INCREMENT_MIN_MAX(Extruder::current->maxAcceleration,10,10,99999);
+        INCREMENT_MIN_MAX(Extruder::current->maxAcceleration, 10, 10, 99999);
         Extruder::selectExtruderById(Extruder::current->id);
         break;
     case UI_ACTION_EXTR_MAX_FEEDRATE:
-        INCREMENT_MIN_MAX(Extruder::current->maxFeedrate,1,1,999);
+        INCREMENT_MIN_MAX(Extruder::current->maxFeedrate, 1, 1, 999);
         Extruder::selectExtruderById(Extruder::current->id);
         break;
     case UI_ACTION_EXTR_START_FEEDRATE:
-        INCREMENT_MIN_MAX(Extruder::current->maxStartFeedrate,1,1,999);
+        INCREMENT_MIN_MAX(Extruder::current->maxStartFeedrate, 1, 1, 999);
         Extruder::selectExtruderById(Extruder::current->id);
         break;
     case UI_ACTION_EXTR_HEATMANAGER:
-        INCREMENT_MIN_MAX(Extruder::current->tempControl.heatManager,1,0,3);
+        INCREMENT_MIN_MAX(currHeaterForSetup->heatManager, 1, 0, 3);
+        Printer::setMenuMode(MENU_MODE_FULL_PID, currHeaterForSetup->heatManager == 1); // show PIDS only with PID controller selected
+        Printer::setMenuMode(MENU_MODE_DEADTIME, currHeaterForSetup->heatManager == 3);
         break;
     case UI_ACTION_EXTR_WATCH_PERIOD:
-        INCREMENT_MIN_MAX(Extruder::current->watchPeriod,1,0,999);
+        INCREMENT_MIN_MAX(Extruder::current->watchPeriod, 1, 0, 999);
         break;
 #if RETRACT_DURING_HEATUP
     case UI_ACTION_EXTR_WAIT_RETRACT_TEMP:
-        INCREMENT_MIN_MAX(Extruder::current->waitRetractTemperature,1,100,UI_SET_MAX_EXTRUDER_TEMP);
+        INCREMENT_MIN_MAX(Extruder::current->waitRetractTemperature, 1, 100, UI_SET_MAX_EXTRUDER_TEMP);
         break;
     case UI_ACTION_EXTR_WAIT_RETRACT_UNITS:
-        INCREMENT_MIN_MAX(Extruder::current->waitRetractUnits,1,0,99);
+        INCREMENT_MIN_MAX(Extruder::current->waitRetractUnits, 1, 0, 99);
         break;
 #endif
 #if USE_ADVANCE
 #if ENABLE_QUADRATIC_ADVANCE
     case UI_ACTION_ADVANCE_K:
-        INCREMENT_MIN_MAX(Extruder::current->advanceK,1,0,200);
+        INCREMENT_MIN_MAX(Extruder::current->advanceK, 1, 0, 200);
         break;
 #endif
     case UI_ACTION_ADVANCE_L:
-        INCREMENT_MIN_MAX(Extruder::current->advanceL,1,0,600);
+        INCREMENT_MIN_MAX(Extruder::current->advanceL, 1, 0, 600);
         break;
 #endif
     }
@@ -3368,11 +3571,11 @@ return response;
 }
 // Actions are events from user input. Depending on the current state, each
 // action can behave differently. Other actions do always the same like home, disable extruder etc.
-bool UIDisplay::executeAction(int action, bool allowMoves)
+int UIDisplay::executeAction(int action, bool allowMoves)
 {
-    bool ret = true;
+    int ret = 0;
 #if UI_HAS_KEYS == 1
-    bool skipBeep = false;
+//    bool skipBeep = false;
  //Davinci Specific,
     bool process_it=false;
     int previousaction=0;
@@ -3426,24 +3629,27 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
         case UI_ACTION_RIGHT_KEY:
         case UI_ACTION_OK:
             ret = okAction(allowMoves);
-            skipBeep = true; // Prevent double beep
+//            skipBeep = true; // Prevent double beep
             break;
         case UI_ACTION_BACK:
             popMenu(false);
             break;
         case UI_ACTION_NEXT:
-            ret = nextPreviousAction(1, allowMoves);
+            if(!nextPreviousAction(1, allowMoves))
+                ret = UI_ACTION_NEXT;
             break;
         case UI_ACTION_PREVIOUS:
-            ret = nextPreviousAction(-1, allowMoves);
+            if(!nextPreviousAction(-1, allowMoves))
+                ret = UI_ACTION_PREVIOUS;
             break;
         case UI_ACTION_MENU_UP:
             if(menuLevel > 0) menuLevel--;
             break;
         case UI_ACTION_TOP_MENU:
             menuLevel = 0;
+//Davinci Specific, reset all and fancy effect
             menuPos[0]=0;
-             activeAction = 0;
+            activeAction = 0;
             action=0;
             playsound(4000,240);
             playsound(5000,240);
@@ -3451,19 +3657,23 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
         case UI_ACTION_EMERGENCY_STOP:
             Commands::emergencyStop();
             break;
+
+//Davinci Specific, System Version
         case UI_ACTION_VERSION:
             pushMenu(&ui_page_version,true);
             break;
+
         case UI_ACTION_HOME_ALL:
             {
-            if(!allowMoves) return false;
+//Davinci Specific, Home menu with main dislay when doing action
+            if(!allowMoves) return UI_ACTION_HOME_ALL;
             int tmpmenu=menuLevel;
             int tmpmenupos=menuPos[menuLevel];
             UIMenu *tmpmen = (UIMenu*)menu[menuLevel];
             menuLevel=0;
             menuPos[0] = 0;
             refreshPage();
-            Printer::homeAxis(true,true,true);
+            Printer::homeAxis(true, true, true);
             Commands::printCurrentPosition(PSTR("UI_ACTION_HOMEALL "));
             menuLevel=tmpmenu;
             menuPos[menuLevel]=tmpmenupos;
@@ -3473,14 +3683,15 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
 			}
         case UI_ACTION_HOME_X:
             {
-            if(!allowMoves) return false;
+//Davinci Specific, Home menu with main dislay when doing action
+            if(!allowMoves) return UI_ACTION_HOME_X;
             int tmpmenu=menuLevel;
             int tmpmenupos=menuPos[menuLevel];
             UIMenu *tmpmen = (UIMenu*)menu[menuLevel];
             menuLevel=0;
             menuPos[0] = 0;
             refreshPage();
-            Printer::homeAxis(true,false,false);
+            Printer::homeAxis(true, false, false);
             Commands::printCurrentPosition(PSTR("UI_ACTION_HOME_X "));
             menuLevel=tmpmenu;
             menuPos[menuLevel]=tmpmenupos;
@@ -3490,14 +3701,15 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             }
         case UI_ACTION_HOME_Y:
             {
-            if(!allowMoves) return false;
+//Davinci Specific, Home menu with main dislay when doing action
+            if(!allowMoves) return UI_ACTION_HOME_Y;
             int tmpmenu=menuLevel;
             int tmpmenupos=menuPos[menuLevel];
             UIMenu *tmpmen = (UIMenu*)menu[menuLevel];
             menuLevel=0;
             menuPos[0] = 0;
             refreshPage();
-            Printer::homeAxis(false,true,false);
+            Printer::homeAxis(false, true, false);
             Commands::printCurrentPosition(PSTR("UI_ACTION_HOME_Y "));
             menuLevel=tmpmenu;
             menuPos[menuLevel]=tmpmenupos;
@@ -3507,14 +3719,15 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             }
         case UI_ACTION_HOME_Z:
             {
-            if(!allowMoves) return false;
+//Davinci Specific, Home menu with main dislay when doing action
+            if(!allowMoves) return UI_ACTION_HOME_Z;
             int tmpmenu=menuLevel;
             int tmpmenupos=menuPos[menuLevel];
             UIMenu *tmpmen = (UIMenu*)menu[menuLevel];
             menuLevel=0;
             menuPos[0] = 0;
             refreshPage();
-            Printer::homeAxis(false,false,true);
+            Printer::homeAxis(false, false, true);
             Commands::printCurrentPosition(PSTR("UI_ACTION_HOME_Z "));
             menuLevel=tmpmenu;
             menuPos[menuLevel]=tmpmenupos;
@@ -3523,7 +3736,7 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             break;
             }
         case UI_ACTION_SET_ORIGIN:
-            if(!allowMoves) return false;
+            if(!allowMoves) return UI_ACTION_SET_ORIGIN;
             Printer::setOrigin(0, 0, 0);
             break;
         case UI_ACTION_DEBUG_ECHO:
@@ -3558,6 +3771,7 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             TOGGLE(PS_ON_PIN);
 #endif
             break;
+//Davinci Specific, toogle easy/advanced mode for UI
     case UI_ACTION_DISPLAY_MODE:
         if (display_mode&ADVANCED_MODE)display_mode=EASY_MODE;
         else display_mode=ADVANCED_MODE;
@@ -3630,6 +3844,18 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             break;
 #endif
 //Davinci Specific
+case UI_ACTION_LOAD_FAILSAFE:
+            EEPROM::restoreEEPROMSettingsFromConfiguration();
+            Extruder::selectExtruderById(Extruder::current->id);
+            BEEP_LONG;
+                    //ask for user if he wants to save to eeprom after loading
+            if (confirmationDialog(UI_TEXT_DO_YOU ,UI_TEXT_STORE_TO_EEPROM,UI_TEXT_LOAD_FAILSAFE2))
+                    {
+                    executeAction(UI_ACTION_STORE_EEPROM,true);
+                    }
+            else UI_STATUS(UI_TEXT_LOAD_FAILSAFE);
+            //skipBeep = true;
+            break;
 #if ENABLE_CLEAN_NOZZLE==1
     case UI_ACTION_CLEAN_NOZZLE:
         {//be sure no issue
@@ -4929,6 +5155,8 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
 
         case UI_ACTION_PREHEAT_PLA:
             {
+//Davinci Specific, preheat menu with feedback need or not,
+//read temperature in EEPROM as more easy to change
             UI_STATUS(UI_TEXT_PREHEAT_PLA);
             bool allheat=true;
             if(extruder[0].tempControl.targetTemperatureC!=EEPROM::ftemp_ext_pla)allheat=false;
@@ -4959,6 +5187,8 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
         }
         case UI_ACTION_PREHEAT_ABS:
         {
+//Davinci Specific, preheat menu with feedback need or not,
+//read temperature in EEPROM as more easy to change
             UI_STATUS(UI_TEXT_PREHEAT_ABS);
             bool allheat=true;
             if(extruder[0].tempControl.targetTemperatureC!=EEPROM::ftemp_ext_abs)allheat=false;
@@ -4975,7 +5205,8 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             if(heatedBedController.targetTemperatureC!=EEPROM::ftemp_bed_abs)allheat=false;
             Extruder::setHeatedBedTemperature(EEPROM::ftemp_bed_abs);
 #endif
-            if (allheat)
+           //Davinci Specific, fancy sound if no need or to confirm it is done
+           if (allheat)
                 {
                 playsound(1000,140);
                 playsound(1000,140);
@@ -4989,22 +5220,24 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
         }
         case UI_ACTION_COOLDOWN:
         {
+//Davinci Specific, cooldown menu with feedback need or not
             UI_STATUS(UI_TEXT_COOLDOWN);
             bool alloff=true;
             if(extruder[0].tempControl.targetTemperatureC>0)alloff=false;
-             Extruder::setTemperatureForExtruder(0,0);
-#if NUM_EXTRUDER>1
+            Extruder::setTemperatureForExtruder(0, 0);
+#if NUM_EXTRUDER > 1
             if(extruder[1].tempControl.targetTemperatureC>0)alloff=false;
-            Extruder::setTemperatureForExtruder(0,1);
+            Extruder::setTemperatureForExtruder(0, 1);
 #endif
-#if NUM_EXTRUDER>2
-             if(extruder[2].tempControl.targetTemperatureC>0)alloff=false;
-             Extruder::setTemperatureForExtruder(0,2);
+#if NUM_EXTRUDER > 2
+            if(extruder[2].tempControl.targetTemperatureC>0)alloff=false;
+            Extruder::setTemperatureForExtruder(0, 2);
 #endif
-#if HAVE_HEATED_BED==true
-             if (heatedBedController.targetTemperatureC>0)alloff=false;
-             Extruder::setHeatedBedTemperature(0);
+#if HAVE_HEATED_BED
+            if (heatedBedController.targetTemperatureC>0)alloff=false;
+            Extruder::setHeatedBedTemperature(0);
 #endif
+           //Davinci Specific, fancy sound if no need or to confirm it is done
              if (alloff)
                 {
                 playsound(1000,140);
@@ -5020,7 +5253,9 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             break;
         }
         case UI_ACTION_HEATED_BED_OFF:
-#if HAVE_HEATED_BED==true
+#if HAVE_HEATED_BED
+           //Davinci Specific, fancy sound if no need or to confirm it is done
+          
             if (heatedBedController.targetTemperatureC==0)
                 {
                 playsound(1000,140);
@@ -5035,36 +5270,15 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
 #endif
             break;
         case UI_ACTION_EXTRUDER0_OFF:
-            if (extruder[0].tempControl.targetTemperatureC==0)
-                {
-                playsound(1000,140);
-                playsound(1000,140);
-                }
-            else
-                {
-                playsound(4000,240);
-                playsound(5000,240);
-                }
-            Extruder::setTemperatureForExtruder(0,0);
-            break;
+#if NUM_EXTRUDER > 1
         case UI_ACTION_EXTRUDER1_OFF:
-#if NUM_EXTRUDER>1
-             if (extruder[1].tempControl.targetTemperatureC==0)
-                {
-                playsound(1000,140);
-                playsound(1000,140);
-                }
-            else
-                {
-                playsound(4000,240);
-                playsound(5000,240);
-                }
-            Extruder::setTemperatureForExtruder(0,1);
 #endif
-            break;
-        case UI_ACTION_EXTRUDER2_OFF:
 #if NUM_EXTRUDER>2
-            if (extruder[2].tempControl.targetTemperatureC==0)
+        case UI_ACTION_EXTRUDER2_OFF:
+#endif
+           //Davinci Specific, fancy sound if no need or to confirm it is done
+
+            if (extruder[action - UI_ACTION_EXTRUDER0_OFF].tempControl.targetTemperatureC==0)
                 {
                 playsound(1000,140);
                 playsound(1000,140);
@@ -5074,8 +5288,7 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
                 playsound(4000,240);
                 playsound(5000,240);
                 }
-            Extruder::setTemperatureForExtruder(0,2);
-#endif
+            Extruder::setTemperatureForExtruder(0, action - UI_ACTION_EXTRUDER0_OFF);
             break;
         case UI_ACTION_DISABLE_STEPPER:
             Printer::kill(true);
@@ -5087,22 +5300,17 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             Printer::relativeExtruderCoordinateMode=!Printer::relativeExtruderCoordinateMode;
             break;
         case UI_ACTION_SELECT_EXTRUDER0:
-#if NUM_EXTRUDER > 0
-            if(!allowMoves) return false;
-            Extruder::selectExtruderById(0);
-#endif
-            break;
-        case UI_ACTION_SELECT_EXTRUDER1:
 #if NUM_EXTRUDER > 1
-            if(!allowMoves) return false;
-            Extruder::selectExtruderById(1);
+        case UI_ACTION_SELECT_EXTRUDER1:
 #endif
-            break;
-        case UI_ACTION_SELECT_EXTRUDER2:
 #if NUM_EXTRUDER > 2
-            if(!allowMoves) return false;
-            Extruder::selectExtruderById(2);
+        case UI_ACTION_SELECT_EXTRUDER2:
 #endif
+            if(!allowMoves) return action;
+            Extruder::selectExtruderById(action - UI_ACTION_SELECT_EXTRUDER0);
+            currHeaterForSetup = &(Extruder::current->tempControl);
+            Printer::setMenuMode(MENU_MODE_FULL_PID, currHeaterForSetup->heatManager == 1);
+            Printer::setMenuMode(MENU_MODE_DEADTIME, currHeaterForSetup->heatManager == 3);
             break;
 #if EEPROM_MODE != 0
         case UI_ACTION_STORE_EEPROM:
@@ -5117,18 +5325,6 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             pushMenu(&ui_menu_eeprom_loaded, false);
             BEEP_LONG;
 //            skipBeep = true;
-            break;
-         case UI_ACTION_LOAD_FAILSAFE:
-            EEPROM::restoreEEPROMSettingsFromConfiguration();
-            Extruder::selectExtruderById(Extruder::current->id);
-            BEEP_LONG;
-                    //ask for user if he wants to save to eeprom after loading
-            if (confirmationDialog(UI_TEXT_DO_YOU ,UI_TEXT_STORE_TO_EEPROM,UI_TEXT_LOAD_FAILSAFE2))
-                    {
-                    executeAction(UI_ACTION_STORE_EEPROM,true);
-                    }
-            else UI_STATUS(UI_TEXT_LOAD_FAILSAFE);
-            skipBeep = true;
             break;
 #endif
 #if SDSUPPORT
@@ -5149,20 +5345,22 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             }
             break;
         case UI_ACTION_SD_PAUSE:
+           //Davinci Specific, fancy sound to confirm it is done
 			playsound(3000,240);
-            playsound(4000,240);
+                        playsound(4000,240);
 			Com::printFLN(PSTR("Pause requested"));
             if(!allowMoves)
-                ret = false;
+                ret = UI_ACTION_SD_PAUSE;
             else
                 sd.pausePrint(true);
             break;
         case UI_ACTION_SD_CONTINUE:
-            if(!allowMoves) ret = false;
+            if(!allowMoves) ret = UI_ACTION_SD_CONTINUE;
             else sd.continuePrint(true);
             break;
         case UI_ACTION_SD_STOP:
             {
+           //Davinci Specific, Immediate stop
             //if(!allowMoves) ret = false;
             //else sd.stopPrint();
              playsound(400,400);
@@ -5208,19 +5406,13 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
 #endif
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
         case UI_ACTION_FAN_OFF:
-            Commands::setFanSpeed(0,false);
-            break;
         case UI_ACTION_FAN_25:
-            Commands::setFanSpeed(64,false);
-            break;
         case UI_ACTION_FAN_50:
-            Commands::setFanSpeed(128,false);
-            break;
         case UI_ACTION_FAN_75:
-            Commands::setFanSpeed(192,false);
+            Commands::setFanSpeed((action - UI_ACTION_FAN_OFF) * 64, false);
             break;
         case UI_ACTION_FAN_FULL:
-            Commands::setFanSpeed(255,false);
+            Commands::setFanSpeed(255, false);
             break;
 #endif
         case UI_ACTION_MENU_XPOS:
@@ -5302,36 +5494,24 @@ bool UIDisplay::executeAction(int action, bool allowMoves)
             break;
 #endif
         case UI_ACTION_X_UP:
-            if(!allowMoves) return false;
-            PrintLine::moveRelativeDistanceInStepsReal(Printer::axisStepsPerMM[X_AXIS],0,0,0,Printer::homingFeedrate[X_AXIS],false);
-            break;
         case UI_ACTION_X_DOWN:
-            if(!allowMoves) return false;
-            PrintLine::moveRelativeDistanceInStepsReal(-Printer::axisStepsPerMM[X_AXIS],0,0,0,Printer::homingFeedrate[X_AXIS],false);
+            if(!allowMoves) return action;
+            PrintLine::moveRelativeDistanceInStepsReal(((action == UI_ACTION_X_UP) ? 1.0 : -1.0) * Printer::axisStepsPerMM[X_AXIS], 0, 0, 0, Printer::homingFeedrate[X_AXIS], false);
             break;
         case UI_ACTION_Y_UP:
-            if(!allowMoves) return false;
-            PrintLine::moveRelativeDistanceInStepsReal(0,Printer::axisStepsPerMM[Y_AXIS],0,0,Printer::homingFeedrate[Y_AXIS],false);
-            break;
         case UI_ACTION_Y_DOWN:
-            if(!allowMoves) return false;
-            PrintLine::moveRelativeDistanceInStepsReal(0,-Printer::axisStepsPerMM[Y_AXIS],0,0,Printer::homingFeedrate[Y_AXIS],false);
+            if(!allowMoves) return action;
+            PrintLine::moveRelativeDistanceInStepsReal(0, ((action == UI_ACTION_Y_UP) ? 1.0 : -1.0) * Printer::axisStepsPerMM[Y_AXIS], 0, 0, Printer::homingFeedrate[Y_AXIS], false);
             break;
         case UI_ACTION_Z_UP:
-            if(!allowMoves) return false;
-            PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[Z_AXIS],false);
-            break;
         case UI_ACTION_Z_DOWN:
-            if(!allowMoves) return false;
-            PrintLine::moveRelativeDistanceInStepsReal(0,0,-Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[Z_AXIS],false);
+            if(!allowMoves) return action;
+            PrintLine::moveRelativeDistanceInStepsReal(0, 0, ((action == UI_ACTION_Z_UP) ? 1.0 : -1.0) * Printer::axisStepsPerMM[Z_AXIS], 0, Printer::homingFeedrate[Z_AXIS], false);
             break;
         case UI_ACTION_EXTRUDER_UP:
-            if(!allowMoves) return false;
-            PrintLine::moveRelativeDistanceInStepsReal(0,0,0,Printer::axisStepsPerMM[E_AXIS],UI_SET_EXTRUDER_FEEDRATE,false);
-            break;
         case UI_ACTION_EXTRUDER_DOWN:
-            if(!allowMoves) return false;
-            PrintLine::moveRelativeDistanceInStepsReal(0,0,0,-Printer::axisStepsPerMM[E_AXIS],UI_SET_EXTRUDER_FEEDRATE,false);
+            if(!allowMoves) return action;
+            PrintLine::moveRelativeDistanceInStepsReal(0, 0, 0, ((action == UI_ACTION_EXTRUDER_UP) ? 1.0 : -1.0) * Printer::axisStepsPerMM[E_AXIS], UI_SET_EXTRUDER_FEEDRATE, false);
             break;
         case UI_ACTION_EXTRUDER_TEMP_UP:
         {
@@ -5541,12 +5721,13 @@ void UIDisplay::slowAction(bool allowMoves)
         flags |= UI_FLAG_SLOW_ACTION_RUNNING;
         // Reset click encoder
         noInts.protect();
-        int8_t epos = encoderPos;
+        int16_t encodeChange = encoderPos;
         encoderPos = 0;
         noInts.unprotect();
-        if(epos) // encoder changed
+        int newAction;
+        if(encodeChange) // encoder changed
         {
-            nextPreviousAction(epos, allowMoves);
+            nextPreviousAction(encodeChange, allowMoves);
             BEEP_SHORT
             refresh = 1;
         }
@@ -5564,7 +5745,7 @@ void UIDisplay::slowAction(bool allowMoves)
             {
                 lastAction = lastButtonAction;
                 BEEP_SHORT
-                if(executeAction(lastAction, allowMoves))
+                if((newAction = executeAction(lastAction, allowMoves)) == 0)
                 {
                     nextRepeat = time + UI_KEY_FIRST_REPEAT;
                     repeatDuration = UI_KEY_FIRST_REPEAT;
@@ -5572,7 +5753,7 @@ void UIDisplay::slowAction(bool allowMoves)
                 else
                 {
                     if(delayedAction == 0)
-                        delayedAction = lastAction;
+                        delayedAction = newAction;
                 }
             }
         }
@@ -5580,10 +5761,10 @@ void UIDisplay::slowAction(bool allowMoves)
         {
             if(time - nextRepeat < 10000)
             {
-                if(!executeAction(lastAction, allowMoves)) {
-                    if(delayedAction == 0)
-                        delayedAction = lastAction;
-                }
+                if(delayedAction == 0)
+                    delayedAction = executeAction(lastAction, allowMoves);
+                else
+                    executeAction(lastAction, allowMoves);
                 repeatDuration -= UI_KEY_REDUCE_REPEAT;
                 if(repeatDuration < UI_KEY_MIN_REPEAT) repeatDuration = UI_KEY_MIN_REPEAT;
                 nextRepeat = time + repeatDuration;
@@ -5596,6 +5777,7 @@ void UIDisplay::slowAction(bool allowMoves)
     noInts.unprotect();
 #endif
 #if UI_AUTORETURN_TO_MENU_AFTER != 0
+//Davinci Specific, to be able to disable autoreturn
     if(menuLevel > 0 && ui_autoreturn_time < time && benable_autoreturn) // Go to top menu after x seoonds
     {
         lastSwitch = time;
@@ -5603,6 +5785,7 @@ void UIDisplay::slowAction(bool allowMoves)
         activeAction = 0;
     }
 #endif
+//Davinci Specific, powersave and light management
 #if UI_AUTOLIGHTOFF_AFTER!=0
 if (ui_autolightoff_time==-1) ui_autolightoff_time=HAL::timeInMilliseconds()+EEPROM::timepowersaving;
 if ((ui_autolightoff_time<time) && (EEPROM::timepowersaving>0) )

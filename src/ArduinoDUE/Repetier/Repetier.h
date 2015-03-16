@@ -345,6 +345,8 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define MENU_MODE_SD_PAUSED 4
 #define MENU_MODE_FAN_RUNNING 8
 #define MENU_MODE_PRINTING 16
+#define MENU_MODE_FULL_PID 32
+#define MENU_MODE_DEADTIME 64
 //Davinci Specific
 #define MENU_MODE_STOP_REQUESTED 1
 #define MENU_MODE_STOP_DONE  2

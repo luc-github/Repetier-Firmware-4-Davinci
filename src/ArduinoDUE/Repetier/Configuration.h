@@ -35,6 +35,9 @@
 #define VERSION_MINOR_DAY "02"
 #define VERSION_BUILD "1"
 
+//Davinci screen is not standard reprap it is WINSTAR 16x4
+#define WINSTAR_SCREEN 1
+
 //Decouple Test feature, do not disable it unless you know what you are doing!!!
 //if you have decouple issue it means you have hardware issue or bad air flow management!!!
 //this feature is a safety feature, if you disable it is dangerous!!!

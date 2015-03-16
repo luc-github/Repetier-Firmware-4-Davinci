@@ -1468,8 +1468,9 @@ class UIDisplay {
     void addStringOnOff(uint8_t);
     void addChar(const char c);
     void addGCode(GCode *code);
-    bool okAction(bool allowMoves);
-    bool nextPreviousAction(int8_t next, bool allowMoves);
+ 
+    int okAction(bool allowMoves);
+    bool nextPreviousAction(int16_t next, bool allowMoves);
     char statusMsg[21];
     int8_t encoderPos;
     int8_t encoderLast;
@@ -1481,7 +1482,7 @@ class UIDisplay {
     void printRowP(uint8_t r,PGM_P txt);
     void parse(const char *txt,bool ram); /// Parse output and write to printCols;
     void refreshPage();
-    bool executeAction(int action, bool allowMoves);
+    int executeAction(int action, bool allowMoves);
     void finishAction(int action);
     void slowAction(bool allowMoves);
     void fastAction();

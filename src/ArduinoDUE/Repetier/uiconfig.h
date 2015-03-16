@@ -73,6 +73,7 @@ works, use the ascii charset 0 as fallback. Not the nicest for everything but wo
 2 = Alternative charset with more european chars
 
 */
+//Davinci Specific, but not sure it is used
 #define UI_DISPLAY_CHARSET 1
 
 /** Select type of beeper
