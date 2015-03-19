@@ -5480,6 +5480,9 @@ case UI_ACTION_LOAD_FAILSAFE:
                     pushMenu(&ui_menu_sd_fileselector,false);
             }
             break;
+        case UI_ACTION_STOP_PRINTING_FROM_MENU:
+			//ask for confirmation
+            if (!confirmationDialog(UI_TEXT_PLEASE_CONFIRM ,UI_TEXT_STOP_PRINT,"",UI_CONFIRMATION_TYPE_YES_NO,false))break;
         case UI_ACTION_SD_STOP:
             {
            //Davinci Specific, Immediate stop

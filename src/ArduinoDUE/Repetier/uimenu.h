@@ -1431,20 +1431,20 @@ UI_MENU_SUBMENU(ui_menu_fan_sub,UI_TEXT_FANSPEED,ui_menu_fan, ADVANCED_MODE)
 
 // **** SD card menu
 #ifdef SDSUPPORT
-
-UI_MENU_HEADLINE(ui_menu_sd_askstop_head,UI_TEXT_STOP_PRINT, ALL_MODE)
-UI_MENU_ACTIONCOMMAND(ui_menu_sd_askstop_no,UI_TEXT_NO,UI_ACTION_BACK, ALL_MODE)
-UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_askstop_yes,      UI_TEXT_YES,     UI_ACTION_SD_STOP | UI_ACTION_TOPMENU,     MENU_MODE_SD_PRINTING, 0, ALL_MODE)
-#define UI_MENU_SD_ASKSTOP {&ui_menu_sd_askstop_head,&ui_menu_sd_askstop_no,&ui_menu_sd_askstop_yes}
-UI_MENU(ui_menu_sd_askstop,UI_MENU_SD_ASKSTOP,3);//BUG without this ; compilation crash
+//Menu using headline is buggy, we have already a Customizable Confirmation Dialog Box so le's use it instead 
+//UI_MENU_HEADLINE(ui_menu_sd_askstop_head,UI_TEXT_STOP_PRINT, ALL_MODE)
+//UI_MENU_ACTIONCOMMAND(ui_menu_sd_askstop_no,UI_TEXT_NO,UI_ACTION_BACK, ALL_MODE)
+//UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_askstop_yes,      UI_TEXT_YES,     UI_ACTION_SD_STOP | UI_ACTION_TOPMENU,     MENU_MODE_SD_PRINTING, 0, ALL_MODE)
+//#define UI_MENU_SD_ASKSTOP {&ui_menu_sd_askstop_head,&ui_menu_sd_askstop_no,&ui_menu_sd_askstop_yes}
+//UI_MENU(ui_menu_sd_askstop,UI_MENU_SD_ASKSTOP,3);//BUG without this ; compilation crash
 
 #define UI_MENU_SD_FILESELECTOR {&ui_menu_back}
 UI_MENU_FILESELECT(ui_menu_sd_fileselector,UI_MENU_SD_FILESELECTOR,1);//BUG without this ; compilation crash
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_printfile, UI_TEXT_PRINT_FILE,     UI_ACTION_SD_PRINT,    MENU_MODE_SD_MOUNTED,  MENU_MODE_SD_PRINTING|MENU_MODE_PRINTING, ALL_MODE)
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_pause,     UI_TEXT_PAUSE_PRINT,    UI_ACTION_SD_PAUSE,    MENU_MODE_SD_PRINTING, MENU_MODE_SD_PAUSED, ALL_MODE)
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_continue,  UI_TEXT_CONTINUE_PRINT, UI_ACTION_SD_CONTINUE, MENU_MODE_SD_PAUSED,   0, ALL_MODE)
-//UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_stop,      UI_TEXT_STOP_PRINT,     UI_ACTION_SD_STOP,     MENU_MODE_SD_PRINTING|MENU_MODE_PRINTING, 0, ALL_MODE)
-UI_MENU_SUBMENU_FILTER(ui_menu_sd_stop, UI_TEXT_STOP_PRINT,ui_menu_sd_askstop, MENU_MODE_SD_PRINTING, 0, ALL_MODE)
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_stop,      UI_TEXT_STOP_PRINT,     UI_ACTION_STOP_PRINTING_FROM_MENU,     MENU_MODE_SD_PRINTING|MENU_MODE_PRINTING, 0, ALL_MODE)
+//UI_MENU_SUBMENU_FILTER(ui_menu_sd_stop, UI_TEXT_STOP_PRINT,ui_menu_sd_askstop, MENU_MODE_SD_PRINTING, 0, ALL_MODE)
 #define SD_PRINTFILE_ENTRY &ui_menu_sd_printfile,
 #define SD_PRINTFILE_ENTRY_CNT 1
 #if defined(SDCARDDETECT) && SDCARDDETECT > -1
