@@ -32,7 +32,7 @@
 #define VERSION_MAJOR " 1"
 #define VERSION_MINOR_YEAR "15"
 #define VERSION_MINOR_MONTH "03"
-#define VERSION_MINOR_DAY "02"
+#define VERSION_MINOR_DAY "19"
 #define VERSION_BUILD "1"
 
 //Davinci screen is not standard reprap it is WINSTAR 16x4
