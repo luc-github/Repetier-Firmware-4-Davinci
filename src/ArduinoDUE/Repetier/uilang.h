@@ -156,7 +156,7 @@
 #define UI_TEXT_BED "Bed"
 #define UI_TEXT_BED_OFF "SwitchOff Bed %B7"
 #define UI_TEXT_LIGHT_OFF_AFTER "Light AutoOff "
-#define UI_TEXT_LIGHT_OFF_AFTER2 "Dis. After:%il","[s] 0=Off"
+#define UI_TEXT_LIGHT_OFF_AFTER2 "Dis. After:%il","[ms] 0=Off"
 #define UI_TEXT_WARNING_POS_X_UNKNOWN    "Real X unknown !"
 #define UI_TEXT_WARNING_POS_Y_UNKNOWN    "Real Y unknown !"
 #define UI_TEXT_WARNING_POS_Z_UNKNOWN    "Real Z unknown !"
