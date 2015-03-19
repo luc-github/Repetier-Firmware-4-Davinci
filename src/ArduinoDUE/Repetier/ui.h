@@ -296,6 +296,8 @@ What display type do you use?
 #define UI_ACTION_WIZARD_JAM_REHEAT      5001
 #define UI_ACTION_WIZARD_JAM_WAITHEAT    5002
 #define UI_ACTION_WIZARD_JAM_EOF         5003
+//Davinci Specific
+#define UI_ACTION_WIZARD_FILAMENTCHANGE_END  5500
 
 // Load basic language definition to make sure all values are defined
 #include "uilang.h"
@@ -418,31 +420,31 @@ extern const int8_t encoder_table[16] PROGMEM ;
    UIMenuEntry name ## _5 PROGMEM ={name ## _5txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
    UIMenuEntry name ## _6 PROGMEM ={name ## _6txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
    const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4,&name ## _5,&name ## _6};\
-   const UIMenu name PROGMEM = {0,0,6,name ## _entries};
+   const UIMenu name PROGMEM = {UI_MENU_TYPE_WIZARD,0,6,name ## _entries};
 #define UI_PAGE4(name,row1,row2,row3,row4,dmode) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);\
   UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
   UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
   UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
   UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
   const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
-  const UIMenu name PROGMEM = {0,0,4,name ## _entries};
+  const UIMenu name PROGMEM = {UI_MENU_TYPE_WIZARD,0,4,name ## _entries};
 #define UI_PAGE2(name,row1,row2,dmode) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);\
   UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
   UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
   const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
-  const UIMenu name PROGMEM = {0,0,2,name ## _entries};
+  const UIMenu name PROGMEM = {UI_MENU_TYPE_WIZARD,0,2,name ## _entries};
 #define UI_WIZARD4(name,action,row1,row2,row3,row4,dmode) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);\
   UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
   UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
   UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
   UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
   const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
-  const UIMenu name PROGMEM = {5,action,4,name ## _entries};
+  const UIMenu name PROGMEM = {UI_MENU_TYPE_WIZARD,action,4,name ## _entries};
 #define UI_WIZARD2(name,action,row1,row2,dmode) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);\
   UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
   UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
   const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
-  const UIMenu name PROGMEM = {5,action,2,name ## _entries};
+  const UIMenu name PROGMEM = {UI_MENU_TYPE_WIZARD,action,2,name ## _entries};
 #define UI_MENU_ACTION4C(name,action,rows,dmode) UI_MENU_ACTION4(name,action,rows,dmode)
 #define UI_MENU_ACTION2C(name,action,rows,dmode) UI_MENU_ACTION2(name,action,rows,dmode)
 #define UI_MENU_ACTION4(name,action,row1,row2,row3,row4,dmode) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);\
@@ -451,12 +453,12 @@ extern const int8_t encoder_table[16] PROGMEM ;
   UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
   UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
   const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
-  const UIMenu name PROGMEM = {3,action,4,name ## _entries};
+  const UIMenu name PROGMEM = {UI_MENU_TYPE_ACTION_MENU,action,4,name ## _entries};
 #define UI_MENU_ACTION2(name,action,row1,row2,dmode) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);\
   UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
   UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
   const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
-  const UIMenu name PROGMEM = {3,action,2,name ## _entries};
+  const UIMenu name PROGMEM = {UI_MENU_TYPE_ACTION_MENU,action,2,name ## _entries};
 #define UI_MENU_HEADLINE(name,text,dmode) UI_STRING(name ## _txt,text);UIMenuEntry name PROGMEM = {name ## _txt,UI_MENU_TYPE_INFO,0,0,0,dmode};
 #define UI_MENU_CHANGEACTION(name,row,action,dmode) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,UI_MENU_TYPE_MODIFICATION_MENU,action,0,0,dmode};
 #define UI_MENU_ACTIONCOMMAND(name,row,action,dmode) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,UI_MENU_TYPE_ACTION_MENU,action,0,0,dmode};

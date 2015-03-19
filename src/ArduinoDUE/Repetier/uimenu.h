@@ -885,14 +885,16 @@ UI_MENU_ACTION4C(ui_menu_heatextruder_page,UI_ACTION_DUMMY,UI_PAGE_HEATEXTRUDER,
 UI_MENU(ui_menu_load_unload,UI_MENU_LOAD_UNLOAD,UI_MENU_BACKCNT + LOADCNT);//BUG without this ; compilation crash 
 UI_MENU_SUBMENU(ui_menu_load_unload_entry, UI_TEXT_LOAD_UNLOAD, ui_menu_load_unload, ALL_MODE)
 
-#if FEATURE_RETRACTION
-UI_MENU_ACTIONCOMMAND(ui_menu_quick_changefil,UI_TEXT_CHANGE_FILAMENT,UI_ACTION_WIZARD_FILAMENTCHANGE, ALL_MODE)
-#define UI_CHANGE_FIL_CNT 1
-#define UI_CHANGE_FIL_ENT ,&ui_menu_quick_changefil
-#else
-#define UI_CHANGE_FIL_CNT 0
-#define UI_CHANGE_FIL_ENT
-#endif
+//Davinci Specific, use existing load/unload feature
+//#if FEATURE_RETRACTION
+//Use existing load/unload feature
+//UI_MENU_ACTIONCOMMAND(ui_menu_quick_changefil,UI_TEXT_CHANGE_FILAMENT,UI_ACTION_WIZARD_FILAMENTCHANGE, ALL_MODE)
+//#define UI_CHANGE_FIL_CNT 1
+//#define UI_CHANGE_FIL_ENT ,&ui_menu_quick_changefil
+//#else
+//#define UI_CHANGE_FIL_CNT 0
+//#define UI_CHANGE_FIL_ENT
+//#endif
 
 
 //Autolevel
@@ -1014,8 +1016,8 @@ UI_MENU_ACTIONCOMMAND(ui_menu_quick_cooldown,UI_TEXT_COOLDOWN_MENU,UI_ACTION_COO
 //disable steppers
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_quick_stopstepper,UI_TEXT_DISABLE_STEPPER,UI_ACTION_DISABLE_STEPPER,0,MENU_MODE_PRINTING, ALL_MODE)
 
-#define UI_MENU_MAINTENANCE  {UI_MENU_ADDCONDBACK &ui_menu_load_unload_entry UI_CHANGE_FIL_ENT , UI_MENU_AUTOLEVEL &ui_menu_manual_level, UI_CLEAN_NOZZLE_ENTRY UI_CLEAN_DRIPBOX_ENTRY &ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_cooldown,&ui_menu_quick_stopstepper}
-UI_MENU(ui_menu_maintenance,UI_MENU_MAINTENANCE,6+UI_MENU_AUTOLEVEL_CNT+UI_CLEAN_NOZZLE_COUNT+UI_CLEAN_DRIPBOX_COUNT+UI_MENU_BACKCNT + UI_CHANGE_FIL_CNT);//BUG without this ; compilation crash
+#define UI_MENU_MAINTENANCE  {UI_MENU_ADDCONDBACK &ui_menu_load_unload_entry, UI_MENU_AUTOLEVEL &ui_menu_manual_level, UI_CLEAN_NOZZLE_ENTRY UI_CLEAN_DRIPBOX_ENTRY &ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_cooldown,&ui_menu_quick_stopstepper}
+UI_MENU(ui_menu_maintenance,UI_MENU_MAINTENANCE,6+UI_MENU_AUTOLEVEL_CNT+UI_CLEAN_NOZZLE_COUNT+UI_CLEAN_DRIPBOX_COUNT+UI_MENU_BACKCNT);//BUG without this ; compilation crash
 UI_MENU_SUBMENU(ui_menu_maintenance_entry, UI_TEXT_MAINTENANCE, ui_menu_maintenance, ALL_MODE)
 
 // **** Positionning menu

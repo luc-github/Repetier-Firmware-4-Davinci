@@ -365,6 +365,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define MENU_MODE_STOP_REQUESTED 1
 #define MENU_MODE_STOP_DONE  2
 #define MENU_MODE_GCODE_PROCESSING  4
+#define MENU_MODE_WIZARD  8
 
 #include "HAL.h"
 #include "gcode.h"

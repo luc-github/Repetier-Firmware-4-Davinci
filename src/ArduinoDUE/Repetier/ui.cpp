@@ -1615,6 +1615,7 @@ void UIDisplay::parse(const char *txt,bool ram)
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
         case 'F': // FAN speed
             if(c2 == 's') addInt(floor(Printer::getFanSpeed() * 100 / 255 + 0.5f), 3);
+            if(c2=='i') addStringP((Printer::flag2 & PRINTER_FLAG2_IGNORE_M106_COMMAND) ? ui_selected : ui_unselected);
             break;
 #endif
         case 'f':
@@ -2615,14 +2616,14 @@ void UIDisplay::pushMenu(const UIMenu *men, bool refresh)
         refreshPage();
         return;
     }
-//Davinci Specific, readibility
+//Davinci Specific, readability
     if(menuLevel == UI_MENU_MAXLEVEL-1) return; // Max. depth reached. No more memory to down further.
     menuLevel++;
     menu[menuLevel] = men;
     menuTop[menuLevel] = menuPos[menuLevel] = 0;
 #if SDSUPPORT
     UIMenu *men2 = (UIMenu*)menu[menuLevel];
-//Davinci Specific, readibility
+//Davinci Specific, readability
     if(pgm_read_byte(&(men2->menuType)) == UI_MENU_TYPE_FILE_SELECTOR) 
     {
         // Menu is Open files list
@@ -2759,7 +2760,7 @@ int UIDisplay::okAction(bool allowMoves)
         finishAction(action);
         return executeAction(UI_ACTION_BACK, true);
     }
-     //Davinci Specific, readibility
+     //Davinci Specific, readability
     if(((mtype == UI_MENU_TYPE_SUBMENU) ||(mtype == UI_MENU_TYPE_MENU_WITH_STATUS) )&& entType == UI_MENU_TYPE_MODIFICATION_MENU)   // Modify action
     {
         if(activeAction)   // finish action
@@ -2777,27 +2778,28 @@ int UIDisplay::okAction(bool allowMoves)
         switch(action)
         {
 #if FEATURE_RETRACTION
-        case UI_ACTION_WIZARD_FILAMENTCHANGE: // filament change is finished
+//Davinci Specific, use another way to end wizard because based on Load/Unload Menu
+//          case UI_ACTION_WIZARD_FILAMENTCHANGE: // filament change is finished
 //            BEEP_SHORT;
-            popMenu(true);
-            Extruder::current->retractDistance(EEPROM_FLOAT(RETRACTION_LENGTH));
-#if FILAMENTCHANGE_REHOME
-#if Z_HOME_DIR > 0
-            Printer::homeAxis(true, true, FILAMENTCHANGE_REHOME == 2);
-#else
-            Printer::homeAxis(true, true, false);
-#endif
-#endif
-            Printer::GoToMemoryPosition(true, true, false, false, Printer::homingFeedrate[X_AXIS]);
-            Printer::GoToMemoryPosition(false, false, true, false, Printer::homingFeedrate[Z_AXIS]);
-            Extruder::current->retractDistance(-EEPROM_FLOAT(RETRACTION_LENGTH));
-            Printer::currentPositionSteps[E_AXIS] = Printer::popWizardVar().l; // set e to starting position
-            Printer::setBlockingReceive(false);
-#if EXTRUDER_JAM_CONTROL
-            Extruder::markAllUnjammed();
-#endif
-            Printer::setJamcontrolDisabled(false);
-            break;
+//            popMenu(true);
+//            Extruder::current->retractDistance(EEPROM_FLOAT(RETRACTION_LENGTH));
+//#if FILAMENTCHANGE_REHOME
+//#if Z_HOME_DIR > 0
+//            Printer::homeAxis(true, true, FILAMENTCHANGE_REHOME == 2);
+//#else
+//            Printer::homeAxis(true, true, false);
+//#endif
+//#endif
+//            Printer::GoToMemoryPosition(true, true, false, false, Printer::homingFeedrate[X_AXIS]);
+//            Printer::GoToMemoryPosition(false, false, true, false, Printer::homingFeedrate[Z_AXIS]);
+//            Extruder::current->retractDistance(-EEPROM_FLOAT(RETRACTION_LENGTH));
+//            Printer::currentPositionSteps[E_AXIS] = Printer::popWizardVar().l; // set e to starting position
+//            Printer::setBlockingReceive(false);
+//#if EXTRUDER_JAM_CONTROL
+//            Extruder::markAllUnjammed();
+//#endif
+//            Printer::setJamcontrolDisabled(false);
+//            break;
 #if EXTRUDER_JAM_CONTROL
         case UI_ACTION_WIZARD_JAM_REHEAT: // user saw problem and takes action
             popMenu(false);
@@ -2814,7 +2816,7 @@ int UIDisplay::okAction(bool allowMoves)
         }
         return 0;
     }
-  //Davinci Specific, readibility
+  //Davinci Specific, readability
     if(entType==UI_MENU_TYPE_MENU_WITH_STATUS || entType==UI_MENU_TYPE_SUBMENU)   // Enter submenu
     {
         pushMenu((UIMenu*)action, false);
@@ -2907,6 +2909,7 @@ void UIDisplay::adjustMenuPos()
 bool UIDisplay::isWizardActive()
 {
     UIMenu *men = (UIMenu*)menu[menuLevel];
+//Davinci Specific, readability
     return HAL::readFlashByte((PGM_P)&(men->menuType)) == UI_MENU_TYPE_WIZARD;
 }
 
@@ -3091,13 +3094,14 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
         PrintLine::moveRelativeDistanceInSteps(0,0,0,Printer::axisStepsPerMM[E_AXIS]*increment / Printer::extrusionFactor,UI_SET_EXTRUDER_FEEDRATE,true,false);
         Commands::printCurrentPosition(PSTR("UI_ACTION_EPOSITION "));
         break;
-#if FEATURE_RETRACTION
-    case UI_ACTION_WIZARD_FILAMENTCHANGE: // filament change is finished
-        Extruder::current->retractDistance(-increment);
-        Commands::waitUntilEndOfAllMoves();
-        Extruder::current->disableCurrentExtruderMotor();
-        break;
-#endif
+//Davinci Specific, Use Load/Unload menu instead       
+//#if FEATURE_RETRACTION
+//    case UI_ACTION_WIZARD_FILAMENTCHANGE: // filament change is finished
+//        Extruder::current->retractDistance(-increment);
+//        Commands::waitUntilEndOfAllMoves();
+//        Extruder::current->disableCurrentExtruderMotor();
+//        break;
+//#endif
     case UI_ACTION_ZPOSITION_NOTEST:
         if(!allowMoves) return false;
         Printer::setNoDestinationCheck(true);
@@ -3743,6 +3747,11 @@ int UIDisplay::executeAction(int action, bool allowMoves)
         case UI_ACTION_BACK:
             if(uid.isWizardActive()) break; // wizards can not exit before finished
             popMenu(false);
+            //Davinci Specific, use another way to do wizard
+            if( Printer::isMenuModeEx(MENU_MODE_WIZARD) && (menuLevel == 0))
+                {
+                  uid.executeAction(UI_ACTION_WIZARD_FILAMENTCHANGE_END, true);
+                }
             break;
         case UI_ACTION_NEXT:
             if(!nextPreviousAction(1, allowMoves))
@@ -3756,6 +3765,12 @@ int UIDisplay::executeAction(int action, bool allowMoves)
             if(menuLevel > 0) menuLevel--;
             break;
         case UI_ACTION_TOP_MENU:
+			//Davinci Specific, use another way to cancel wizard
+			if(uid.isWizardActive()) break; // wizards can not exit before finished
+            if( Printer::isMenuModeEx(MENU_MODE_WIZARD))
+				{
+				uid.executeAction(UI_ACTION_WIZARD_FILAMENTCHANGE_END, true);
+				}
             menuLevel = 0;
 //Davinci Specific, reset all and fancy effect
             menuPos[0]=0;
@@ -4566,16 +4581,17 @@ case UI_ACTION_LOAD_FAILSAFE:
         if(status==STATUS_OK)
             {
             UI_STATUS(UI_TEXT_PRINTER_READY);
-            menuLevel=tmpmenu;
-            menuPos[menuLevel]=tmpmenupos;
-            menu[menuLevel]=tmpmen;
             }
         else if (status==STATUS_CANCEL)
             {
+			menuLevel=0;
             while (Printer::isMenuMode(MENU_MODE_PRINTING))Commands::checkForPeriodicalActions(true);
             UI_STATUS(UI_TEXT_CANCELED);
-            menuLevel=0;
+            refreshPage();
             }
+        menuLevel=tmpmenu;
+        menuPos[menuLevel]=tmpmenupos;
+        menu[menuLevel]=tmpmen;
         refreshPage();
 //restore autoreturn function
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
@@ -5635,12 +5651,19 @@ case UI_ACTION_LOAD_FAILSAFE:
 #endif
 #if FEATURE_RETRACTION
         case UI_ACTION_WIZARD_FILAMENTCHANGE:
-        {
+        {    
+			//Davinci Specific, use wizard differently           
+			menuLevel = 0;
+            menuPos[0]=0;
+            benable_autoreturn=false;//desactivate
+            Printer::setMenuModeEx(MENU_MODE_WIZARD,true);
             Printer::setJamcontrolDisabled(true);
             Com::printFLN(PSTR("important: Filament change required!"));
             Printer::setBlockingReceive(true);
             BEEP_LONG;
-            pushMenu(&ui_wiz_filamentchange, true);
+            //Davinci Specific, use existing load/unload menu
+            //pushMenu(&ui_wiz_filamentchange, true);
+            pushMenu(&ui_menu_load_unload, true);
             Printer::resetWizardStack();
             Printer::pushWizardVar(Printer::currentPositionSteps[E_AXIS]);
             Printer::MemoryPosition();
@@ -5651,7 +5674,32 @@ case UI_ACTION_LOAD_FAILSAFE:
             Printer::moveToReal(FILAMENTCHANGE_X_POS, FILAMENTCHANGE_Y_POS, newZ, 0, Printer::homingFeedrate[X_AXIS]);
             Extruder::current->retractDistance(FILAMENTCHANGE_LONGRETRACT);
             Extruder::current->disableCurrentExtruderMotor();
+            //Davinci Specific, Fancy effect
+            playsound(1000,140);
+            playsound(3000,240);
         }
+        break;
+        //Davinci Specific, End the Filament change Wizard
+        case UI_ACTION_WIZARD_FILAMENTCHANGE_END:
+            Extruder::current->retractDistance(EEPROM_FLOAT(RETRACTION_LENGTH));
+#if FILAMENTCHANGE_REHOME
+#if Z_HOME_DIR > 0
+            Printer::homeAxis(true, true, FILAMENTCHANGE_REHOME == 2);
+#else
+            Printer::homeAxis(true, true, false);
+#endif
+#endif
+            Printer::GoToMemoryPosition(true, true, false, false, Printer::homingFeedrate[X_AXIS]);
+            Printer::GoToMemoryPosition(false, false, true, false, Printer::homingFeedrate[Z_AXIS]);
+            Extruder::current->retractDistance(-EEPROM_FLOAT(RETRACTION_LENGTH));
+            Printer::currentPositionSteps[E_AXIS] = Printer::popWizardVar().l; // set e to starting position
+            Printer::setBlockingReceive(false);
+#if EXTRUDER_JAM_CONTROL
+            Extruder::markAllUnjammed();
+#endif
+            Printer::setJamcontrolDisabled(false);
+            Printer::setMenuModeEx(MENU_MODE_WIZARD,false);
+            benable_autoreturn=true;//reactivate
         break;
 #if EXTRUDER_JAM_CONTROL
         case UI_ACTION_WIZARD_JAM_EOF:
