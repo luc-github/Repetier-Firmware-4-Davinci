@@ -36,32 +36,35 @@ void Commands::commandLoop()
 #ifdef DEBUG_PRINT
         debugWaitLoop = 1;
 #endif
-
-        GCode::readFromSerial();
-        GCode *code = GCode::peekCurrentCommand();
-        //UI_SLOW; // do longer timed user interface action
-        UI_MEDIUM; // do check encoder
-        if(code)
+        if(!Printer::isBlockingReceive())
         {
-#if SDSUPPORT
-            if(sd.savetosd)
+            GCode::readFromSerial();
+            GCode *code = GCode::peekCurrentCommand();
+            //UI_SLOW; // do longer timed user interface action
+            UI_MEDIUM; // do check encoder
+            if(code)
             {
-                if(!(code->hasM() && code->M == 29))   // still writing to file
+#if SDSUPPORT
+                if(sd.savetosd)
                 {
-                    sd.writeCommand(code);
+                    if(!(code->hasM() && code->M == 29))   // still writing to file
+                        sd.writeCommand(code);
+                    else
+                        sd.finishWrite();
+#if ECHO_ON_EXECUTE
+                    code->echoCommand();
+#endif
                 }
                 else
-                {
-                    sd.finishWrite();
-                }
-#if ECHO_ON_EXECUTE
-                code->echoCommand();
 #endif
+		//Davinci Specific, STOP requested
+	        if(!Printer::isMenuModeEx(MENU_MODE_STOP_REQUESTED))   Commands::executeGCode(code);
+                code->popCurrentCommand();
             }
-            else
-#endif
-             if(!Printer::isMenuModeEx(MENU_MODE_STOP_REQUESTED))   Commands::executeGCode(code);
-            code->popCurrentCommand();
+        }
+        else
+        {
+            UI_MEDIUM;
         }
         Printer::defaultLoopActions();
     }
@@ -69,6 +72,7 @@ void Commands::commandLoop()
 
 void Commands::checkForPeriodicalActions(bool allowNewMoves)
 {
+    Printer::handleInterruptEvent();
     if(!executePeriodical) return;
 //Davinci Specific, as we call a lot this function in subfunctions
 #if FEATURE_WATCHDOG
@@ -294,6 +298,10 @@ void Commands::changeFlowrateMultiply(int factor)
     if(factor < 25) factor = 25;
     if(factor > 200) factor = 200;
     Printer::extrudeMultiply = factor;
+    if(Extruder::current->diameter <= 0)
+        Printer::extrusionFactor = 0.01f * static_cast<float>(factor);
+    else
+        Printer::extrusionFactor = 0.01f * static_cast<float>(factor) * 4.0f / (Extruder::current->diameter * Extruder::current->diameter * 3.141592654f);
     Com::printFLN(Com::tFlowMultiply, factor);
 }
 
@@ -693,6 +701,22 @@ void Commands::processGCode(GCode *com)
             if (Printer::isMenuModeEx(MENU_MODE_STOP_REQUESTED))break;
         }
         break;
+#if FEATURE_RETRACTION && NUM_EXTRUDER > 0
+    case 10: // G10 S<1 = long retract, 0 = short retract = default> retracts filament accoridng to stored setting
+#if NUM_EXTRUDER > 1
+        Extruder::current->retract(true, com->hasS() && com->S > 0);
+#else
+        Extruder::current->retract(true, false);
+#endif
+        break;
+    case 11: // G11 S<1 = long retract, 0 = short retract = default> = Undo retraction according to stored setting
+#if NUM_EXTRUDER > 1
+        Extruder::current->retract(false, com->hasS() && com->S > 0);
+#else
+        Extruder::current->retract(false, false);
+#endif
+        break;
+#endif // FEATURE_RETRACTION
     case 20: // G20 Units to inches
         Printer::unitIsInches = 1;
         break;
@@ -710,8 +734,14 @@ void Commands::processGCode(GCode *com)
     }
     break;
 #if FEATURE_Z_PROBE
-    case 29: // G29 3 points, build average
+    case 29: // G29 3 points, build average or distortion compensation
     {
+#if DISTORTION_CORRECTION
+        float oldFeedrate = Printer::feedrate;
+        Printer::measureDistortion();
+        Printer::feedrate = oldFeedrate;
+#else
+        //Davinci Specific, Error management
         float zMin_save=Printer::zMin ;
         if(!Printer::isHomed()) Printer::homeAxis(true,true,true);
         //to avoid hit on plates low, down bed a little
@@ -723,7 +753,7 @@ void Commands::processGCode(GCode *com)
         Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         sum = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
         //Davinci Specific, better error management
-	if(sum<0)
+	if(sum < 0)
               {
                 Printer::zMin =  zMin_save;
                 Printer::setAutolevelActive(false);
@@ -748,7 +778,7 @@ void Commands::processGCode(GCode *com)
         Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         last = Printer::runZProbe(false,true);
         //Davinci Specific, better error management
-	if(last<0)
+	if(last < 0)
                 {
                 Printer::zMin =  zMin_save;
                 Printer::setAutolevelActive(false);
@@ -785,20 +815,24 @@ void Commands::processGCode(GCode *com)
             EEPROM::storeDataIntoEEPROM();
         Printer::updateCurrentPosition(true);
         printCurrentPosition(PSTR("G29 "));
+        GCode::executeFString(Com::tZProbeEndScript);
+        Printer::feedrate = oldFeedrate;
+#endif // DISTORTION_CORRECTION
     }
     break;
     case 30: // G30 single probe set Z0
     {
         uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
-        bool oldAutolevel = Printer::isAutolevelActive();
+        //bool oldAutolevel = Printer::isAutolevelActive();
+	//Davinci Specific, better error management
         if(!Printer::isHomed()) Printer::homeAxis(true,true,true);
             //to avoid hit on plates, low down bed a little
         if (Printer::currentPosition[Z_AXIS] < Printer::zMin+5) Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+5,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
-        Printer::setAutolevelActive(false);
+        //Printer::setAutolevelActive(false);
         Printer::runZProbe(p & 1,p & 2);
-        Printer::setAutolevelActive(oldAutolevel);
+        //Printer::setAutolevelActive(oldAutolevel);
         Printer::updateCurrentPosition(p & 1);
-        printCurrentPosition(PSTR("G30 "));
+        //printCurrentPosition(PSTR("G30 "));
         //Davinci Specific, better error management
 	if (Printer::realZPosition()<-200)Printer::homeAxis(false,false,true);
         //to avoid hit on plates
@@ -814,6 +848,16 @@ void Commands::processGCode(GCode *com)
 #if FEATURE_AUTOLEVEL
     case 32: // G32 Auto-Bed leveling
     {
+#if DISTORTION_CORRECTION
+        Printer::distortion.disable(true); // if level has changed, distortion is also invalid
+#endif
+#if DRIVE_SYSTEM == DELTA
+        // It is not possible to go to the edges at the top, also users try
+        // it often and wonder why the coordinate system is then wrong.
+        // For that reason we ensure a correct behaviour by code.
+        Printer::homeAxis(true, true, true);
+        Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance() + EEPROM::zProbeHeight(), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+#endif
 	//Davinci Specific, better error management
         float zMin_save=Printer::zMin;
          if(!Printer::isHomed()) Printer::homeAxis(true,true,true);
@@ -827,7 +871,7 @@ void Commands::processGCode(GCode *com)
         Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h1 = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
         //Davinci Specific, better error management
-	if(h1<0)
+	if(h1 < 0)
                 {
                 Printer::zMin =  zMin_save;
                 Printer::setAutolevelActive(true);
@@ -839,7 +883,7 @@ void Commands::processGCode(GCode *com)
         Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h2 = Printer::runZProbe(false,false);
         //Davinci Specific, better error management
-	if(h2<0)
+	if(h2 < 0)
               {
                 Printer::zMin =  zMin_save;
                 Printer::setAutolevelActive(true);
@@ -851,7 +895,7 @@ void Commands::processGCode(GCode *com)
         Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h3 = Printer::runZProbe(false,true);
         //Davinci Specific, better error management
-	if(h3<0)
+	if(h3 < 0)
               {
                 Printer::zMin =  zMin_save;
                 Printer::setAutolevelActive(true);
@@ -1195,8 +1239,7 @@ void Commands::processMCode(GCode *com)
         break;
 #endif
     case 42: //M42 -Change pin status via gcode
-	//Davinci Specific, better error management
-        if (com->hasS() && com->hasP() && com->S>=0 && com->S<=255)
+        if (com->hasP())
         {
             int pin_number = com->P;
             for(uint8_t i = 0; i < (uint8_t)sizeof(sensitive_pins); i++)
@@ -1209,11 +1252,29 @@ void Commands::processMCode(GCode *com)
             }
             if (pin_number > -1)
             {
-                pinMode(pin_number, OUTPUT);
-                digitalWrite(pin_number, com->S);
-                analogWrite(pin_number, com->S);
-                Com::printF(Com::tSetOutputSpace,pin_number);
-                Com::printFLN(Com::tSpaceToSpace,(int)com->S);
+                if(com->hasS())
+                {
+                    if(com->S >= 0 && com->S <= 255)
+                    {
+                        pinMode(pin_number, OUTPUT);
+                        digitalWrite(pin_number, com->S);
+                        analogWrite(pin_number, com->S);
+                        Com::printF(Com::tSetOutputSpace, pin_number);
+                        Com::printFLN(Com::tSpaceToSpace,(int)com->S);
+                    }
+                    else
+                        Com::printErrorFLN(PSTR("Illegal S value for M42"));
+                }
+                else
+                {
+                    pinMode(pin_number, INPUT_PULLUP);
+                    Com::printF(Com::tSpaceToSpace, pin_number);
+                    Com::printFLN(Com::tSpaceIsSpace, digitalRead(pin_number));
+                }
+            }
+            else
+            {
+                Com::printErrorFLN(PSTR("Pin can not be set by M42, may in invalid or in use. "));
             }
         }
         break;
@@ -1307,7 +1368,7 @@ void Commands::processMCode(GCode *com)
             Printer::cleanNozzle();
             break;
 #endif
-
+//Davinci Specific, Light management
 #if CASE_LIGHTS_PIN>=0
         case 101://light on
             #if UI_AUTOLIGHTOFF_AFTER!=0
@@ -1443,12 +1504,15 @@ void Commands::processMCode(GCode *com)
         for(fast8_t h = 0; h < NUM_TEMPERATURE_LOOPS; h++)
             tempController[h]->waitForTargetTemperature();
             //Davinci Specific, STOP request
-	if (Printer::isMenuModeEx(MENU_MODE_STOP_REQUESTED))break;
+         if (Printer::isMenuModeEx(MENU_MODE_STOP_REQUESTED))break;
         break;
 
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
     case 106: // M106 Fan On
+        if(!(Printer::flag2 & PRINTER_FLAG2_IGNORE_M106_COMMAND))
+        {
         setFanSpeed(com->hasS() ? com->S : 255, com->hasP());
+        }
         break;
     case 107: // M107 Fan Off
         setFanSpeed(0, com->hasP());
@@ -1539,6 +1603,30 @@ void Commands::processMCode(GCode *com)
 #endif
         break;
 #endif // MIXING_EXTRUDER
+    case 200: // M200 T<extruder> D<diameter>
+    {
+        uint8_t extruderId = Extruder::current->id;
+        if(com->hasT() && com->T < NUM_EXTRUDER)
+            extruderId = com->T;
+        float d = 0;
+        if(com->hasR())
+            d = com->R;
+        if(com->hasD())
+            d = com->D;
+        extruder[extruderId].diameter = d;
+        if(extruderId == Extruder::current->id)
+            changeFlowrateMultiply(Printer::extrudeMultiply);
+        if(d == 0)
+        {
+            Com::printFLN(PSTR("Disabled volumetric extrusion for extruder "),static_cast<int>(extruderId));
+        }
+        else
+        {
+            Com::printF(PSTR("Set volumetric extrusion for extruder "),static_cast<int>(extruderId));
+            Com::printFLN(PSTR(" to "),d);
+        }
+    }
+    break;
 #if RAMP_ACCELERATION
     case 201: // M201
         if(com->hasX()) Printer::maxAccelerationMMPerSquareSecond[X_AXIS] = com->X;
@@ -1605,6 +1693,10 @@ void Commands::processMCode(GCode *com)
 #else
         Com::printFLN(Com::tJerkColon,Printer::maxJerk);
 #endif
+        break;
+    case 209: // M209 S<0/1> Enable/disable autoretraction
+        if(com->hasS())
+            Printer::setAutoretract(com->S != 0);
         break;
     case 220: // M220 S<Feedrate multiplier in percent>
         changeFeedrateMultiply(com->getS(100));
@@ -1678,14 +1770,16 @@ void Commands::processMCode(GCode *com)
         Com::printInfoFLN(PSTR("Triggering watchdog. If activated, the printer will reset."));
         Printer::kill(false);
         HAL::delayMilliseconds(200); // write output, make sure heaters are off for safety
-        InterruptProtectedBlock noInts;
+#if !defined(__AVR_ATmega1280__) && !defined(__AVR_ATmega2560__)
+        InterruptProtectedBlock noInts;			// don't disable interrupts on mega2560 and mega1280 because of bootloader bug
+#endif
         while(1) {} // Endless loop
     }
 #else
     Com::printInfoFLN(PSTR("Watchdog feature was not compiled into this version!"));
 #endif
     break;
-
+    //Davinci Specific, to be able to disable BEEPER if pin exists
 #if defined(BEEPER_PIN) && BEEPER_PIN>=0 && FEATURE_BEEPER
     case 300: // M300
     {
@@ -1707,10 +1801,12 @@ void Commands::processMCode(GCode *com)
 #if defined(TEMP_PID) && NUM_TEMPERATURE_LOOPS>0
         int temp = 150;
         int cont = 0;
+        int cycles = 5;
         if(com->hasS()) temp = com->S;
         if(com->hasP()) cont = com->P;
+        if(com->hasR()) cycles = static_cast<int>(com->R);
         if(cont>=NUM_TEMPERATURE_LOOPS) cont = NUM_TEMPERATURE_LOOPS;
-        tempController[cont]->autotunePID(temp,cont,com->hasX());
+        tempController[cont]->autotunePID(temp,cont,cycles,com->hasX());
 #endif
     }
     break;
@@ -1740,6 +1836,21 @@ void Commands::processMCode(GCode *com)
         }
         break;
 #endif // FEATURE_AUTOLEVEL
+#if DISTORTION_CORRECTION
+    case 323: // M323 S0/S1 enable disable distortion correction P0 = not permanent, P1 = permanent = default
+        if(com->hasS())
+        {
+            if(com->S > 0)
+                Printer::distortion.enable(com->hasP() && com->P == 1);
+            else
+                Printer::distortion.disable(com->hasP() && com->P == 1);
+        }
+        else
+        {
+            Printer::distortion.reportStatus();
+        }
+        break;
+#endif // DISTORTION_CORRECTION
 #if FEATURE_SERVO
     case 340: // M340
         if(com->hasP() && com->P<4 && com->P>=0)
@@ -1747,7 +1858,10 @@ void Commands::processMCode(GCode *com)
             int s = 0;
             if(com->hasS())
                 s = com->S;
-            HAL::servoMicroseconds(com->P,s);
+            uint16_t r = 0;
+            if(com->hasR())    // auto off time in ms
+                r = com->R;
+            HAL::servoMicroseconds(com->P,s,r);
         }
         break;
 #endif // FEATURE_SERVO
@@ -1809,7 +1923,16 @@ void Commands::processMCode(GCode *com)
     case 502: // M502
         EEPROM::restoreEEPROMSettingsFromConfiguration();
         break;
-
+#if EXTRUDER_JAM_CONTROL
+#ifdef DEBUG_JAM
+    case 512:
+        Com::printFLN(PSTR("Jam signal:"),(int16_t)READ(EXT0_JAM_PIN));
+        break;
+#endif // DEBUG_JAM
+    case 513:
+        Extruder::markAllUnjammed();
+        break;
+#endif // EXTRUDER_JAM_CONTROL
 #ifdef DEBUG_QUEUE_MOVE
     case 533: // M533 Write move data
         Com::printF(PSTR("Buf:"),(int)PrintLine::linesCount);
@@ -1869,6 +1992,25 @@ void Commands::processMCode(GCode *com)
               if(com->hasS())
                   Com::printFLN(Com::tInfo,(int32_t)HAL::integerSqrt(com->S));
               break;*/
+#if FEATURE_CONTROLLER != NO_CONTROLLER && FEATURE_RETRACTION
+    case 600:
+        uid.executeAction(UI_ACTION_WIZARD_FILAMENTCHANGE, true);
+        break;
+#endif
+    case 601:
+        if(com->hasS() && com->S > 0)
+            Extruder::pauseExtruders();
+        else
+            Extruder::unpauseExtruders();
+        break;
+    case 602:
+        Commands::waitUntilEndOfAllMoves();
+        if(com->hasS()) Printer::setDebugJam(com->S > 0);
+        if(com->hasP()) Printer::setJamcontrolDisabled(com->P > 0);
+        break;
+    case 603:
+        Printer::setInterruptEvent(PRINTER_INTERRUPT_EVENT_JAM_DETECTED, true);
+        break;
     case 908: // M908 Control digital trimpot directly.
     {
 #if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL

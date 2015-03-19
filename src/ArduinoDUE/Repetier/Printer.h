@@ -19,6 +19,26 @@
     which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 */
 
+/**
+
+Coordinate system transformations:
+
+Level 1: G-code => Coordinates like send via g-codes.
+
+Level 2: Real coordinates => Coordinates corrected by coordinate shift via G92
+         currentPosition and lastCmdPos are from this level.
+Level 3: Transformed and shifter => Include extruder offset and bed rotation.
+         These variables are only stored temporary.
+
+Level 4: Step position => Level 3 converted into steps for motor position
+        currentPositionSteps and destinationPositionSteps are from this level.
+
+Level 5: Nonlinear motor step position, only for nonlinear drive systems
+         destinationDeltaSteps
+
+
+*/
+
 #ifndef PRINTER_H_INCLUDED
 #define PRINTER_H_INCLUDED
 
@@ -29,6 +49,25 @@ union floatLong
 #ifdef SUPPORT_64_BIT_MATH
     uint64_t L;
 #endif
+};
+
+union wizardVar {
+    float f;
+    int32_t l;
+    uint32_t ul;
+    int16_t i;
+    uint16_t ui;
+    int8_t c;
+    uint8_t uc;
+
+    wizardVar():i(0) {}
+    wizardVar(float _f):f(_f) {}
+    wizardVar(int32_t _f):l(_f) {}
+    wizardVar(uint32_t _f):ul(_f) {}
+    wizardVar(int16_t _f):i(_f) {}
+    wizardVar(uint16_t _f):ui(_f) {}
+    wizardVar(int8_t _f):c(_f) {}
+    wizardVar(uint8_t _f):uc(_f) {}
 };
 
 #define PRINTER_FLAG0_STEPPER_DISABLED      1
@@ -54,6 +93,15 @@ union floatLong
 #define PRINTER_FLAG2_DEBUG_JAM             16
 #define PRINTER_FLAG2_JAMCONTROL_DISABLED   32
 
+// List of possible interrupt events (1-255 allowed)
+#define PRINTER_INTERRUPT_EVENT_JAM_DETECTED 1
+#define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL0 2
+#define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL1 3
+#define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL2 4
+#define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL3 5
+#define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL4 6
+#define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL5 7
+
 //Davinci Specific       
 #define PRINTER_FLAG_HOME_X		1
 #define PRINTER_FLAG_HOME_Y		2
@@ -70,12 +118,43 @@ union floatLong
 #define towerBMinSteps Printer::yMinSteps
 #define towerCMinSteps Printer::zMinSteps
 
+#if DISTORTION_CORRECTION
+class Distortion
+{
+public:
+    Distortion();
+    void init();
+    void enable(bool permanent = true);
+    void disable(bool permanent = true);
+    void measure(void);
+    int32_t correct(int32_t x, int32_t y, int32_t z) const;
+    void updateDerived();
+    void reportStatus();
+private:
+    inline int matrixIndex(fast8_t x, fast8_t y) const;
+    inline int32_t getMatrix(int index) const;
+    inline void setMatrix(int32_t val, int index);
+    bool isCorner(fast8_t i, fast8_t j) const;
+    inline int32_t extrapolatePoint(fast8_t x1, fast8_t y1, fast8_t x2, fast8_t y2) const;
+    void extrapolateCorner(fast8_t x, fast8_t y, fast8_t dx, fast8_t dy);
+    void extrapolateCorners();
+    void resetCorrection();
+// attributes
+    int32_t step;
+    int32_t radiusCorrectionSteps;
+    int32_t zStart,zEnd;
+#if !DISTORTION_PERMANENT
+    int32_t matrix[DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS];
+#endif
+    bool enabled;
+};
+#endif //DISTORTION_CORRECTION
+
 class Printer
 {
 public:
 #if USE_ADVANCE
     static volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
-    static uint8_t minExtruderSpeed;            ///< Timer delay for start extruder speed
     static uint8_t maxExtruderSpeed;            ///< Timer delay for end extruder speed
     //static uint8_t extruderAccelerateDelay;     ///< delay between 2 speec increases
     static int advanceStepsSet;
@@ -120,6 +199,7 @@ public:
     #endif
     static int32_t destinationSteps[E_AXIS_ARRAY];         ///< Target position in steps.
     static float extrudeMultiplyError; ///< Accumulated error during extrusion
+    static float extrusionFactor; ///< Extrusion multiply factor
 #if NONLINEAR_SYSTEM
     static int32_t maxDeltaPositionSteps;
     static int32_t currentDeltaPositionSteps[E_TOWER_ARRAY];
@@ -173,6 +253,7 @@ public:
     static int feedrateMultiply;             ///< Multiplier for feedrate in percent (factor 1 = 100)
     static unsigned int extrudeMultiply;     ///< Flow multiplier in percdent (factor 1 = 100)
     static float maxJerk;                    ///< Maximum allowed jerk in mm/s
+    static uint8_t interruptEvent;           ///< Event generated in interrupts that should/could be handled in main thread
 #if DRIVE_SYSTEM!=DELTA
     static float maxZJerk;                   ///< Maximum allowed jerk in z direction in mm/s
 #endif
@@ -206,6 +287,16 @@ public:
 #ifdef DEBUG_REAL_JERK
     static float maxRealJerk;
 #endif
+    static fast8_t wizardStackPos;
+    static wizardVar wizardStack[WIZARD_STACK_SIZE];
+
+    static void handleInterruptEvent();
+
+    static inline void setInterruptEvent(uint8_t evt, bool highPriority) {
+        if(highPriority || interruptEvent == 0)
+            interruptEvent = evt;
+    }
+
     static inline void setMenuMode(uint8_t mode,bool on)
     {
         if(on)
@@ -218,6 +309,7 @@ public:
     {
         return (menuMode & mode)==mode;
     }
+
     //Davinci Specific, extra mode
 	static inline void setMenuModeEx(uint8_t mode,bool on)
     {
@@ -226,7 +318,6 @@ public:
         else
             menuModeEx &= ~mode;
     }
-
     static inline bool isMenuModeEx(uint8_t mode)
     {
         return (menuModeEx & mode)==mode;
@@ -280,10 +371,10 @@ public:
     static inline void disableXStepper()
     {
 #if (X_ENABLE_PIN > -1)
-        WRITE(X_ENABLE_PIN,!X_ENABLE_ON);
+        WRITE(X_ENABLE_PIN, !X_ENABLE_ON);
 #endif
 #if FEATURE_TWO_XSTEPPER && (X2_ENABLE_PIN > -1)
-        WRITE(X2_ENABLE_PIN,!X_ENABLE_ON);
+        WRITE(X2_ENABLE_PIN, !X_ENABLE_ON);
 #endif
     }
 
@@ -291,20 +382,20 @@ public:
     static inline void disableYStepper()
     {
 #if (Y_ENABLE_PIN > -1)
-        WRITE(Y_ENABLE_PIN,!Y_ENABLE_ON);
+        WRITE(Y_ENABLE_PIN, !Y_ENABLE_ON);
 #endif
 #if FEATURE_TWO_YSTEPPER && (Y2_ENABLE_PIN > -1)
-        WRITE(Y2_ENABLE_PIN,!Y_ENABLE_ON);
+        WRITE(Y2_ENABLE_PIN, !Y_ENABLE_ON);
 #endif
     }
     /** \brief Disable stepper motor for z direction. */
     static inline void disableZStepper()
     {
 #if (Z_ENABLE_PIN > -1)
-        WRITE(Z_ENABLE_PIN,!Z_ENABLE_ON);
+        WRITE(Z_ENABLE_PIN, !Z_ENABLE_ON);
 #endif
 #if FEATURE_TWO_ZSTEPPER && (Z2_ENABLE_PIN > -1)
-        WRITE(Z2_ENABLE_PIN,!Z_ENABLE_ON);
+        WRITE(Z2_ENABLE_PIN, !Z_ENABLE_ON);
 #endif
     }
 
@@ -315,7 +406,7 @@ public:
         WRITE(X_ENABLE_PIN, X_ENABLE_ON);
 #endif
 #if FEATURE_TWO_XSTEPPER && (X2_ENABLE_PIN > -1)
-        WRITE(X2_ENABLE_PIN,X_ENABLE_ON);
+        WRITE(X2_ENABLE_PIN, X_ENABLE_ON);
 #endif
     }
 
@@ -326,7 +417,7 @@ public:
         WRITE(Y_ENABLE_PIN, Y_ENABLE_ON);
 #endif
 #if FEATURE_TWO_YSTEPPER && (Y2_ENABLE_PIN > -1)
-        WRITE(Y2_ENABLE_PIN,Y_ENABLE_ON);
+        WRITE(Y2_ENABLE_PIN, Y_ENABLE_ON);
 #endif
     }
     /** \brief Enable stepper motor for z direction. */
@@ -336,7 +427,7 @@ public:
         WRITE(Z_ENABLE_PIN, Z_ENABLE_ON);
 #endif
 #if FEATURE_TWO_ZSTEPPER && (Z2_ENABLE_PIN > -1)
-        WRITE(Z2_ENABLE_PIN,Z_ENABLE_ON);
+        WRITE(Z2_ENABLE_PIN, Z_ENABLE_ON);
 #endif
     }
 
@@ -362,16 +453,16 @@ public:
     {
         if(positive)
         {
-            WRITE(Y_DIR_PIN,!INVERT_Y_DIR);
+            WRITE(Y_DIR_PIN, !INVERT_Y_DIR);
 #if FEATURE_TWO_YSTEPPER
-            WRITE(Y2_DIR_PIN,!INVERT_Y_DIR);
+            WRITE(Y2_DIR_PIN, !INVERT_Y_DIR);
 #endif
         }
         else
         {
-            WRITE(Y_DIR_PIN,INVERT_Y_DIR);
+            WRITE(Y_DIR_PIN, INVERT_Y_DIR);
 #if FEATURE_TWO_YSTEPPER
-            WRITE(Y2_DIR_PIN,INVERT_Y_DIR);
+            WRITE(Y2_DIR_PIN, INVERT_Y_DIR);
 #endif
         }
     }
@@ -379,33 +470,33 @@ public:
     {
         if(positive)
         {
-            WRITE(Z_DIR_PIN,!INVERT_Z_DIR);
+            WRITE(Z_DIR_PIN, !INVERT_Z_DIR);
 #if FEATURE_TWO_ZSTEPPER
-            WRITE(Z2_DIR_PIN,!INVERT_Z_DIR);
+            WRITE(Z2_DIR_PIN, !INVERT_Z_DIR);
 #endif
         }
         else
         {
-            WRITE(Z_DIR_PIN,INVERT_Z_DIR);
+            WRITE(Z_DIR_PIN, INVERT_Z_DIR);
 #if FEATURE_TWO_ZSTEPPER
-            WRITE(Z2_DIR_PIN,INVERT_Z_DIR);
+            WRITE(Z2_DIR_PIN, INVERT_Z_DIR);
 #endif
         }
     }
 
     static inline bool getZDirection()
     {
-        return ((READ(Z_DIR_PIN)!=0) ^ INVERT_Z_DIR);
+        return ((READ(Z_DIR_PIN) != 0) ^ INVERT_Z_DIR);
     }
 
     static inline bool getYDirection()
     {
-        return((READ(Y_DIR_PIN)!=0) ^ INVERT_Y_DIR);
+        return((READ(Y_DIR_PIN) != 0) ^ INVERT_Y_DIR);
     }
 
     static inline bool getXDirection()
     {
-        return((READ(X_DIR_PIN)!=0) ^ INVERT_X_DIR);
+        return((READ(X_DIR_PIN) != 0) ^ INVERT_X_DIR);
     }
 
     static inline uint8_t isLargeMachine()
@@ -433,6 +524,7 @@ public:
 	//Davinci Specific, every axis has a home flag       
         return flaghome & (PRINTER_FLAG_HOME_X|PRINTER_FLAG_HOME_Y|PRINTER_FLAG_HOME_Z);
     }
+
     //Davinci Specific, every axis has a home flag       
     static inline uint8_t isXHomed()
     {
@@ -536,8 +628,59 @@ public:
     static inline void setColdExtrusionAllowed(uint8_t b)
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_ALLOW_COLD_EXTRUSION : flag1 & ~PRINTER_FLAG1_ALLOW_COLD_EXTRUSION);
+        if(b)
+            Com::printFLN(PSTR("Cold extrusion allowed"));
+        else
+            Com::printFLN(PSTR("Cold extrusion disallowed"));
     }
 
+    static inline uint8_t isBlockingReceive()
+    {
+        return flag2 & PRINTER_FLAG2_BLOCK_RECEIVING;
+    }
+
+    static inline void setBlockingReceive(uint8_t b)
+    {
+        flag2 = (b ? flag2 | PRINTER_FLAG2_BLOCK_RECEIVING : flag2 & ~PRINTER_FLAG2_BLOCK_RECEIVING);
+    }
+
+    static inline uint8_t isAutoretract()
+    {
+        return flag2 & PRINTER_FLAG2_AUTORETRACT;
+    }
+
+    static inline void setAutoretract(uint8_t b)
+    {
+        flag2 = (b ? flag2 | PRINTER_FLAG2_AUTORETRACT : flag2 & ~PRINTER_FLAG2_AUTORETRACT);
+        Com::printFLN(PSTR("Autoretract:"),b);
+    }
+
+    static inline uint8_t isDebugJam()
+    {
+        return (flag2 & PRINTER_FLAG2_DEBUG_JAM) != 0;
+    }
+
+    static inline uint8_t isDebugJamOrDisabled()
+    {
+        return (flag2 & (PRINTER_FLAG2_DEBUG_JAM | PRINTER_FLAG2_JAMCONTROL_DISABLED)) != 0;
+    }
+
+    static inline void setDebugJam(uint8_t b)
+    {
+        flag2 = (b ? flag2 | PRINTER_FLAG2_DEBUG_JAM : flag2 & ~PRINTER_FLAG2_DEBUG_JAM);
+        Com::printFLN(PSTR("Jam debugging:"),b);
+    }
+
+    static inline uint8_t isJamcontrolDisabled()
+    {
+        return (flag2 & PRINTER_FLAG2_JAMCONTROL_DISABLED) != 0;
+    }
+
+    static inline void setJamcontrolDisabled(uint8_t b)
+    {
+        flag2 = (b ? flag2 | PRINTER_FLAG2_JAMCONTROL_DISABLED : flag2 & ~PRINTER_FLAG2_JAMCONTROL_DISABLED);
+        Com::printFLN(PSTR("Jam control disabled:"),b);
+    }
 
     static inline void toggleAnimation()
     {
@@ -862,9 +1005,17 @@ public:
     static void resetTransformationMatrix(bool silent);
     static void buildTransformationMatrix(float h1,float h2,float h3);
 #endif
+#if DISTORTION_CORRECTION
+    static void measureDistortion(void);
+    static Distortion distortion;
+#endif
     static void MemoryPosition();
     static void GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed);
     static void zBabystep();
+
+    static inline void resetWizardStack() {wizardStackPos = 0;}
+    static inline void pushWizardVar(wizardVar v) {wizardStack[wizardStackPos++] = v;}
+    static inline wizardVar popWizardVar() {return wizardStack[--wizardStackPos];}
     static void showConfiguration();
     static void setCaseLight(bool on);
     static void reportCaseLightStatus();

@@ -39,6 +39,8 @@ Implemented Codes
 - G0  -> G1
 - G1  - Coordinated Movement X Y Z E, S1 disables boundary check, S0 enables it
 - G4  - Dwell S<seconds> or P<milliseconds>
+- G10 S<1 = long retract, 0 = short retract = default> retracts filament accoridng to stored setting
+- G11 S<1 = long retract, 0 = short retract = default> = Undo retraction according to stored setting
 - G20 - Units for G0/G1 are inches.
 - G21 - Units for G0/G1 are mm.
 - G28 - Home all axis or named axis.
@@ -98,6 +100,7 @@ Custom M Codes
 - M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive
 - M164 S<virtNum> P<0 = dont store eeprom,1 = store to eeprom> - Store weights as virtual extruder S
 - M190 - Wait for bed current temp to reach target temp.
+- M200 T<extruder> D<diameter> - Use volumetric extrusion. Set D0 or omit D to disable volumetric extr. Omit T for current extruder.
 - M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
 - M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
 - M203 - Set temperture monitor to Sx
@@ -105,6 +108,7 @@ Custom M Codes
 - M205 - Output EEPROM settings
 - M206 - Set EEPROM value
 - M207 X<XY jerk> Z<Z Jerk> E<ExtruderJerk> - Changes current jerk values, but do not store them in eeprom.
+- M209 S<0/1> - Enable/disable autoretraction
 - M220 S<Feedrate multiplier in percent> - Increase/decrease given feedrate
 - M221 S<Extrusion flow multiplier in percent> - Increase/decrease given flow rate
 - M231 S<OPS_MODE> X<Min_Distance> Y<Retract> Z<Backlash> F<ReatrctMove> - Set OPS parameter
@@ -115,11 +119,12 @@ Custom M Codes
 - M281 Test if watchdog is running and working.
 - M300 S<Frequency> P<DurationMillis> play frequency
 - M302 S<0 or 1> - allow cold extrusion. Without S parameter it will allow. S1 will disallow.
-- M303 P<extruder/bed> S<printTemerature> X0 - Autodetect pid values. Use P<NUM_EXTRUDER> for heated bed. X0 saves result in EEPROM.
+- M303 P<extruder/bed> S<printTemerature> X0 R<Repetitions>- Autodetect pid values. Use P<NUM_EXTRUDER> for heated bed. X0 saves result in EEPROM. R is number of cycles.
 - M320 - Activate autolevel
 - M321 - Deactivate autolevel
 - M322 - Reset autolevel matrix
-- M340 P<servoId> S<pulseInUS> : servoID = 0..3, Servos are controlled by a pulse with normally between 500 and 2500 with 1500ms in center position. 0 turns servo off.
+- M323 S0/S1 enable disable distortion correction P0 = not permanent, P1 = permanent = default
+- M340 P<servoId> S<pulseInUS> R<autoOffIn ms>: servoID = 0..3, Servos are controlled by a pulse with normally between 500 and 2500 with 1500ms in center position. 0 turns servo off. R allows automatic disabling after a while.
 - M350 S<mstepsAll> X<mstepsX> Y<mstepsY> Z<mstepsZ> E<mstepsE0> P<mstespE1> : Set microstepping on RAMBO board
 - M355 S<0/1> - Turn case light on/off, no S = report status, (no eeprom saving) and reset autoturn off time if activated
 - M360 - show configuration
@@ -129,6 +134,10 @@ Custom M Codes
 - M500 Store settings to EEPROM
 - M501 Load settings from EEPROM
 - M502 Reset settings to the one in configuration.h. Does not store values in EEPROM!
+- M513 - Clear all jam marker.
+- M600 Change filament
+- M601 S<1/0> - Pause extruders. Paused extrudes disable heaters and motor. Unpausing reheats extruder to old temp.
+- M602 S<1/0> P<1/0>- Debug jam control (S) Disable jam control (P). If enabled it will log signal changes and will not trigger jam errors!
 - M908 P<address> S<value> : Set stepper current for digipot (RAMBO board)
 */
 

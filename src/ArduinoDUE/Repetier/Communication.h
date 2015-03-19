@@ -129,7 +129,8 @@ FSTRINGVAR(tCommaSpeedEqual)
 FSTRINGVAR(tLinearLColon)
 FSTRINGVAR(tQuadraticKColon)
 FSTRINGVAR(tEEPROMUpdated)
-
+FSTRINGVAR(tExtruderJam)
+FSTRINGVAR(tFilamentSlipping)
 #if DRIVE_SYSTEM == DELTA
 FSTRINGVAR(tMeasurementReset)
 FSTRINGVAR(tMeasureDeltaSteps)
@@ -384,6 +385,20 @@ FSTRINGVAR(tSDErrorCode)
 #if FEATURE_DECOUPLE_TEST
 FSTRINGVAR(tHeaterDecoupled)
 FSTRINGVAR(tHeaterDecoupledWarning)
+#endif //FEATURE_DECOUPLE_TEST
+#if DISTORTION_CORRECTION
+FSTRINGVAR(tZCorrectionEnabled)
+FSTRINGVAR(tZCorrectionDisabled)
+#endif
+#if FEATURE_RETRACTION
+FSTRINGVAR(tEPRAutoretractEnabled)
+FSTRINGVAR(tEPRRetractionLength)
+FSTRINGVAR(tEPRRetractionLongLength)
+FSTRINGVAR(tEPRRetractionSpeed)
+FSTRINGVAR(tEPRRetractionZLift)
+FSTRINGVAR(tEPRRetractionUndoExtraLength)
+FSTRINGVAR(tEPRRetractionUndoExtraLongLength)
+FSTRINGVAR(tEPRRetractionUndoSpeed)
 #endif
 FSTRINGVAR(tConfig)
 FSTRINGVAR(tExtrDot)

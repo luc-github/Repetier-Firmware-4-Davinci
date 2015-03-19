@@ -437,6 +437,7 @@ public:
     {
         linesCount = 0;
         linesPos = linesWritePos;
+        //Davinci Specific, no immediate no printing to avoid to many refresh
         //Printer::setMenuMode(MENU_MODE_PRINTING,false);
     }
     // Only called from bresenham -> inside interrupt handle
@@ -646,6 +647,8 @@ public:
         nlFlag = false;
 #endif
         HAL::forbidInterrupts();
+       //Davinci Specific, no immediate no printing to avoid to many refresh
+       //be sure linescount is not 0 before decremente
        if (linesCount>0) --linesCount;
        // if(!linesCount)
        //     Printer::setMenuMode(MENU_MODE_PRINTING,false);
@@ -689,13 +692,13 @@ public:
     }
 #if NONLINEAR_SYSTEM
     static uint8_t queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint8_t softEndstop);
-    static inline void queueEMove(long e_diff,uint8_t check_endstops,uint8_t pathOptimize);
+    static inline void queueEMove(int32_t e_diff,uint8_t check_endstops,uint8_t pathOptimize);
     inline uint16_t calculateDeltaSubSegments(uint8_t softEndstop);
-    static inline void calculateDirectionAndDelta(long difference[], flag8_t *dir, long delta[]);
+    static inline void calculateDirectionAndDelta(int32_t difference[], flag8_t *dir, int32_t delta[]);
     static inline uint8_t calculateDistance(float axis_diff[], uint8_t dir, float *distance);
 #if SOFTWARE_LEVELING && DRIVE_SYSTEM == DELTA
-    static void calculatePlane(long factors[], long p1[], long p2[], long p3[]);
-    static float calcZOffset(long factors[], long pointX, long pointY);
+    static void calculatePlane(int32_t factors[], int32_t p1[], int32_t p2[], int32_t p3[]);
+    static float calcZOffset(int32_t factors[], int32_t pointX, int32_t pointY);
 #endif
 #endif
 };

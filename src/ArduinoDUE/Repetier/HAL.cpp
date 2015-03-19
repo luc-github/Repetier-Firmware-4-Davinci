@@ -631,11 +631,13 @@ unsigned char HAL::i2cReadNak(void)
 #if defined (__SAM3X8E__)
 unsigned int HAL::servoTimings[4] = {0,0,0,0};
 static uint8_t servoIndex = 0;
-void HAL::servoMicroseconds(uint8_t servo,int microsec) {
+unsigned int servoAutoOff[4] = {0,0,0,0}; 
+void HAL::servoMicroseconds(uint8_t servo,int microsec, uint16_t autoOff) {
     if(microsec < 500) microsec = 0;
     if(microsec > 2500) microsec = 2500;
     servoTimings[servo] = (unsigned int)(((F_CPU_TRUE / SERVO_PRESCALE) / 
                                          1000000) * microsec);
+    servoAutoOff[servo] = (microsec) ? (autoOff / 20) : 0; 
 }
  
 
@@ -719,6 +721,15 @@ void SERVO_COMPA_VECTOR ()
       TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, 
                SERVO5000US - interval);
     break;
+  }
+  if(servoIndex & 1)
+  {
+     uint8_t nr = servoIndex >> 1;
+	   if(servoAutoOff[nr])
+	   {
+		    servoAutoOff[nr]--;
+		    if(servoAutoOff[nr] == 0) HAL::servoTimings[nr] = 0;
+	   }
   }
   servoIndex++;
   if(servoIndex > 7) servoIndex = 0;

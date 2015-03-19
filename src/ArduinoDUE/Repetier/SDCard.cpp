@@ -105,7 +105,6 @@ void SDCard::initsd()
 
 	}
 #endif
-#endif
 }
 #ifdef SDEEPROM
 bool SDCard::syncEeprom() {
@@ -131,6 +130,7 @@ void SDCard::autoPrint() {
     {
         startPrint();
     }
+#endif
 }
 
 void SDCard::mount()
@@ -214,10 +214,17 @@ void SDCard::continuePrint(bool intern)
 void SDCard::stopPrint()
 {
     if(!sd.sdactive) return;
+    if(sdmode)
+        Com::printFLN(PSTR("SD print stopped by user."));
     sdmode = 0;
     Printer::setMenuMode(MENU_MODE_SD_PRINTING,false);
     Printer::setMenuMode(MENU_MODE_SD_PAUSED,false);
-    Com::printFLN(PSTR("SD print stopped by user."));
+    //Davinci Specific, STOP is handled in UI.cpp
+    //GCode::executeFString(PSTR(SD_RUN_ON_STOP));
+    //if(SD_STOP_HEATER_AND_MOTORS_ON_STOP) {
+    //    Commands::waitUntilEndOfAllMoves();
+    //    Printer::kill(true);
+    //}
 }
 
 void SDCard::writeCommand(GCode *code)

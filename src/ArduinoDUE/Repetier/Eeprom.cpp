@@ -80,7 +80,11 @@ void EEPROM::update(GCode *com)
     if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
         HAL::eprSetByte(EPR_INTEGRITY_BYTE, newcheck);
     readDataFromEEPROM();
+#if MIXING_EXTRUDER
+    Extruder::selectExtruderById(Extruder::activeMixingExtruder);
+#else
     Extruder::selectExtruderById(Extruder::current->id);
+#endif
 #else
     Com::printErrorF(Com::tNoEEPROMSupport);
 #endif
@@ -342,7 +346,11 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 #endif
     initalizeUncached();
     Printer::updateDerivedParameter();
+#if MIXING_EXTRUDER
+    Extruder::selectExtruderById(Extruder::activeMixingExtruder);
+#else
     Extruder::selectExtruderById(Extruder::current->id);
+#endif
     Extruder::initHeatedBed();
     Com::printInfoFLN(Com::tEPRConfigResetDefaults);
 #else
@@ -579,6 +587,17 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_AXISCOMP_TANXY,AXISCOMP_TANXY);
     HAL::eprSetFloat(EPR_AXISCOMP_TANYZ,AXISCOMP_TANYZ);
     HAL::eprSetFloat(EPR_AXISCOMP_TANXZ,AXISCOMP_TANXZ);
+    HAL::eprSetByte(EPR_DISTORTION_CORRECTION_ENABLED,0);
+
+    HAL::eprSetFloat(EPR_RETRACTION_LENGTH,RETRACTION_LENGTH);
+    HAL::eprSetFloat(EPR_RETRACTION_LONG_LENGTH,RETRACTION_LONG_LENGTH);
+    HAL::eprSetFloat(EPR_RETRACTION_SPEED,RETRACTION_SPEED);
+    HAL::eprSetFloat(EPR_RETRACTION_Z_LIFT,RETRACTION_Z_LIFT);
+    HAL::eprSetFloat(EPR_RETRACTION_UNDO_EXTRA_LENGTH,RETRACTION_UNDO_EXTRA_LENGTH);
+    HAL::eprSetFloat(EPR_RETRACTION_UNDO_EXTRA_LONG_LENGTH,RETRACTION_UNDO_EXTRA_LONG_LENGTH);
+    HAL::eprSetFloat(EPR_RETRACTION_UNDO_SPEED,RETRACTION_UNDO_SPEED);
+    HAL::eprSetByte(EPR_AUTORETRACT_ENABLED,AUTORETRACT_ENABLED);
+
 }
 
 void EEPROM::readDataFromEEPROM()
@@ -801,6 +820,21 @@ EEPROM::ftemp_bed_abs= HAL::eprGetFloat(EPR_TEMP_BED_ABS);
             HAL::eprSetFloat(EPR_AXISCOMP_TANXY,AXISCOMP_TANXY);
             HAL::eprSetFloat(EPR_AXISCOMP_TANYZ,AXISCOMP_TANYZ);
             HAL::eprSetFloat(EPR_AXISCOMP_TANXZ,AXISCOMP_TANXZ);
+        }
+        if(version < 11)
+        {
+            HAL::eprSetByte(EPR_DISTORTION_CORRECTION_ENABLED, 0);
+        }
+        if(version < 12)
+        {
+            HAL::eprSetFloat(EPR_RETRACTION_LENGTH,RETRACTION_LENGTH);
+            HAL::eprSetFloat(EPR_RETRACTION_LONG_LENGTH,RETRACTION_LONG_LENGTH);
+            HAL::eprSetFloat(EPR_RETRACTION_SPEED,RETRACTION_SPEED);
+            HAL::eprSetFloat(EPR_RETRACTION_Z_LIFT,RETRACTION_Z_LIFT);
+            HAL::eprSetFloat(EPR_RETRACTION_UNDO_EXTRA_LENGTH,RETRACTION_UNDO_EXTRA_LENGTH);
+            HAL::eprSetFloat(EPR_RETRACTION_UNDO_EXTRA_LONG_LENGTH,RETRACTION_UNDO_EXTRA_LONG_LENGTH);
+            HAL::eprSetFloat(EPR_RETRACTION_UNDO_SPEED,RETRACTION_UNDO_SPEED);
+            HAL::eprSetByte(EPR_AUTORETRACT_ENABLED,AUTORETRACT_ENABLED);
         }
         /*        if (version<8) {
         #if DRIVE_SYSTEM==DELTA
@@ -1041,6 +1075,20 @@ void EEPROM::writeSettings()
     writeByte(EPR_BED_PID_MAX, Com::tEPRBedPISMaxValue);
 #endif
 #endif
+#if FEATURE_RETRACTION
+    writeByte(EPR_AUTORETRACT_ENABLED,Com::tEPRAutoretractEnabled);
+    writeFloat(EPR_RETRACTION_LENGTH,Com::tEPRRetractionLength);
+#if NUM_EXTRUDER > 1
+    writeFloat(EPR_RETRACTION_LONG_LENGTH,Com::tEPRRetractionLongLength);
+#endif
+    writeFloat(EPR_RETRACTION_SPEED,Com::tEPRRetractionSpeed);
+    writeFloat(EPR_RETRACTION_Z_LIFT,Com::tEPRRetractionZLift);
+    writeFloat(EPR_RETRACTION_UNDO_EXTRA_LENGTH,Com::tEPRRetractionUndoExtraLength);
+#if NUM_EXTRUDER > 1
+    writeFloat(EPR_RETRACTION_UNDO_EXTRA_LONG_LENGTH,Com::tEPRRetractionUndoExtraLongLength);
+#endif
+    writeFloat(EPR_RETRACTION_UNDO_SPEED,Com::tEPRRetractionUndoSpeed);
+#endif
     // now the extruder
     for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
     {
@@ -1196,6 +1244,11 @@ void EEPROM::restoreMixingRatios()
 }
 
 #endif
+
+void EEPROM::setZCorrection(int32_t c,int index)
+{
+    HAL::eprSetInt32(2048 + (index << 2), c);
+}
 
 #endif
 

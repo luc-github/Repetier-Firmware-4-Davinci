@@ -713,7 +713,7 @@ public:
     inline static float maxExtruderTimerFrequency() {return (float)F_CPU/TIMER0_PRESCALE;}
 #if FEATURE_SERVO
     static unsigned int servoTimings[4];
-    static void servoMicroseconds(uint8_t servo,int ms);
+    static void servoMicroseconds(uint8_t servo,int ms, uint16_t autoOff);
 #endif
 
 #if ANALOG_INPUTS > 0
@@ -722,7 +722,8 @@ public:
 #if USE_ADVANCE
     static void resetExtruderDirection();
 #endif
-    static volatile uint8_t insideTimer1; 
+    static volatile uint8_t insideTimer1;        
+ 
 //Davinci Specific       
 #ifdef SDEEPROM
     static void setupSdEeprom();
@@ -730,6 +731,7 @@ public:
     static char sdEepromImage[];
     static uint32_t sdEepromLastChanged; // millis
 #endif
+
 };
 
 #endif // HAL_H

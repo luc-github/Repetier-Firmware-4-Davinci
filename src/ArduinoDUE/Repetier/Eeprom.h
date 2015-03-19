@@ -20,7 +20,7 @@
 #define _EEPROM_H
 
 // Id to distinguish version changes
-#define EEPROM_PROTOCOL_VERSION 10
+#define EEPROM_PROTOCOL_VERSION 12
 
 /** Where to start with our datablock in memory. Can be moved if you
 have problems with other modules using the eeprom */
@@ -105,37 +105,54 @@ have problems with other modules using the eeprom */
 #define EPR_DELTA_DIAGONAL_CORRECTION_A 933
 #define EPR_DELTA_DIAGONAL_CORRECTION_B 937
 #define EPR_DELTA_DIAGONAL_CORRECTION_C 941
-//Davinci Specific
-#define EPR_LIGHT_ON 946
-#define EPR_SOUND_ON 947
-#define EPR_POWERSAVE_AFTER_TIME 948
-#define EPR_DISPLAY_MODE 952
-#define EPR_FIL_SENSOR_ON 953
-#define EPR_KEEP_LIGHT_ON 954
-#define EPR_MANUAL_LEVEL_X1 955
-#define EPR_MANUAL_LEVEL_Y1 959
-#define EPR_MANUAL_LEVEL_X2 963
-#define EPR_MANUAL_LEVEL_Y2 971
-#define EPR_MANUAL_LEVEL_X3 975
-#define EPR_MANUAL_LEVEL_Y3 979
-#define EPR_MANUAL_LEVEL_X4 983
-#define EPR_MANUAL_LEVEL_Y4 987
-#define EPR_TEMP_EXT_PLA		 991
-#define EPR_TEMP_EXT_ABS 		 995
-#define EPR_TEMP_BED_PLA		 999
-#define EPR_TEMP_BED_ABS		1003
-#define EPR_TOP_SENSOR_ON     1007
-#define EPR_TOUCHSCREEN           1008 // - 1027 = 30 byte for touchscreen calibration data
+#define EPR_TOUCHSCREEN           946 // - 975 = 30 byte for touchscreen calibration data
 
 // Axis compensation
-#define EPR_AXISCOMP_TANXY          1028
-#define EPR_AXISCOMP_TANYZ          1032
-#define EPR_AXISCOMP_TANXZ          1036
+#define EPR_AXISCOMP_TANXY			976
+#define EPR_AXISCOMP_TANYZ			980
+#define EPR_AXISCOMP_TANXZ			984
+
+#define EPR_DISTORTION_CORRECTION_ENABLED 988
+#define EPR_RETRACTION_LENGTH 992
+#define EPR_RETRACTION_LONG_LENGTH 996
+#define EPR_RETRACTION_SPEED 1000
+#define EPR_RETRACTION_Z_LIFT 1004
+#define EPR_RETRACTION_UNDO_EXTRA_LENGTH 1008
+#define EPR_RETRACTION_UNDO_EXTRA_LONG_LENGTH 1012
+#define EPR_RETRACTION_UNDO_SPEED 1016
+#define EPR_AUTORETRACT_ENABLED 1018
+
+//Davinci Specific
+#define EPR_LIGHT_ON 1019
+#define EPR_SOUND_ON 1020
+#define EPR_POWERSAVE_AFTER_TIME 1021
+#define EPR_DISPLAY_MODE 1025
+#define EPR_FIL_SENSOR_ON 1026
+#define EPR_KEEP_LIGHT_ON 1027
+#define EPR_MANUAL_LEVEL_X1 1028
+#define EPR_MANUAL_LEVEL_Y1 1032
+#define EPR_MANUAL_LEVEL_X2 1036
+#define EPR_MANUAL_LEVEL_Y2 1040
+#define EPR_MANUAL_LEVEL_X3 1044
+#define EPR_MANUAL_LEVEL_Y3 1048
+#define EPR_MANUAL_LEVEL_X4 1052
+#define EPR_MANUAL_LEVEL_Y4 1056
+#define EPR_TEMP_EXT_PLA		 1060
+#define EPR_TEMP_EXT_ABS 		 1064
+#define EPR_TEMP_BED_PLA		 1068
+#define EPR_TEMP_BED_ABS		1072
+#define EPR_TOP_SENSOR_ON     1076
 
 #if EEPROM_MODE != 0
 #define EEPROM_FLOAT(x) HAL::eprGetFloat(EPR_##x)
+#define EEPROM_INT32(x) HAL::eprGetInt32(EPR_##x)
+#define EEPROM_BYTE(x) HAL::eprGetByte(EPR_##x)
+#define EEPROM_SET_BYTE(x,val) HAL::eprSetByte(EPR_##x,val)
 #else
 #define EEPROM_FLOAT(x) (x)
+#define EEPROM_INT32(x) (x)
+#define EEPROM_BYTE(x) (x)
+#define EEPROM_SET_BYTE(x,val)
 #endif
 
 #define EEPROM_EXTRUDER_OFFSET 200
@@ -167,7 +184,7 @@ have problems with other modules using the eeprom */
 // 55-57 free for byte sized parameter
 #define EPR_EXTRUDER_MIXING_RATIOS  58 // 16*2 byte ratios = 32 byte -> end = 89
 #ifndef Z_PROBE_BED_DISTANCE
-#define Z_PROBE_BED_DISTANCE 10.0
+#define Z_PROBE_BED_DISTANCE 5.0
 #endif
 
 //Davinci Specific
@@ -581,5 +598,26 @@ static inline void setTowerZFloor(float newZ) {
     static void readMixingRatios();
     static void restoreMixingRatios();
 #endif
+
+    static void setZCorrection(int32_t c,int index);
+    static inline int32_t getZCorrection(int index) {
+        return HAL::eprGetInt32(2048 + (index << 2));
+    }
+    static inline void setZCorrectionEnabled(int8_t on) {
+#if EEPROM_MODE != 0
+        if(isZCorrectionEnabled() == on) return;
+        HAL::eprSetInt16(EPR_DISTORTION_CORRECTION_ENABLED, on);
+        uint8_t newcheck = computeChecksum();
+        if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
+            HAL::eprSetByte(EPR_INTEGRITY_BYTE, newcheck);
+#endif
+    }
+    static inline int8_t isZCorrectionEnabled() {
+#if EEPROM_MODE != 0
+        return HAL::eprGetByte(EPR_DISTORTION_CORRECTION_ENABLED);
+#else
+        return 0;
+#endif
+    }
 };
 #endif

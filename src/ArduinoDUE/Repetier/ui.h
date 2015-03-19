@@ -53,6 +53,7 @@ What display type do you use?
 // 1000-1999 : Execute
 // 2000-2999 : Write code
 // 4000-4999 : Show menu
+// 5000-5999 : Wizard pages
 // Add UI_ACTION_TOPMENU to show a menu as top menu
 // ----------------------------------------------------------------------------
 
@@ -203,8 +204,18 @@ What display type do you use?
 #define UI_ACTION_Z_BABYSTEPS           1111
 #define UI_ACTION_MAX_INACTIVE          1112
 #define UI_ACTION_TEMP_DEFECT           1113
+#define UI_ACTION_BED_HEATMANAGER       1114
+#define UI_ACTION_BED_PGAIN             1115
+#define UI_ACTION_BED_IGAIN             1116
+#define UI_ACTION_BED_DGAIN             1117
+#define UI_ACTION_BED_DRIVE_MIN         1118
+#define UI_ACTION_BED_DRIVE_MAX         1119
+#define UI_ACTION_BED_MAX               1120
+#define UI_ACTION_SD_PRI_PAU_CONT       1200
+#define UI_ACTION_FAN_SUSPEND           1201
 #define UI_ACTION_AUTOLEVEL_ONOFF       1202
-
+#define UI_ACTION_SERVOPOS              1203
+#define UI_ACTION_IGNORE_M106           1204
 //Davinci Specific
 #define UI_ACTION_CLEAN_NOZZLE          1500
 #define UI_ACTION_SOUND			1501
@@ -281,16 +292,22 @@ What display type do you use?
 #define UI_ACTION_SHOW_USERMENU9        4109
 #define UI_ACTION_SHOW_USERMENU10       4110
 
+#define UI_ACTION_WIZARD_FILAMENTCHANGE  5000
+#define UI_ACTION_WIZARD_JAM_REHEAT      5001
+#define UI_ACTION_WIZARD_JAM_WAITHEAT    5002
+#define UI_ACTION_WIZARD_JAM_EOF         5003
+
 // Load basic language definition to make sure all values are defined
 #include "uilang.h"
 
 #define UI_MENU_TYPE_INFO 0
 #define UI_MENU_TYPE_FILE_SELECTOR 1
 #define UI_MENU_TYPE_SUBMENU 2
-//Davinci Specific
+//Davinci Specific, entry ID 
 #define UI_MENU_TYPE_ACTION_MENU 3
 #define UI_MENU_TYPE_MODIFICATION_MENU 4
 #define UI_MENU_TYPE_MENU_WITH_STATUS 5
+#define UI_MENU_TYPE_WIZARD 6
 
 //Davinci Specific
 #define UI_MENU_ENTRY_MIN_TYPE_CHECK 2
@@ -314,6 +331,7 @@ typedef struct UIMenu_struct {
   // 3 = action menu
   // 4 = modification menu
   // 5 =Special menu with status
+  // 6 = Wizard menu
   uint8_t menuType;
   int id; // Type of modification
   int numEntries;
@@ -332,7 +350,6 @@ extern const int8_t encoder_table[16] PROGMEM ;
 * Target:   any AVR device
 * Usage:    see Doxygen manual
 **************************************************************************/
-
 
 
 
@@ -414,6 +431,18 @@ extern const int8_t encoder_table[16] PROGMEM ;
   UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
   const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
   const UIMenu name PROGMEM = {0,0,2,name ## _entries};
+#define UI_WIZARD4(name,action,row1,row2,row3,row4,dmode) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);\
+  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
+  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
+  UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
+  UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
+  const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
+  const UIMenu name PROGMEM = {5,action,4,name ## _entries};
+#define UI_WIZARD2(name,action,row1,row2,dmode) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);\
+  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
+  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,UI_MENU_TYPE_INFO,0,0,0,dmode};\
+  const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
+  const UIMenu name PROGMEM = {5,action,2,name ## _entries};
 #define UI_MENU_ACTION4C(name,action,rows,dmode) UI_MENU_ACTION4(name,action,rows,dmode)
 #define UI_MENU_ACTION2C(name,action,rows,dmode) UI_MENU_ACTION2(name,action,rows,dmode)
 #define UI_MENU_ACTION4(name,action,row1,row2,row3,row4,dmode) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);\
@@ -433,6 +462,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define UI_MENU_ACTIONCOMMAND(name,row,action,dmode) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,UI_MENU_TYPE_ACTION_MENU,action,0,0,dmode};
 #define UI_MENU_ACTIONSELECTOR(name,row,entries,dmode) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,UI_MENU_TYPE_SUBMENU,(unsigned int)&entries,0,0,dmode};
 #define UI_MENU_SUBMENU(name,row,entries,dmode) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,UI_MENU_TYPE_SUBMENU,(unsigned int)&entries,0,0,dmode};
+#define UI_MENU_WIZARD(name,row,entries,dmode) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,UI_MENU_TYPE_WIZARD,(unsigned int)&entries,0,0,dmode};
 #define UI_MENU_CHANGEACTION_FILTER(name,row,action,filter,nofilter,dmode) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,UI_MENU_TYPE_MODIFICATION_MENU,action,filter,nofilter,dmode};
 #define UI_MENU_ACTIONCOMMAND_FILTER(name,row,action,filter,nofilter,dmode) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,UI_MENU_TYPE_ACTION_MENU,action,filter,nofilter,dmode};
 #define UI_MENU_ACTIONSELECTOR_FILTER(name,row,entries,filter,nofilter,dmode) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,UI_MENU_TYPE_SUBMENU,(unsigned int)&entries,filter,nofilter,dmode};
@@ -471,8 +501,77 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define UI_FLAG_SLOW_KEY_ACTION 2
 #define UI_FLAG_SLOW_ACTION_RUNNING 4
 #define UI_FLAG_KEY_TEST_RUNNING 8
+/*Davinci Specific, to track any not obvious change, class definition stay in comment 
+and used one is located at the end of the file
 
-
+class UIDisplay {
+  public:
+    volatile uint8_t flags; // 1 = fast key action, 2 = slow key action, 4 = slow action running, 8 = key test running
+    uint8_t col; // current col for buffer prefill
+    uint8_t menuLevel; // current menu level, 0 = info, 1 = group, 2 = groupdata select, 3 = value change
+    uint16_t menuPos[UI_MENU_MAXLEVEL]; // Positions in menu
+    const UIMenu *menu[UI_MENU_MAXLEVEL]; // Menus active
+    uint16_t menuTop[UI_MENU_MAXLEVEL]; // Top row in menu
+    int8_t shift; // Display shift for scrolling text
+    int pageDelay; // Counter. If 0 page is refreshed if menuLevel is 0.
+    void *errorMsg;
+    uint16_t activeAction; // action for ok/next/previous
+    uint16_t lastAction;
+    uint16_t delayedAction;
+    millis_t lastSwitch; // Last time display switched pages
+    millis_t lastRefresh;
+    uint16_t lastButtonAction;
+    millis_t lastButtonStart;
+    millis_t nextRepeat; // Time of next autorepeat
+    millis_t lastNextPrev; // for increasing speed settings
+    float lastNextAccumul; // Accumulated value
+    unsigned int outputMask; // Output mask for backlight, leds etc.
+    int repeatDuration; // Time beween to actions if autorepeat is enabled
+    int8_t oldMenuLevel;
+    uint8_t encoderStartScreen;
+    char printCols[MAX_COLS+1];
+    void addInt(int value,uint8_t digits,char fillChar=' '); // Print int into printCols
+    void addLong(long value,char digits);
+    inline void addLong(long value) {addLong(value, -11);};
+    void addFloat(float number, char fixdigits,uint8_t digits);
+    inline void addFloat(float number) {addFloat(number, -9,2);};
+    void addStringP(PGM_P text);
+    void addStringOnOff(uint8_t);
+    void addChar(const char c);
+    void addGCode(GCode *code);
+    int okAction(bool allowMoves);
+    bool nextPreviousAction(int16_t next, bool allowMoves);
+    char statusMsg[21];
+    int8_t encoderPos;
+    int8_t encoderLast;
+    UIDisplay();
+    void createChar(uint8_t location, const uint8_t charmap[]);
+    void initialize(); // Initialize display and keys
+    void waitForKey();
+    void printRow(uint8_t r, char *txt, char *txt2, uint8_t changeAtCol); // Print row on display
+    void printRowP(uint8_t r,PGM_P txt);
+    void parse(const char *txt,bool ram); /// Parse output and write to printCols;
+    void refreshPage();
+    int executeAction(int action, bool allowMoves);
+    void finishAction(int action);
+    void slowAction(bool allowMoves);
+    void fastAction();
+    void mediumAction();
+    void pushMenu(const UIMenu *men, bool refresh);
+    void popMenu(bool refresh);
+    void adjustMenuPos();
+    void setStatusP(PGM_P txt, bool error = false);
+    void setStatus(const char *txt, bool error = false);
+    inline void setOutputMaskBits(unsigned int bits) {outputMask |= bits;}
+    inline void unsetOutputMaskBits(unsigned int bits) {outputMask &= ~bits;}
+    void updateSDFileCount();
+    void goDir(char *name);
+    bool isDirname(char *name);
+    bool isWizardActive();
+    char cwd[SD_MAX_FOLDER_DEPTH*LONG_FILENAME_LENGTH+2];
+    uint8_t folderLevel;
+};
+*/
 
 #if FEATURE_CONTROLLER == UICONFIG_CONTROLLER
 #include "uiconfig.h"
@@ -1499,6 +1598,7 @@ class UIDisplay {
     void sdrefresh(uint16_t &r,char cache[UI_ROWS][MAX_COLS+1]);
     void goDir(char *name);
     bool isDirname(char *name);
+    bool isWizardActive();
     char cwd[SD_MAX_FOLDER_DEPTH*LONG_FILENAME_LENGTH+2];
     uint8_t folderLevel;
 };

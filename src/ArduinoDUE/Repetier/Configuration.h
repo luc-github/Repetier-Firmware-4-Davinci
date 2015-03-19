@@ -334,11 +334,11 @@ cog. Direct drive extruder need 0. */
 #define EXT0_ADVANCE_BACKLASH_STEPS 0
 /** \brief Temperature to retract filament when extruder is heating up. Overridden if EEPROM activated.
 */
-#define EXT0_WAIT_RETRACT_TEMP      150
+#define EXT0_WAIT_RETRACT_TEMP 		150
 /** \brief Units (mm/inches) to retract filament when extruder is heating up. Overridden if EEPROM activated. Set
 to 0 to disable.
 */
-#define EXT0_WAIT_RETRACT_UNITS     0
+#define EXT0_WAIT_RETRACT_UNITS 	0
 
 /** You can run any gcode command on extruder deselect/select. Seperate multiple commands with a new line \n.
 That way you can execute some mechanical components needed for extruder selection or retract filament or whatever you need.
@@ -355,6 +355,10 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT0_EXTRUDER_COOLER_SPEED 255
 /** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
 #define EXT0_DECOUPLE_TEST_PERIOD 30000
+/** Pin which toggles regualrly during extrusion allowing jam control. -1 = disabled */
+#define EXT0_JAM_PIN -1
+/** Pullup resistor for jam pin? */
+#define EXT0_JAM_PULLUP false
 
 
 // =========================== Configuration for second extruder ========================
@@ -452,8 +456,8 @@ needed to move the motor cog in reverse direction until it hits the driving
 cog. Direct drive extruder need 0. */
 #define EXT1_ADVANCE_BACKLASH_STEPS 0
 
-#define EXT1_WAIT_RETRACT_TEMP  150
-#define EXT1_WAIT_RETRACT_UNITS 0
+#define EXT1_WAIT_RETRACT_TEMP 	150
+#define EXT1_WAIT_RETRACT_UNITS	0
 #define EXT1_SELECT_COMMANDS "M117 Extruder 2"
 #define EXT1_DESELECT_COMMANDS ""
 /** The extruder cooler is a fan to cool the extruder when it is heating. If you turn the etxruder on, the fan goes on. */
@@ -471,10 +475,64 @@ cog. Direct drive extruder need 0. */
 #define EXT1_EXTRUDER_COOLER_SPEED 255
 /** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
 #define EXT1_DECOUPLE_TEST_PERIOD 30000
+/** Pin which toggles regualrly during extrusion allowing jam control. -1 = disabled */
+#define EXT1_JAM_PIN -1
+/** Pullup resistor for jam pin? */
+#define EXT1_JAM_PULLUP false
 
 /** If enabled you can select the distance your filament gets retracted during a
 M140 command, after a given temperature is reached. */
 #define RETRACT_DURING_HEATUP true
+
+/** Allow retraction with G10/G11 removing requirement for retraction setting in slicer. Also allows filament change if lcd is configured. */
+#define FEATURE_RETRACTION 1
+/** autoretract converts pure extrusion moves into retractions. Beware that 
+ simple extrusion e.g. over Repetier-Host will then not work! */
+#define AUTORETRACT_ENABLED 0
+#define RETRACTION_LENGTH 3
+#define RETRACTION_LONG_LENGTH 13
+#define RETRACTION_SPEED 40
+#define RETRACTION_Z_LIFT 0
+#define RETRACTION_UNDO_EXTRA_LENGTH 0
+#define RETRACTION_UNDO_EXTRA_LONG_LENGTH 0
+#define RETRACTION_UNDO_SPEED 20
+
+/**
+If you have a lcd display, you can do a filament switch with M600.
+It will change the current extruders filament and temperature must already be high enough.
+*/
+#define FILAMENTCHANGE_X_POS 0
+#define FILAMENTCHANGE_Y_POS 0
+#define FILAMENTCHANGE_Z_ADD 1
+/** Does a homing procedure after a filament change. This is good in case
+you moved the extruder while changing filament during print.
+0 = no homing, 1 = xy homing, 2 = xyz homing
+*/
+#define FILAMENTCHANGE_REHOME 1
+/** Will first retract short distance, go to change position and then retract longretract.
+Retractions speeds are taken from RETRACTION_SPEED and RETRACTION_UNDO_SPEED
+*/
+#define FILAMENTCHANGE_SHORTRETRACT 30
+#define FILAMENTCHANGE_LONGRETRACT 30
+
+// Steps normally needed for a full signal cycle.
+#define JAM_STEPS 220
+// Steps for reducing speed. Must be higher then JAM_STEPS
+#define JAM_SLOWDOWN_STEPS 380
+// New speed multiplier which gets set when slowdown is reached.
+#define JAM_SLOWDOWN_TO 70
+// Last fallback. If we slip this much, we want to pause.
+#define JAM_ERROR_STEPS 430
+/** To prevent signal bouncing, only consider changes if we are this much steps
+ away from last signal change. */ 
+#define JAM_MIN_STEPS 10
+/*
+Determine what should be done if a jam is detected
+0 : Nothing, just mark extruder as jammed.
+1 : Jam/out of filament dialog and block communication.
+2 : Message to host/server otherwise continue and mark extruder jammed
+*/
+#define JAM_ACTION 1
 
 /** PID control only works target temperature +/- PID_CONTROL_RANGE.
 If you get much overshoot at the first temperature set, because the heater is going full power too long, you
@@ -771,6 +829,7 @@ on this endstop.
 // during homing operation. The homing speed is divided by the value. 1 = same speed, 2 = half speed
 #define ENDSTOP_X_RETEST_REDUCTION_FACTOR 3
 #define ENDSTOP_Y_RETEST_REDUCTION_FACTOR 3
+//Davinci Specific, bad noise if set to 3
 #define ENDSTOP_Z_RETEST_REDUCTION_FACTOR 4
 
 // When you have several endstops in one circuit you need to disable it after homing by moving a
@@ -779,6 +838,7 @@ on this endstop.
 #if DAVINCI==1
 #define ENDSTOP_Y_BACK_ON_HOME 0
 #else
+//to avoid to hit plate when homing
 #define ENDSTOP_Y_BACK_ON_HOME 7
 #endif
 #define ENDSTOP_Z_BACK_ON_HOME 0
@@ -1150,7 +1210,7 @@ uncommented, you will see the last command executed. To be more specific: It is 
 execution. This helps tracking errors, because there may be 8 or more commands in the queue
 and it is elsewise difficult to know, what your reprap is currently doing.
 */
-#define ECHO_ON_EXECUTE 0
+#define ECHO_ON_EXECUTE 1
 
 /** \brief EEPROM storage mode
 
@@ -1209,6 +1269,13 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 #define SERVO1_PIN 6
 #define SERVO2_PIN 5
 #define SERVO3_PIN 4
+/* for set servo(s) at designed neutral position at power-up. Values < 500 mean no start position */
+#define SERVO0_NEUTRAL_POS  1300
+#define SERVO1_NEUTRAL_POS  -1
+#define SERVO2_NEUTRAL_POS  -1
+#define SERVO3_NEUTRAL_POS  -1
+/** Set to servo number +1 to control that servo in ui menu. 0 disables ui control. */
+#define UI_SERVO_CONTROL 0
 /** Some fans won't start for low values, but would run if started with higher power at the beginning.
 This defines the full power duration before returning to set value. Time is in milliseconds */
 #define FAN_KICKSTART_TIME  200
@@ -1231,6 +1298,8 @@ See: AdditionalArduinoFiles: README.txt on how to install them.
 #define Z_PROBE_ON_HIGH 0
 #define Z_PROBE_X_OFFSET 0
 #define Z_PROBE_Y_OFFSET 0
+#define Z_PROBE_BED_DISTANCE 5.0 // Higher than max bed level distance error in mm
+
 // Waits for a signal to start. Valid signals are probe hit and ok button.
 // This is needful if you have the probe trigger by hand.
 #define Z_PROBE_WAIT_BEFORE_TEST 0
@@ -1283,6 +1352,41 @@ See: AdditionalArduinoFiles: README.txt on how to install them.
 #define MANUAL_LEVEL_X4  150
 #define MANUAL_LEVEL_Y4  95
 #endif
+
+/* DISTORTION_CORRECTION compensates the distortion caused by mechanical imprecisions of nonlinear (i.e. DELTA) printers
+ * assumes that the floor is plain (i.e. glass plate)
+ *     and that it is perpendicular to the towers
+ *     and that the (0,0) is in center
+ * requires z-probe
+ * G29 measures the Z offset in matrix NxN points (due to nature of the delta printer, the corners are extrapolated instead of measured)
+ * and compensate the distortion
+ * more points means better compensation, but consumes more memory and takes more time
+ * DISTORTION_CORRECTION_R is the distance of last row or collumn from center
+ */
+
+#define DISTORTION_CORRECTION         0
+#define DISTORTION_CORRECTION_POINTS  5
+#define DISTORTION_CORRECTION_R       80
+/** Uses eeprom instead of ram. Allows bigger matrix (up to 22x22) without any ram cost.
+  Especially on arm based systems with cached eeprom it is good, on AVR it has a small
+  performance penalty.
+*/
+#define DISTORTION_PERMANENT          1
+/** Correction computation is not a cheap operation and changes are only small. So it
+is not necessary to update it for every subline computed. For example lets take DELTA_SEGMENTS_PER_SECOND_PRINT = 150
+and fastest print speed 100 mm/s. So we have a maximum segment length of 100/150 = 0.66 mm.
+Now lats say our point field is 200 x 200 mm with 9 x 9 points. So between 2 points we have
+200 / (9-1) = 25 mm. So we need at least 25 / 0.66 = 37 lines to move to the next measuring
+point. So updting correction every 15 calls gives us at least 2 updates between the
+measured points.
+NOTE: Explicit z changes will always trigger an update!
+*/
+#define DISTORTION_UPDATE_FREQUENCY   15
+/** z distortion degrades to 0 from this height on. You should start after the first layer to get
+best bonding with surface. */
+#define DISTORTION_START_DEGRADE 0.5
+/** z distortion correction gets down to 0 at this height. */
+#define DISTORTION_END_HEIGHT 1.5
 
 /* If your printer is not exactly square but is more like a parallelogramm, you can
 use this to compensate the effect of printing squares like parallelogramms. Set the
@@ -1436,6 +1540,9 @@ Select an encoder speed from 0 = fastest to 2 = slowest that results in one menu
 */
 #define UI_ENCODER_SPEED 0
 
+// Set to 1 to reverse encoder direction
+#define UI_REVERSE_ENCODER 0
+
 /* There are 2 ways to change positions. You can move by increments of 1/0.1 mm resulting in more menu entries
 and requiring many turns on your encode. The alternative is to enable speed dependent positioning. It will change
 the move distance depending on the speed you turn the encoder. That way you can move very fast and very slow in the
@@ -1443,6 +1550,9 @@ same setting.
 
 */
 #define UI_SPEEDDEPENDENT_POSITIONING 0
+
+/** If set to 1 faster turning the wheel makes larger jumps. Helps for faster navgation. */
+#define UI_DYNAMIC_ENCODER_SPEED 1          // enable dynamic rotary encoder speed
 
 /** \brief bounce time of keys in milliseconds */
 #define UI_KEY_BOUNCETIME 10
@@ -1481,5 +1591,15 @@ Values must be in range 1..255
 #define UI_SET_EXTRUDER_FEEDRATE 2 // mm/sec
 #define UI_SET_EXTRUDER_RETRACT_DISTANCE 3 // mm
 
+/*
+#define USER_KEY1_PIN     UI_DISPLAY_D5_PIN      // D5 to display (not used for graphics controller), change to other pin if you use character LCD !
+#define USER_KEY1_ACTION  UI_ACTION_FAN_SUSPEND
+#define USER_KEY2_PIN     UI_DISPLAY_D6_PIN      // D6 to display (not used for graphics controller)...
+#define USER_KEY2_ACTION  UI_ACTION_SD_PRI_PAU_CONT
+#define USER_KEY3_PIN     UI_DISPLAY_D7_PIN      // D7 to display (not used for graphics controller)...
+#define USER_KEY3_ACTION  UI_ACTION_LIGHTS_ONOFF
+#define USER_KEY4_PIN     -1
+#define USER_KEY4_ACTION  UI_ACTION_DUMMY
+*/
 #endif
 

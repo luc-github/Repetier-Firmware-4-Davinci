@@ -135,6 +135,8 @@ FSTRINGVALUE(Com::tEEPROMUpdated,"EEPROM updated")
 
 FSTRINGVALUE(Com::tLinearLColon,"linear L:")
 FSTRINGVALUE(Com::tQuadraticKColon," quadratic K:")
+FSTRINGVALUE(Com::tExtruderJam, UI_TEXT_EXTRUDER_JAM)
+FSTRINGVALUE(Com::tFilamentSlipping,"Filament slipping")
 #if DRIVE_SYSTEM == DELTA
 FSTRINGVALUE(Com::tMeasurementReset,"Measurement reset.")
 FSTRINGVALUE(Com::tMeasureDeltaSteps,"Measure/delta (Steps) =")
@@ -399,6 +401,20 @@ FSTRINGVALUE(Com::tSDErrorCode,"SD errorCode:")
 #if FEATURE_DECOUPLE_TEST
 FSTRINGVALUE(Com::tHeaterDecoupled,"Heater decoupled")
 FSTRINGVALUE(Com::tHeaterDecoupledWarning,"One heater seems decoupled from thermistor - disabling all for safety!")
+#endif //FEATURE_DECOUPLE_TEST
+#if DISTORTION_CORRECTION
+FSTRINGVALUE(Com::tZCorrectionEnabled,"Z correction enabled")
+FSTRINGVALUE(Com::tZCorrectionDisabled,"Z correction disabled")
+#endif
+#if FEATURE_RETRACTION
+FSTRINGVALUE(Com::tEPRAutoretractEnabled,"Enable retraction conversion [0/1]")
+FSTRINGVALUE(Com::tEPRRetractionLength,"Retraction length [mm]")
+FSTRINGVALUE(Com::tEPRRetractionLongLength,"Retraction length extruder switch [mm]")
+FSTRINGVALUE(Com::tEPRRetractionSpeed,"Retraction speed [mm/s]")
+FSTRINGVALUE(Com::tEPRRetractionZLift,"Retraction z-lift [mm]")
+FSTRINGVALUE(Com::tEPRRetractionUndoExtraLength,"Extra extrusion on undo retract [mm]")
+FSTRINGVALUE(Com::tEPRRetractionUndoExtraLongLength,"Extra extrusion on undo switch retract [mm]")
+FSTRINGVALUE(Com::tEPRRetractionUndoSpeed,"Retraction undo speed")
 #endif
 FSTRINGVALUE(Com::tConfig,"Config:")
 FSTRINGVALUE(Com::tExtrDot,"Extr.")

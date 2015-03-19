@@ -355,7 +355,7 @@ const int matrixActions[] PROGMEM = UI_MATRIX_ACTIONS;
 void uiInitKeys() {
 #if UI_HAS_KEYS!=0
   //UI_KEYS_INIT_CLICKENCODER_LOW(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
-  //Davinci Specific, Davinci Key pad pins
+  //Davinci Specific, Davinci Specific, Davinci Key pad pins
   UI_KEYS_INIT_BUTTON_LOW(44); // push button, connects gnd to pin
   UI_KEYS_INIT_BUTTON_LOW(10);
   UI_KEYS_INIT_BUTTON_LOW(72);
