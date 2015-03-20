@@ -1066,7 +1066,7 @@ void Printer::defaultLoopActions()
     Commands::checkForPeriodicalActions(true);  //check heater every n milliseconds
     UI_MEDIUM; // do check encoder
     millis_t curtime = HAL::timeInMilliseconds();
-    if(PrintLine::hasLines() || isMenuMode(MENU_MODE_SD_PAUSED))
+    if(PrintLine::hasLines() || isMenuMode(MENU_MODE_SD_PAUSED) || Printer::isMenuMode(MENU_MODE_PRINTING))
         previousMillisCmd = curtime;
     else
     {
