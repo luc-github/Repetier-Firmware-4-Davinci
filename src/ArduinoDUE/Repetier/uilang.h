@@ -396,7 +396,7 @@
 #define UI_TEXT_WIZ_WAITTEMP1 "Wait for target"
 #define UI_TEXT_WIZ_WAITTEMP2 "temperatures ..."
 #define UI_TEXT_EXTRUDER_JAM "Extruder Jam"
-
+#define UI_TEXT_AUTOLEVEL_MATRIX "Autolevel Matrix"
 // *************** German translation ****************
 
 #if UI_LANGUAGE==1

@@ -4795,16 +4795,8 @@ case UI_ACTION_LOAD_FAILSAFE:
                          Printer::autolevelTransformation[1]*Printer::autolevelTransformation[5])*
                         (float)Printer::currentPositionSteps[X_AXIS]*Printer::invAxisStepsPerMM[X_AXIS])/
                       (Printer::autolevelTransformation[1]*Printer::autolevelTransformation[3]-Printer::autolevelTransformation[0]*Printer::autolevelTransformation[4]);
-#ifdef ZPROBE_ADJUST_ZMIN
-                Com::printFLN("Old zMin:", Printer::zMin);
-                Com::printFLN("Z : ", z);
-                Com::printFLN("h3 : ", h3);
-                Com::printFLN("bed : ", (float)EEPROM::zProbeBedDistance());
-                Printer::zMin = z + h3 - EEPROM::zProbeBedDistance();
-                Com::printFLN("New zMin:", Printer::zMin);
-#else
+
                 Printer::zMin = 0;
-#endif
                 step = STEP_AUTOLEVEL_RESULTS;
                 playsound(3000,240);
                 playsound(4000,240);
@@ -4820,7 +4812,7 @@ case UI_ACTION_LOAD_FAILSAFE:
                 playsound(3000,240);
                 playsound(4000,240);
                 playsound(5000,240);
-            if (confirmationDialog(UI_TEXT_PLEASE_CONFIRM ,UI_TEXT_SAVE,UI_TEXT_ZMIN))
+            if (confirmationDialog(UI_TEXT_PLEASE_CONFIRM ,UI_TEXT_SAVE,UI_TEXT_AUTOLEVEL_MATRIX))
                 {
                 //save matrix to memory as individual save to eeprom erase all
                 float tmpmatrix[9];
