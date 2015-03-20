@@ -4269,7 +4269,14 @@ case UI_ACTION_LOAD_FAILSAFE:
         int tmpmenupos=menuPos[menuLevel];
         UIMenu *tmpmen = (UIMenu*)menu[menuLevel];
         process_it=true;
-        sd.pausePrint(true);
+        //if printing from SD pause
+        if(sd.sdmode )sd.pausePrint(true);
+        else //if printing from Host, request a pause
+            {
+            Com::printFLN(PSTR("RequestPause: No Filament!"));
+            Commands::waitUntilEndOfAllMoves();
+            }
+        
         //to be sure no return menu
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
         bool btmp_autoreturn=benable_autoreturn; //save current value
@@ -4326,6 +4333,8 @@ case UI_ACTION_LOAD_FAILSAFE:
         menuLevel=tmpmenu;
         menuPos[menuLevel]=tmpmenupos;
         menu[menuLevel]=tmpmen;
+        if(menuLevel>0) menuLevel--;
+        pushMenu(&ui_menu_load_unload,true);
         break;
         }
 
