@@ -5056,7 +5056,7 @@ case UI_ACTION_LOAD_FAILSAFE:
             UI_STATUS(UI_TEXT_MOVING);
             Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+10,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
             Printer::moveToReal(EEPROM::ManualProbeX1() ,EEPROM::ManualProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
-            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,0,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
             Commands::waitUntilEndOfAllMoves();
              if(menuLevel>0) menuLevel--;
             playsound(3000,240);
@@ -5072,7 +5072,7 @@ case UI_ACTION_LOAD_FAILSAFE:
             UI_STATUS(UI_TEXT_MOVING);
             Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+10,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
             Printer::moveToReal(EEPROM::ManualProbeX2() ,EEPROM::ManualProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
-            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,0,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
             Commands::waitUntilEndOfAllMoves();
              if(menuLevel>0) menuLevel--;
             playsound(3000,240);
@@ -5088,7 +5088,7 @@ case UI_ACTION_LOAD_FAILSAFE:
             UI_STATUS(UI_TEXT_MOVING);
             Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+10,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
             Printer::moveToReal(EEPROM::ManualProbeX3() ,EEPROM::ManualProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
-            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,0,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
             Commands::waitUntilEndOfAllMoves();
              if(menuLevel>0) menuLevel--;
             playsound(3000,240);
@@ -5104,7 +5104,7 @@ case UI_ACTION_LOAD_FAILSAFE:
             UI_STATUS(UI_TEXT_MOVING);
             Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+10,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
             Printer::moveToReal(EEPROM::ManualProbeX4() ,EEPROM::ManualProbeY4(),IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
-            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,0,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
             Commands::waitUntilEndOfAllMoves();
              if(menuLevel>0) menuLevel--;
             playsound(3000,240);
@@ -5120,7 +5120,7 @@ case UI_ACTION_LOAD_FAILSAFE:
             UI_STATUS(UI_TEXT_MOVING);
             Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+10,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
             Printer::moveToReal(EEPROM::ManualProbeX2() ,EEPROM::ManualProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
-            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,0,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
             Commands::waitUntilEndOfAllMoves();
              if(menuLevel>0) menuLevel--;
             playsound(3000,240);
