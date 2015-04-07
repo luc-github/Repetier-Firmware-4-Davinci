@@ -12,7 +12,8 @@ TBD
 
 ##Flash the Module    
 *tools:    
-https://github.com/themadinventor/esptool    
+     --flash tool : https://github.com/themadinventor/esptool   
+     --lualoader : http://benlo.com/esp8266/     
 ...   
 TBD   
     
