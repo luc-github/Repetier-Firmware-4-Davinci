@@ -1,16 +1,16 @@
-##Module ESP8266 for usage on DaVinci
-Description:    
+#Module ESP8266 for usage on DaVinci
+##Description      
 Thanks to @disneysw for bringing this module idea and basic code    
 
 Still on going , check TODO    
 ...   
 TBD   
 
-#Hardware connection : 
+##Hardware connection     
 ...    
 TBD      
 
-#Flash the Module    
+##Flash the Module    
 *tools:    
 https://github.com/themadinventor/esptool    
 ...   
@@ -35,17 +35,17 @@ TBD
     
 NB: need to use format command before copy files    
 
-#Wifi connection    
+##Wifi connection    
 *Access point / Client station    
 *DHCP/Static IP    
 ...    
 TBD
     
-#Configuration   
+##Configuration   
 From web:   
 <IMG SRC=Capture.PNG>    
     
-#Commands    
+##Commands    
 *from module to printer    
     -M800 S1 , restart module done need a wifi/activity restart     
     -M801 [Message], Error message from module    
@@ -64,7 +64,7 @@ From web:
     ...    
     TBD    
     
-#Scripts/files:    
+##Scripts/files    
 *init.lua, setup default baud rate, more TBD    
 *datasave, configuration file    
 *connect.lc, setup wifi according  configuration file (datasave), error if no file, currently no automatic generation out of web UI    
@@ -79,7 +79,7 @@ From web:
 ...    
 TBD    
 
-#TODO    
+##TODO    
 *setup.lua script to convert lua to lc to save space and generate default configuration file    
 *config.lua script to pass all parameters by command line if not wifi   
 *activity.lua to launch bridge.lc or front end.lc according parrameters   
