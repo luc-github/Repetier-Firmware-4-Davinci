@@ -1,44 +1,74 @@
+--connect.lua, setup wifi according configuration file
+-- -------------------------------
+
+--File datasave has one line for each parameter (more or less lines means error)
 local get_data = function (connection_data)
-if file.open("datasave","r")==nil then return 0 end
-for i = 1,8,1 do
-if file.readline() == nil then 
-file.close()
-return 0 
-end
-end
-if file.readline() ~= nil then return 0 end
-file.seek("set")
-for i = 1,8,1 do
-connection_data[i] = string.gsub(file.readline(),"\n","")
-end
-file.close()
-return 1
+    --check if file can be opened
+    if file.open("datasave","r")==nil then return 0 end
+    for i = 1,8,1 do
+        --if any error reading line
+        if file.readline() == nil then 
+        file.close()
+        return 0 
+        end
+    end
+    --if one more, it means file is not correct
+    if file.readline() ~= nil then return 0 end
+    --if we are here it means so far so good, so rewind to begining
+    file.seek("set")
+    --read each parameter, one by one
+    for i = 1,8,1 do
+        connection_data[i] = string.gsub(file.readline(),"\n","")
+    end
+    file.close()
+    --no problem so far 
+    return 1
 end
 
+--configuration table
 local data_configuration={ "","","","","","","",""}
+--send status message
 print("M802 Starting Wifi")
+--try to open configuration file
 d,drf = pcall(get_data,data_configuration)
+--if failed or error then use default values
  if (drf==0 or d~=true ) then
-print("M801 Error - no config file")
+    --send error message
+    print("M801 Error - no config file")
 else
-if data_configuration[1]=="1"then
-if  data_configuration[4]=="2" then
-wifi.setmode(wifi.SOFTAP)
-wifi.ap.config({ssid=data_configuration[2],pwd=data_configuration[3]})
-wifi.ap.setip(wifi.sta.setip({ip=data_configuration[5],netmask=data_configuration[6], gateway=data_configuration[7] }))
-else
-wifi.setmode(wifi.STATIONAP)
-wifi.ap.config({ssid=data_configuration[2],pwd=data_configuration[3]})
-wifi.ap.getip()
-end
-elseif data_configuration[1]=="2"then
-wifi.setmode(wifi.STATION)
-wifi.sta.config(data_configuration[2],data_configuration[3])
-wifi.sta.autoconnect(1)
-if  data_configuration[4]=="2" then
-wifi.sta.setip({ip=data_configuration[5],netmask=data_configuration[6], gateway=data_configuration[7] })
-else
-wifi.sta.getip()
-end
-end
+    --if access point
+    if data_configuration[1]=="1"then
+        --static IP
+        if  data_configuration[4]=="2" then
+            --IP is static so it is central AP
+            wifi.setmode(wifi.SOFTAP)
+            --AP SSID and Password
+            wifi.ap.config({ssid=data_configuration[2],pwd=data_configuration[3]})
+            --IP/Mask/Gateway
+            wifi.ap.setip(wifi.sta.setip({ip=data_configuration[5],netmask=data_configuration[6], gateway=data_configuration[7] }))
+        --DHCP for AP
+        else
+            --AP and client at once
+            wifi.setmode(wifi.STATIONAP)
+            --AP SSID and Password
+            wifi.ap.config({ssid=data_configuration[2],pwd=data_configuration[3]})
+            wifi.ap.getip()
+        end
+    --else if client station
+    elseif data_configuration[1]=="2"then
+        --set client station
+        wifi.setmode(wifi.STATION)
+         --AP SSID and Password
+        wifi.sta.config(data_configuration[2],data_configuration[3])
+        --set autoconnect to true , should not be necessary but
+        wifi.sta.autoconnect(1)
+        --if static IP
+        if  data_configuration[4]=="2" then
+             --IP/Mask/Gateway
+            wifi.sta.setip({ip=data_configuration[5],netmask=data_configuration[6], gateway=data_configuration[7] })
+        else
+            wifi.sta.getip()
+        end
+    end 
+    --if no AP neither Station then do nothing
 end
