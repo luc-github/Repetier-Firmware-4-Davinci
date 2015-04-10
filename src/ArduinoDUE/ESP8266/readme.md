@@ -13,7 +13,9 @@ TBD
 ##Flash the Module    
 *tools:    
      --flash tool : https://github.com/themadinventor/esptool   
-     --lualoader : http://benlo.com/esp8266/     
+     --lualoader : http://benlo.com/esp8266/    
+     --ESPlorer : http://esp8266.ru/esplorer/    
+     --esp flasher: https://github.com/nodemcu/nodemcu-flasher 
 ...   
 TBD   
     
