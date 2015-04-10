@@ -52,13 +52,15 @@ From web:
 *from module to printer    
     -M800 S1 , restart module done need a wifi/activity restart     
     -M801 [Message], Error message from module    
-    -M802 [Message], Status message from module    
-    -M804 [IP, AP,SSID,....], ]Module configuration without password    
+    -M802 [Message], Status message from module       
+    -M804 [AP/STATION,SSID,DHC/STATIC,IP,MASK,GW,STATUS], ]Module configuration without password    
+          STATUS follows : 0: STATION_IDLE, 1: STATION_CONNECTING, 2: STATION_WRONG_PASSWORD, 3: STATION_NO_AP_FOUND, 4: STATION_CONNECT_FAIL, 5: STATION_GOT_IP   
     ...    
     TBD    
         
 *from host to printer    
-    -M803 [IP, AP,SSID, Password....], ]Module configuration settings to be used    
+    -M803 [IP, AP,SSID, Password....], ]Module configuration settings to be used  
+    -M805 query to get M804 informations
     ...    
     TBD        
         
@@ -77,7 +79,7 @@ From web:
 *setup.lc, __not done yet__, to compile lua to lc and generate default configuration file    
 *config.lc , __not done yet__,script to pass all parameters by command line if not wifi    
 *activity.lc , __not done yet__, to launch bridge.lc or front end.lc according parrameters    
-*status.lc , __not done yet__,to get all information on request
+*status.lc , to get all information on request
 *frontend.lc  , __not done yet__, to show printer information on web if not in bridge mode    
 ...    
 TBD    
@@ -85,11 +87,12 @@ TBD
 ##TODO    
 *setup.lua script to convert lua to lc to save space and generate default configuration file    
 *config.lua script to pass all parameters by command line if not wifi   
-*activity.lua to launch bridge.lc or front end.lc according parrameters   
-*status.lua to get all information on request    
+*activity.lua to launch bridge.lc or front end.lc according parameters   
 *allow bridge.lc to be stopped using GPIO2 pin and  free printer pin (EEPROM 1 pin ?)    
 *frontend.lua to show printer information on web if not in bridge mode    
 *repetier Fw connection   
+*M803 command
+*M805 command or M804 S1 for query configuration TBD
 ...   
 more to come   
  
