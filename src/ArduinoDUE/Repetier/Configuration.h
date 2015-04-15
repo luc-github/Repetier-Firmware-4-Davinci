@@ -846,6 +846,7 @@ on this endstop.
 // You can disable endstop checking for print moves. This is needed, if you get sometimes
 // false signals from your endstops. If your endstops don't give false signals, you
 // can set it on for safety.
+//Davinci, specific : Home sensors are easy to get noise an make print to lift, especially on 1.0A/2.0A, so disable it as no need to check home position all the time
 #define ALWAYS_CHECK_ENDSTOPS 0
 
 // maximum positions in mm - only fixed numbers!
