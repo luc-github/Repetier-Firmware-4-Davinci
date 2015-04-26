@@ -6,7 +6,7 @@ This firmware is based on the popular repetier firmware and modified to work wit
 ***
 ###Support for 1.0A/2.0A is implemented and need feedback 
 
-The board can be easily exposed by removing the back panel of the printer secured by two torx screws.  Supported boards have a jumper labeled JP1.  Unsupported second generation boards have a jumper labeled J37. More info can be found on the [Voltivo forum](http://voltivo.com/forum/davinci-peersupport/340-new-kind-of-mainboard-no-j1-erase-jumper).
+The board can be easily exposed by removing the back panel of the printer secured by two torx screws.  Supported boards have a jumper labeled JP1, second generation boards have a jumper labeled J37. More info can be found on the [Voltivo forum](http://voltivo.com/forum/davinci-peersupport/340-new-kind-of-mainboard-no-j1-erase-jumper).
 ***
 
 Here are just a few of the benifits of using this firmware:
@@ -27,7 +27,7 @@ The previous version (based on repetier v0.91) can be found [here](https://githu
 
 ***
 ##Installation
-1. With the machine off remove the back panel and short the jumper JP1.  Some Boards do not have jumper pins exposed but can still be shorted with a conductive wire.
+1. With the machine off remove the back panel and short the jumper JP1 or J37 depending on model.  Some Boards do not have jumper pins exposed but can still be shorted with a conductive wire.
 2. Turn the machine on and wait a few seconds then turn it off again.  The machine will have been flashed removing the current stock firmware and allowing it to be detected as a normal arduino DUE. NOTE: Windows users may need to install drivers to detect the board.  Consult the Voltivo forums.
 3. Use an arduino IDE supporting arduino DUE, [version 1.5.8+ Not 1.6.0](http://arduino.cc/en/Main/OldSoftwareReleases), 1.6.0 bring several issues - a [tracker](https://github.com/luc-github/Repetier-Firmware-0.92/issues/51) is open to follow up .    
 4. Update arduino files (variants.cpp and USBcore.cpp) with the one(s) present in src\ArduinoDUE\AdditionalArduinoFiles\1.5.8. or in src\ArduinoDUE\AdditionalArduinoFiles\1.6.0 according your IDE version   
