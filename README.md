@@ -15,7 +15,7 @@ Here are just a few of the benifits of using this firmware:
 * It works stand alone if you use a WIFI SD Card. 
 * It allows the use of clear ABS (by disabling optical sensors), as well as other arbitrary filament brands/types as temperatures can be controlled freely and there is no requirement for chiped cartridges. 
 
-You can find more info on the [Voltivo forum](http://voltivo.com/forum/davinci-firmware).     
+You can find more info on the [Voltivo forum](http://voltivo.com/forum/davinci-firmware).  
 
 The current firmware is based on [repetier Firmware](https://github.com/repetier/Repetier-Firmware) 0.92 : [bgm370 Da Vinci 1.0 FW](https://github.com/bgm370/Repetier-Firmware)    
 Sources are [here](https://github.com/luc-github/Repetier-Firmware-0.92)   
@@ -57,6 +57,10 @@ Support for 1.0A and 2.0A:  need to change <CODE>#define MODEL 0</CODE>  to  <CO
 
 To repurpose the main Extruder cooling fan to be controlled VIA G-Code instructions M106/M107:   
 Set REPURPOSE_FAN_TO_COOL_EXTRUSIONS to 1, do not forget to add a fan with power source to cool extruder permanently if you use this option.     
+
+Another excellent tutorial for flashing and installation is here from Jake : http://voltivo.com/forum/davinci-peersupport/501-da-vinci-setup-guide-from-installation-to-wireless-printing
+
+Or a great video done by Daniel Gonos: https://www.youtube.com/watch?v=rjuCvlnpB7M
 
 ***
 ##TODO
