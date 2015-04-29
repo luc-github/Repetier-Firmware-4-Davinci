@@ -1781,7 +1781,8 @@ case 'P':
             if(c2 == 'x')
             {
 #if (X_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_X
-                addStringOnOff(Printer::isXMinEndstopHit());
+                //addStringOnOff(Printer::isXMinEndstopHit());
+                addStringP(Printer::isXMinEndstopHit()?"\003":"\004");
 #else
                 addStringP(ui_text_na);
 #endif
@@ -1794,7 +1795,8 @@ case 'P':
 #endif
             if(c2 == 'y')
 #if (Y_MIN_PIN > -1)&& MIN_HARDWARE_ENDSTOP_Y
-                addStringOnOff(Printer::isYMinEndstopHit());
+                //addStringOnOff(Printer::isYMinEndstopHit());
+                addStringP(Printer::isYMinEndstopHit()?"\003":"\004");
 #else
                 addStringP(ui_text_na);
 #endif
@@ -1806,7 +1808,8 @@ case 'P':
 #endif
             if(c2 == 'z')
 #if (Z_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Z
-                addStringOnOff(Printer::isZMinEndstopHit());
+                //addStringOnOff(Printer::isZMinEndstopHit());
+                addStringP(Printer::isZMinEndstopHit()?"\003":"\004");
 #else
                 addStringP(ui_text_na);
 #endif

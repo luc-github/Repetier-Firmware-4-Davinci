@@ -260,7 +260,7 @@ for 2 row displays. You can add additional pages or change the default pages lik
    #endif
  #endif
  //page 2
- UI_PAGE4(ui_page2,"X:%x0 mm","Y:%x1 mm","Z:%x2 mm","%os", ALL_MODE)
+ UI_PAGE4(ui_page2,"X:%x0 mm   %sx","Y:%x1 mm   %sy","Z:%x2 mm   %sz","%os", ALL_MODE)
  //page 3
  UI_PAGE4(ui_page3,UI_TEXT_SPEED_MULTIPLY,UI_TEXT_FLOW_MULTIPLY,UI_TEXT_PAGE_BUFFER,"%os", ALL_MODE)
  //printing time
@@ -1033,7 +1033,7 @@ UI_MENU_ACTIONCOMMAND(ui_menu_home_z,UI_TEXT_HOME_Z,UI_ACTION_HOME_Z, ADVANCED_M
 UI_MENU_CHANGEACTION(ui_menu_x_1,"  1mm",UI_ACTION_X_1, ALL_MODE)
 UI_MENU_CHANGEACTION(ui_menu_x_10," 10mm",UI_ACTION_X_10, ALL_MODE)
 UI_MENU_CHANGEACTION(ui_menu_x_100,"100mm",UI_ACTION_X_100, ALL_MODE)
-UI_MENU_ACTIONCOMMAND(ui_menu_x_pos,"X: %x0mm ",UI_ACTION_DUMMY, ALL_MODE)
+UI_MENU_ACTIONCOMMAND(ui_menu_x_pos,"X:%x0mm    %sx",UI_ACTION_DUMMY, ALL_MODE)
 #define UI_MENU_X_POS_VALUE  {UI_MENU_ADDCONDBACK &ui_menu_x_1,&ui_menu_x_10,&ui_menu_x_100,&ui_menu_x_pos}
 UI_MENU_WITH_STATUS(ui_menu_pos_x_value,UI_MENU_X_POS_VALUE,4+UI_MENU_BACKCNT);//BUG without this ; compilation crash
 UI_MENU_SUBMENU(ui_menu_X_pos, UI_TEXT_X_POSITION, ui_menu_pos_x_value, ALL_MODE)
@@ -1041,7 +1041,7 @@ UI_MENU_SUBMENU(ui_menu_X_pos, UI_TEXT_X_POSITION, ui_menu_pos_x_value, ALL_MODE
 UI_MENU_CHANGEACTION(ui_menu_y_1,"  1mm",UI_ACTION_Y_1, ALL_MODE)
 UI_MENU_CHANGEACTION(ui_menu_y_10," 10mm",UI_ACTION_Y_10, ALL_MODE)
 UI_MENU_CHANGEACTION(ui_menu_y_100,"100mm",UI_ACTION_Y_100, ALL_MODE)
-UI_MENU_ACTIONCOMMAND(ui_menu_y_pos,"Y: %x1mm ",UI_ACTION_DUMMY, ALL_MODE)
+UI_MENU_ACTIONCOMMAND(ui_menu_y_pos,"Y:%x1mm    %sy",UI_ACTION_DUMMY, ALL_MODE)
 #define UI_MENU_Y_POS_VALUE  {UI_MENU_ADDCONDBACK &ui_menu_y_1,&ui_menu_y_10,&ui_menu_y_100,&ui_menu_y_pos}
 UI_MENU_WITH_STATUS(ui_menu_pos_y_value,UI_MENU_Y_POS_VALUE,4+UI_MENU_BACKCNT);//BUG without this ; compilation crash
 UI_MENU_SUBMENU(ui_menu_Y_pos, UI_TEXT_Y_POSITION, ui_menu_pos_y_value, ALL_MODE)
@@ -1050,7 +1050,7 @@ UI_MENU_CHANGEACTION(ui_menu_z_0_1,"0.1mm",UI_ACTION_Z_0_1, ALL_MODE)
 UI_MENU_CHANGEACTION(ui_menu_z_1,"  1mm",UI_ACTION_Z_1, ALL_MODE)
 UI_MENU_CHANGEACTION(ui_menu_z_10," 10mm",UI_ACTION_Z_10, ALL_MODE)
 UI_MENU_CHANGEACTION(ui_menu_z_100,"100mm",UI_ACTION_Z_100, ALL_MODE)
-UI_MENU_ACTIONCOMMAND(ui_menu_z_pos,"Z: %x2mm ",UI_ACTION_DUMMY, ALL_MODE)
+UI_MENU_ACTIONCOMMAND(ui_menu_z_pos,"Z:%x2mm    %sz",UI_ACTION_DUMMY, ALL_MODE)
 #define UI_MENU_Z_POS_VALUE  {UI_MENU_ADDCONDBACK &ui_menu_z_0_1,&ui_menu_z_1,&ui_menu_z_10,&ui_menu_z_100,&ui_menu_z_pos}
 UI_MENU_WITH_STATUS(ui_menu_pos_z_value,UI_MENU_Z_POS_VALUE,5+UI_MENU_BACKCNT);//BUG without this ; compilation crash
 UI_MENU_SUBMENU(ui_menu_Z_pos, UI_TEXT_Z_POSITION, ui_menu_pos_z_value, ALL_MODE)
