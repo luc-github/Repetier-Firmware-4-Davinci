@@ -1,6 +1,8 @@
 ##Da Vinci Firmware based on Repetier (0.92)
 ============================
 
+[![Join the chat at https://gitter.im/luc-github/Repetier-Firmware-0.92](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/luc-github/Repetier-Firmware-0.92?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 This firmware is based on the popular repetier firmware and modified to work with first generation Da Vinci 1.0, 2.0 single fan and 2.0.
 
 ***
