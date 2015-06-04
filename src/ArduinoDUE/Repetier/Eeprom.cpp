@@ -104,6 +104,9 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     #endif
     EEPROM::busesensor = bool(CASE_FILAMENT_SENSOR_DEFAULT_ON);
     EEPROM::btopsensor = bool(CASE_TOP_SENSOR_DEFAULT_ON);
+    #if ENABLE_WIFI
+    HAL::bwifion = bool(CASE_WIFI_DEFAULT_ON);
+    #endif
     EEPROM::ftemp_ext_pla=UI_SET_PRESET_EXTRUDER_TEMP_PLA;
     EEPROM::ftemp_ext_abs=UI_SET_PRESET_EXTRUDER_TEMP_ABS;
     EEPROM::ftemp_bed_pla=UI_SET_PRESET_HEATED_BED_TEMP_PLA;
@@ -444,6 +447,9 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
 #if defined(TOP_SENSOR_PIN)
 	 HAL::eprSetByte(EPR_TOP_SENSOR_ON,EEPROM::btopsensor);
 #endif
+#if ENABLE_WIFI
+	 HAL::eprSetByte(EPR_WIFI_ON,HAL::bwifion);
+#endif
 #if FEATURE_BEEPER
 	HAL::eprSetByte(EPR_SOUND_ON,HAL::enablesound);
 #endif
@@ -663,6 +669,9 @@ void EEPROM::readDataFromEEPROM()
 #endif
 #if defined(TOP_SENSOR_PIN)
 	EEPROM::btopsensor=HAL::eprGetByte(EPR_TOP_SENSOR_ON);
+#endif
+#if ENABLE_WIFI
+	HAL::bwifion=HAL::eprGetByte(EPR_WIFI_ON);
 #endif
 #if FEATURE_BEEPER
 	HAL::enablesound=HAL::eprGetByte(EPR_SOUND_ON);

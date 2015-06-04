@@ -114,6 +114,7 @@
 	#define UI_TEXT_EXTR_XOFF         "Xoffst:%Xx"
 	#define UI_TEXT_EXTR_YOFF         "Yoffst:%Xy"
 #endif
+#define UI_TEXT_WIFI_ONOFF "Wifi:       %wo"
 #define UI_TEXT_REDO_ACTION "Do it again ?"
 #define UI_TEXT_X_LENGTH "X Length:%Lxmm"
 #define UI_TEXT_Y_LENGTH "Y Length:%Lymm"
@@ -1350,6 +1351,7 @@
 // *************** French translation ****************
 // ***************      By Doudou     ****************
 #if UI_LANGUAGE==7
+#define UI_TEXT_WIFI_ONOFF "Wifi:       %wo"
 #if NUM_EXTRUDER == 1
 	#define UI_TEXT_LOAD_FILAMENT   "Inser. Filament"
 	#define UI_TEXT_UNLOAD_FILAMENT "Retir. Filament"

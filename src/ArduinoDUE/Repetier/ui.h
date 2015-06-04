@@ -256,6 +256,7 @@ What display type do you use?
 #define UI_ACTION_Z_LENGTH		1535
 #define UI_ACTION_VERSION		1536
 #define UI_ACTION_TOP_SENSOR_ONOFF      1537
+#define UI_ACTION_WIFI_ONOFF	1538
 #define UI_ACTION_Z_0_1                 1539
 #define UI_ACTION_X_MIN                 1540
 #define UI_ACTION_Y_MIN    		1541

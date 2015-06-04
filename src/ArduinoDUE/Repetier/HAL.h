@@ -281,6 +281,10 @@ public:
 #if FEATURE_BEEPER
     static bool enablesound;
 #endif //FEATURE_BEEPER
+#if ENABLE_WIFI
+    static bool bwifion;
+#endif //wifi feature
+
     // do any hardware-specific initialization here
     static inline void hwSetup(void)
     {
@@ -552,22 +556,41 @@ public:
     }
     static inline void serialSetBaudrate(long baud)
     {
+	#if ENABLE_WIFI
+		Serial.begin(baud);
+	#endif
         RFSERIAL.begin(baud);
     }
     static inline bool serialByteAvailable()
     {
+	#if ENABLE_WIFI
+		if(HAL::bwifion) return Serial.available();
+		else 
+	#endif
         return RFSERIAL.available();
     }
     static inline uint8_t serialReadByte()
     {
+	#if ENABLE_WIFI
+		if(HAL::bwifion) return Serial.read();
+		else 
+	#endif
         return RFSERIAL.read();
     }
     static inline void serialWriteByte(char b)
     {
+	#if ENABLE_WIFI
+		if(HAL::bwifion) Serial.write(b);
+		else 
+	#endif
         RFSERIAL.write(b);
     }
     static inline void serialFlush()
     {
+	#if ENABLE_WIFI
+		if(HAL::bwifion) Serial.flush();
+		else 
+	#endif
         RFSERIAL.flush();
     }
     static void setupTimer();

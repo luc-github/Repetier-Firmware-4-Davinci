@@ -74,6 +74,9 @@ HAL::~HAL()
 bool HAL::enablesound = true;
 #endif
 
+#if ENABLE_WIFI
+    bool HAL::bwifion=false;
+#endif //wifi feature
 char HAL::sdEepromImage[SDEEPROM_SIZE] = { 0, };
 uint32_t HAL::sdEepromLastChanged = 0; // 0 = never.
 

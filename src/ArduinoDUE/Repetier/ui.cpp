@@ -1873,6 +1873,11 @@ case 'P':
             }
             break;
 
+#if ENABLE_WIFI
+		case 'w':
+			if(c2=='o')addStringP(HAL::bwifion?ui_text_on:ui_text_off);        //wifi on/off
+			break;
+#endif
         case 'x':
             if(c2>='0' && c2<='4')
             {
@@ -3947,6 +3952,14 @@ int UIDisplay::executeAction(int action, bool allowMoves)
          //save directly to eeprom
         EEPROM:: update(EPR_FIL_SENSOR_ON,EPR_TYPE_BYTE,EEPROM::busesensor,0);
         UI_STATUS(UI_TEXT_FIL_SENSOR_ONOFF);
+     break;
+#endif
+ #if ENABLE_WIFI
+     case UI_ACTION_WIFI_ONOFF:
+         HAL::bwifion=!HAL::bwifion;
+         //save directly to eeprom
+        EEPROM:: update(EPR_WIFI_ON,EPR_TYPE_BYTE,HAL::bwifion,0);
+        UI_STATUS(UI_TEXT_WIFI_ONOFF);
      break;
 #endif
  #if defined(TOP_SENSOR_PIN)

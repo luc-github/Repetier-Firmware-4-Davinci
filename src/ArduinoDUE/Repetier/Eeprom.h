@@ -142,6 +142,7 @@ have problems with other modules using the eeprom */
 #define EPR_TEMP_BED_PLA		 1168
 #define EPR_TEMP_BED_ABS		1172
 #define EPR_TOP_SENSOR_ON     1176
+#define EPR_WIFI_ON     1177
 
 #if EEPROM_MODE != 0
 #define EEPROM_FLOAT(x) HAL::eprGetFloat(EPR_##x)
