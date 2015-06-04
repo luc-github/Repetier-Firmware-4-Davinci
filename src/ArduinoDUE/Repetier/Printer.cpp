@@ -988,6 +988,16 @@ SET_INPUT(FIL_SENSOR2_PIN);
 #if USE_ADVANCE
     extruderStepsNeeded = 0;
 #endif
+	//Davinci Specific, setup SD Card EEPROM
+	#if SDSUPPORT
+	#ifdef SDEEPROM
+		HAL::setupSdEeprom();
+	#endif
+		sd.initsd();
+	#endif
+     HAL::loadVirtualEEPROM();
+    // sets autoleveling in eeprom init
+    EEPROM::init(); // Read settings from eeprom if wanted
     EEPROM::initBaudrate();
     HAL::serialSetBaudrate(baudrate);
     Com::printFLN(Com::tStart);
@@ -995,16 +1005,7 @@ SET_INPUT(FIL_SENSOR2_PIN);
     //UI_INITIALIZE;
     HAL::showStartReason();
     Extruder::initExtruder();
-//Davinci Specific, setup SD Card EEPROM
-#if SDSUPPORT
-#ifdef SDEEPROM
-    HAL::setupSdEeprom();
-#endif
-    sd.initsd();
-#endif
-     HAL::loadVirtualEEPROM();
-    // sets autoleveling in eeprom init
-    EEPROM::init(); // Read settings from eeprom if wanted
+
     for(uint8_t i = 0; i < E_AXIS_ARRAY; i++)
     {
         currentPositionSteps[i] = 0;
