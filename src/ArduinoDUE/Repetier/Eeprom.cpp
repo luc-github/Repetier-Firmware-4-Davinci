@@ -959,6 +959,9 @@ void EEPROM::writeSettings()
 #if FEATURE_BEEPER
     writeByte(EPR_SOUND_ON,Com::tSoundOn);
 #endif
+#if ENABLE_WIFI
+    writeByte(EPR_WIFI_ON,Com::tWifiOn);
+#endif
     writeFloat(EPR_PRINTING_DISTANCE, Com::tEPRFilamentPrinted);
     writeLong(EPR_PRINTING_TIME, Com::tEPRPrinterActive);
     writeLong(EPR_MAX_INACTIVE_TIME, Com::tEPRMaxInactiveTime);
