@@ -662,6 +662,7 @@ void Printer::setup()
 //Davinci Specific, we start watch dog from begining
 #if FEATURE_WATCHDOG
     HAL::startWatchdog();
+    HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG
 #if FEATURE_CONTROLLER == CONTROLLER_VIKI
     HAL::delayMilliseconds(100);
