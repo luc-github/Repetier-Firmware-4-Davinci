@@ -31,8 +31,8 @@
 //Version
 #define VERSION_MAJOR "1"
 #define VERSION_MINOR_YEAR "15"
-#define VERSION_MINOR_MONTH "03"
-#define VERSION_MINOR_DAY "20"
+#define VERSION_MINOR_MONTH "06"
+#define VERSION_MINOR_DAY "04"
 #define VERSION_BUILD "1"
 
 //Davinci screen is not standard reprap it is WINSTAR 16x4
@@ -47,6 +47,7 @@
 #define UI_AUTOLIGHTOFF_AFTER 1
 #define ENABLE_CLEAN_DRIPBOX 1
 #define ENABLE_CLEAN_NOZZLE 1
+#define ENABLE_WIFI 0
 #if ENABLE_CLEAN_NOZZLE
   #if DAVINCI==1 //cleaner of Davinci 1.0 is not in same position of 2.0
     #define CLEAN_X 20
@@ -61,6 +62,7 @@
 #define CASE_FILAMENT_SENSOR_DEFAULT_ON 1
 #define CASE_TOP_SENSOR_DEFAULT_ON 1
 #define CASE_SOUND_DEFAULT_ON 1
+#define CASE_WIFI_DEFAULT_ON 0
 //default mode is advanced
 #define CASE_DISPLAY_MODE_DEFAULT 1
 
