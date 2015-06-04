@@ -47,7 +47,10 @@
 #define UI_AUTOLIGHTOFF_AFTER 1
 #define ENABLE_CLEAN_DRIPBOX 1
 #define ENABLE_CLEAN_NOZZLE 1
+//to enable communication using wifi module set to 1
 #define ENABLE_WIFI 0
+//if wifi is enabled serial need to slow down a little, this is a delay in ms after a '\n' so normaly after a command or a message
+#define DELAY_BY_LINE 50
 #if ENABLE_CLEAN_NOZZLE
   #if DAVINCI==1 //cleaner of Davinci 1.0 is not in same position of 2.0
     #define CLEAN_X 20

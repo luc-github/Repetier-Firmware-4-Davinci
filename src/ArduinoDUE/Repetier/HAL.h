@@ -580,7 +580,14 @@ public:
     static inline void serialWriteByte(char b)
     {
 	#if ENABLE_WIFI
-		if(HAL::bwifion) Serial.write(b);
+		if(HAL::bwifion) 
+			{
+				Serial.write(b);
+				if (b=='\n') 
+					{
+						HAL::delayMilliseconds(DELAY_BY_LINE);
+					}
+			}
 		else 
 	#endif
         RFSERIAL.write(b);
