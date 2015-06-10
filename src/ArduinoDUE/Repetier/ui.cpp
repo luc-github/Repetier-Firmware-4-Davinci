@@ -2029,6 +2029,7 @@ case 'P':
 }
 void UIDisplay::setStatusP(PGM_P txt,bool error)
 {
+	static char lastmsg[21]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0};
     if(!error && Printer::isUIErrorMessage()) return;
     uint8_t i=0;
     while(i<20)
@@ -2040,9 +2041,19 @@ void UIDisplay::setStatusP(PGM_P txt,bool error)
     statusMsg[i]=0;
     if(error)
         Printer::setUIErrorMessage(true);
+    #if ENABLE_WIFI
+    else
+    if (strcmp(lastmsg,statusMsg)!=0)
+		{
+		strcpy(lastmsg,statusMsg);
+		Com::print(Com::tStatus);
+		Com::printFLN(statusMsg);
+		}
+    #endif
 }
 void UIDisplay::setStatus(const char *txt,bool error)
 {
+	static char lastmsg[21]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0};
     if(!error && Printer::isUIErrorMessage()) return;
     uint8_t i=0;
     while(*txt && i<20)
@@ -2050,6 +2061,15 @@ void UIDisplay::setStatus(const char *txt,bool error)
     statusMsg[i]=0;
     if(error)
         Printer::setUIErrorMessage(true);
+    #if ENABLE_WIFI
+    else
+    if (strcmp(lastmsg,statusMsg)!=0)
+		{
+		strcpy(lastmsg,statusMsg);
+		Com::print(Com::tStatus);
+		Com::printFLN(statusMsg);
+		}
+    #endif
 }
 
 const UIMenu * const ui_pages[UI_NUM_PAGES] PROGMEM = UI_PAGES;
