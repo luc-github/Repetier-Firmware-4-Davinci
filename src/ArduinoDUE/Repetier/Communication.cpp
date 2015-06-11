@@ -20,6 +20,7 @@
 */
 
 #include "Repetier.h"
+#include <String.h>
 
 #if DRIVE_SYSTEM == DELTA
 FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Delta EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:3")
@@ -577,7 +578,9 @@ void Com::printFloat(float number, uint8_t digits)
 	printF(tINF);
     return;
   }
-  // Handle negative numbers
+
+  print(String(round(number*pow(10.0,digits))/pow(10.0,digits)).c_str());
+  /*// Handle negative numbers
   if (number < 0.0)
   {
      print('-');
@@ -606,5 +609,5 @@ void Com::printFloat(float number, uint8_t digits)
     int toPrint = int(remainder);
     print(toPrint);
     remainder -= toPrint;
-  }
+  }*/
 }
