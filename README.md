@@ -3,12 +3,12 @@
 
 [![Join the chat at https://gitter.im/luc-github/Repetier-Firmware-0.92](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/luc-github/Repetier-Firmware-0.92?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-This firmware is based on the popular repetier firmware and modified to work with first generation Da Vinci 1.0, 2.0 single fan and 2.0., per feedback it seems also working on AiO but scanner function is not support so it will work like a 1.0A
+This firmware is based on the popular repetier firmware and modified to work with first generation Da Vinci 1.0, 2.0 single fan and 2.0., per feedback it seems also working on AiO but scanner function is not supported so it will work like a 1.0A
 
 YOU MIGHT DAMAGE YOUR PRINTER OR VOID YOUR WARRANTY, DO IT ON YOUR OWN RISK.
 
 ***
-###Support for 1.0A/2.0A is implemented and need feedback AiO need settings tunning 
+###Support for 1.0A/2.0A is implemented and need feedback, AiO need some settings tunning 
 
 The board can be easily exposed by removing the back panel of the printer secured by two torx screws.  Supported boards have a jumper labeled JP1, second generation boards have a jumper labeled J37. More info can be found on the [Voltivo forum](http://voltivo.com/forum/davinci-peersupport/340-new-kind-of-mainboard-no-j1-erase-jumper).
 ***
