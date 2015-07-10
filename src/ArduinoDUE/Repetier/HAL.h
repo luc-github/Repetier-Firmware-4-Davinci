@@ -732,11 +732,25 @@ public:
 
 
     // Watchdog support
-    inline static void startWatchdog() {  WDT->WDT_MR = WDT_MR_WDRSTEN | WATCHDOG_INTERVAL | (WATCHDOG_INTERVAL << 16);WDT->WDT_CR = 0xA5000001;};
-    inline static void stopWatchdog() {}
+    //Davinci Specific
+		//inline static void startWatchdog() {  WDT->WDT_MR = WDT_MR_WDRSTEN | WATCHDOG_INTERVAL | (WATCHDOG_INTERVAL << 16);WDT->WDT_CR = 0xA5000001;};
+	//Enable the watchdog with the specified timeout. Should only be called once.
+	//timeout in milliseconds.
+    inline static void startWatchdog() {
+#if FEATURE_WATCHDOG
+		uint32_t timeout = 8000 * 256 / 1000; //8000ms = 8s
+		if (timeout == 0) timeout = 1;
+		else if (timeout > 0xFFF) timeout = 0xFFF;
+		timeout = WDT_MR_WDRSTEN | WDT_MR_WDV(timeout) | WDT_MR_WDD(timeout);
+		WDT_Enable (WDT, timeout);
+#endif
+	}
+    inline static void stopWatchdog() {WDT_Disable (WDT);}
+  
     inline static void pingWatchdog() {
 #if FEATURE_WATCHDOG
-    WDT->WDT_CR = 0xA5000001;
+    //WDT->WDT_CR = 0xA5000001;
+		WDT_Restart (WDT);
 #endif
     };
 

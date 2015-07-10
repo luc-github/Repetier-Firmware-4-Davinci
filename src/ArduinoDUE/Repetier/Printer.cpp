@@ -663,6 +663,8 @@ void Printer::setup()
 #if FEATURE_WATCHDOG
     HAL::startWatchdog();
     HAL::pingWatchdog();
+#else
+	HAL::stopWatchdog();
 #endif // FEATURE_WATCHDOG
 #if FEATURE_CONTROLLER == CONTROLLER_VIKI
     HAL::delayMilliseconds(100);
