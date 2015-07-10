@@ -1659,6 +1659,9 @@ void UIDisplay::parse(const char *txt,bool ram)
 #if SDSUPPORT
                 if(sd.sdactive && sd.sdmode)
                 {
+					#if ENABLE_WIFI
+					static float previouspercent=-1;
+					#endif
                     addStringP(PSTR( UI_TEXT_PRINT_POS));
                     float percent;
                     if(sd.filesize < 2000000) percent = sd.sdpos * 100.0 / sd.filesize;
@@ -1666,10 +1669,40 @@ void UIDisplay::parse(const char *txt,bool ram)
                     addFloat(percent, 3, 1);
                     if(col<MAX_COLS)
                         uid.printCols[col++] = '%';
+                     #if ENABLE_WIFI
+                    
+					 if (floorf(10*previouspercent)!=floorf(10*percent))
+						{ 
+						if(HAL::bwifion){
+							previouspercent=percent;
+							Com::printF(Com::tInfo);
+							Com::printF(PSTR( UI_TEXT_PRINT_POS));
+							Com::printFloat(previouspercent,1);
+							Com::printF(PSTR("%"));
+							Com::println();
+							}
+						}
+                     #endif
                 }
                 else
 #endif
                     parse(statusMsg, true);
+//Davinci Wifi
+#if ENABLE_WIFI
+					static char lastmsg[21]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+					char currentmsg[21]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+					if(HAL::bwifion)
+						{
+						strcpy(currentmsg,uid.printCols);
+						//send only if different than previous and not empty
+						if (strcmp(lastmsg,currentmsg)!=0 && strlen(statusMsg)>0)
+							{
+							strcpy(lastmsg,currentmsg);
+							Com::print(Com::tStatus);
+							Com::printFLN(currentmsg);
+							}
+						}
+#endif
                 break;
             }
             if(c2 == 'c')
@@ -2029,7 +2062,6 @@ case 'P':
 }
 void UIDisplay::setStatusP(PGM_P txt,bool error)
 {
-	static char lastmsg[21]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0};
     if(!error && Printer::isUIErrorMessage()) return;
     uint8_t i=0;
     while(i<20)
@@ -2040,20 +2072,10 @@ void UIDisplay::setStatusP(PGM_P txt,bool error)
     }
     statusMsg[i]=0;
     if(error)
-        Printer::setUIErrorMessage(true);
-    #if ENABLE_WIFI
-    else
-    if (strcmp(lastmsg,statusMsg)!=0)
-		{
-		strcpy(lastmsg,statusMsg);
-		Com::print(Com::tStatus);
-		Com::printFLN(statusMsg);
-		}
-    #endif
+        Printer::setUIErrorMessage(true); 
 }
 void UIDisplay::setStatus(const char *txt,bool error)
 {
-	static char lastmsg[21]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0};
     if(!error && Printer::isUIErrorMessage()) return;
     uint8_t i=0;
     while(*txt && i<20)
@@ -2061,15 +2083,6 @@ void UIDisplay::setStatus(const char *txt,bool error)
     statusMsg[i]=0;
     if(error)
         Printer::setUIErrorMessage(true);
-    #if ENABLE_WIFI
-    else
-    if (strcmp(lastmsg,statusMsg)!=0)
-		{
-		strcpy(lastmsg,statusMsg);
-		Com::print(Com::tStatus);
-		Com::printFLN(statusMsg);
-		}
-    #endif
 }
 
 const UIMenu * const ui_pages[UI_NUM_PAGES] PROGMEM = UI_PAGES;
