@@ -579,7 +579,7 @@ void Com::printFloat(float number, uint8_t digits)
     return;
   }
 
-  print(String(round(number*pow(10.0,digits))/pow(10.0,digits)).c_str());
+  print(String(number,digits).c_str());
   /*// Handle negative numbers
   if (number < 0.0)
   {
