@@ -1659,30 +1659,16 @@ void UIDisplay::parse(const char *txt,bool ram)
 #if SDSUPPORT
                 if(sd.sdactive && sd.sdmode)
                 {
-					#if ENABLE_WIFI
-					static float previouspercent=-1;
-					#endif
                     addStringP(PSTR( UI_TEXT_PRINT_POS));
                     float percent;
                     if(sd.filesize < 2000000) percent = sd.sdpos * 100.0 / sd.filesize;
                     else percent = (sd.sdpos >> 8) * 100.0 / (sd.filesize >> 8);
                     addFloat(percent, 3, 1);
                     if(col<MAX_COLS)
+						{
                         uid.printCols[col++] = '%';
-                     #if ENABLE_WIFI
-                    
-					 if (floorf(10*previouspercent)!=floorf(10*percent))
-						{ 
-						if(HAL::bwifion){
-							previouspercent=percent;
-							Com::printF(Com::tInfo);
-							Com::printF(PSTR( UI_TEXT_PRINT_POS));
-							Com::printFloat(previouspercent,1);
-							Com::printF(PSTR("%"));
-							Com::println();
-							}
+                        uid.printCols[col++] = 0;
 						}
-                     #endif
                 }
                 else
 #endif
