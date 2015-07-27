@@ -859,8 +859,12 @@ on this endstop.
 // and the platform when the printer is at its home position.
 // If EEPROM is enabled these values will be overidden with the values in the EEPROM
 #if DAVINCI==1
-#define X_MAX_LENGTH 237 - ENDSTOP_X_BACK_ON_HOME
+#if MODEL==0
 #define Y_MAX_LENGTH 217 - ENDSTOP_Y_BACK_ON_HOME
+#else
+#define Y_MAX_LENGTH 215 - ENDSTOP_Y_BACK_ON_HOME
+#endif
+#define X_MAX_LENGTH 237 - ENDSTOP_X_BACK_ON_HOME
 #define Z_MAX_LENGTH 202 - ENDSTOP_Z_BACK_ON_HOME
 #else
 #define X_MAX_LENGTH 199 - ENDSTOP_X_BACK_ON_HOME
@@ -1329,9 +1333,14 @@ See: AdditionalArduinoFiles: README.txt on how to install them.
 #define Z_PROBE_X1 -7
 #define Z_PROBE_Y1 -10
 #define Z_PROBE_X2 -7
-#define Z_PROBE_Y2 205
 #define Z_PROBE_X3 179
+#if MODEL==0
+#define Z_PROBE_Y2 205
 #define Z_PROBE_Y3 205
+#else
+#define Z_PROBE_Y2 203
+#define Z_PROBE_Y3 203
+#endif
 //Manual bed leveling
 #define MANUAL_LEVEL_X1 100
 #define MANUAL_LEVEL_Y1 190
