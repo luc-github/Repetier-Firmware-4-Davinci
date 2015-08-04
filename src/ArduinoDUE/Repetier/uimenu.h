@@ -1015,9 +1015,11 @@ UI_MENU_ACTIONCOMMAND(ui_menu_quick_preheat_abs,UI_TEXT_PREHEAT_ABS,UI_ACTION_PR
 UI_MENU_ACTIONCOMMAND(ui_menu_quick_cooldown,UI_TEXT_COOLDOWN_MENU,UI_ACTION_COOLDOWN, ADVANCED_MODE)
 //disable steppers
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_quick_stopstepper,UI_TEXT_DISABLE_STEPPER,UI_ACTION_DISABLE_STEPPER,0,MENU_MODE_PRINTING, ALL_MODE)
+//bed down
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_bed_down,UI_TEXT_BED_DOWN,UI_ACTION_BED_DOWN,0,MENU_MODE_PRINTING, ALL_MODE)
 
-#define UI_MENU_MAINTENANCE  {UI_MENU_ADDCONDBACK &ui_menu_load_unload_entry, UI_MENU_AUTOLEVEL &ui_menu_manual_level, UI_CLEAN_NOZZLE_ENTRY UI_CLEAN_DRIPBOX_ENTRY &ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_cooldown,&ui_menu_quick_stopstepper}
-UI_MENU(ui_menu_maintenance,UI_MENU_MAINTENANCE,6+UI_MENU_AUTOLEVEL_CNT+UI_CLEAN_NOZZLE_COUNT+UI_CLEAN_DRIPBOX_COUNT+UI_MENU_BACKCNT);//BUG without this ; compilation crash
+#define UI_MENU_MAINTENANCE  {UI_MENU_ADDCONDBACK &ui_menu_load_unload_entry, UI_MENU_AUTOLEVEL &ui_menu_manual_level, UI_CLEAN_NOZZLE_ENTRY UI_CLEAN_DRIPBOX_ENTRY &ui_menu_bed_down,&ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_cooldown,&ui_menu_quick_stopstepper}
+UI_MENU(ui_menu_maintenance,UI_MENU_MAINTENANCE,7+UI_MENU_AUTOLEVEL_CNT+UI_CLEAN_NOZZLE_COUNT+UI_CLEAN_DRIPBOX_COUNT+UI_MENU_BACKCNT);//BUG without this ; compilation crash
 UI_MENU_SUBMENU(ui_menu_maintenance_entry, UI_TEXT_MAINTENANCE, ui_menu_maintenance, ALL_MODE)
 
 // **** Positionning menu

@@ -114,6 +114,7 @@
 	#define UI_TEXT_EXTR_XOFF         "Xoffst:%Xx"
 	#define UI_TEXT_EXTR_YOFF         "Yoffst:%Xy"
 #endif
+#define UI_TEXT_BED_DOWN "Bed Down"
 #define UI_TEXT_WIFI_ONOFF "Wifi:       %wo"
 #define UI_TEXT_REDO_ACTION "Do it again ?"
 #define UI_TEXT_X_LENGTH "X Length:%Lxmm"

@@ -4016,6 +4016,36 @@ case UI_ACTION_LOAD_FAILSAFE:
             else UI_STATUS(UI_TEXT_LOAD_FAILSAFE);
             //skipBeep = true;
             break;
+     case UI_ACTION_BED_DOWN:
+		{
+		if(!allowMoves) return UI_ACTION_BED_DOWN;
+		int tmpmenu=menuLevel;
+        int tmpmenupos=menuPos[menuLevel];
+         UIMenu *tmpmen = (UIMenu*)menu[menuLevel];
+		 if (!Printer::isZHomed())//ask for home to secure movement
+			{
+			 if (confirmationDialog(UI_TEXT_DO_YOU ,UI_TEXT_HOME_Z,UI_TEXT_WARNING_POS_Z_UNKNOWN,UI_CONFIRMATION_TYPE_YES_NO,true))
+				{
+				 executeAction(UI_ACTION_HOME_Z,true);
+				}
+			}
+		if(Printer::isZHomed())//check if accepted to home
+			{
+            menuLevel=0;
+            menuPos[0] = 0;
+            refreshPage();
+			UI_STATUS(UI_TEXT_PLEASE_WAIT);
+			Printer::moveTo(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+Printer::zMin+Printer::zLength,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+			Commands::waitUntilEndOfAllMoves();
+			Commands::printCurrentPosition(PSTR("UI_ACTION_ZPOSITION "));
+			}
+		Printer::setMenuMode(MENU_MODE_PRINTING,false);
+		menuLevel=tmpmenu;
+		menuPos[menuLevel]=tmpmenupos;
+		menu[menuLevel]=tmpmen;
+		refreshPage();
+		}
+		 break;
 #if ENABLE_CLEAN_NOZZLE==1
     case UI_ACTION_CLEAN_NOZZLE:
         {//be sure no issue
@@ -4556,6 +4586,10 @@ case UI_ACTION_LOAD_FAILSAFE:
          case STEP_EXT_ASK_CONTINUE:
             if(!PrintLine::hasLines())
             {
+				#if FEATURE_RETRACTION
+				if (load_dir==1)
+					Extruder::current->retractDistance(EEPROM_FLOAT(RETRACTION_LENGTH));
+				#endif
                 //ask to redo or stop
                 if (confirmationDialog(UI_TEXT_PLEASE_CONFIRM ,UI_TEXT_CONTINUE_ACTION,UI_TEXT_PUSH_FILAMENT,UI_CONFIRMATION_TYPE_YES_NO,true))
                         {

@@ -263,6 +263,7 @@ What display type do you use?
 #define UI_ACTION_Z_MIN                 1542
 #define UI_ACTION_TOGGLE_POWERSAVE	1543
 #define UI_ACTION_STOP_PRINTING_FROM_MENU 1544
+#define UI_ACTION_BED_DOWN 1545
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
