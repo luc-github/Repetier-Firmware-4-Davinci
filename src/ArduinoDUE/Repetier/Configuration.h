@@ -21,7 +21,7 @@
 
 // ################## EDIT THESE SETTINGS MANUALLY ################
 
-#define DAVINCI 1 // "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN
+#define DAVINCI 1 // "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN, 4 for AiO
 #define MODEL  0//"0" for first generation (jumper JP1 to reset ) , "1" for new generation   (jumper J37 to reset)
 #define REPURPOSE_FAN_TO_COOL_EXTRUSIONS 0 //Setting this to 1 will repurpose the main Extruder cooling fan to be controlled VIA M106/M107
                                                                                             //Warning: for DaVinci 1.0 need to add a permanent fan with power supply to cool extruder
@@ -47,18 +47,31 @@
 #define UI_AUTOLIGHTOFF_AFTER 1
 #define ENABLE_CLEAN_DRIPBOX 1
 #define ENABLE_CLEAN_NOZZLE 1
+//ensure of some define if AiO
+#if DAVINCI==4
+//no drip box
+#undef ENABLE_CLEAN_DRIPBOX
+#define ENABLE_CLEAN_DRIPBOX 0
+//it must be model 1
+#undef MODEL
+#define MODEL 1
+#endif
 //to enable communication using wifi module set to 1
 #define ENABLE_WIFI 0
 //if wifi is enabled serial need to slow down a little, this is a delay in ms after a '\n' so normaly after a command or a message
 #define DELAY_BY_LINE 50
 #if ENABLE_CLEAN_NOZZLE
-  #if DAVINCI==1 //cleaner of Davinci 1.0 is not in same position of 2.0
+  #if DAVINCI==1 //cleaner of Davinci 1.0 is not in same position of 2.0 neither AiO
     #define CLEAN_X 20
     #define CLEAN_Y 20
   #endif
-  #if DAVINCI>=2
+  #if DAVINCI==2 || DAVINCI==3
     #define CLEAN_X 0
     #define CLEAN_Y 30
+  #endif
+  #if DAVINCI==4
+    #define CLEAN_X 35
+    #define CLEAN_Y 50
   #endif
 #endif
 #define CASE_KEEP_LIGHT_DEFAULT_ON 1
@@ -96,7 +109,8 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // BASIC SETTINGS: select your board type, thermistor type, axis scaling, and endstop configuration
 
 /** Number of extruders. Maximum 6 extruders. */
-#if DAVINCI==1
+//1.0/1.0A/AiO have 1 extruder
+#if DAVINCI==1 || DAVINCI==4
 #define NUM_EXTRUDER 1
 #else
 #define NUM_EXTRUDER 2
@@ -269,7 +283,7 @@ Overridden if EEPROM activated.*/
 #define EXT0_STEP_PIN E0_STEP_PIN
 #define EXT0_DIR_PIN E0_DIR_PIN
 // set to false/true for normal / inverse direction
-#if DAVINCI==1
+#if DAVINCI==1 || DAVINCI==4
 #define EXT0_INVERSE false
 #else
 #define EXT0_INVERSE true
@@ -466,7 +480,7 @@ cog. Direct drive extruder need 0. */
 #define EXT1_SELECT_COMMANDS "M117 Extruder 2"
 #define EXT1_DESELECT_COMMANDS ""
 /** The extruder cooler is a fan to cool the extruder when it is heating. If you turn the etxruder on, the fan goes on. */
-#if DAVINCI==1
+#if DAVINCI==1 || DAVINCI==4
 #define EXT1_EXTRUDER_COOLER_PIN -1
 #endif
 #if DAVINCI==2
@@ -840,7 +854,7 @@ on this endstop.
 // When you have several endstops in one circuit you need to disable it after homing by moving a
 // small amount back. This is also the case with H-belt systems.
 #define ENDSTOP_X_BACK_ON_HOME 0
-#if DAVINCI==1
+#if DAVINCI==1 || DAVINCI==4
 #define ENDSTOP_Y_BACK_ON_HOME 0
 #else
 //to avoid to hit plate when homing
@@ -865,16 +879,22 @@ on this endstop.
 #define Y_MAX_LENGTH 215 - ENDSTOP_Y_BACK_ON_HOME
 #endif
 #define X_MAX_LENGTH 237 - ENDSTOP_X_BACK_ON_HOME
-#define Z_MAX_LENGTH 202 - ENDSTOP_Z_BACK_ON_HOME
 #else
 #define X_MAX_LENGTH 199 - ENDSTOP_X_BACK_ON_HOME
 #define Y_MAX_LENGTH 211 - ENDSTOP_Y_BACK_ON_HOME
-#define Z_MAX_LENGTH 202 - ENDSTOP_Z_BACK_ON_HOME
+#endif
+
+#if DAVINCI==4
+#define X_MAX_LENGTH 237 - ENDSTOP_X_BACK_ON_HOME
+#define Y_MAX_LENGTH 217 - ENDSTOP_Y_BACK_ON_HOME
+#define Z_MAX_LENGTH 190 - ENDSTOP_Z_BACK_ON_HOME
+#else
+#define Z_MAX_LENGTH 200 - ENDSTOP_Z_BACK_ON_HOME
 #endif
 
 // Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
 // of the bed. Maximum coordinate is given by adding the above X_MAX_LENGTH values.
-#if DAVINCI==1
+#if DAVINCI==1 || DAVINCI==4
 #define X_MIN_POS -33
 #define Y_MIN_POS -12
 #define Z_MIN_POS 0
@@ -1319,7 +1339,11 @@ See: AdditionalArduinoFiles: README.txt on how to install them.
 #define Z_PROBE_SWITCHING_DISTANCE 1 // Distance to safely switch off probe
 #define Z_PROBE_REPETITIONS 1 // Repetitions for probing at one point.
 /** The height is the difference between activated probe position and nozzle height. */
+#if MODEL==0
 #define Z_PROBE_HEIGHT 0.28
+#else
+#define Z_PROBE_HEIGHT 0.54
+#endif
 /** These scripts are run before resp. after the z-probe is done. Add here code to activate/deactivate probe if needed. */
 #define Z_PROBE_START_SCRIPT ""
 #define Z_PROBE_FINISHED_SCRIPT ""
@@ -1329,7 +1353,7 @@ See: AdditionalArduinoFiles: README.txt on how to install them.
    The same 3 points are used for the G29 command.
 */
 #define FEATURE_AUTOLEVEL true
-#if DAVINCI==1
+#if DAVINCI==1 || DAVINCI==4
 #define Z_PROBE_X1 -7
 #define Z_PROBE_Y1 -10
 #define Z_PROBE_X2 -7
@@ -1338,8 +1362,13 @@ See: AdditionalArduinoFiles: README.txt on how to install them.
 #define Z_PROBE_Y2 205
 #define Z_PROBE_Y3 205
 #else
+#if DAVINCI==4
+#define Z_PROBE_Y2 200
+#define Z_PROBE_Y3 200
+#else
 #define Z_PROBE_Y2 203
 #define Z_PROBE_Y3 203
+#endif
 #endif
 //Manual bed leveling
 #define MANUAL_LEVEL_X1 100
@@ -1516,14 +1545,20 @@ Select the language to use.
 #if DAVINCI==1
 #define UI_PRINTER_NAME    "  Da Vinci 1.0"
 #define DAVINCI_TYPE "1"
-#else
-#define UI_PRINTER_NAME    "  Da Vinci 2.0"
+#endif
 #if DAVINCI==2
+#define UI_PRINTER_NAME    "  Da Vinci 2.0"
 #define DAVINCI_TYPE "2"
-#else
+#endif
+#if DAVINCI==3
+#define UI_PRINTER_NAME    "  Da Vinci 2.0"
 #define DAVINCI_TYPE "3"
 #endif
+#if DAVINCI==4
+#define UI_PRINTER_NAME    "  Da Vinci AiO"
+#define DAVINCI_TYPE "4"
 #endif
+
 #define UI_PRINTER_COMPANY "By XYZ Printing"
 
 #if MODEL == 0
