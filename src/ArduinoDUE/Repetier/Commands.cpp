@@ -1268,7 +1268,7 @@ void Commands::processMCode(GCode *com)
                 else
                 {
                     pinMode(pin_number, INPUT_PULLUP);
-                    Com::printF(Com::tSpaceToSpace, pin_number);
+                    Com::printF(Com::tReadInput, pin_number);
                     Com::printFLN(Com::tSpaceIsSpace, digitalRead(pin_number));
                 }
             }

@@ -26,6 +26,7 @@ class Com
 {
     public:
 //Davinci Specific
+FSTRINGVAR(tReadInput)
 FSTRINGVAR(tReset)
 FSTRINGVAR(tTempExtABS)
 FSTRINGVAR(tTempExtPLA)

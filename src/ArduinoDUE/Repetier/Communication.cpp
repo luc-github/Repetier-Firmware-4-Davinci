@@ -33,6 +33,7 @@ FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWAR
 #endif
 #endif
 //Davinci Specific
+FSTRINGVALUE(Com::tReadInput,"Read input: ")
 FSTRINGVALUE(Com::tReset,RESET_IDENTIFIER)
 FSTRINGVALUE(Com::tTempExtABS,"Temp Ext ABS:")
 FSTRINGVALUE(Com::tTempExtPLA,"Temp Ext PLA:")
