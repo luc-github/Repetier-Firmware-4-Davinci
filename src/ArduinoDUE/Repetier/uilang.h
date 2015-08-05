@@ -208,6 +208,7 @@
 #define UI_TEXT_PREHEAT_PLA      "Preheat PLA   %B1"
 #define UI_TEXT_PREHEAT_ABS      "Preheat ABS   %B2"
 #define UI_TEXT_LIGHTS_ONOFF     "Lights:     %lo"
+#define UI_TEXT_BADGE_LIGHT_ONOFF     "Badge light:%lb"
 #define UI_TEXT_SOUND_ONOF	 "Sound:      %so"
 #define UI_TEXT_CONFIRMATION     "%C1","%C2","%C3","%C4"
 #define UI_TEXT_YES_SELECTED     "  [Yes]    No   "

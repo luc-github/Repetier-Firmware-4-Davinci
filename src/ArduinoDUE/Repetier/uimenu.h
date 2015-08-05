@@ -167,7 +167,8 @@ delta stuff
 Davinci Specific, extra information
 %so:Sound On/Off
 %la:LastAction
-%lo:Light On/Off
+%lo:Lights On/Off
+%lo:Badge Light On/Off
 %lk:KeepLight On/Off
 %sf:Filament Sensors:On/Off
 %zm : zMin
@@ -1161,6 +1162,15 @@ UI_MENU_ACTIONCOMMAND(ui_menu_toggle_light,UI_TEXT_LIGHTS_ONOFF,UI_ACTION_LIGHTS
 #define UI_TOOGLE_LIGHT_ENTRY
 #define UI_TOGGLE_LIGHT_COUNT 0
 #endif
+//Badge light on off
+#if BADGE_LIGHT_PIN > 0
+UI_MENU_ACTIONCOMMAND(ui_menu_toggle_badge_light,UI_TEXT_BADGE_LIGHT_ONOFF,UI_ACTION_BADGE_LIGHT_ONOFF, ALL_MODE)
+#define UI_TOOGLE_BADGE_LIGHT_ENTRY ,&ui_menu_toggle_badge_light
+#define UI_TOGGLE_BADGE_LIGHT_COUNT 1
+#else
+#define UI_TOOGLE_BADGE_LIGHT_ENTRY
+#define UI_TOGGLE_BADGE_LIGHT_COUNT 0
+#endif
 //sound on off
 #if FEATURE_BEEPER
 UI_MENU_ACTIONCOMMAND(ui_menu_sound,UI_TEXT_SOUND_ONOF,UI_ACTION_SOUND, ALL_MODE)
@@ -1420,8 +1430,8 @@ UI_MENU(ui_menu_positions_size_seetings,UI_MENU_POSITIONS_SIZE_SETTINGS,6+UI_TOO
 
 UI_MENU_SUBMENU(ui_menu_positions_size_settings_entry, UI_TEXT_POSITION,ui_menu_positions_size_seetings, ADVANCED_MODE)
 
-#define UI_MENU_SETTINGS  {UI_MENU_ADDCONDBACK &ui_menu_display_mode,&ui_menu_quick_speedmultiply, &ui_menu_quick_flowmultiply UI_TOOGLE_LIGHT_ENTRY UI_SOUND_ENTRY UI_SENSOR_ONOFF_ENTRY UI_TOP_SENSOR_ONOFF_ENTRY UI_WIFI_ONOFF_ENTRY UI_POWER_SAVE_ENTRY ,&ui_menu_powersave_menu_entry MENU_PSON_ENTRY,&ui_menu_general_baud,&ui_menu_conf_accel,&ui_menu_conf_feed,&ui_menu_conf_extr UI_MENU_BEDCONF_COND ,&ui_menu_positions_size_settings_entry,&ui_menu_version UI_MENU_EEPROM_COND UI_MENU_DELTA_COND UI_MENU_SL_COND}
-UI_MENU(ui_menu_settings,UI_MENU_SETTINGS,10+UI_TOGGLE_LIGHT_COUNT+UI_SOUND_COUNT+UI_SENSOR_ONOFF_COUNT+UI_TOP_SENSOR_ONOFF_COUNT+UI_WIFI_ONOFF_COUNT+UI_POWER_SAVE_COUNT+MENU_PSON_COUNT+UI_MENU_EEPROM_CNT+UI_MENU_BEDCONF_CNT+UI_MENU_DELTA_CNT+UI_MENU_SL_CNT+UI_MENU_BACKCNT);//BUG without this ; compilation crash
+#define UI_MENU_SETTINGS  {UI_MENU_ADDCONDBACK &ui_menu_display_mode,&ui_menu_quick_speedmultiply, &ui_menu_quick_flowmultiply UI_TOOGLE_LIGHT_ENTRY UI_TOOGLE_BADGE_LIGHT_ENTRY UI_SOUND_ENTRY UI_SENSOR_ONOFF_ENTRY UI_TOP_SENSOR_ONOFF_ENTRY UI_WIFI_ONOFF_ENTRY UI_POWER_SAVE_ENTRY ,&ui_menu_powersave_menu_entry MENU_PSON_ENTRY,&ui_menu_general_baud,&ui_menu_conf_accel,&ui_menu_conf_feed,&ui_menu_conf_extr UI_MENU_BEDCONF_COND ,&ui_menu_positions_size_settings_entry,&ui_menu_version UI_MENU_EEPROM_COND UI_MENU_DELTA_COND UI_MENU_SL_COND}
+UI_MENU(ui_menu_settings,UI_MENU_SETTINGS,10+UI_TOGGLE_LIGHT_COUNT+UI_TOGGLE_BADGE_LIGHT_COUNT+UI_SOUND_COUNT+UI_SENSOR_ONOFF_COUNT+UI_TOP_SENSOR_ONOFF_COUNT+UI_WIFI_ONOFF_COUNT+UI_POWER_SAVE_COUNT+MENU_PSON_COUNT+UI_MENU_EEPROM_CNT+UI_MENU_BEDCONF_CNT+UI_MENU_DELTA_CNT+UI_MENU_SL_CNT+UI_MENU_BACKCNT);//BUG without this ; compilation crash
 UI_MENU_SUBMENU(ui_menu_settings_entry, UI_TEXT_SETTINGS, ui_menu_settings, ALL_MODE)
 
 // **** Fan menu

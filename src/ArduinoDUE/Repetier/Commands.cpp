@@ -2061,6 +2061,12 @@ void Commands::executeGCode(GCode *com)
                 TOGGLE(CASE_LIGHTS_PIN);
                 }
             #endif
+            #if BADGE_LIGHT_PIN > 0
+            if (!(READ(BADGE_LIGHT_PIN)) && EEPROM::busebadgelight && EEPROM::buselight)
+                {
+                TOGGLE(BADGE_LIGHT_PIN);
+                }
+            #endif
             #if defined(UI_BACKLIGHT_PIN)
             if (!(READ(UI_BACKLIGHT_PIN))) WRITE(UI_BACKLIGHT_PIN, HIGH);
             #endif

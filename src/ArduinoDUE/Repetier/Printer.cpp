@@ -953,6 +953,11 @@ SET_INPUT(FIL_SENSOR2_PIN);
     //Davinci Specific, we power on lights based on state set in EEPROM 
     WRITE(CASE_LIGHTS_PIN, EEPROM::buselight);
 #endif // CASE_LIGHTS_PIN
+#if BADGE_LIGHT_PIN >= 0
+    SET_OUTPUT(BADGE_LIGHT_PIN);
+    //Davinci Specific, we power on lights based on state set in EEPROM 
+    WRITE(BADGE_LIGHT_PIN, EEPROM::buselight & EEPROM::busebadgelight);
+#endif // EEPROM::buselight
 #if GANTRY
     Printer::motorX = 0;
     Printer::motorYorZ = 0;

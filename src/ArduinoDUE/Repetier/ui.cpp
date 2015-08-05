@@ -1644,6 +1644,9 @@ void UIDisplay::parse(const char *txt,bool ram)
          break;
         case 'l':
             if(c2 == 'a') addInt(lastAction,4);
+#if defined(BADGE_LIGHT_PIN) && BADGE_LIGHT_PIN >= 0
+            else if(c2 == 'b') addStringOnOff(READ(BADGE_LIGHT_PIN));        // Lights on/off
+#endif
 #if defined(CASE_LIGHTS_PIN) && CASE_LIGHTS_PIN >= 0
             else if(c2 == 'o') addStringOnOff(READ(CASE_LIGHTS_PIN));        // Lights on/off
 //Davinci Specific, Light management
@@ -3672,6 +3675,12 @@ while (process_it)
                 TOGGLE(CASE_LIGHTS_PIN);
                 }
             #endif
+            #if BADGE_LIGHT_PIN > 0
+            if (!(READ(BADGE_LIGHT_PIN)) && EEPROM::busebadgelight && EEPROM::buselight)
+                {
+                TOGGLE(BADGE_LIGHT_PIN);
+                }
+            #endif
             #if defined(UI_BACKLIGHT_PIN)
             if (!(READ(UI_BACKLIGHT_PIN))) WRITE(UI_BACKLIGHT_PIN, HIGH);
             #endif
@@ -3734,6 +3743,12 @@ int UIDisplay::executeAction(int action, bool allowMoves)
     if (!(READ(CASE_LIGHTS_PIN)) && EEPROM::buselight)
         {
         TOGGLE(CASE_LIGHTS_PIN);
+        }
+    #endif
+    #if BADGE_LIGHT_PIN > 0
+    if (!(READ(BADGE_LIGHT_PIN)) && EEPROM::buselight && EEPROM::busebadgelight)
+        {
+        TOGGLE(BADGE_LIGHT_PIN);
         }
     #endif
     #if defined(UI_BACKLIGHT_PIN)
@@ -4003,6 +4018,19 @@ int UIDisplay::executeAction(int action, bool allowMoves)
             UI_STATUS(UI_TEXT_LIGHTS_ONOFF);
             break;
 #endif
+//Davinci Specific, save state to EEPROM
+#if BADGE_LIGHT_PIN > -1
+        case UI_ACTION_BADGE_LIGHT_ONOFF:
+            TOGGLE(BADGE_LIGHT_PIN);
+            if (READ(BADGE_LIGHT_PIN))
+            EEPROM::busebadgelight=true;
+            else
+            EEPROM::busebadgelight=false;
+            //save directly to eeprom
+            EEPROM:: update(EPR_BADGE_LIGHT_ON,EPR_TYPE_BYTE,EEPROM::busebadgelight,0);
+            UI_STATUS(UI_TEXT_BADGE_LIGHT_ONOFF);
+            break;
+#endif
 //Davinci Specific
 case UI_ACTION_LOAD_FAILSAFE:
             EEPROM::restoreEEPROMSettingsFromConfiguration();
@@ -4170,6 +4198,12 @@ case UI_ACTION_LOAD_FAILSAFE:
                     TOGGLE(CASE_LIGHTS_PIN);
                     }
                 #endif
+                #if BADGE_LIGHT_PIN > 0
+				if (!(READ(BADGE_LIGHT_PIN)) && EEPROM::busebadgelight && EEPROM::buselight)
+                {
+                TOGGLE(BADGE_LIGHT_PIN);
+                }
+				#endif
                 #if defined(UI_BACKLIGHT_PIN)
                 if (!(READ(UI_BACKLIGHT_PIN))) WRITE(UI_BACKLIGHT_PIN, HIGH);
                 #endif
@@ -4304,6 +4338,12 @@ case UI_ACTION_LOAD_FAILSAFE:
                     TOGGLE(CASE_LIGHTS_PIN);
                     }
                 #endif
+                #if BADGE_LIGHT_PIN > 0
+				if (!(READ(BADGE_LIGHT_PIN)) && EEPROM::busebadgelight && EEPROM::buselight)
+					{
+					TOGGLE(BADGE_LIGHT_PIN);
+					}
+				#endif
                 #if defined(UI_BACKLIGHT_PIN)
                 if (!(READ(UI_BACKLIGHT_PIN))) WRITE(UI_BACKLIGHT_PIN, HIGH);
                 #endif
@@ -4381,6 +4421,12 @@ case UI_ACTION_LOAD_FAILSAFE:
                     TOGGLE(CASE_LIGHTS_PIN);
                     }
                 #endif
+                #if BADGE_LIGHT_PIN > 0
+				if (!(READ(BADGE_LIGHT_PIN)) && EEPROM::busebadgelight && EEPROM::buselight)
+					{
+					TOGGLE(BADGE_LIGHT_PIN);
+					}
+				#endif
                 #if defined(UI_BACKLIGHT_PIN)
                 if (!(READ(UI_BACKLIGHT_PIN))) WRITE(UI_BACKLIGHT_PIN, HIGH);
                 #endif
@@ -4644,6 +4690,12 @@ case UI_ACTION_LOAD_FAILSAFE:
                     TOGGLE(CASE_LIGHTS_PIN);
                     }
                 #endif
+                #if BADGE_LIGHT_PIN > 0
+				if (!(READ(BADGE_LIGHT_PIN)) && EEPROM::busebadgelight && EEPROM::buselight)
+					{
+					TOGGLE(BADGE_LIGHT_PIN);
+					}
+				#endif
                 #if defined(UI_BACKLIGHT_PIN)
                 if (!(READ(UI_BACKLIGHT_PIN))) WRITE(UI_BACKLIGHT_PIN, HIGH);
                 #endif
@@ -4965,6 +5017,12 @@ case UI_ACTION_LOAD_FAILSAFE:
                     TOGGLE(CASE_LIGHTS_PIN);
                     }
                 #endif
+                #if BADGE_LIGHT_PIN > 0
+				if (!(READ(BADGE_LIGHT_PIN)) && EEPROM::busebadgelight && EEPROM::buselight)
+					{
+					TOGGLE(BADGE_LIGHT_PIN);
+					}
+				#endif
                 #if defined(UI_BACKLIGHT_PIN)
                 if (!(READ(UI_BACKLIGHT_PIN))) WRITE(UI_BACKLIGHT_PIN, HIGH);
                 #endif
@@ -5310,6 +5368,12 @@ case UI_ACTION_LOAD_FAILSAFE:
                     TOGGLE(CASE_LIGHTS_PIN);
                     }
                 #endif
+                #if BADGE_LIGHT_PIN > 0
+				if (!(READ(BADGE_LIGHT_PIN)) && EEPROM::busebadgelight && EEPROM::buselight)
+					{
+					TOGGLE(BADGE_LIGHT_PIN);
+					}
+				#endif
                 #if defined(UI_BACKLIGHT_PIN)
                 if (!(READ(UI_BACKLIGHT_PIN))) WRITE(UI_BACKLIGHT_PIN, HIGH);
                 #endif
@@ -6109,6 +6173,12 @@ if ((ui_autolightoff_time<time) && (EEPROM::timepowersaving>0) )
             TOGGLE(CASE_LIGHTS_PIN);
             }
         #endif
+        #if BADGE_LIGHT_PIN > 0
+		if ((READ(BADGE_LIGHT_PIN)) && EEPROM::busebadgelight && EEPROM::buselight)
+			{
+			TOGGLE(BADGE_LIGHT_PIN);
+			}
+		#endif
         #if defined(UI_BACKLIGHT_PIN)
         WRITE(UI_BACKLIGHT_PIN, LOW);
         #endif

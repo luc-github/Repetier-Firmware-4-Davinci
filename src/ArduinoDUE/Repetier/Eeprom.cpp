@@ -97,6 +97,9 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     maxInactiveTime = MAX_INACTIVE_TIME * 1000L;
     //Davinci Specific
     EEPROM::buselight = bool(CASE_LIGHT_DEFAULT_ON);
+#if BADGE_LIGHT_PIN > -1
+    EEPROM::busebadgelight = bool(CASE_BADGE_LIGHT_DEFAULT_ON);
+#endif
     EEPROM::bkeeplighton = bool(CASE_KEEP_LIGHT_DEFAULT_ON);
     UIDisplay::display_mode=CASE_DISPLAY_MODE_DEFAULT;
     #if FEATURE_BEEPER
@@ -114,6 +117,9 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     #if CASE_LIGHTS_PIN>=0
     WRITE(CASE_LIGHTS_PIN, byte(EEPROM::buselight)); 
     #endif // CASE_LIGHTS_PIN
+    #if BADGE_LIGHT_PIN>=0
+    WRITE(BADGE_LIGHT_PIN, byte(EEPROM::busebadgelight & EEPROM::buselight)); 
+    #endif // BADGE_LIGHT_PIN
     stepperInactiveTime = STEPPER_INACTIVE_TIME * 1000L;
     Printer::axisStepsPerMM[X_AXIS] = XAXIS_STEPS_PER_MM;
     Printer::axisStepsPerMM[Y_AXIS] = YAXIS_STEPS_PER_MM;
@@ -363,6 +369,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 }
 //Davinci Specific
 bool EEPROM::buselight=false;
+bool EEPROM::busebadgelight=false;
 bool EEPROM::busesensor=false;
 bool EEPROM::btopsensor=false;
 bool EEPROM::bkeeplighton=true;
@@ -439,6 +446,9 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
 //Davinci Specific
     HAL::eprSetByte(EPR_LIGHT_ON,EEPROM::buselight);
     HAL::eprSetByte(EPR_KEEP_LIGHT_ON,EEPROM::bkeeplighton);
+#if BADGE_LIGHT_PIN > -1
+    HAL::eprSetByte(EPR_BADGE_LIGHT_ON,EEPROM::busebadgelight);
+#endif
     
     HAL::eprSetByte(EPR_DISPLAY_MODE,UIDisplay::display_mode);
 #if defined(FIL_SENSOR1_PIN)
@@ -658,12 +668,18 @@ void EEPROM::readDataFromEEPROM()
 //Davinci Specific
 	EEPROM::buselight=HAL::eprGetByte(EPR_LIGHT_ON);
 	EEPROM::bkeeplighton=HAL::eprGetByte(EPR_KEEP_LIGHT_ON);
+#if BADGE_LIGHT_PIN > -1
+	EEPROM::busebadgelight=HAL::eprGetByte(EPR_BADGE_LIGHT_ON);
+#endif
 	UIDisplay::display_mode=HAL::eprGetByte(EPR_DISPLAY_MODE);
 	//need to be sure a valid value is set
 	if(!((UIDisplay::display_mode==ADVANCED_MODE)||(UIDisplay::display_mode==EASY_MODE)))UIDisplay::display_mode=ADVANCED_MODE;
 	#if CASE_LIGHTS_PIN>=0
         WRITE(CASE_LIGHTS_PIN, byte(EEPROM::buselight));
 	#endif // CASE_LIGHTS_PIN
+	#if BADGE_LIGHT_PIN>=0
+        WRITE(BADGE_LIGHT_PIN, byte(EEPROM::busebadgelight & EEPROM::buselight));
+	#endif // BADGE_LIGHT_PIN
 #if defined(FIL_SENSOR1_PIN)
 	EEPROM::busesensor=HAL::eprGetByte(EPR_FIL_SENSOR_ON);
 #endif
@@ -949,6 +965,9 @@ void EEPROM::writeSettings()
 //Davinci Specific
     writeByte(EPR_DISPLAY_MODE, Com::tDisplayMode);
     writeByte(EPR_LIGHT_ON,Com::tLightOn);
+#if BADGE_LIGHT_PIN > -1
+    writeByte(EPR_BADGE_LIGHT_ON,Com::tBadgeLightOn);
+#endif
     writeByte(EPR_KEEP_LIGHT_ON,Com::tKeepLightOn);
  #if defined(FIL_SENSOR1_PIN)
 	  writeByte(EPR_FIL_SENSOR_ON,Com::tSensorOn);

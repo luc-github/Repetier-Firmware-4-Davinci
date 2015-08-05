@@ -143,6 +143,7 @@ have problems with other modules using the eeprom */
 #define EPR_TEMP_BED_ABS		1172
 #define EPR_TOP_SENSOR_ON     1176
 #define EPR_WIFI_ON     1177
+#define EPR_BADGE_LIGHT_ON 1178
 
 #if EEPROM_MODE != 0
 #define EEPROM_FLOAT(x) HAL::eprGetFloat(EPR_##x)
@@ -213,6 +214,7 @@ public:
     static void initBaudrate();
     //Davinci Specific
     static bool buselight; 
+    static bool busebadgelight;
     static bool busesensor;
     static bool btopsensor;
     static bool bkeeplighton;
