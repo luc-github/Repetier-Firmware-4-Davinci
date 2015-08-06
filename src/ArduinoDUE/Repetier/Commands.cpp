@@ -2119,6 +2119,13 @@ Printer::setMenuModeEx(MENU_MODE_GCODE_PROCESSING,false);
 
 void Commands::emergencyStop()
 {
+//Davinci Specific, EEPROM is on SD Card
+#if defined(SDEEPROM)
+    if (!HAL::syncSdEeprom())
+    {
+        Com::printFLN(PSTR("SD EEPROM write error"));
+    }
+#endif
 #if defined(KILL_METHOD) && KILL_METHOD == 1
     HAL::resetHardware();
 #else
