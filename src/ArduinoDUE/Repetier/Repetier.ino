@@ -43,7 +43,7 @@ Implemented Codes
 - G11 S<1 = long retract, 0 = short retract = default> = Undo retraction according to stored setting
 - G20 - Units for G0/G1 are inches.
 - G21 - Units for G0/G1 are mm.
-- G28 - Home all axis or named axis.
+- G28 - Home all axis or named axis like G28 XY 
 - G29 S<0..2> - Z-Probe at the 3 defined probe points. S = 1 measure avg. zHeight, S = 2 store avg zHeight
 - G30 P<0..3> - Single z-probe at current position P = 1 first measurement, P = 2 Last measurement P = 0 or 3 first and last measurement
 - G31 - Write signal of probe sensor
@@ -53,13 +53,15 @@ Implemented Codes
 - G92 - Set current position to cordinates given
 - G131 - set extruder offset position to 0 - needed for calibration with G132
 - G132 - calibrate endstop positions. Call this, after calling G131 and after centering the extruder holder.
+- T0 - select extruder 1
+- T1 - select extruder 2
 
 RepRap M Codes
 
 - M104 - Set extruder target temp
 - M105 - Read current temp
-- M106 - Fan on
-- M107 - Fan off
+- M106 - Fan on (only if repurpose fan is enabled)
+- M107 - Fan off (only if repurpose fan is enabled)
 - M109 - Wait for extruder current temp to reach target temp.
 - M114 - Display current position
 
@@ -77,7 +79,7 @@ Custom M Codes
 - M29  - Stop SD write
 - M30 <filename> - Delete file on sd card
 - M32 <dirname> create subdirectory
-- M42 P<pin number> S<value 0..255> - Change output of pin P to S. Does not work on most important pins.
+- M42 P<pin number> S<value 0..255> - Change output of pin P to S. Does not work on most important pins, if no S: read value of pin
 - M50  - Stop print from host or SD Card 
 - M80  - Turn on power supply
 - M81  - Turn off power supply
@@ -86,7 +88,7 @@ Custom M Codes
 - M84  - Disable steppers until next move,
         or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
 - M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
-- M92  - Set axisStepsPerMM - same syntax as G92
+- M92  - Set axisStepsPerMM - same syntax as G1
 - M99 S<delayInSec> X0 Y0 Z0 - Disable motors for S seconds (default 10) for given axis.
 - M100 clean nozzle
 - M104 S<temp> T<extruder> P1 F1 - Set temperature without wait. P1 = wait for moves to finish, F1 = beep when temp. reached first time
