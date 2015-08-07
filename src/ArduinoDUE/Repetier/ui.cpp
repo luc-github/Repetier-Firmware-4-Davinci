@@ -4063,7 +4063,9 @@ case UI_ACTION_LOAD_FAILSAFE:
             menuPos[0] = 0;
             refreshPage();
 			UI_STATUS(UI_TEXT_PLEASE_WAIT);
-			Printer::moveTo(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+Printer::zMin+Printer::zLength,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+			Printer::lastCmdPos[Z_AXIS]=Printer::zMin+Printer::zMin+Printer::zLength;
+			Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+Printer::zMin+Printer::zLength,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+			Printer::updateCurrentPosition();
 			Commands::waitUntilEndOfAllMoves();
 			Commands::printCurrentPosition(PSTR("UI_ACTION_ZPOSITION "));
 			}
