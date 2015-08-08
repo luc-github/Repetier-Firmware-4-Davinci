@@ -4068,6 +4068,7 @@ case UI_ACTION_LOAD_FAILSAFE:
 			Printer::updateCurrentPosition();
 			Commands::waitUntilEndOfAllMoves();
 			Commands::printCurrentPosition(PSTR("UI_ACTION_ZPOSITION "));
+			UI_STATUS(UI_TEXT_BED_DOWN);
 			}
 		Printer::setMenuMode(MENU_MODE_PRINTING,false);
 		menuLevel=tmpmenu;
