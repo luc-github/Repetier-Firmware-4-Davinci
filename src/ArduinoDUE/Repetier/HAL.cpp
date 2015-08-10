@@ -60,6 +60,14 @@ HAL::~HAL()
 }
 
 //Davinci Specific
+#if FEATURE_BEEPER
+bool HAL::enablesound = true;
+#endif
+
+#if ENABLE_WIFI
+    bool HAL::bwifion=false;
+#endif //wifi feature
+
 #ifdef SDEEPROM
 #if !SDSUPPORT
 #error SDEEPROM requires SDCARSUPPORT
@@ -70,13 +78,6 @@ HAL::~HAL()
 
 #define SDEEPROM_SIZE 2048 // Minimum size used by Eeprom.cpp
 
-#if FEATURE_BEEPER
-bool HAL::enablesound = true;
-#endif
-
-#if ENABLE_WIFI
-    bool HAL::bwifion=false;
-#endif //wifi feature
 char HAL::sdEepromImage[SDEEPROM_SIZE] = { 0, };
 uint32_t HAL::sdEepromLastChanged = 0; // 0 = never.
 

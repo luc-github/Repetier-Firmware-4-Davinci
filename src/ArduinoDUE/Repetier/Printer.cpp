@@ -216,7 +216,7 @@ void Printer::cleanNozzle(bool restoreposition)
 	//sixth step Z probe
 	moveToReal(xMin,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	#endif
-	#if DAVINCI ==4
+	#if DAVINCI ==4 || DAVINCI ==0
 	moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,zMin+3,IGNORE_COORDINATE,homingFeedrate[Z_AXIS]);
     Commands::waitUntilEndOfAllMoves();
 	//first step noze

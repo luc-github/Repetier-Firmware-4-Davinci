@@ -326,30 +326,40 @@ STEPPER_CURRENT_CONTROL
 
 // Available chip select pins for HW SPI are 4 10 52
 #if (SDSS == 4) || (SDSS == 10) || (SDSS == 52) 
-#if (SDSS == 10)
-#define SPI_PIN         77
-#define SPI_CHAN        0
-#else
-#if (SDSS == 52) 
-#define SPI_PIN         86
-#define SPI_CHAN        2
-#else // SDSS == 4
-#define SPI_PIN         87
-#define SPI_CHAN        1
-  #endif
-#endif
+	#if (SDSS == 10)
+	#define SPI_PIN         77
+	#define SPI_CHAN        0
+	#else
+		#if (SDSS == 52) 
+		#define SPI_PIN         86
+		#define SPI_CHAN        2
+		#else // SDSS == 4
+		#define SPI_PIN         87
+		#define SPI_CHAN        1
+		#endif
+	#endif
 #define MOSI_PIN        75
 #define MISO_PIN        74
 #define SCK_PIN         76
 //#define DUE_SOFTWARE_SPI
 //Davinci Specific, SD Card pins are defined in Userpins.h
-#elsif MOTHERBOARD != 999
-#define DUE_SOFTWARE_SPI
-#define MOSI_PIN		51
-#define MISO_PIN		50
-#define SCK_PIN 		52
+#else
+	#if MOTHERBOARD != 999
+	#define DUE_SOFTWARE_SPI
+	#define MOSI_PIN		51
+	#define MISO_PIN		50
+	#define SCK_PIN 		52
+	#endif
 #endif
 
+#if MOTHERBOARD != 999
+	#define LIGHT_PIN		-1
+	#define BADGE_LIGHT_PIN		-1
+	#define TOP_SENSOR_PIN		-1
+	#define BADGE_LIGHT_PIN		-1
+	#define FIL_SENSOR1_PIN		-1
+	#define FIL_SENSOR2_PIN		-1
+#endif
 
 // Original pin assignmats to be used in configuration tool
 #define X_STEP_PIN ORIG_X_STEP_PIN

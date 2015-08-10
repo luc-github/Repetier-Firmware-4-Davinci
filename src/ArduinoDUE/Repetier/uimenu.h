@@ -315,7 +315,7 @@ next/previous changes the value
 ok sets the value if not already done and goes back to previous menu.
 */
 //Davinci Specific, to follow the changes in future new commits and make it work for other than Davinci board likeRADDS/DUE 
-#if !DAVINCI
+#if 1==0 //for native UI no need this FW, take original one
 // Error menu
 
 UI_MENU_ACTION2(ui_menu_error,UI_ACTION_DUMMY,UI_TEXT_ERROR,"%oe")

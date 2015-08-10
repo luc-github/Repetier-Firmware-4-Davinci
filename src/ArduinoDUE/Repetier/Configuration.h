@@ -61,6 +61,10 @@
 //if wifi is enabled serial need to slow down a little, this is a delay in ms after a '\n' so normaly after a command or a message
 #define DELAY_BY_LINE 50
 #if ENABLE_CLEAN_NOZZLE
+  #if DAVINCI==0 
+    #define CLEAN_X 20
+    #define CLEAN_Y 20
+  #endif
   #if DAVINCI==1 //cleaner of Davinci 1.0 is not in same position of 2.0 neither AiO
     #define CLEAN_X 20
     #define CLEAN_Y 20
@@ -109,10 +113,15 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // BASIC SETTINGS: select your board type, thermistor type, axis scaling, and endstop configuration
 
 /** Number of extruders. Maximum 6 extruders. */
+#if DAVINCI==0
+#define NUM_EXTRUDER 1
+#endif
 //1.0/1.0A/AiO have 1 extruder
 #if DAVINCI==1 || DAVINCI==4
 #define NUM_EXTRUDER 1
-#else
+#endif
+//2.0/2.0A have 2 extruders
+#if DAVINCI==2 || DAVINCI==3
 #define NUM_EXTRUDER 2
 #endif
 
@@ -127,7 +136,11 @@ setpe per mm and heater manager settings in extruder 0 are used! */
 // Arduino Due with RAMPS-FD V2 = 404
 //specific board is 999 = DaVinci
 
+#if DAVINCI==0
+#define MOTHERBOARD 402
+#else
 #define MOTHERBOARD 999
+#endif
 
 #include "pins.h"
 
@@ -283,9 +296,13 @@ Overridden if EEPROM activated.*/
 #define EXT0_STEP_PIN E0_STEP_PIN
 #define EXT0_DIR_PIN E0_DIR_PIN
 // set to false/true for normal / inverse direction
+#if DAVINCI==0
+#define EXT0_INVERSE false
+#endif
 #if DAVINCI==1 || DAVINCI==4
 #define EXT0_INVERSE false
-#else
+#endif
+#if DAVINCI==2 || DAVINCI==3
 #define EXT0_INVERSE true
 #endif
 #define EXT0_ENABLE_PIN E0_ENABLE_PIN
@@ -480,6 +497,9 @@ cog. Direct drive extruder need 0. */
 #define EXT1_SELECT_COMMANDS "M117 Extruder 2"
 #define EXT1_DESELECT_COMMANDS ""
 /** The extruder cooler is a fan to cool the extruder when it is heating. If you turn the etxruder on, the fan goes on. */
+#if DAVINCI==0
+#define EXT1_EXTRUDER_COOLER_PIN ORIG_FAN_PIN
+#endif
 #if DAVINCI==1 || DAVINCI==4
 #define EXT1_EXTRUDER_COOLER_PIN -1
 #endif
@@ -853,14 +873,26 @@ on this endstop.
 
 // When you have several endstops in one circuit you need to disable it after homing by moving a
 // small amount back. This is also the case with H-belt systems.
+
+#if DAVINCI==0
 #define ENDSTOP_X_BACK_ON_HOME 0
-#if DAVINCI==1 || DAVINCI==4
 #define ENDSTOP_Y_BACK_ON_HOME 0
-#else
+#define ENDSTOP_Z_BACK_ON_HOME 0
+#endif 
+
+#if DAVINCI==1 || DAVINCI==4
+#define ENDSTOP_X_BACK_ON_HOME 0
+#define ENDSTOP_Y_BACK_ON_HOME 0
+#define ENDSTOP_Z_BACK_ON_HOME 0
+#endif 
+
+#if DAVINCI==2 || DAVINCI==3
+#define ENDSTOP_X_BACK_ON_HOME 0
 //to avoid to hit plate when homing
 #define ENDSTOP_Y_BACK_ON_HOME 7
-#endif
 #define ENDSTOP_Z_BACK_ON_HOME 0
+#endif
+
 
 // You can disable endstop checking for print moves. This is needed, if you get sometimes
 // false signals from your endstops. If your endstops don't give false signals, you
@@ -872,6 +904,12 @@ on this endstop.
 // For delta robot Z_MAX_LENGTH is the maximum travel of the towers and should be set to the distance between the hotend
 // and the platform when the printer is at its home position.
 // If EEPROM is enabled these values will be overidden with the values in the EEPROM
+#if DAVINCI==0
+#define X_MAX_LENGTH 237 - ENDSTOP_X_BACK_ON_HOME
+#define Y_MAX_LENGTH 217 - ENDSTOP_Y_BACK_ON_HOME
+#define Z_MAX_LENGTH 190 - ENDSTOP_Z_BACK_ON_HOME
+#endif
+
 #if DAVINCI==1
 #if MODEL==0
 #define Y_MAX_LENGTH 217 - ENDSTOP_Y_BACK_ON_HOME
@@ -879,17 +917,19 @@ on this endstop.
 #define Y_MAX_LENGTH 215 - ENDSTOP_Y_BACK_ON_HOME
 #endif
 #define X_MAX_LENGTH 237 - ENDSTOP_X_BACK_ON_HOME
-#else
+#define Z_MAX_LENGTH 200 - ENDSTOP_Z_BACK_ON_HOME
+#endif
+
+#if DAVINCI==2 || DAVINCI==3
 #define X_MAX_LENGTH 199 - ENDSTOP_X_BACK_ON_HOME
 #define Y_MAX_LENGTH 211 - ENDSTOP_Y_BACK_ON_HOME
+#define Z_MAX_LENGTH 200 - ENDSTOP_Z_BACK_ON_HOME
 #endif
 
 #if DAVINCI==4
 #define X_MAX_LENGTH 237 - ENDSTOP_X_BACK_ON_HOME
 #define Y_MAX_LENGTH 217 - ENDSTOP_Y_BACK_ON_HOME
 #define Z_MAX_LENGTH 190 - ENDSTOP_Z_BACK_ON_HOME
-#else
-#define Z_MAX_LENGTH 200 - ENDSTOP_Z_BACK_ON_HOME
 #endif
 
 // Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
@@ -1489,7 +1529,7 @@ is also used for the heater if you have 2 extruders connected. */
 #if REPURPOSE_FAN_TO_COOL_EXTRUSIONS==1
 #define FEATURE_FAN_CONTROL 1
  #define FAN_PIN ORIG_FAN_PIN
-  #if DAVINCI>=2
+  #if DAVINCI==2 || DAVINCI==3
       #define EXT0_EXTRUDER_COOLER_PIN ORIG_FAN2_PIN
       #define EXT1_EXTRUDER_COOLER_PIN ORIG_FAN2_PIN
     #else //DaVinci 1.0
@@ -1543,6 +1583,10 @@ Select the language to use.
 #define UI_LANGUAGE 0
 
 // This is line 2 of the status display at startup. Change to your like.
+#if DAVINCI==0
+#define UI_PRINTER_NAME    "  My Printer "
+#define DAVINCI_TYPE "0"
+#endif
 #if DAVINCI==1
 #define UI_PRINTER_NAME    "  Da Vinci 1.0"
 #define DAVINCI_TYPE "1"
@@ -1562,7 +1606,7 @@ Select the language to use.
 
 #define UI_PRINTER_COMPANY "By XYZ Printing"
 
-#if MODEL == 0
+#if MODEL == 0 || DAVINCI==0
 #define MODEL_TYPE " "
 #else
 #define MODEL_TYPE  "A"
