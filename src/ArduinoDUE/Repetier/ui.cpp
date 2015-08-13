@@ -1517,10 +1517,12 @@ void UIDisplay::parse(const char *txt,bool ram)
                 {
                 addStringP(extruder[2].tempControl.targetTemperatureC>0?"\004":"\003");
                 }
+#if HAVE_HEATED_BED
              else if(c2=='7') //Bed Off
                 {
                 addStringP(heatedBedController.targetTemperatureC>0?"\004":"\003");
                 }
+#endif
         break;
 	    case 'C':
             if(c2=='1')
@@ -1811,7 +1813,8 @@ case 'P':
             }
             if(c2 == 'X')
 #if (X_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_X
-                addStringOnOff(Printer::isXMaxEndstopHit());
+                //addStringOnOff(Printer::isXMaxEndstopHit());
+                addStringP(Printer::isXMaxEndstopHit()?"\003":"\004");
 #else
                 addStringP(ui_text_na);
 #endif
@@ -1824,7 +1827,8 @@ case 'P':
 #endif
             if(c2 == 'Y')
 #if (Y_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Y
-                addStringOnOff(Printer::isYMaxEndstopHit());
+                //addStringOnOff(Printer::isYMaxEndstopHit());
+                addStringP(Printer::isYMaxEndstopHit()?"\003":"\004");
 #else
                 addStringP(ui_text_na);
 #endif
@@ -1837,7 +1841,8 @@ case 'P':
 #endif
             if(c2=='Z')
 #if (Z_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Z
-                addStringOnOff(Printer::isZMaxEndstopHit());
+                //addStringOnOff(Printer::isZMaxEndstopHit());
+                addStringP(Printer::isZMaxEndstopHit()?"\003":"\004");
 #else
                 addStringP(ui_text_na);
 #endif
@@ -3278,7 +3283,7 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
         if (action==UI_ACTION_Z_1)istep=1;
         if (action==UI_ACTION_Z_10)istep=10;
         if (action==UI_ACTION_Z_100)istep=100;
-        increment=-increment; //upside down increment to allow keys to follow  Z movement, Up Key make Z going up, down key make Z going down
+        //increment=-increment; //upside down increment to allow keys to follow  Z movement, Up Key make Z going up, down key make Z going down
         if (!Printer::isZHomed())//ask for home to secure movement
         {
             if (confirmationDialog(UI_TEXT_DO_YOU ,UI_TEXT_HOME_Z,UI_TEXT_WARNING_POS_Z_UNKNOWN,UI_CONFIRMATION_TYPE_YES_NO,true))
@@ -3304,7 +3309,7 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
         int istep=1;
         if (action==UI_ACTION_E_10)istep=10;
         if (action==UI_ACTION_E_100)istep=100;
-        increment=-increment; //upside down increment to allow keys to follow  filament movement, Up Key make filament going up, down key make filament going down
+ //       increment=-increment; //upside down increment to allow keys to follow  filament movement, Up Key make filament going up, down key make filament going down
         if(reportTempsensorError() or Printer::debugDryrun()) break;
         //check temperature
         if(Extruder::current->tempControl.currentTemperatureC<=MIN_EXTRUDER_TEMP)
@@ -3626,6 +3631,7 @@ bool UIDisplay::confirmationDialog(char * title,char * line1,char * line2,int ty
 {
 bool response=defaultresponse;
 bool process_it=true;
+bool encoder_command=false;
 int previousaction=0;
 int tmpmenulevel = menuLevel;
 if (menuLevel>3)menuLevel=3;
@@ -3661,6 +3667,18 @@ while (process_it)
     //process critical actions
     Commands::checkForPeriodicalActions(true);
     //be sure button is pressed and not same one
+    int16_t encodeChange = encoderPos;
+    encoderPos = 0;
+    if (encodeChange > 0 )
+		{
+		encoder_command=true;
+		lastButtonAction=UI_ACTION_BACK;	
+		}
+    if (encodeChange < 0 )
+		{
+		encoder_command=true;
+		lastButtonAction=UI_ACTION_RIGHT_KEY;
+		}
     if (lastButtonAction!=previousaction)
         {
          previousaction=lastButtonAction;
@@ -3705,6 +3723,11 @@ while (process_it)
             }
         if(previousaction!=0)BEEP_SHORT;
         refreshPage();
+        if (encoder_command)
+			{
+				lastButtonAction=0;
+				encoder_command=false;
+			}
         }
     }//end while
  menuLevel=tmpmenulevel;
@@ -4163,8 +4186,13 @@ case UI_ACTION_LOAD_FAILSAFE:
          //just need to wait for key to be pressed
          break;
          }
+        //check encoder 
+		int16_t encodeChange = encoderPos;
+		bool encoder_command=false;
+		if (encodeChange > 0 ) encoder_command=true;
+		encoderPos = 0;
          //check what key is pressed
-         if (previousaction!=lastButtonAction)
+         if (previousaction!=lastButtonAction || encoder_command)
             {
             previousaction=lastButtonAction;
             if(previousaction!=0)BEEP_SHORT;
@@ -4175,8 +4203,9 @@ case UI_ACTION_LOAD_FAILSAFE:
                 playsound(3000,240);
                 Printer::homeAxis(true,true,false);
                 }
-             if (lastButtonAction==UI_ACTION_BACK)//this means user want to cancel current action
+             if (lastButtonAction==UI_ACTION_BACK  || encodeChange > 0)//this means user want to cancel current action
                 {
+				playsound(5000,240);
                 if (confirmationDialog(UI_TEXT_PLEASE_CONFIRM ,UI_TEXT_CANCEL_ACTION,UI_TEXT_CLEANING_NOZZLE))
                     {
                     UI_STATUS(UI_TEXT_CANCELED);
@@ -4655,8 +4684,13 @@ case UI_ACTION_LOAD_FAILSAFE:
             }
          break;
          }
+         //check encoder 
+		int16_t encodeChange = encoderPos;
+		bool encoder_command=false;
+		if (encodeChange > 0 ) encoder_command=true;
+		encoderPos = 0;
          //check what key is pressed
-         if (previousaction!=lastButtonAction)
+         if (previousaction!=lastButtonAction || encoder_command)
             {
             previousaction=lastButtonAction;
             if(previousaction!=0)BEEP_SHORT;
@@ -4667,8 +4701,9 @@ case UI_ACTION_LOAD_FAILSAFE:
                 playsound(3000,240);
                 UI_STATUS(UI_TEXT_PUSH_FILAMENT);
                 }
-             if (lastButtonAction==UI_ACTION_BACK)//this means user want to cancel current action
+             if (lastButtonAction==UI_ACTION_BACK  || encodeChange > 0)//this means user want to cancel current action
                 {
+				playsound(5000,240);
                 if (confirmationDialog(UI_TEXT_PLEASE_CONFIRM ,UI_TEXT_CANCEL_ACTION,UI_TEXT_LOADUNLOAD_FILAMENT))
                     {
                     UI_STATUS(UI_TEXT_CANCELED);
@@ -4983,8 +5018,13 @@ case UI_ACTION_LOAD_FAILSAFE:
             else    process_it=false;
             break;
          }
+         //check encoder 
+		int16_t encodeChange = encoderPos;
+		bool encoder_command=false;
+		if (encodeChange > 0 ) encoder_command=true;
+		encoderPos = 0;
          //check what key is pressed
-         if (previousaction!=lastButtonAction)
+         if (previousaction!=lastButtonAction || encoder_command)
             {
             previousaction=lastButtonAction;
             if(previousaction!=0)BEEP_SHORT;
@@ -4992,8 +5032,9 @@ case UI_ACTION_LOAD_FAILSAFE:
                 {
                     step=STEP_AUTOLEVEL_SAVE_RESULTS;
                 }
-             if (lastButtonAction==UI_ACTION_BACK)//this means user want to cancel current action
+             if (lastButtonAction==UI_ACTION_BACK  || encodeChange > 0)//this means user want to cancel current action
                 {
+				playsound(5000,240);
                 if (confirmationDialog(UI_TEXT_PLEASE_CONFIRM ,UI_TEXT_CANCEL_ACTION,UI_TEXT_AUTOLEVEL))
                     {
                     Printer::setZProbingActive(false);
@@ -5262,8 +5303,13 @@ case UI_ACTION_LOAD_FAILSAFE:
             step =STEP_MANUAL_LEVEL_PAGE10;
             break;
         }
+         //check encoder 
+		int16_t encodeChange = encoderPos;
+		bool encoder_command=false;
+		if (encodeChange > 0 ) encoder_command=true;
+		encoderPos = 0;
          //check what key is pressed
-         if (previousaction!=lastButtonAction)
+         if (previousaction!=lastButtonAction || encoder_command)
             {
             previousaction=lastButtonAction;
             if(previousaction!=0)BEEP_SHORT;
@@ -5330,8 +5376,9 @@ case UI_ACTION_LOAD_FAILSAFE:
                     process_it=false;
                     }
             }
-            else if (lastButtonAction==UI_ACTION_BACK)//this means user want to cancel current action
+            else if (lastButtonAction==UI_ACTION_BACK  || encodeChange > 0)//this means user want to cancel current action
                 {
+				playsound(5000,240);
                 if (confirmationDialog(UI_TEXT_PLEASE_CONFIRM ,UI_TEXT_CANCEL_ACTION,UI_TEXT_MANUAL_LEVEL))
                     {
                     status=STATUS_CANCEL;
