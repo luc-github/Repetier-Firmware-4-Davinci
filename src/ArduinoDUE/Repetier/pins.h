@@ -167,7 +167,7 @@ STEPPER_CURRENT_CONTROL
 #define LED_PIN 	   -1
 #define ORIG_FAN_PIN 	   9 
 #define ORIG_FAN2_PIN           8 
-#define ORIG_PS_ON_PIN          40
+#define ORIG_PS_ON_PIN          -1//40
 #define KILL_PIN	   -1
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
 
@@ -293,6 +293,12 @@ STEPPER_CURRENT_CONTROL
 #if MOTHERBOARD == 999
 #define KNOWN_BOARD
 #include "userpins.h"
+#else
+	#define LIGHT_PIN		-1
+	#define BADGE_LIGHT_PIN		-1
+	//#define TOP_SENSOR_PIN		-1
+	//#define FIL_SENSOR1_PIN		-1
+	//#define FIL_SENSOR2_PIN		-1
 #endif
 
 
@@ -352,14 +358,7 @@ STEPPER_CURRENT_CONTROL
 	#endif
 #endif
 
-#if MOTHERBOARD != 999
-	#define LIGHT_PIN		-1
-	#define BADGE_LIGHT_PIN		-1
-	#define TOP_SENSOR_PIN		-1
-	#define BADGE_LIGHT_PIN		-1
-	#define FIL_SENSOR1_PIN		-1
-	#define FIL_SENSOR2_PIN		-1
-#endif
+
 
 // Original pin assignmats to be used in configuration tool
 #define X_STEP_PIN ORIG_X_STEP_PIN
