@@ -54,7 +54,6 @@ Currently supported hardware:
 
 #ifndef _ui_config_h
 #define _ui_config_h
-
 //Davinci Specific, for cheat key
 #define FLAG_OK					1 
 #define FLAG_NEXT				2 
@@ -88,7 +87,7 @@ works, use the ascii charset 0 as fallback. Not the nicest for everything but wo
 
 #if BEEPER_TYPE==1 && !defined(BEEPER_PIN)
 //Davinci Specific, Buzzer pin
-#define BEEPER_PIN 66
+#define BEEPER_PIN 41
 #endif
 #if BEEPER_TYPE==2
 #define BEEPER_ADDRESS 0x40 // I2C address of the chip with the beeper pin
@@ -108,8 +107,8 @@ What display type do you use?
                If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
 5 = U8G supported display
 */
-//Davinci Specific, LCD use 8 bits protocole
-#define UI_DISPLAY_TYPE DISPLAY_8BIT
+//Graphic LCD
+#define UI_DISPLAY_TYPE DISPLAY_U8G
 
 #if UI_DISPLAY_TYPE == DISPLAY_U8G // Special case for graphic displays
 
@@ -204,21 +203,22 @@ Define the pin
 
 #else // Direct display connections
 //Davinci Specific, LCD and Back light pins
-#define UI_DISPLAY_RS_PIN		8		// PINK.1, 88, D_RS
+#define UI_DISPLAY_RS_PIN		46
 #define UI_DISPLAY_RW_PIN		-1
-#define UI_DISPLAY_RW_PIN_NOT_USED		45 //to set state to low as it is connected
-#define UI_DISPLAY_ENABLE_PIN	        125		// PINK.3, 86, D_E
-#define UI_DISPLAY_D0_PIN		34		// PINF.5, 92, D_D4
-#define UI_DISPLAY_D1_PIN		35		// PINK.2, 87, D_D5
-#define UI_DISPLAY_D2_PIN		36		// PINL.5, 40, D_D6
-#define UI_DISPLAY_D3_PIN		37		// PINK.4, 85, D_D7
-#define UI_DISPLAY_D4_PIN		38		// PINF.5, 92, D_D4
-#define UI_DISPLAY_D5_PIN		39		// PINK.2, 87, D_D5
-#define UI_DISPLAY_D6_PIN		40		// PINL.5, 40, D_D6
-#define UI_DISPLAY_D7_PIN		41		// PINK.4, 85, D_D7
+#define UI_DISPLAY_RW_PIN_NOT_USED		-1
+#define UI_DISPLAY_ENABLE_PIN	        47
+#define UI_DISPLAY_D0_PIN		-1
+#define UI_DISPLAY_D1_PIN		-1
+#define UI_DISPLAY_D2_PIN		-1
+#define UI_DISPLAY_D3_PIN		-1
+#define UI_DISPLAY_D4_PIN		44
+#define UI_DISPLAY_D5_PIN		-1
+#define UI_DISPLAY_D6_PIN		-1
+#define UI_DISPLAY_D7_PIN		-1
 #define UI_DELAYPERCHAR		        320
 
-#define UI_BACKLIGHT_PIN                78
+//no back light so disable pin
+//#define UI_BACKLIGHT_PIN                78
 
 #endif
 
@@ -237,13 +237,13 @@ Define the pin
 If you have menus enabled, you need a method to leave it. If you have a back key, you can always go one level higher.
 Without a back key, you need to navigate to the back entry in the menu. Setting this value to 1 removes the back entry.
 */
-#define UI_HAS_BACK_KEY 1
+#define UI_HAS_BACK_KEY 0
 
 /* Then you have the next/previous keys more like up/down keys, it may be more intuitive to change the direction you skip through the menus.
 If you set it to true, next will go to previous menu instead of the next menu.
 
 */
-#define UI_INVERT_MENU_DIRECTION 0
+#define UI_INVERT_MENU_DIRECTION 1
 
 /** Uncomment this, if you have keys connected via i2c to a PCF8574 chip. */
 //#define UI_HAS_I2C_KEYS
@@ -354,14 +354,13 @@ const int matrixActions[] PROGMEM = UI_MATRIX_ACTIONS;
 
 void uiInitKeys() {
 #if UI_HAS_KEYS!=0
-  //UI_KEYS_INIT_CLICKENCODER_LOW(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
-  //Davinci Specific, Davinci Specific, Davinci Key pad pins
-  UI_KEYS_INIT_BUTTON_LOW(44); // push button, connects gnd to pin
-  UI_KEYS_INIT_BUTTON_LOW(10);
-  UI_KEYS_INIT_BUTTON_LOW(72);
-  UI_KEYS_INIT_BUTTON_LOW(75);
-  UI_KEYS_INIT_BUTTON_LOW(76);
-  UI_KEYS_INIT_BUTTON_LOW(77);
+  UI_KEYS_INIT_CLICKENCODER_LOW(52,50); // click encoder on pins 50 and 52. Phase is connected with gnd for signals.
+  UI_KEYS_INIT_BUTTON_LOW(48); // push button, connects gnd to pin
+  //UI_KEYS_INIT_BUTTON_LOW(10);
+  //UI_KEYS_INIT_BUTTON_LOW(72);
+  //UI_KEYS_INIT_BUTTON_LOW(75);
+ // UI_KEYS_INIT_BUTTON_LOW(76);
+ // UI_KEYS_INIT_BUTTON_LOW(77);
 
 //  UI_KEYS_INIT_CLICKENCODER_LOW(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
 //  UI_KEYS_INIT_BUTTON_LOW(43); // push button, connects gnd to pin
@@ -370,35 +369,34 @@ void uiInitKeys() {
 }
 void uiCheckKeys(int &action) {
 #if UI_HAS_KEYS!=0
-
 //Davinci Specific, for cheat key
- int key_flag=0;
+ //int key_flag=0;
  //UI_KEYS_CLICKENCODER_LOW_REV(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
 //Davinci Specific, key pad and cheat keys definition 
-UI_KEYS_BUTTON_LOW(76,UI_ACTION_OK); // push button, connects gnd to pin
- if (action==UI_ACTION_OK)key_flag = key_flag|FLAG_OK;
- UI_KEYS_BUTTON_LOW(10,UI_ACTION_NEXT); // push button, connects gnd to pin
-  if (action==UI_ACTION_NEXT)key_flag = key_flag|FLAG_NEXT;
- UI_KEYS_BUTTON_LOW(44,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
-  if (action==UI_ACTION_PREVIOUS)key_flag = key_flag|FLAG_PREVIOUS;
- UI_KEYS_BUTTON_LOW(75,UI_ACTION_BACK); // push button, connects gnd to pin
-  if (action==UI_ACTION_BACK)key_flag = key_flag|FLAG_BACK;
- UI_KEYS_BUTTON_LOW(72,UI_ACTION_RIGHT_KEY); // push button, connects gnd to pin
-  if (action==UI_ACTION_RIGHT_KEY)key_flag = key_flag|FLAG_RIGHT;
- UI_KEYS_BUTTON_LOW(77,UI_ACTION_TOP_MENU); // push button, connects gnd to pin
-  if (action==UI_ACTION_TOP_MENU)key_flag = key_flag|FLAG_TOPMENU;
-  if (key_flag==(FLAG_OK|FLAG_PREVIOUS|FLAG_TOPMENU))action=UI_ACTION_OK_TOP_PREV;
-  if (key_flag==(FLAG_OK|FLAG_NEXT|FLAG_TOPMENU))action=UI_ACTION_OK_TOP_NEXT;
-  if (key_flag==(FLAG_OK|FLAG_NEXT|FLAG_TOPMENU))action=UI_ACTION_OK_TOP_BACK;
-  if (key_flag==(FLAG_OK|FLAG_RIGHT|FLAG_BACK))action=UI_ACTION_OK_TOP_RIGHT;
-  if (key_flag==(FLAG_OK|FLAG_NEXT|FLAG_BACK))action=UI_ACTION_OK_NEXT_BACK;
-  if (key_flag==(FLAG_OK|FLAG_NEXT|FLAG_PREVIOUS))action=UI_ACTION_OK_NEXT_PREV;
-  if (key_flag==(FLAG_OK|FLAG_NEXT|FLAG_RIGHT))action=UI_ACTION_OK_NEXT_RIGHT;
-  if (key_flag==(FLAG_OK|FLAG_PREVIOUS|FLAG_RIGHT))action=UI_ACTION_OK_PREV_RIGHT;
-  if (key_flag==(FLAG_OK|FLAG_PREVIOUS|FLAG_BACK))action=UI_ACTION_OK_PREV_BACK;
+//UI_KEYS_BUTTON_LOW(76,UI_ACTION_OK); // push button, connects gnd to pin
+ //if (action==UI_ACTION_OK)key_flag = key_flag|FLAG_OK;
+ //UI_KEYS_BUTTON_LOW(10,UI_ACTION_NEXT); // push button, connects gnd to pin
+  //if (action==UI_ACTION_NEXT)key_flag = key_flag|FLAG_NEXT;
+ //UI_KEYS_BUTTON_LOW(44,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
+  //if (action==UI_ACTION_PREVIOUS)key_flag = key_flag|FLAG_PREVIOUS;
+ //UI_KEYS_BUTTON_LOW(75,UI_ACTION_BACK); // push button, connects gnd to pin
+  //if (action==UI_ACTION_BACK)key_flag = key_flag|FLAG_BACK;
+ //UI_KEYS_BUTTON_LOW(72,UI_ACTION_RIGHT_KEY); // push button, connects gnd to pin
+  //if (action==UI_ACTION_RIGHT_KEY)key_flag = key_flag|FLAG_RIGHT;
+ //UI_KEYS_BUTTON_LOW(77,UI_ACTION_TOP_MENU); // push button, connects gnd to pin
+  //if (action==UI_ACTION_TOP_MENU)key_flag = key_flag|FLAG_TOPMENU;
+  //if (key_flag==(FLAG_OK|FLAG_PREVIOUS|FLAG_TOPMENU))action=UI_ACTION_OK_TOP_PREV;
+  //if (key_flag==(FLAG_OK|FLAG_NEXT|FLAG_TOPMENU))action=UI_ACTION_OK_TOP_NEXT;
+  //if (key_flag==(FLAG_OK|FLAG_NEXT|FLAG_TOPMENU))action=UI_ACTION_OK_TOP_BACK;
+  //if (key_flag==(FLAG_OK|FLAG_RIGHT|FLAG_BACK))action=UI_ACTION_OK_TOP_RIGHT;
+  //if (key_flag==(FLAG_OK|FLAG_NEXT|FLAG_BACK))action=UI_ACTION_OK_NEXT_BACK;
+  //if (key_flag==(FLAG_OK|FLAG_NEXT|FLAG_PREVIOUS))action=UI_ACTION_OK_NEXT_PREV;
+  //if (key_flag==(FLAG_OK|FLAG_NEXT|FLAG_RIGHT))action=UI_ACTION_OK_NEXT_RIGHT;
+  //if (key_flag==(FLAG_OK|FLAG_PREVIOUS|FLAG_RIGHT))action=UI_ACTION_OK_PREV_RIGHT;
+  //if (key_flag==(FLAG_OK|FLAG_PREVIOUS|FLAG_BACK))action=UI_ACTION_OK_PREV_BACK;
   
-//  UI_KEYS_CLICKENCODER_LOW_REV(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
-//  UI_KEYS_BUTTON_LOW(43,UI_ACTION_OK); // push button, connects gnd to pin
+UI_KEYS_CLICKENCODER_LOW_REV(52,50); // click encoder on pins 50 and 52. Phase is connected with gnd for signals.
+UI_KEYS_BUTTON_LOW(48,UI_ACTION_OK); // push button, connects gnd to pin
 #endif
 }
 inline void uiCheckSlowEncoder() {
@@ -420,6 +418,7 @@ inline void uiCheckSlowEncoder() {
   UI_KEYS_I2C_CLICKENCODER_LOW_REV(_BV(2),_BV(0)); // click encoder on pins 0 and 2. Phase is connected with gnd for signals.
 #endif
 }
+
 void uiCheckSlowKeys(int &action) {
 #if defined(UI_HAS_I2C_KEYS) && UI_HAS_KEYS!=0
 #if UI_DISPLAY_I2C_CHIPTYPE==0
