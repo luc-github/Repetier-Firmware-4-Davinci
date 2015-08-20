@@ -41,7 +41,7 @@
 //Decouple Test feature, do not disable it unless you know what you are doing!!!
 //if you have decouple issue it means you have hardware issue or bad air flow management!!!
 //this feature is a safety feature, if you disable it is dangerous!!!
-#define FEATURE_DECOUPLE_TEST 1
+#define FEATURE_DECOUPLE_TEST 0
 //this will hide on sd card no extension files and bin/hex/dat files to make navigation and selection easier
 #define HIDE_BINARY_ON_SD 1
 #define UI_AUTOLIGHTOFF_AFTER 1
@@ -307,7 +307,7 @@ Overridden if EEPROM activated.*/
 #endif
 #define EXT0_ENABLE_PIN E0_ENABLE_PIN
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
-#define EXT0_ENABLE_ON false
+#define EXT0_ENABLE_ON 1
 // The following speed settings are for skeinforge 40+ where e is the
 // length of filament pulled inside the heater. For repsnap or older
 // skeinforge use higher values.
