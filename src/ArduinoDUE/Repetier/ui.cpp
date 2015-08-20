@@ -3312,7 +3312,7 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
  //       increment=-increment; //upside down increment to allow keys to follow  filament movement, Up Key make filament going up, down key make filament going down
         if(reportTempsensorError() or Printer::debugDryrun()) break;
         //check temperature
-        if(Extruder::current->tempControl.currentTemperatureC<=MIN_EXTRUDER_TEMP)
+        if(Extruder::current->tempControl.currentTemperatureC<=MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed())
             {
                 if (confirmationDialog(UI_TEXT_WARNING ,UI_TEXT_EXTRUDER_COLD,UI_TEXT_HEAT_EXTRUDER,UI_CONFIRMATION_TYPE_YES_NO,true))
                     {
