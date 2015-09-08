@@ -220,15 +220,15 @@ void Printer::cleanNozzle(bool restoreposition)
 	moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,zMin+3,IGNORE_COORDINATE,homingFeedrate[Z_AXIS]);
     Commands::waitUntilEndOfAllMoves();
 	//first step noze
-	moveToReal(xMin,yMin+CLEAN_Y,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	moveToReal(xMin,yMin+CLEAN_Y-1,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	//second step
 	moveToReal(xMin+CLEAN_X,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	//third step
-	moveToReal(xMin,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	moveToReal(xMin,yMin+CLEAN_Y,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	//fourth step
-	moveToReal(xMin+CLEAN_X,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	moveToReal(xMin+CLEAN_X,yMin+CLEAN_Y+1,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	//fifth step
-	moveToReal(xMin,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	moveToReal(xMin,yMin+CLEAN_Y+2,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	#endif
 	#if DAVINCI ==2 || DAVINCI ==3
 	//first step

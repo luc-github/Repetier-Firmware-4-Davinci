@@ -21,7 +21,7 @@
 
 // ################## EDIT THESE SETTINGS MANUALLY ################
 
-#define DAVINCI 1 // "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN, 4 for AiO
+#define DAVINCI 4 // "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN, 4 for AiO (WITH NO SCANNER SUPPORT)
 #define MODEL  0//"0" for first generation (jumper JP1 to reset ) , "1" for new generation   (jumper J37 to reset)
 #define REPURPOSE_FAN_TO_COOL_EXTRUSIONS 0 //Setting this to 1 will repurpose the main Extruder cooling fan to be controlled VIA M106/M107
                                                                                             //Warning: for DaVinci 1.0 need to add a permanent fan with power supply to cool extruder
@@ -31,8 +31,8 @@
 //Version
 #define VERSION_MAJOR "1"
 #define VERSION_MINOR_YEAR "15"
-#define VERSION_MINOR_MONTH "08"
-#define VERSION_MINOR_DAY "12"
+#define VERSION_MINOR_MONTH "09"
+#define VERSION_MINOR_DAY "08"
 #define VERSION_BUILD "1"
 
 //Davinci screen is not standard reprap it is WINSTAR 16x4
@@ -75,7 +75,7 @@
   #endif
   #if DAVINCI==4
     #define CLEAN_X 35
-    #define CLEAN_Y 50
+    #define CLEAN_Y 55
   #endif
 #endif
 #define CASE_KEEP_LIGHT_DEFAULT_ON 1
@@ -927,20 +927,28 @@ on this endstop.
 #endif
 
 #if DAVINCI==4
-#define X_MAX_LENGTH 237 - ENDSTOP_X_BACK_ON_HOME
-#define Y_MAX_LENGTH 217 - ENDSTOP_Y_BACK_ON_HOME
+#define X_MAX_LENGTH 223.60 - ENDSTOP_X_BACK_ON_HOME
+#define Y_MAX_LENGTH 220.60 - ENDSTOP_Y_BACK_ON_HOME
 #define Z_MAX_LENGTH 190 - ENDSTOP_Z_BACK_ON_HOME
 #endif
 
 // Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
 // of the bed. Maximum coordinate is given by adding the above X_MAX_LENGTH values.
-#if DAVINCI==1 || DAVINCI==4
+#if DAVINCI==1
 #define X_MIN_POS -33
 #define Y_MIN_POS -12
 #define Z_MIN_POS 0
-#else
+#endif
+
+#if DAVINCI==2 || DAVINCI==3
 #define X_MIN_POS 0
 #define Y_MIN_POS 0
+#define Z_MIN_POS 0
+#endif
+
+#if DAVINCI==4
+#define X_MIN_POS -14.60
+#define Y_MIN_POS -12.60
 #define Z_MIN_POS 0
 #endif
 
@@ -1393,7 +1401,7 @@ See: AdditionalArduinoFiles: README.txt on how to install them.
    The same 3 points are used for the G29 command.
 */
 #define FEATURE_AUTOLEVEL true
-#if DAVINCI==1 || DAVINCI==4
+#if DAVINCI==1
 #define Z_PROBE_X1 -7
 #define Z_PROBE_Y1 -10
 #define Z_PROBE_X2 -7
@@ -1402,13 +1410,8 @@ See: AdditionalArduinoFiles: README.txt on how to install them.
 #define Z_PROBE_Y2 205
 #define Z_PROBE_Y3 205
 #else
-#if DAVINCI==4
-#define Z_PROBE_Y2 200
-#define Z_PROBE_Y3 200
-#else
 #define Z_PROBE_Y2 203
 #define Z_PROBE_Y3 203
-#endif
 #endif
 //Manual bed leveling
 #define MANUAL_LEVEL_X1 100
@@ -1419,7 +1422,9 @@ See: AdditionalArduinoFiles: README.txt on how to install them.
 #define MANUAL_LEVEL_Y3  100
 #define MANUAL_LEVEL_X4  190
 #define MANUAL_LEVEL_Y4  100
-#else
+#endif
+
+#if DAVINCI==2 || DAVINCI==3
 #define Z_PROBE_X1 36
 #define Z_PROBE_Y1 -7
 #define Z_PROBE_X2 36
@@ -1435,6 +1440,24 @@ See: AdditionalArduinoFiles: README.txt on how to install them.
 #define MANUAL_LEVEL_Y3 95
 #define MANUAL_LEVEL_X4  150
 #define MANUAL_LEVEL_Y4  95
+#endif
+
+#if DAVINCI==4
+#define Z_PROBE_X1 -3
+#define Z_PROBE_Y1 -7
+#define Z_PROBE_X2 -3
+#define Z_PROBE_Y2 204
+#define Z_PROBE_X3 184
+#define Z_PROBE_Y3 204
+//Manual bed leveling
+#define MANUAL_LEVEL_X1 100
+#define MANUAL_LEVEL_Y1 190
+#define MANUAL_LEVEL_X2 100
+#define MANUAL_LEVEL_Y2 10
+#define MANUAL_LEVEL_X3 10
+#define MANUAL_LEVEL_Y3  100
+#define MANUAL_LEVEL_X4  190
+#define MANUAL_LEVEL_Y4  100
 #endif
 
 /* DISTORTION_CORRECTION compensates the distortion caused by mechanical imprecisions of nonlinear (i.e. DELTA) printers
