@@ -96,7 +96,9 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     baudrate = BAUDRATE;
     maxInactiveTime = MAX_INACTIVE_TIME * 1000L;
     //Davinci Specific
+#if CASE_LIGHTS_PIN > 0
     EEPROM::buselight = bool(CASE_LIGHT_DEFAULT_ON);
+#endif
 #if BADGE_LIGHT_PIN > -1
     EEPROM::busebadgelight = bool(CASE_BADGE_LIGHT_DEFAULT_ON);
 #endif
@@ -444,8 +446,10 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
 #endif
 
 //Davinci Specific
+#if CASE_LIGHTS_PIN > 0
     HAL::eprSetByte(EPR_LIGHT_ON,EEPROM::buselight);
     HAL::eprSetByte(EPR_KEEP_LIGHT_ON,EEPROM::bkeeplighton);
+#endif
 #if BADGE_LIGHT_PIN > -1
     HAL::eprSetByte(EPR_BADGE_LIGHT_ON,EEPROM::busebadgelight);
 #endif
@@ -666,8 +670,10 @@ void EEPROM::readDataFromEEPROM()
     Printer::radius0 = HAL::eprGetFloat(EPR_DELTA_HORIZONTAL_RADIUS);
 #endif
 //Davinci Specific
+#if CASE_LIGHTS_PIN > 0
 	EEPROM::buselight=HAL::eprGetByte(EPR_LIGHT_ON);
 	EEPROM::bkeeplighton=HAL::eprGetByte(EPR_KEEP_LIGHT_ON);
+#endif
 #if BADGE_LIGHT_PIN > -1
 	EEPROM::busebadgelight=HAL::eprGetByte(EPR_BADGE_LIGHT_ON);
 #endif
@@ -964,12 +970,14 @@ void EEPROM::writeSettings()
     writeLong(EPR_BAUDRATE, Com::tEPRBaudrate);
 //Davinci Specific
     writeByte(EPR_DISPLAY_MODE, Com::tDisplayMode);
+#if CASE_LIGHTS_PIN > 0 
     writeByte(EPR_LIGHT_ON,Com::tLightOn);
+    writeByte(EPR_KEEP_LIGHT_ON,Com::tKeepLightOn);
+#endif
 #if BADGE_LIGHT_PIN > -1
     writeByte(EPR_BADGE_LIGHT_ON,Com::tBadgeLightOn);
 #endif
-    writeByte(EPR_KEEP_LIGHT_ON,Com::tKeepLightOn);
- #if defined(FIL_SENSOR1_PIN)
+#if defined(FIL_SENSOR1_PIN)
 	  writeByte(EPR_FIL_SENSOR_ON,Com::tSensorOn);
 #endif
 #if defined(TOP_SENSOR_PIN)

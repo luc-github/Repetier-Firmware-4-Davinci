@@ -4633,7 +4633,7 @@ case UI_ACTION_LOAD_FAILSAFE:
                 if (load_dir==-1)
                     {
                     UI_STATUS(UI_TEXT_UNLOADING_FILAMENT);
-                    PrintLine::moveRelativeDistanceInSteps(0,0,0,load_dir * Printer::axisStepsPerMM[E_AXIS],4,false,false);
+                    PrintLine::moveRelativeDistanceInSteps(0,0,0,load_dir * Printer::axisStepsPerMM[E_AXIS],8,false,false);
                     if (extruderid==0)//filament sensor override to stop earlier
                     {
                         #if defined(FIL_SENSOR1_PIN)

@@ -44,7 +44,7 @@
 #define FEATURE_DECOUPLE_TEST 0
 //this will hide on sd card no extension files and bin/hex/dat files to make navigation and selection easier
 #define HIDE_BINARY_ON_SD 1
-#define UI_AUTOLIGHTOFF_AFTER 1
+#define UI_AUTOLIGHTOFF_AFTER 0
 #define ENABLE_CLEAN_DRIPBOX 0
 #define ENABLE_CLEAN_NOZZLE 1
 //ensure of some define if AiO
@@ -268,7 +268,7 @@ Overridden if EEPROM activated.*/
 #define EXT0_X_OFFSET 0
 #define EXT0_Y_OFFSET 0
 // for skeinforge 40 and later, steps to pull the plasic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
-#define EXT0_STEPS_PER_MM 99 //425 // 825.698 //457
+#define EXT0_STEPS_PER_MM 400 //425 // 825.698 //457
 // What type of sensor is used?
 // 1 is 100k thermistor (Epcos B57560G0107F000 - RepRap-Fab.org and many other)
 // 2 is 200k thermistor
@@ -401,7 +401,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT1_X_OFFSET -2852
 #define EXT1_Y_OFFSET 12
 // for skeinforge 40 and later, steps to pull the plasic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
-#define EXT1_STEPS_PER_MM 99
+#define EXT1_STEPS_PER_MM 400
 // What type of sensor is used?
 // 1 is 100k thermistor (Epcos B57560G0107F000 - RepRap-Fab.org and many other)
 // 2 is 200k thermistor
@@ -528,8 +528,8 @@ M140 command, after a given temperature is reached. */
 /** autoretract converts pure extrusion moves into retractions. Beware that 
  simple extrusion e.g. over Repetier-Host will then not work! */
 #define AUTORETRACT_ENABLED 0
-#define RETRACTION_LENGTH 3
-#define RETRACTION_LONG_LENGTH 13
+#define RETRACTION_LENGTH 1
+#define RETRACTION_LONG_LENGTH 3
 #define RETRACTION_SPEED 40
 #define RETRACTION_Z_LIFT 0
 #define RETRACTION_UNDO_EXTRA_LENGTH 0
@@ -1082,8 +1082,8 @@ Mega. Used only for nonlinear systems like delta or tuga. */
 #define MAX_FEEDRATE_Z 4
 
 /** Home position speed in mm/s. Overridden if EEPROM activated. */
-#define HOMING_FEEDRATE_X 40
-#define HOMING_FEEDRATE_Y 40
+#define HOMING_FEEDRATE_X 25
+#define HOMING_FEEDRATE_Y 25
 #define HOMING_FEEDRATE_Z 2
 
 /** Set order of axis homing. Use HOME_ORDER_XYZ and replace XYZ with your order. */
