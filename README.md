@@ -70,7 +70,7 @@ Or a great video done by Daniel Gonos: https://www.youtube.com/watch?v=rjuCvlnpB
 ***
 ##TODO or Questions ?
 [Check issue list](https://github.com/luc-github/Repetier-Firmware-0.92/issues)    
-[FAQ](https://github.com/luc-github/Repetier-Firmware-0.92/issues?utf8=%E2%9C%93&q=is%3Aclosed+label%3Aquestion)    
+[FAQ](https://github.com/luc-github/Repetier-Firmware-0.92/labels/FAQ)    
 
 ***
 ##Implemented
