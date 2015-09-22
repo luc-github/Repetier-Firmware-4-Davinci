@@ -21,7 +21,7 @@
 
 // ################## EDIT THESE SETTINGS MANUALLY ################
 
-#define DAVINCI 4 // "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN, 4 for AiO (WITH NO SCANNER SUPPORT)
+#define DAVINCI 4 // "0" if not DAVINCI, "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN, 4 for AiO (WITH NO SCANNER SUPPORT)
 #define MODEL  0//"0" for first generation (jumper JP1 to reset ) , "1" for new generation   (jumper J37 to reset)
 #define REPURPOSE_FAN_TO_COOL_EXTRUSIONS 0 //Setting this to 1 will repurpose the main Extruder cooling fan to be controlled VIA M106/M107
                                                                                             //Warning: for DaVinci 1.0 need to add a permanent fan with power supply to cool extruder
@@ -32,7 +32,7 @@
 #define VERSION_MAJOR "1"
 #define VERSION_MINOR_YEAR "15"
 #define VERSION_MINOR_MONTH "09"
-#define VERSION_MINOR_DAY "08"
+#define VERSION_MINOR_DAY "22"
 #define VERSION_BUILD "1"
 
 //Davinci screen is not standard reprap it is WINSTAR 16x4
@@ -47,6 +47,7 @@
 #define UI_AUTOLIGHTOFF_AFTER 1
 #define ENABLE_CLEAN_DRIPBOX 1
 #define ENABLE_CLEAN_NOZZLE 1
+#define FEATURE_ENCODER	0
 //ensure of some define if AiO
 #if DAVINCI==4
 //no drip box
@@ -952,6 +953,12 @@ on this endstop.
 #define Z_MIN_POS 0
 #endif
 
+#if DAVINCI==0
+#define X_MIN_POS 0
+#define Y_MIN_POS 0
+#define Z_MIN_POS 0
+#endif
+
 // ##########################################################################################
 // ##                           Movement settings                                          ##
 // ##########################################################################################
@@ -1460,6 +1467,24 @@ See: AdditionalArduinoFiles: README.txt on how to install them.
 #define MANUAL_LEVEL_Y4  100
 #endif
 
+#if DAVINCI==0
+#define Z_PROBE_X1 36
+#define Z_PROBE_Y1 -7
+#define Z_PROBE_X2 36
+#define Z_PROBE_Y2 203
+#define Z_PROBE_X3 171
+#define Z_PROBE_Y3 203
+//Manual bed leveling
+#define MANUAL_LEVEL_X1 100
+#define MANUAL_LEVEL_Y1  180
+#define MANUAL_LEVEL_X2 100
+#define MANUAL_LEVEL_Y2 10
+#define MANUAL_LEVEL_X3 50
+#define MANUAL_LEVEL_Y3 95
+#define MANUAL_LEVEL_X4  150
+#define MANUAL_LEVEL_Y4  95
+#endif
+
 /* DISTORTION_CORRECTION compensates the distortion caused by mechanical imprecisions of nonlinear (i.e. DELTA) printers
  * assumes that the floor is plain (i.e. glass plate)
  *     and that it is perpendicular to the towers
@@ -1656,7 +1681,7 @@ info pages with next/previous button/click-encoder */
 Unfotunately, the encoder have a different count of phase changes between clicks.
 Select an encoder speed from 0 = fastest to 2 = slowest that results in one menu move per click.
 */
-#define UI_ENCODER_SPEED 0
+#define UI_ENCODER_SPEED 2
 
 // Set to 1 to reverse encoder direction
 #define UI_REVERSE_ENCODER 0

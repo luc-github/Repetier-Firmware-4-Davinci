@@ -3283,8 +3283,10 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
         if (action==UI_ACTION_Z_1)istep=1;
         if (action==UI_ACTION_Z_10)istep=10;
         if (action==UI_ACTION_Z_100)istep=100;
+	#if !FEATURE_ENCODER
         increment=-increment; //upside down increment to allow keys to follow  Z movement, Up Key make Z going up, down key make Z going down
-        if (!Printer::isZHomed())//ask for home to secure movement
+	#endif        
+	if (!Printer::isZHomed())//ask for home to secure movement
         {
             if (confirmationDialog(UI_TEXT_DO_YOU ,UI_TEXT_HOME_Z,UI_TEXT_WARNING_POS_Z_UNKNOWN,UI_CONFIRMATION_TYPE_YES_NO,true))
                     {
@@ -3309,7 +3311,9 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
         int istep=1;
         if (action==UI_ACTION_E_10)istep=10;
         if (action==UI_ACTION_E_100)istep=100;
+	#if !FEATURE_ENCODER
         increment=-increment; //upside down increment to allow keys to follow  filament movement, Up Key make filament going up, down key make filament going down
+	#endif
         if(reportTempsensorError() or Printer::debugDryrun()) break;
         //check temperature
         if(Extruder::current->tempControl.currentTemperatureC<=MIN_EXTRUDER_TEMP)
@@ -3631,6 +3635,9 @@ bool UIDisplay::confirmationDialog(char * title,char * line1,char * line2,int ty
 {
 bool response=defaultresponse;
 bool process_it=true;
+#if FEATURE_ENCODER
+bool encoder_command=false;
+#endif
 int previousaction=0;
 int tmpmenulevel = menuLevel;
 if (menuLevel>3)menuLevel=3;
@@ -3666,6 +3673,20 @@ while (process_it)
     //process critical actions
     Commands::checkForPeriodicalActions(true);
     //be sure button is pressed and not same one
+    #if FEATURE_ENCODER
+    int16_t encodeChange = encoderPos;
+    encoderPos = 0;
+    if (encodeChange > 0 )
+		{
+		encoder_command=true;
+		lastButtonAction=UI_ACTION_BACK;	
+		}
+    if (encodeChange < 0 )
+		{
+		encoder_command=true;
+		lastButtonAction=UI_ACTION_RIGHT_KEY;
+		}
+    #endif
     if (lastButtonAction!=previousaction)
         {
          previousaction=lastButtonAction;
@@ -3710,6 +3731,13 @@ while (process_it)
             }
         if(previousaction!=0)BEEP_SHORT;
         refreshPage();
+	#if FEATURE_ENCODER
+        if (encoder_command)
+			{
+				lastButtonAction=0;
+				encoder_command=false;
+			}
+	#endif
         }
     }//end while
  menuLevel=tmpmenulevel;
@@ -4168,8 +4196,17 @@ case UI_ACTION_LOAD_FAILSAFE:
          //just need to wait for key to be pressed
          break;
          }
+	#if FEATURE_ENCODER
+        //check encoder 
+		int16_t encodeChange = encoderPos;
+		bool encoder_command=false;
+		if (encodeChange > 0 ) encoder_command=true;
+		encoderPos = 0;
          //check what key is pressed
-         if (previousaction!=lastButtonAction)
+         if (previousaction!=lastButtonAction || encoder_command)
+	#else
+	 if (previousaction!=lastButtonAction)
+	#endif
             {
             previousaction=lastButtonAction;
             if(previousaction!=0)BEEP_SHORT;
@@ -4180,8 +4217,12 @@ case UI_ACTION_LOAD_FAILSAFE:
                 playsound(3000,240);
                 Printer::homeAxis(true,true,false);
                 }
-             if (lastButtonAction==UI_ACTION_BACK)//this means user want to cancel current action
-                {
+	#if FEATURE_ENCODER
+             if (lastButtonAction==UI_ACTION_BACK  || encodeChange > 0)//this means user want to cancel current action
+	#else 
+	     if (lastButtonAction==UI_ACTION_BACK)//this means user want to cancel current action
+	#endif               
+		{
                 if (confirmationDialog(UI_TEXT_PLEASE_CONFIRM ,UI_TEXT_CANCEL_ACTION,UI_TEXT_CLEANING_NOZZLE))
                     {
                     UI_STATUS(UI_TEXT_CANCELED);
@@ -4660,8 +4701,17 @@ case UI_ACTION_LOAD_FAILSAFE:
             }
          break;
          }
+	#if FEATURE_ENCODER 
+         //check encoder 
+		int16_t encodeChange = encoderPos;
+		bool encoder_command=false;
+		if (encodeChange > 0 ) encoder_command=true;
+		encoderPos = 0;
          //check what key is pressed
-         if (previousaction!=lastButtonAction)
+         if (previousaction!=lastButtonAction || encoder_command)
+	#else
+	  if (previousaction!=lastButtonAction)
+	#endif
             {
             previousaction=lastButtonAction;
             if(previousaction!=0)BEEP_SHORT;
@@ -4672,7 +4722,11 @@ case UI_ACTION_LOAD_FAILSAFE:
                 playsound(3000,240);
                 UI_STATUS(UI_TEXT_PUSH_FILAMENT);
                 }
-             if (lastButtonAction==UI_ACTION_BACK)//this means user want to cancel current action
+	     #if FEATURE_ENCODER
+             if (lastButtonAction==UI_ACTION_BACK  || encodeChange > 0)//this means user want to cancel current action
+	     #else
+	     if (lastButtonAction==UI_ACTION_BACK)//this means user want to cancel current action
+	     #endif
                 {
                 if (confirmationDialog(UI_TEXT_PLEASE_CONFIRM ,UI_TEXT_CANCEL_ACTION,UI_TEXT_LOADUNLOAD_FILAMENT))
                     {
@@ -4988,8 +5042,17 @@ case UI_ACTION_LOAD_FAILSAFE:
             else    process_it=false;
             break;
          }
+	 #if FEATURE_ENCODER
+         //check encoder 
+		int16_t encodeChange = encoderPos;
+		bool encoder_command=false;
+		if (encodeChange > 0 ) encoder_command=true;
+		encoderPos = 0;
          //check what key is pressed
-         if (previousaction!=lastButtonAction)
+         if (previousaction!=lastButtonAction || encoder_command)
+	#else
+	if (previousaction!=lastButtonAction)
+	#endif
             {
             previousaction=lastButtonAction;
             if(previousaction!=0)BEEP_SHORT;
@@ -4997,7 +5060,11 @@ case UI_ACTION_LOAD_FAILSAFE:
                 {
                     step=STEP_AUTOLEVEL_SAVE_RESULTS;
                 }
-             if (lastButtonAction==UI_ACTION_BACK)//this means user want to cancel current action
+	     #if FEATURE_ENCODER
+             if (lastButtonAction==UI_ACTION_BACK  || encodeChange > 0)//this means user want to cancel current action
+	     #else
+	     if (lastButtonAction==UI_ACTION_BACK)//this means user want to cancel current action
+	     #endif
                 {
                 if (confirmationDialog(UI_TEXT_PLEASE_CONFIRM ,UI_TEXT_CANCEL_ACTION,UI_TEXT_AUTOLEVEL))
                     {
@@ -5267,8 +5334,17 @@ case UI_ACTION_LOAD_FAILSAFE:
             step =STEP_MANUAL_LEVEL_PAGE10;
             break;
         }
+	#if FEATURE_ENCODER
+         //check encoder 
+		int16_t encodeChange = encoderPos;
+		bool encoder_command=false;
+		if (encodeChange > 0 ) encoder_command=true;
+		encoderPos = 0;
          //check what key is pressed
-         if (previousaction!=lastButtonAction)
+         if (previousaction!=lastButtonAction || encoder_command)
+	#else
+	 if (previousaction!=lastButtonAction)
+	#endif
             {
             previousaction=lastButtonAction;
             if(previousaction!=0)BEEP_SHORT;
@@ -5335,7 +5411,11 @@ case UI_ACTION_LOAD_FAILSAFE:
                     process_it=false;
                     }
             }
-            else if (lastButtonAction==UI_ACTION_BACK)//this means user want to cancel current action
+	#if FEATURE_ENCODER
+            else if (lastButtonAction==UI_ACTION_BACK  || encodeChange > 0)//this means user want to cancel current action
+	#else
+	    else if (lastButtonAction==UI_ACTION_BACK)//this means user want to cancel current action
+	#endif
                 {
                 if (confirmationDialog(UI_TEXT_PLEASE_CONFIRM ,UI_TEXT_CANCEL_ACTION,UI_TEXT_MANUAL_LEVEL))
                     {
