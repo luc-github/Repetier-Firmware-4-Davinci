@@ -3,7 +3,8 @@
 
 [![Join the chat at https://gitter.im/luc-github/Repetier-Firmware-0.92](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/luc-github/Repetier-Firmware-0.92?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-This firmware is based on the popular repetier firmware and modified to work with first generation Da Vinci 1.0, 2.0 single fan, 2.0 dual fans and also AiO (NB:scanner function is not supported so AiO will work like an 1.0A)
+This firmware is based on the popular repetier firmware and modified to work with first generation Da Vinci 1.0, 2.0 single fan, 2.0 dual fans and also AiO (NB:scanner function is not supported so AiO will work like an 1.0A)   
+If you change the board, currently DUE based are supported with RADDS, as well as Graphical screen and LCD with encoder, there are some sample configuration files provided for RADDS/DUE/GLCD using 1/128 step drivers.
 
 YOU MIGHT DAMAGE YOUR PRINTER OR VOID YOUR WARRANTY, DO IT ON YOUR OWN RISK. When it is possible on 1.0/2.0, currently on 1.0A/2.0A and AiO there is no way to revert to stock fw so be sure of what you are doing.
 
@@ -52,7 +53,7 @@ For information on upgrading from or reverting to stock FW and other procedures 
 Do not forget to modify the configuration.h to match your targeted Da Vinci: 1.0, 2.0 SF or 2.0.   
 for basic installation just change :   
 '<code>#define DAVINCI 1 // "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FANS, 4 For AiO （no scanner)</code>'    
-
+  0 for not Davinci board (like DUE/RADDS)    
   1 for DaVinci 1.0 (1Fan, 1 Extruder)   
   2 for DaVinci 2.0 SF (1Fan, 2 Extruders)   
   3 for DaVinci 2.0  (2Fans, 2 Extruders)    
