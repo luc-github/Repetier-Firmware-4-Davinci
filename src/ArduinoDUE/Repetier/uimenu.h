@@ -87,6 +87,9 @@ feed rate
 %fZ : Homing feedrate z direction
 %Fs : Fan speed
 %Fi : ignore M106 commands state
+%fl : loading feed rate
+%fu : unloading feed rate
+%fd : Unloading/loading distance
 
 inactivity
 %is : Stepper inactive time in minutes
@@ -1288,9 +1291,12 @@ UI_MENU_CHANGEACTION(ui_menu_feedrate_maxy,  UI_TEXT_FEED_MAX_Y,  UI_ACTION_MAX_
 UI_MENU_CHANGEACTION(ui_menu_feedrate_maxz,  UI_TEXT_FEED_MAX_Z,  UI_ACTION_MAX_FEEDRATE_Z, ADVANCED_MODE)
 UI_MENU_CHANGEACTION(ui_menu_feedrate_homex, UI_TEXT_FEED_HOME_X, UI_ACTION_HOMING_FEEDRATE_X, ADVANCED_MODE)
 UI_MENU_CHANGEACTION(ui_menu_feedrate_homey, UI_TEXT_FEED_HOME_Y, UI_ACTION_HOMING_FEEDRATE_Y, ADVANCED_MODE)
+UI_MENU_CHANGEACTION(ui_menu_feedrate_loading_filament, UI_TEXT_FEED_LOADING_FILAMENT, UI_ACTION_LOADING_FEEDRATE, ADVANCED_MODE)
+UI_MENU_CHANGEACTION(ui_menu_feedrate_unloading_filament, UI_TEXT_FEED_UNLOADING_FILAMENT, UI_ACTION_UNLOADING_FEEDRATE, ADVANCED_MODE)
+UI_MENU_CHANGEACTION(ui_menu_feedrate_loading_unloading_distance, UI_TEXT_LOADING_UNLOADING_DISTANCE, UI_ACTION_LOAD_UNLOAD_DISTANCE, ADVANCED_MODE)
 UI_MENU_CHANGEACTION(ui_menu_feedrate_homez, UI_TEXT_FEED_HOME_Z, UI_ACTION_HOMING_FEEDRATE_Z, ADVANCED_MODE)
-#define UI_MENU_FEEDRATE {UI_MENU_ADDCONDBACK &ui_menu_feedrate_maxx,&ui_menu_feedrate_maxy,&ui_menu_feedrate_maxz,&ui_menu_feedrate_homex,&ui_menu_feedrate_homey,&ui_menu_feedrate_homez}
-UI_MENU(ui_menu_feedrate,UI_MENU_FEEDRATE,6 + UI_MENU_BACKCNT);//BUG without this ; compilation crash
+#define UI_MENU_FEEDRATE {UI_MENU_ADDCONDBACK &ui_menu_feedrate_maxx,&ui_menu_feedrate_maxy,&ui_menu_feedrate_maxz,&ui_menu_feedrate_homex,&ui_menu_feedrate_homey,&ui_menu_feedrate_homez,&ui_menu_feedrate_loading_filament, &ui_menu_feedrate_unloading_filament, &ui_menu_feedrate_loading_unloading_distance}
+UI_MENU(ui_menu_feedrate,UI_MENU_FEEDRATE,9 + UI_MENU_BACKCNT);//BUG without this ; compilation crash
 #else
 // **** Acceleration settings
 UI_MENU_CHANGEACTION(ui_menu_accel_printz,UI_TEXT_PRINT_Z_DELTA,UI_ACTION_PRINT_ACCEL_Z, ADVANCED_MODE)

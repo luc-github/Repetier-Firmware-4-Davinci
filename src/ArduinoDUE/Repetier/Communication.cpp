@@ -39,6 +39,11 @@ FSTRINGVALUE(Com::tTempExtABS,"Temp Ext ABS:")
 FSTRINGVALUE(Com::tTempExtPLA,"Temp Ext PLA:")
 FSTRINGVALUE(Com::tTempBedABS,"Temp Bed ABS:")
 FSTRINGVALUE(Com::tTempBedPLA,"Temp Bed PLA:")
+
+FSTRINGVALUE(Com::tLoadFeedRate,"Load Feed Rate:")
+FSTRINGVALUE(Com::tUnloadFeedRate,"Unload Feed Rate:")
+FSTRINGVALUE(Com::tUnloadLoadDistance,"Unload/Load Distance:")
+
 FSTRINGVALUE(Com::tKeepLightOn,"Keep Light On:")
 FSTRINGVALUE(Com::tSensorOn,"Filament Sensor On:")
 FSTRINGVALUE(Com::tTopsensorOn,"Top Sensor On:")

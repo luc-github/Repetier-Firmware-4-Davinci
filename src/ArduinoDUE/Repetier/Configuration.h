@@ -21,7 +21,7 @@
 
 // ################## EDIT THESE SETTINGS MANUALLY ################
 
-#define DAVINCI 4 // "0" if not DAVINCI, "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN, 4 for AiO (WITH NO SCANNER SUPPORT)
+#define DAVINCI 1 // "0" if not DAVINCI, "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN, 4 for AiO (WITH NO SCANNER SUPPORT)
 #define MODEL  0//"0" for first generation (jumper JP1 to reset ) , "1" for new generation   (jumper J37 to reset)
 #define REPURPOSE_FAN_TO_COOL_EXTRUSIONS 0 //Setting this to 1 will repurpose the main Extruder cooling fan to be controlled VIA M106/M107
                                                                                             //Warning: for DaVinci 1.0 need to add a permanent fan with power supply to cool extruder
@@ -1726,6 +1726,12 @@ Values must be in range 1..255
 #define UI_SET_PRESET_EXTRUDER_TEMP_PLA   180
 #define UI_SET_PRESET_HEATED_BED_TEMP_ABS 90
 #define UI_SET_PRESET_EXTRUDER_TEMP_ABS   230
+
+// Loading / Unloading Filament value
+#define UI_SET_PRESET_LOADING_FEEDRATE  2 
+#define UI_SET_PRESET_UNLOADING_FEEDRATE  4
+#define UI_SET_PRESET_UNLOAD_LOAD_DISTANCE  60 
+
 // Extreme values
 #define UI_SET_MIN_HEATED_BED_TEMP  30
 #define UI_SET_MAX_HEATED_BED_TEMP 130

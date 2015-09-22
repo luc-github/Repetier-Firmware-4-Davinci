@@ -116,6 +116,9 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     EEPROM::ftemp_ext_abs=UI_SET_PRESET_EXTRUDER_TEMP_ABS;
     EEPROM::ftemp_bed_pla=UI_SET_PRESET_HEATED_BED_TEMP_PLA;
     EEPROM::ftemp_bed_abs=UI_SET_PRESET_HEATED_BED_TEMP_ABS;
+    EEPROM::loading_feed_rate=UI_SET_PRESET_LOADING_FEEDRATE;
+    EEPROM::unloading_feed_rate=UI_SET_PRESET_UNLOADING_FEEDRATE;
+    EEPROM::unloading_loading_distance=UI_SET_PRESET_UNLOAD_LOAD_DISTANCE;
     #if CASE_LIGHTS_PIN>=0
     WRITE(CASE_LIGHTS_PIN, byte(EEPROM::buselight)); 
     #endif // CASE_LIGHTS_PIN
@@ -379,6 +382,9 @@ float EEPROM::ftemp_ext_pla=UI_SET_PRESET_EXTRUDER_TEMP_PLA;
 float EEPROM::ftemp_ext_abs=UI_SET_PRESET_EXTRUDER_TEMP_ABS;
 float EEPROM::ftemp_bed_pla=UI_SET_PRESET_HEATED_BED_TEMP_PLA;
 float EEPROM::ftemp_bed_abs=UI_SET_PRESET_HEATED_BED_TEMP_ABS;
+float EEPROM::loading_feed_rate=UI_SET_PRESET_LOADING_FEEDRATE;
+float EEPROM::unloading_feed_rate=UI_SET_PRESET_UNLOADING_FEEDRATE;
+float EEPROM::unloading_loading_distance=UI_SET_PRESET_UNLOAD_LOAD_DISTANCE;
 
 #if UI_AUTOLIGHTOFF_AFTER !=0
 millis_t EEPROM::timepowersaving=1000 * 60 * 30; //30 min
@@ -482,6 +488,9 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
     HAL::eprSetFloat(EPR_TEMP_BED_ABS, EEPROM::ftemp_bed_abs);
     HAL::eprSetFloat(EPR_TEMP_EXT_PLA, EEPROM::ftemp_ext_pla);
     HAL::eprSetFloat(EPR_TEMP_EXT_ABS, EEPROM::ftemp_ext_abs);
+    HAL::eprSetFloat(EPR_LOAD_FEED_RATE, EEPROM::loading_feed_rate);
+    HAL::eprSetFloat(EPR_UNLOAD_FEED_RATE, EEPROM::unloading_feed_rate);
+    HAL::eprSetFloat(EPR_UNLOAD_LOAD_DISTANCE, EEPROM::unloading_loading_distance);
 #if ENABLE_BACKLASH_COMPENSATION
     HAL::eprSetFloat(EPR_BACKLASH_X,Printer::backlashX);
     HAL::eprSetFloat(EPR_BACKLASH_Y,Printer::backlashY);
@@ -581,6 +590,9 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_TEMP_BED_ABS, EEPROM::ftemp_bed_abs);
     HAL::eprSetFloat(EPR_TEMP_EXT_PLA, EEPROM::ftemp_ext_pla);
     HAL::eprSetFloat(EPR_TEMP_EXT_ABS, EEPROM::ftemp_ext_abs);
+    HAL::eprSetFloat(EPR_LOAD_FEED_RATE, EEPROM::loading_feed_rate);
+    HAL::eprSetFloat(EPR_UNLOAD_FEED_RATE, EEPROM::unloading_feed_rate);
+    HAL::eprSetFloat(EPR_UNLOAD_LOAD_DISTANCE, EEPROM::unloading_loading_distance);
     HAL::eprSetFloat(EPR_AXISCOMP_TANXY,AXISCOMP_TANXY);
     HAL::eprSetFloat(EPR_AXISCOMP_TANYZ,AXISCOMP_TANYZ);
     HAL::eprSetFloat(EPR_AXISCOMP_TANXZ,AXISCOMP_TANXZ);
@@ -707,6 +719,9 @@ EEPROM::ftemp_ext_pla= HAL::eprGetFloat(EPR_TEMP_EXT_PLA);
 EEPROM::ftemp_ext_abs= HAL::eprGetFloat(EPR_TEMP_EXT_ABS);
 EEPROM::ftemp_bed_pla= HAL::eprGetFloat(EPR_TEMP_BED_PLA);
 EEPROM::ftemp_bed_abs= HAL::eprGetFloat(EPR_TEMP_BED_ABS);
+EEPROM::loading_feed_rate= HAL::eprGetFloat(EPR_LOAD_FEED_RATE);
+EEPROM::unloading_feed_rate= HAL::eprGetFloat(EPR_UNLOAD_FEED_RATE);
+EEPROM::unloading_loading_distance= HAL::eprGetFloat(EPR_UNLOAD_LOAD_DISTANCE);
 #if ENABLE_BACKLASH_COMPENSATION
     Printer::backlashX = HAL::eprGetFloat(EPR_BACKLASH_X);
     Printer::backlashY = HAL::eprGetFloat(EPR_BACKLASH_Y);
@@ -1001,6 +1016,9 @@ void EEPROM::writeSettings()
     writeFloat(EPR_TEMP_EXT_ABS,Com::tTempExtABS);
     writeFloat(EPR_TEMP_BED_PLA,Com::tTempBedPLA);
     writeFloat(EPR_TEMP_BED_ABS,Com::tTempBedABS);
+    writeFloat(EPR_LOAD_FEED_RATE,Com::tLoadFeedRate);
+    writeFloat(EPR_UNLOAD_FEED_RATE,Com::tUnloadFeedRate);
+    writeFloat(EPR_UNLOAD_LOAD_DISTANCE,Com::tUnloadLoadDistance);
 //#define EPR_ACCELERATION_TYPE 1
 #if DRIVE_SYSTEM != DELTA
     writeFloat(EPR_XAXIS_STEPS_PER_MM, Com::tEPRXStepsPerMM, 4);

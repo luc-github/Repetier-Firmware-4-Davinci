@@ -1621,8 +1621,11 @@ void UIDisplay::parse(const char *txt,bool ram)
             break;
 #endif
         case 'f':
-            if(c2 >= 'x' && c2 <= 'z') addFloat(Printer::maxFeedrate[c2 - 'x'], 5, 0);
+            if(c2 >= 'x' && c2 <= 'z' && ! (c2 == 'l' || c2 == 'u' ||c2 == 'd')) addFloat(Printer::maxFeedrate[c2 - 'x'], 5, 0);
             else if(c2 >= 'X' && c2 <= 'Z') addFloat(Printer::homingFeedrate[c2 - 'X'], 5, 0);
+            else if(c2 == 'l') addFloat(EEPROM::loading_feed_rate, 5, 0);
+            else if(c2 == 'u') addFloat(EEPROM::unloading_feed_rate, 5, 0);
+            else if(c2 == 'd') addFloat(EEPROM::unloading_loading_distance, 3, 0);
             break;
 //Davinci Specific, XYZ Min position
         case 'H':
@@ -3472,6 +3475,15 @@ case UI_ACTION_BED_TEMP_PLA :
         INCREMENT_MIN_MAX(Printer::maxZJerk,0.1,0.1,99.9);
         break;
 #endif
+	case UI_ACTION_LOADING_FEEDRATE:
+		INCREMENT_MIN_MAX(EEPROM::loading_feed_rate, 1, 1, 1000);
+        break;
+    case UI_ACTION_UNLOADING_FEEDRATE:
+		INCREMENT_MIN_MAX(EEPROM::unloading_feed_rate, 1, 1, 1000);
+        break;
+    case UI_ACTION_LOAD_UNLOAD_DISTANCE:
+		INCREMENT_MIN_MAX(EEPROM::unloading_loading_distance, 1, 1, 1000);
+        break;
     case UI_ACTION_HOMING_FEEDRATE_X:
     case UI_ACTION_HOMING_FEEDRATE_Y:
     case UI_ACTION_HOMING_FEEDRATE_Z:
@@ -4650,7 +4662,7 @@ case UI_ACTION_LOAD_FAILSAFE:
                 if (load_dir==-1)
                     {
                     UI_STATUS(UI_TEXT_UNLOADING_FILAMENT);
-                    PrintLine::moveRelativeDistanceInSteps(0,0,0,load_dir * Printer::axisStepsPerMM[E_AXIS],4,false,false);
+                    PrintLine::moveRelativeDistanceInSteps(0,0,0,load_dir * Printer::axisStepsPerMM[E_AXIS],EEPROM::unloading_feed_rate,false,false);
                     if (extruderid==0)//filament sensor override to stop earlier
                     {
                         #if defined(FIL_SENSOR1_PIN)
@@ -4673,9 +4685,9 @@ case UI_ACTION_LOAD_FAILSAFE:
                 else
                     {
                     UI_STATUS(UI_TEXT_LOADING_FILAMENT);
-                    PrintLine::moveRelativeDistanceInSteps(0,0,0,load_dir * Printer::axisStepsPerMM[E_AXIS],2,false,false);
+                    PrintLine::moveRelativeDistanceInSteps(0,0,0,load_dir * Printer::axisStepsPerMM[E_AXIS],EEPROM::loading_feed_rate,false,false);
                     }
-                if (counter>=60)step = STEP_EXT_ASK_CONTINUE;
+                if (counter>=EEPROM::unloading_loading_distance)step = STEP_EXT_ASK_CONTINUE;
             }
             break;
          case STEP_EXT_ASK_CONTINUE:

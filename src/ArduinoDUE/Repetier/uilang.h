@@ -114,6 +114,9 @@
 	#define UI_TEXT_EXTR_XOFF         "Xoffst:%Xx"
 	#define UI_TEXT_EXTR_YOFF         "Yoffst:%Xy"
 #endif
+#define UI_TEXT_FEED_LOADING_FILAMENT "Load Fil.:%fl"
+#define UI_TEXT_FEED_UNLOADING_FILAMENT "Unload F.:%fu"
+#define UI_TEXT_LOADING_UNLOADING_DISTANCE "Load dist.: %fd"
 #define UI_TEXT_BED_DOWN "Bed Down"
 #define UI_TEXT_WIFI_ONOFF "Wifi:       %wo"
 #define UI_TEXT_REDO_ACTION "Do it again ?"
