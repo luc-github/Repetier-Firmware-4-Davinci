@@ -502,15 +502,22 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #endif
 #define UI_MENU_MAXLEVEL 5
 
+#ifndef UI_ROWS
+#define UI_ROWS 4
+#endif
+
 #define UI_FLAG_FAST_KEY_ACTION 1
 #define UI_FLAG_SLOW_KEY_ACTION 2
 #define UI_FLAG_SLOW_ACTION_RUNNING 4
 #define UI_FLAG_KEY_TEST_RUNNING 8
-/*Davinci Specific, to track any not obvious change, class definition stay in comment 
-and used one is located at the end of the file
 
+//Davinci Specific,move to the end to integrate SDrefresh in class
 class UIDisplay {
   public:
+#if UI_AUTOLIGHTOFF_AFTER!=0
+	static millis_t ui_autolightoff_time;
+#endif
+    static uint8_t display_mode; 
     volatile uint8_t flags; // 1 = fast key action, 2 = slow key action, 4 = slow action running, 8 = key test running
     uint8_t col; // current col for buffer prefill
     uint8_t menuLevel; // current menu level, 0 = info, 1 = group, 2 = groupdata select, 3 = value change
@@ -544,6 +551,7 @@ class UIDisplay {
     void addStringOnOff(uint8_t);
     void addChar(const char c);
     void addGCode(GCode *code);
+ 
     int okAction(bool allowMoves);
     bool nextPreviousAction(int16_t next, bool allowMoves);
     char statusMsg[21];
@@ -562,6 +570,7 @@ class UIDisplay {
     void slowAction(bool allowMoves);
     void fastAction();
     void mediumAction();
+    bool confirmationDialog(char * title,char * line1,char * line2,int type=UI_CONFIRMATION_TYPE_YES_NO, bool defaultresponse=false);
     void pushMenu(const UIMenu *men, bool refresh);
     void popMenu(bool refresh);
     void adjustMenuPos();
@@ -570,13 +579,15 @@ class UIDisplay {
     inline void setOutputMaskBits(unsigned int bits) {outputMask |= bits;}
     inline void unsetOutputMaskBits(unsigned int bits) {outputMask &= ~bits;}
     void updateSDFileCount();
+    void sdrefresh(uint16_t &r,char cache[UI_ROWS][MAX_COLS+1]);
     void goDir(char *name);
     bool isDirname(char *name);
     bool isWizardActive();
     char cwd[SD_MAX_FOLDER_DEPTH*LONG_FILENAME_LENGTH+2];
     uint8_t folderLevel;
 };
-*/
+
+extern UIDisplay uid;
 
 #if FEATURE_CONTROLLER == UICONFIG_CONTROLLER
 #include "uiconfig.h"
@@ -1532,82 +1543,7 @@ void uiCheckSlowKeys(int &action) {}
 #define BEEP_LONG beep(BEEPER_LONG_SEQUENCE);
 #endif
 
-//Davinci Specific,move to the end to integrate SDrefresh in class
-class UIDisplay {
-  public:
-#if UI_AUTOLIGHTOFF_AFTER!=0
-	static millis_t ui_autolightoff_time;
-#endif
-    static uint8_t display_mode; 
-    volatile uint8_t flags; // 1 = fast key action, 2 = slow key action, 4 = slow action running, 8 = key test running
-    uint8_t col; // current col for buffer prefill
-    uint8_t menuLevel; // current menu level, 0 = info, 1 = group, 2 = groupdata select, 3 = value change
-    uint16_t menuPos[UI_MENU_MAXLEVEL]; // Positions in menu
-    const UIMenu *menu[UI_MENU_MAXLEVEL]; // Menus active
-    uint16_t menuTop[UI_MENU_MAXLEVEL]; // Top row in menu
-    int8_t shift; // Display shift for scrolling text
-    int pageDelay; // Counter. If 0 page is refreshed if menuLevel is 0.
-    void *errorMsg;
-    uint16_t activeAction; // action for ok/next/previous
-    uint16_t lastAction;
-    uint16_t delayedAction;
-    millis_t lastSwitch; // Last time display switched pages
-    millis_t lastRefresh;
-    uint16_t lastButtonAction;
-    millis_t lastButtonStart;
-    millis_t nextRepeat; // Time of next autorepeat
-    millis_t lastNextPrev; // for increasing speed settings
-    float lastNextAccumul; // Accumulated value
-    unsigned int outputMask; // Output mask for backlight, leds etc.
-    int repeatDuration; // Time beween to actions if autorepeat is enabled
-    int8_t oldMenuLevel;
-    uint8_t encoderStartScreen;
-    char printCols[MAX_COLS+1];
-    void addInt(int value,uint8_t digits,char fillChar=' '); // Print int into printCols
-    void addLong(long value,char digits);
-    inline void addLong(long value) {addLong(value, -11);};
-    void addFloat(float number, char fixdigits,uint8_t digits);
-    inline void addFloat(float number) {addFloat(number, -9,2);};
-    void addStringP(PGM_P text);
-    void addStringOnOff(uint8_t);
-    void addChar(const char c);
-    void addGCode(GCode *code);
- 
-    int okAction(bool allowMoves);
-    bool nextPreviousAction(int16_t next, bool allowMoves);
-    char statusMsg[21];
-    int8_t encoderPos;
-    int8_t encoderLast;
-    UIDisplay();
-    void createChar(uint8_t location, const uint8_t charmap[]);
-    void initialize(); // Initialize display and keys
-    void waitForKey();
-    void printRow(uint8_t r, char *txt, char *txt2, uint8_t changeAtCol); // Print row on display
-    void printRowP(uint8_t r,PGM_P txt);
-    void parse(const char *txt,bool ram); /// Parse output and write to printCols;
-    void refreshPage();
-    int executeAction(int action, bool allowMoves);
-    void finishAction(int action);
-    void slowAction(bool allowMoves);
-    void fastAction();
-    void mediumAction();
-    bool confirmationDialog(char * title,char * line1,char * line2,int type=UI_CONFIRMATION_TYPE_YES_NO, bool defaultresponse=false);
-    void pushMenu(const UIMenu *men, bool refresh);
-    void popMenu(bool refresh);
-    void adjustMenuPos();
-    void setStatusP(PGM_P txt, bool error = false);
-    void setStatus(const char *txt, bool error = false);
-    inline void setOutputMaskBits(unsigned int bits) {outputMask |= bits;}
-    inline void unsetOutputMaskBits(unsigned int bits) {outputMask &= ~bits;}
-    void updateSDFileCount();
-    void sdrefresh(uint16_t &r,char cache[UI_ROWS][MAX_COLS+1]);
-    void goDir(char *name);
-    bool isDirname(char *name);
-    bool isWizardActive();
-    char cwd[SD_MAX_FOLDER_DEPTH*LONG_FILENAME_LENGTH+2];
-    uint8_t folderLevel;
-};
-extern UIDisplay uid;
+
 extern void playsound(int tone,int duration);
 
 extern void beep(uint8_t duration,uint8_t count);
