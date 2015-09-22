@@ -1813,7 +1813,8 @@ case 'P':
             }
             if(c2 == 'X')
 #if (X_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_X
-                addStringOnOff(Printer::isXMaxEndstopHit());
+                //addStringOnOff(Printer::isXMaxEndstopHit());
+                addStringP(Printer::isXMaxEndstopHit()?"\003":"\004");
 #else
                 addStringP(ui_text_na);
 #endif
@@ -1826,7 +1827,8 @@ case 'P':
 #endif
             if(c2 == 'Y')
 #if (Y_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Y
-                addStringOnOff(Printer::isYMaxEndstopHit());
+                //addStringOnOff(Printer::isYMaxEndstopHit());
+                addStringP(Printer::isYMaxEndstopHit()?"\003":"\004");
 #else
                 addStringP(ui_text_na);
 #endif
@@ -1839,7 +1841,8 @@ case 'P':
 #endif
             if(c2=='Z')
 #if (Z_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Z
-                addStringOnOff(Printer::isZMaxEndstopHit());
+                //addStringOnOff(Printer::isZMaxEndstopHit());
+                addStringP(Printer::isZMaxEndstopHit()?"\003":"\004");
 #else
                 addStringP(ui_text_na);
 #endif
