@@ -1517,10 +1517,12 @@ void UIDisplay::parse(const char *txt,bool ram)
                 {
                 addStringP(extruder[2].tempControl.targetTemperatureC>0?"\004":"\003");
                 }
+#if HAVE_HEATED_BED
              else if(c2=='7') //Bed Off
                 {
                 addStringP(heatedBedController.targetTemperatureC>0?"\004":"\003");
                 }
+#endif
         break;
 	    case 'C':
             if(c2=='1')
