@@ -96,7 +96,7 @@ Or a great video done by Daniel Gonos: https://www.youtube.com/watch?v=rjuCvlnpB
 * Command for bed down
 * Several fixes from original FW   
 * Watchdog   
-* Basic Wifi support for module ESP8266  
+* Basic Wifi support for module ESP8266 (https://github.com/luc-github/ESP8266/blob/master/README.md#result-of-esp12e-on-davinci) 
 * Customized thermistor tables for bed and extruder(s) as Davinci board do not follow design of others 3D printer boards so standard tables do not work properly [check here](http://voltivo.com/forum/davinci-firmware/438-repetier-91-e3d-v6-extruder#3631)
 * More to come ....
 
