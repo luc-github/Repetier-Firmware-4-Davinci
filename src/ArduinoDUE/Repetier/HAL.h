@@ -557,14 +557,14 @@ public:
     static inline void serialSetBaudrate(long baud)
     {
 	#if ENABLE_WIFI
-		Serial.begin(baud);
+		WIFI_SERIAL.begin(baud);
 	#endif
         RFSERIAL.begin(baud);
     }
     static inline bool serialByteAvailable()
     {
 	#if ENABLE_WIFI
-		if(HAL::bwifion) return Serial.available();
+		if(HAL::bwifion) return WIFI_SERIAL.available();
 		else 
 	#endif
         return RFSERIAL.available();
@@ -572,7 +572,7 @@ public:
     static inline uint8_t serialReadByte()
     {
 	#if ENABLE_WIFI
-		if(HAL::bwifion) return Serial.read();
+		if(HAL::bwifion) return WIFI_SERIAL.read();
 		else 
 	#endif
         return RFSERIAL.read();
@@ -582,7 +582,7 @@ public:
 	#if ENABLE_WIFI
 		if(HAL::bwifion) 
 			{
-				Serial.write(b);
+				WIFI_SERIAL.write(b);
 				if (b=='\n') 
 					{
 						HAL::delayMilliseconds(DELAY_BY_LINE);
@@ -595,7 +595,7 @@ public:
     static inline void serialFlush()
     {
 	#if ENABLE_WIFI
-		if(HAL::bwifion) Serial.flush();
+		if(HAL::bwifion) WIFI_SERIAL.flush();
 		else 
 	#endif
         RFSERIAL.flush();

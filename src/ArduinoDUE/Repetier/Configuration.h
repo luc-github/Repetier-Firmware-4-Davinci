@@ -31,8 +31,8 @@
 //Version
 #define VERSION_MAJOR "1"
 #define VERSION_MINOR_YEAR "15"
-#define VERSION_MINOR_MONTH "09"
-#define VERSION_MINOR_DAY "22"
+#define VERSION_MINOR_MONTH "10"
+#define VERSION_MINOR_DAY "30"
 #define VERSION_BUILD "1"
 
 //Davinci screen is not standard reprap it is WINSTAR 16x4
@@ -58,7 +58,17 @@
 #define MODEL 1
 #endif
 //to enable communication using wifi module set to 1
-#define ENABLE_WIFI 0
+#define ENABLE_WIFI 1
+//define the wifi serial output
+//on Davinci use Serial
+//on RADDS use Serial1
+#if ENABLE_WIFI
+#if DAVINCI == 0
+#define WIFI_SERIAL Serial1
+#else
+#define WIFI_SERIAL Serial
+#endif
+#endif
 //if wifi is enabled serial need to slow down a little, this is a delay in ms after a '\n' so normaly after a command or a message
 #define DELAY_BY_LINE 50
 #if ENABLE_CLEAN_NOZZLE
