@@ -58,7 +58,7 @@
 #define MODEL 1
 #endif
 //to enable communication using wifi module set to 1
-#define ENABLE_WIFI 1
+#define ENABLE_WIFI 0
 //define the wifi serial output
 //on Davinci use Serial
 //on RADDS use Serial1
