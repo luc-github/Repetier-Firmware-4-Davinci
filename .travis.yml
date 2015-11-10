@@ -23,7 +23,7 @@ before_script:
   - wget http://downloads.arduino.cc/gcc-arm-none-eabi-4.8.3-2014q1-linux64.tar.gz
   - tar xf gcc-arm-none-eabi-4.8.3-2014q1-linux64.tar.gz
   - mv gcc-arm-none-eabi-4.8.3-2014q1 4.8.3-2014q1
-  - cp -f "$TRAVIS_BUILD_DIR/src/ArduinoDUE/AdditionalArduinoFiles/Arduino - 1.6.5 -Due 1.6.4/Arduino15/packages/hardware/sam/1.6.4/variants/arduino_due_x/variant.cpp" $HOME/.arduino15/packages/hardware/sam/1.6.4/variants/arduino_due_x/variant.cpp 
+  - cp -f "$TRAVIS_BUILD_DIR/src/ArduinoDUE/AdditionalArduinoFiles/Arduino - 1.6.5 -Due 1.6.4/Arduino15/packages/hardware/sam/1.6.4/variants/arduino_due_x/variant.cpp" $HOME/.arduino15/packages/arduino/hardware/sam/1.6.4/variants/arduino_due_x/variant.cpp 
   
 
 script:
