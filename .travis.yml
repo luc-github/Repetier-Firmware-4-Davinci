@@ -1,0 +1,35 @@
+sudo: false
+
+language: bash
+
+os:
+  - linux
+
+before_install:
+  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16"
+
+before_script:
+  - "export DISPLAY=:99.0"
+  - sleep 3 # give xvfb some time to start
+  - wget http://downloads.arduino.cc/arduino-1.6.5-linux64.tar.xz
+  - tar xf arduino-1.6.5-linux64.tar.xz
+  - mv arduino-1.6.5 $HOME/arduino_ide
+  - cd $HOME/arduino_ide/hardware
+  - wget http://downloads.arduino.cc/cores/sam-1.6.4.tar.bz2
+  - tar xf sam-1.6.4.tar.bz2
+  - cd $HOME/arduino_ide/tools
+  - wget http://downloads.arduino.cc/gcc-arm-none-eabi-4.8.3-2014q1-linux64.tar.gz
+  - tar xf gcc-arm-none-eabi-4.8.3-2014q1-linux64.tar.gz
+  
+
+script:
+  - cd $TRAVIS_BUILD_DIR
+  - export PATH="$HOME/arduino_ide:$PATH"
+  - arduino --board arduino:sam:generic --save-prefs
+  - arduino --get-pref sketchbook.path
+  - build_sketch src/ArduinoDUE/Repetier/Repetier.ino
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
