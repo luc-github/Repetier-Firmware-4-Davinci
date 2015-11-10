@@ -155,7 +155,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves)
         if (delay_flag_change>5)
         {
         Printer::setMenuMode(MENU_MODE_PRINTING,false);
-        UI_STATUS_UPD(UI_TEXT_IDLE);
+ //       UI_STATUS_UPD(UI_TEXT_IDLE);
         delay_flag_change=0;
         }
         else delay_flag_change++;
@@ -1268,7 +1268,7 @@ void Commands::processMCode(GCode *com)
                 else
                 {
                     pinMode(pin_number, INPUT_PULLUP);
-                    Com::printF(Com::tSpaceToSpace, pin_number);
+                    Com::printF(Com::tReadInput, pin_number);
                     Com::printFLN(Com::tSpaceIsSpace, digitalRead(pin_number));
                 }
             }
@@ -2061,6 +2061,12 @@ void Commands::executeGCode(GCode *com)
                 TOGGLE(CASE_LIGHTS_PIN);
                 }
             #endif
+            #if BADGE_LIGHT_PIN > 0
+            if (!(READ(BADGE_LIGHT_PIN)) && EEPROM::busebadgelight && EEPROM::buselight)
+                {
+                TOGGLE(BADGE_LIGHT_PIN);
+                }
+            #endif
             #if defined(UI_BACKLIGHT_PIN)
             if (!(READ(UI_BACKLIGHT_PIN))) WRITE(UI_BACKLIGHT_PIN, HIGH);
             #endif
@@ -2113,6 +2119,13 @@ Printer::setMenuModeEx(MENU_MODE_GCODE_PROCESSING,false);
 
 void Commands::emergencyStop()
 {
+//Davinci Specific, EEPROM is on SD Card
+#if defined(SDEEPROM)
+    if (!HAL::syncSdEeprom())
+    {
+        Com::printFLN(PSTR("SD EEPROM write error"));
+    }
+#endif
 #if defined(KILL_METHOD) && KILL_METHOD == 1
     HAL::resetHardware();
 #else

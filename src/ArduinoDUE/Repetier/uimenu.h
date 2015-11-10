@@ -87,6 +87,9 @@ feed rate
 %fZ : Homing feedrate z direction
 %Fs : Fan speed
 %Fi : ignore M106 commands state
+%fl : loading feed rate
+%fu : unloading feed rate
+%fd : Unloading/loading distance
 
 inactivity
 %is : Stepper inactive time in minutes
@@ -167,7 +170,8 @@ delta stuff
 Davinci Specific, extra information
 %so:Sound On/Off
 %la:LastAction
-%lo:Light On/Off
+%lo:Lights On/Off
+%lo:Badge Light On/Off
 %lk:KeepLight On/Off
 %sf:Filament Sensors:On/Off
 %zm : zMin
@@ -260,7 +264,11 @@ for 2 row displays. You can add additional pages or change the default pages lik
    #endif
  #endif
  //page 2
- UI_PAGE4(ui_page2,"X:%x0 mm","Y:%x1 mm","Z:%x2 mm","%os", ALL_MODE)
+#if MAX_HARDWARE_ENDSTOP_X || MAX_HARDWARE_ENDSTOP_Y || MAX_HARDWARE_ENDSTOP_Z
+ UI_PAGE4(ui_page2,"X:%x0 mm   %sx %sX","Y:%x1 mm   %sy %sY","Z:%x2 mm   %sz %sZ","%os", ALL_MODE)
+#else
+ UI_PAGE4(ui_page2,"X:%x0 mm   %sx","Y:%x1 mm   %sy","Z:%x2 mm   %sz","%os", ALL_MODE)
+#endif
  //page 3
  UI_PAGE4(ui_page3,UI_TEXT_SPEED_MULTIPLY,UI_TEXT_FLOW_MULTIPLY,UI_TEXT_PAGE_BUFFER,"%os", ALL_MODE)
  //printing time
@@ -314,7 +322,7 @@ next/previous changes the value
 ok sets the value if not already done and goes back to previous menu.
 */
 //Davinci Specific, to follow the changes in future new commits and make it work for other than Davinci board likeRADDS/DUE 
-#if !DAVINCI
+#if 1==0 //for native UI no need this FW, take original one
 // Error menu
 
 UI_MENU_ACTION2(ui_menu_error,UI_ACTION_DUMMY,UI_TEXT_ERROR,"%oe")
@@ -1015,9 +1023,11 @@ UI_MENU_ACTIONCOMMAND(ui_menu_quick_preheat_abs,UI_TEXT_PREHEAT_ABS,UI_ACTION_PR
 UI_MENU_ACTIONCOMMAND(ui_menu_quick_cooldown,UI_TEXT_COOLDOWN_MENU,UI_ACTION_COOLDOWN, ADVANCED_MODE)
 //disable steppers
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_quick_stopstepper,UI_TEXT_DISABLE_STEPPER,UI_ACTION_DISABLE_STEPPER,0,MENU_MODE_PRINTING, ALL_MODE)
+//bed down
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_bed_down,UI_TEXT_BED_DOWN,UI_ACTION_BED_DOWN,0,MENU_MODE_PRINTING, ALL_MODE)
 
-#define UI_MENU_MAINTENANCE  {UI_MENU_ADDCONDBACK &ui_menu_load_unload_entry, UI_MENU_AUTOLEVEL &ui_menu_manual_level, UI_CLEAN_NOZZLE_ENTRY UI_CLEAN_DRIPBOX_ENTRY &ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_cooldown,&ui_menu_quick_stopstepper}
-UI_MENU(ui_menu_maintenance,UI_MENU_MAINTENANCE,6+UI_MENU_AUTOLEVEL_CNT+UI_CLEAN_NOZZLE_COUNT+UI_CLEAN_DRIPBOX_COUNT+UI_MENU_BACKCNT);//BUG without this ; compilation crash
+#define UI_MENU_MAINTENANCE  {UI_MENU_ADDCONDBACK &ui_menu_load_unload_entry, UI_MENU_AUTOLEVEL &ui_menu_manual_level, UI_CLEAN_NOZZLE_ENTRY UI_CLEAN_DRIPBOX_ENTRY &ui_menu_bed_down,&ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_cooldown,&ui_menu_quick_stopstepper}
+UI_MENU(ui_menu_maintenance,UI_MENU_MAINTENANCE,7+UI_MENU_AUTOLEVEL_CNT+UI_CLEAN_NOZZLE_COUNT+UI_CLEAN_DRIPBOX_COUNT+UI_MENU_BACKCNT);//BUG without this ; compilation crash
 UI_MENU_SUBMENU(ui_menu_maintenance_entry, UI_TEXT_MAINTENANCE, ui_menu_maintenance, ALL_MODE)
 
 // **** Positionning menu
@@ -1033,7 +1043,11 @@ UI_MENU_ACTIONCOMMAND(ui_menu_home_z,UI_TEXT_HOME_Z,UI_ACTION_HOME_Z, ADVANCED_M
 UI_MENU_CHANGEACTION(ui_menu_x_1,"  1mm",UI_ACTION_X_1, ALL_MODE)
 UI_MENU_CHANGEACTION(ui_menu_x_10," 10mm",UI_ACTION_X_10, ALL_MODE)
 UI_MENU_CHANGEACTION(ui_menu_x_100,"100mm",UI_ACTION_X_100, ALL_MODE)
-UI_MENU_ACTIONCOMMAND(ui_menu_x_pos,"X: %x0mm ",UI_ACTION_DUMMY, ALL_MODE)
+#if MAX_HARDWARE_ENDSTOP_X
+UI_MENU_ACTIONCOMMAND(ui_menu_x_pos,"X:%x0mm    %sx %sX",UI_ACTION_DUMMY, ALL_MODE)
+#else
+UI_MENU_ACTIONCOMMAND(ui_menu_x_pos,"X:%x0mm    %sx",UI_ACTION_DUMMY, ALL_MODE)
+#endif
 #define UI_MENU_X_POS_VALUE  {UI_MENU_ADDCONDBACK &ui_menu_x_1,&ui_menu_x_10,&ui_menu_x_100,&ui_menu_x_pos}
 UI_MENU_WITH_STATUS(ui_menu_pos_x_value,UI_MENU_X_POS_VALUE,4+UI_MENU_BACKCNT);//BUG without this ; compilation crash
 UI_MENU_SUBMENU(ui_menu_X_pos, UI_TEXT_X_POSITION, ui_menu_pos_x_value, ALL_MODE)
@@ -1041,7 +1055,12 @@ UI_MENU_SUBMENU(ui_menu_X_pos, UI_TEXT_X_POSITION, ui_menu_pos_x_value, ALL_MODE
 UI_MENU_CHANGEACTION(ui_menu_y_1,"  1mm",UI_ACTION_Y_1, ALL_MODE)
 UI_MENU_CHANGEACTION(ui_menu_y_10," 10mm",UI_ACTION_Y_10, ALL_MODE)
 UI_MENU_CHANGEACTION(ui_menu_y_100,"100mm",UI_ACTION_Y_100, ALL_MODE)
-UI_MENU_ACTIONCOMMAND(ui_menu_y_pos,"Y: %x1mm ",UI_ACTION_DUMMY, ALL_MODE)
+#if MAX_HARDWARE_ENDSTOP_Y
+UI_MENU_ACTIONCOMMAND(ui_menu_y_pos,"Y:%x1mm    %sy %sY",UI_ACTION_DUMMY, ALL_MODE)
+#else
+UI_MENU_ACTIONCOMMAND(ui_menu_y_pos,"Y:%x1mm    %sy",UI_ACTION_DUMMY, ALL_MODE)
+
+#endif
 #define UI_MENU_Y_POS_VALUE  {UI_MENU_ADDCONDBACK &ui_menu_y_1,&ui_menu_y_10,&ui_menu_y_100,&ui_menu_y_pos}
 UI_MENU_WITH_STATUS(ui_menu_pos_y_value,UI_MENU_Y_POS_VALUE,4+UI_MENU_BACKCNT);//BUG without this ; compilation crash
 UI_MENU_SUBMENU(ui_menu_Y_pos, UI_TEXT_Y_POSITION, ui_menu_pos_y_value, ALL_MODE)
@@ -1050,7 +1069,12 @@ UI_MENU_CHANGEACTION(ui_menu_z_0_1,"0.1mm",UI_ACTION_Z_0_1, ALL_MODE)
 UI_MENU_CHANGEACTION(ui_menu_z_1,"  1mm",UI_ACTION_Z_1, ALL_MODE)
 UI_MENU_CHANGEACTION(ui_menu_z_10," 10mm",UI_ACTION_Z_10, ALL_MODE)
 UI_MENU_CHANGEACTION(ui_menu_z_100,"100mm",UI_ACTION_Z_100, ALL_MODE)
-UI_MENU_ACTIONCOMMAND(ui_menu_z_pos,"Z: %x2mm ",UI_ACTION_DUMMY, ALL_MODE)
+#if MAX_HARDWARE_ENDSTOP_Z
+UI_MENU_ACTIONCOMMAND(ui_menu_z_pos,"Z:%x2mm    %sz %sZ",UI_ACTION_DUMMY, ALL_MODE)
+#else
+UI_MENU_ACTIONCOMMAND(ui_menu_z_pos,"Z:%x2mm    %sz",UI_ACTION_DUMMY, ALL_MODE)
+
+#endif
 #define UI_MENU_Z_POS_VALUE  {UI_MENU_ADDCONDBACK &ui_menu_z_0_1,&ui_menu_z_1,&ui_menu_z_10,&ui_menu_z_100,&ui_menu_z_pos}
 UI_MENU_WITH_STATUS(ui_menu_pos_z_value,UI_MENU_Z_POS_VALUE,5+UI_MENU_BACKCNT);//BUG without this ; compilation crash
 UI_MENU_SUBMENU(ui_menu_Z_pos, UI_TEXT_Z_POSITION, ui_menu_pos_z_value, ALL_MODE)
@@ -1159,6 +1183,15 @@ UI_MENU_ACTIONCOMMAND(ui_menu_toggle_light,UI_TEXT_LIGHTS_ONOFF,UI_ACTION_LIGHTS
 #define UI_TOOGLE_LIGHT_ENTRY
 #define UI_TOGGLE_LIGHT_COUNT 0
 #endif
+//Badge light on off
+#if BADGE_LIGHT_PIN > 0
+UI_MENU_ACTIONCOMMAND(ui_menu_toggle_badge_light,UI_TEXT_BADGE_LIGHT_ONOFF,UI_ACTION_BADGE_LIGHT_ONOFF, ALL_MODE)
+#define UI_TOOGLE_BADGE_LIGHT_ENTRY ,&ui_menu_toggle_badge_light
+#define UI_TOGGLE_BADGE_LIGHT_COUNT 1
+#else
+#define UI_TOOGLE_BADGE_LIGHT_ENTRY
+#define UI_TOGGLE_BADGE_LIGHT_COUNT 0
+#endif
 //sound on off
 #if FEATURE_BEEPER
 UI_MENU_ACTIONCOMMAND(ui_menu_sound,UI_TEXT_SOUND_ONOF,UI_ACTION_SOUND, ALL_MODE)
@@ -1187,6 +1220,16 @@ UI_MENU_ACTIONCOMMAND(ui_menu_top_sensoronoff,UI_TEXT_TOP_SENSOR_ONOFF,UI_ACTION
 #else
 #define UI_TOP_SENSOR_ONOFF_ENTRY
 #define UI_TOP_SENSOR_ONOFF_COUNT 0
+#endif
+
+//wifi with external modul like ESP8266
+#if ENABLE_WIFI
+UI_MENU_ACTIONCOMMAND(ui_menu_wifi_onoff,UI_TEXT_WIFI_ONOFF,UI_ACTION_WIFI_ONOFF, ALL_MODE)
+#define UI_WIFI_ONOFF_ENTRY ,&ui_menu_wifi_onoff
+#define UI_WIFI_ONOFF_COUNT 1
+#else
+#define UI_WIFI_ONOFF_ENTRY
+#define UI_WIFI_ONOFF_COUNT 0
 #endif
 
 //powersave easy entry
@@ -1248,9 +1291,12 @@ UI_MENU_CHANGEACTION(ui_menu_feedrate_maxy,  UI_TEXT_FEED_MAX_Y,  UI_ACTION_MAX_
 UI_MENU_CHANGEACTION(ui_menu_feedrate_maxz,  UI_TEXT_FEED_MAX_Z,  UI_ACTION_MAX_FEEDRATE_Z, ADVANCED_MODE)
 UI_MENU_CHANGEACTION(ui_menu_feedrate_homex, UI_TEXT_FEED_HOME_X, UI_ACTION_HOMING_FEEDRATE_X, ADVANCED_MODE)
 UI_MENU_CHANGEACTION(ui_menu_feedrate_homey, UI_TEXT_FEED_HOME_Y, UI_ACTION_HOMING_FEEDRATE_Y, ADVANCED_MODE)
+UI_MENU_CHANGEACTION(ui_menu_feedrate_loading_filament, UI_TEXT_FEED_LOADING_FILAMENT, UI_ACTION_LOADING_FEEDRATE, ADVANCED_MODE)
+UI_MENU_CHANGEACTION(ui_menu_feedrate_unloading_filament, UI_TEXT_FEED_UNLOADING_FILAMENT, UI_ACTION_UNLOADING_FEEDRATE, ADVANCED_MODE)
+UI_MENU_CHANGEACTION(ui_menu_feedrate_loading_unloading_distance, UI_TEXT_LOADING_UNLOADING_DISTANCE, UI_ACTION_LOAD_UNLOAD_DISTANCE, ADVANCED_MODE)
 UI_MENU_CHANGEACTION(ui_menu_feedrate_homez, UI_TEXT_FEED_HOME_Z, UI_ACTION_HOMING_FEEDRATE_Z, ADVANCED_MODE)
-#define UI_MENU_FEEDRATE {UI_MENU_ADDCONDBACK &ui_menu_feedrate_maxx,&ui_menu_feedrate_maxy,&ui_menu_feedrate_maxz,&ui_menu_feedrate_homex,&ui_menu_feedrate_homey,&ui_menu_feedrate_homez}
-UI_MENU(ui_menu_feedrate,UI_MENU_FEEDRATE,6 + UI_MENU_BACKCNT);//BUG without this ; compilation crash
+#define UI_MENU_FEEDRATE {UI_MENU_ADDCONDBACK &ui_menu_feedrate_maxx,&ui_menu_feedrate_maxy,&ui_menu_feedrate_maxz,&ui_menu_feedrate_homex,&ui_menu_feedrate_homey,&ui_menu_feedrate_homez,&ui_menu_feedrate_loading_filament, &ui_menu_feedrate_unloading_filament, &ui_menu_feedrate_loading_unloading_distance}
+UI_MENU(ui_menu_feedrate,UI_MENU_FEEDRATE,9 + UI_MENU_BACKCNT);//BUG without this ; compilation crash
 #else
 // **** Acceleration settings
 UI_MENU_CHANGEACTION(ui_menu_accel_printz,UI_TEXT_PRINT_Z_DELTA,UI_ACTION_PRINT_ACCEL_Z, ADVANCED_MODE)
@@ -1408,8 +1454,8 @@ UI_MENU(ui_menu_positions_size_seetings,UI_MENU_POSITIONS_SIZE_SETTINGS,6+UI_TOO
 
 UI_MENU_SUBMENU(ui_menu_positions_size_settings_entry, UI_TEXT_POSITION,ui_menu_positions_size_seetings, ADVANCED_MODE)
 
-#define UI_MENU_SETTINGS  {UI_MENU_ADDCONDBACK &ui_menu_display_mode,&ui_menu_quick_speedmultiply, &ui_menu_quick_flowmultiply UI_TOOGLE_LIGHT_ENTRY UI_SOUND_ENTRY UI_SENSOR_ONOFF_ENTRY UI_TOP_SENSOR_ONOFF_ENTRY UI_POWER_SAVE_ENTRY ,&ui_menu_powersave_menu_entry MENU_PSON_ENTRY,&ui_menu_general_baud,&ui_menu_conf_accel,&ui_menu_conf_feed,&ui_menu_conf_extr UI_MENU_BEDCONF_COND ,&ui_menu_positions_size_settings_entry,&ui_menu_version UI_MENU_EEPROM_COND UI_MENU_DELTA_COND UI_MENU_SL_COND}
-UI_MENU(ui_menu_settings,UI_MENU_SETTINGS,10+UI_TOGGLE_LIGHT_COUNT+UI_SOUND_COUNT+UI_SENSOR_ONOFF_COUNT+UI_TOP_SENSOR_ONOFF_COUNT+UI_POWER_SAVE_COUNT+MENU_PSON_COUNT+UI_MENU_EEPROM_CNT+UI_MENU_BEDCONF_CNT+UI_MENU_DELTA_CNT+UI_MENU_SL_CNT+UI_MENU_BACKCNT);//BUG without this ; compilation crash
+#define UI_MENU_SETTINGS  {UI_MENU_ADDCONDBACK &ui_menu_display_mode,&ui_menu_quick_speedmultiply, &ui_menu_quick_flowmultiply UI_TOOGLE_LIGHT_ENTRY UI_TOOGLE_BADGE_LIGHT_ENTRY UI_SOUND_ENTRY UI_SENSOR_ONOFF_ENTRY UI_TOP_SENSOR_ONOFF_ENTRY UI_WIFI_ONOFF_ENTRY UI_POWER_SAVE_ENTRY ,&ui_menu_powersave_menu_entry MENU_PSON_ENTRY,&ui_menu_general_baud,&ui_menu_conf_accel,&ui_menu_conf_feed,&ui_menu_conf_extr UI_MENU_BEDCONF_COND ,&ui_menu_positions_size_settings_entry,&ui_menu_version UI_MENU_EEPROM_COND UI_MENU_DELTA_COND UI_MENU_SL_COND}
+UI_MENU(ui_menu_settings,UI_MENU_SETTINGS,10+UI_TOGGLE_LIGHT_COUNT+UI_TOGGLE_BADGE_LIGHT_COUNT+UI_SOUND_COUNT+UI_SENSOR_ONOFF_COUNT+UI_TOP_SENSOR_ONOFF_COUNT+UI_WIFI_ONOFF_COUNT+UI_POWER_SAVE_COUNT+MENU_PSON_COUNT+UI_MENU_EEPROM_CNT+UI_MENU_BEDCONF_CNT+UI_MENU_DELTA_CNT+UI_MENU_SL_CNT+UI_MENU_BACKCNT);//BUG without this ; compilation crash
 UI_MENU_SUBMENU(ui_menu_settings_entry, UI_TEXT_SETTINGS, ui_menu_settings, ALL_MODE)
 
 // **** Fan menu

@@ -190,7 +190,7 @@ void Printer::cleanNozzle(bool restoreposition)
     if (currentPosition[Z_AXIS] < zMin+15) moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,zMin+15,IGNORE_COORDINATE,homingFeedrate[0]);
     Commands::waitUntilEndOfAllMoves();
 	UI_STATUS_UPD_RAM(UI_TEXT_CLEANING_NOZZLE);
-        #if DAVINCI ==1
+    #if DAVINCI ==1
 	//first step noze
 	moveToReal(xMin+CLEAN_X-ENDSTOP_X_BACK_ON_HOME,yMin,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	//second step noze
@@ -215,7 +215,22 @@ void Printer::cleanNozzle(bool restoreposition)
 	moveToReal(xMin,yMin+CLEAN_Y-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	//sixth step Z probe
 	moveToReal(xMin,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
-	#else
+	#endif
+	#if DAVINCI ==4 || DAVINCI ==0
+	moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,zMin+3,IGNORE_COORDINATE,homingFeedrate[Z_AXIS]);
+    Commands::waitUntilEndOfAllMoves();
+	//first step noze
+	moveToReal(xMin,yMin+CLEAN_Y-1,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//second step
+	moveToReal(xMin+CLEAN_X,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//third step
+	moveToReal(xMin,yMin+CLEAN_Y,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//fourth step
+	moveToReal(xMin+CLEAN_X,yMin+CLEAN_Y+1,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//fifth step
+	moveToReal(xMin,yMin+CLEAN_Y+2,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	#endif
+	#if DAVINCI ==2 || DAVINCI ==3
 	//first step
 	moveToReal(xMin + CLEAN_X-ENDSTOP_X_BACK_ON_HOME,yMin + CLEAN_Y-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	//second step
@@ -662,6 +677,9 @@ void Printer::setup()
 //Davinci Specific, we start watch dog from begining
 #if FEATURE_WATCHDOG
     HAL::startWatchdog();
+    HAL::pingWatchdog();
+#else
+	HAL::stopWatchdog();
 #endif // FEATURE_WATCHDOG
 #if FEATURE_CONTROLLER == CONTROLLER_VIKI
     HAL::delayMilliseconds(100);
@@ -935,6 +953,11 @@ SET_INPUT(FIL_SENSOR2_PIN);
     //Davinci Specific, we power on lights based on state set in EEPROM 
     WRITE(CASE_LIGHTS_PIN, EEPROM::buselight);
 #endif // CASE_LIGHTS_PIN
+#if BADGE_LIGHT_PIN >= 0
+    SET_OUTPUT(BADGE_LIGHT_PIN);
+    //Davinci Specific, we power on lights based on state set in EEPROM 
+    WRITE(BADGE_LIGHT_PIN, EEPROM::buselight & EEPROM::busebadgelight);
+#endif // EEPROM::buselight
 #if GANTRY
     Printer::motorX = 0;
     Printer::motorYorZ = 0;
@@ -987,6 +1010,16 @@ SET_INPUT(FIL_SENSOR2_PIN);
 #if USE_ADVANCE
     extruderStepsNeeded = 0;
 #endif
+	//Davinci Specific, setup SD Card EEPROM
+	#if SDSUPPORT
+	#ifdef SDEEPROM
+		HAL::setupSdEeprom();
+	#endif
+		sd.initsd();
+	#endif
+     HAL::loadVirtualEEPROM();
+    // sets autoleveling in eeprom init
+    EEPROM::init(); // Read settings from eeprom if wanted
     EEPROM::initBaudrate();
     HAL::serialSetBaudrate(baudrate);
     Com::printFLN(Com::tStart);
@@ -994,16 +1027,7 @@ SET_INPUT(FIL_SENSOR2_PIN);
     //UI_INITIALIZE;
     HAL::showStartReason();
     Extruder::initExtruder();
-//Davinci Specific, setup SD Card EEPROM
-#if SDSUPPORT
-#ifdef SDEEPROM
-    HAL::setupSdEeprom();
-#endif
-    sd.initsd();
-#endif
-     HAL::loadVirtualEEPROM();
-    // sets autoleveling in eeprom init
-    EEPROM::init(); // Read settings from eeprom if wanted
+
     for(uint8_t i = 0; i < E_AXIS_ARRAY; i++)
     {
         currentPositionSteps[i] = 0;

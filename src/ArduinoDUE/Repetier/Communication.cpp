@@ -20,6 +20,7 @@
 */
 
 #include "Repetier.h"
+#include <string.h>
 
 #if DRIVE_SYSTEM == DELTA
 FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Delta EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:3")
@@ -32,16 +33,24 @@ FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWAR
 #endif
 #endif
 //Davinci Specific
+FSTRINGVALUE(Com::tReadInput,"Read input: ")
 FSTRINGVALUE(Com::tReset,RESET_IDENTIFIER)
 FSTRINGVALUE(Com::tTempExtABS,"Temp Ext ABS:")
 FSTRINGVALUE(Com::tTempExtPLA,"Temp Ext PLA:")
 FSTRINGVALUE(Com::tTempBedABS,"Temp Bed ABS:")
 FSTRINGVALUE(Com::tTempBedPLA,"Temp Bed PLA:")
+
+FSTRINGVALUE(Com::tLoadFeedRate,"Load Feed Rate:")
+FSTRINGVALUE(Com::tUnloadFeedRate,"Unload Feed Rate:")
+FSTRINGVALUE(Com::tUnloadLoadDistance,"Unload/Load Distance:")
+
 FSTRINGVALUE(Com::tKeepLightOn,"Keep Light On:")
 FSTRINGVALUE(Com::tSensorOn,"Filament Sensor On:")
 FSTRINGVALUE(Com::tTopsensorOn,"Top Sensor On:")
 FSTRINGVALUE(Com::tLightOn,"Light On:")
+FSTRINGVALUE(Com::tBadgeLightOn,"Badge On:")
 FSTRINGVALUE(Com::tSoundOn,"Sound On:")
+FSTRINGVALUE(Com::tWifiOn,"Wifi On:")
 FSTRINGVALUE(Com::tPowerSave,"Powersave after [ms,0=off]:")
 FSTRINGVALUE(Com::tDisplayMode,"Display Mode:")
 FSTRINGVALUE(Com::tDebug,"Debug:")
@@ -51,6 +60,7 @@ FSTRINGVALUE(Com::tNAN,"NAN")
 FSTRINGVALUE(Com::tINF,"INF")
 FSTRINGVALUE(Com::tError,"Error:")
 FSTRINGVALUE(Com::tInfo,"Info:")
+FSTRINGVALUE(Com::tStatus,"Status:")
 FSTRINGVALUE(Com::tWarning,"Warning:")
 FSTRINGVALUE(Com::tResend,"Resend:")
 FSTRINGVALUE(Com::tEcho,"Echo:")
@@ -575,7 +585,9 @@ void Com::printFloat(float number, uint8_t digits)
 	printF(tINF);
     return;
   }
-  // Handle negative numbers
+
+  print(String(number,digits).c_str());
+  /*// Handle negative numbers
   if (number < 0.0)
   {
      print('-');
@@ -604,5 +616,5 @@ void Com::printFloat(float number, uint8_t digits)
     int toPrint = int(remainder);
     print(toPrint);
     remainder -= toPrint;
-  }
+  }*/
 }

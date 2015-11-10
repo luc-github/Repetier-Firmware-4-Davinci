@@ -142,6 +142,11 @@ have problems with other modules using the eeprom */
 #define EPR_TEMP_BED_PLA		 1168
 #define EPR_TEMP_BED_ABS		1172
 #define EPR_TOP_SENSOR_ON     1176
+#define EPR_WIFI_ON     1177
+#define EPR_BADGE_LIGHT_ON 1178
+#define EPR_LOAD_FEED_RATE 1179
+#define EPR_UNLOAD_FEED_RATE 1183
+#define EPR_UNLOAD_LOAD_DISTANCE 1187
 
 #if EEPROM_MODE != 0
 #define EEPROM_FLOAT(x) HAL::eprGetFloat(EPR_##x)
@@ -212,6 +217,7 @@ public:
     static void initBaudrate();
     //Davinci Specific
     static bool buselight; 
+    static bool busebadgelight;
     static bool busesensor;
     static bool btopsensor;
     static bool bkeeplighton;
@@ -220,6 +226,9 @@ public:
     static float ftemp_bed_pla;
     static float ftemp_bed_abs;
     static millis_t timepowersaving;
+    static float loading_feed_rate;
+    static float unloading_feed_rate;
+    static float unloading_loading_distance;
     static void storeDataIntoEEPROM(uint8_t corrupted=0);
     static void readDataFromEEPROM();
     static void restoreEEPROMSettingsFromConfiguration();

@@ -114,6 +114,11 @@
 	#define UI_TEXT_EXTR_XOFF         "Xoffst:%Xx"
 	#define UI_TEXT_EXTR_YOFF         "Yoffst:%Xy"
 #endif
+#define UI_TEXT_FEED_LOADING_FILAMENT "Load Fil.:%fl"
+#define UI_TEXT_FEED_UNLOADING_FILAMENT "Unload F.:%fu"
+#define UI_TEXT_LOADING_UNLOADING_DISTANCE "Load dist.: %fd"
+#define UI_TEXT_BED_DOWN "Bed Down"
+#define UI_TEXT_WIFI_ONOFF "Wifi:       %wo"
 #define UI_TEXT_REDO_ACTION "Do it again ?"
 #define UI_TEXT_X_LENGTH "X Length:%Lxmm"
 #define UI_TEXT_Y_LENGTH "Y Length:%Lymm"
@@ -156,7 +161,7 @@
 #define UI_TEXT_BED "Bed"
 #define UI_TEXT_BED_OFF "SwitchOff Bed %B7"
 #define UI_TEXT_LIGHT_OFF_AFTER "Light AutoOff "
-#define UI_TEXT_LIGHT_OFF_AFTER2 "Dis. After:%il","[ms] 0=Off"
+#define UI_TEXT_LIGHT_OFF_AFTER2 "Dis. After:%il","[min] 0=Off"
 #define UI_TEXT_WARNING_POS_X_UNKNOWN    "Real X unknown !"
 #define UI_TEXT_WARNING_POS_Y_UNKNOWN    "Real Y unknown !"
 #define UI_TEXT_WARNING_POS_Z_UNKNOWN    "Real Z unknown !"
@@ -206,6 +211,7 @@
 #define UI_TEXT_PREHEAT_PLA      "Preheat PLA   %B1"
 #define UI_TEXT_PREHEAT_ABS      "Preheat ABS   %B2"
 #define UI_TEXT_LIGHTS_ONOFF     "Lights:     %lo"
+#define UI_TEXT_BADGE_LIGHT_ONOFF     "Badge light:%lb"
 #define UI_TEXT_SOUND_ONOF	 "Sound:      %so"
 #define UI_TEXT_CONFIRMATION     "%C1","%C2","%C3","%C4"
 #define UI_TEXT_YES_SELECTED     "  [Yes]    No   "
@@ -1350,6 +1356,7 @@
 // *************** French translation ****************
 // ***************      By Doudou     ****************
 #if UI_LANGUAGE==7
+#define UI_TEXT_WIFI_ONOFF "Wifi:       %wo"
 #if NUM_EXTRUDER == 1
 	#define UI_TEXT_LOAD_FILAMENT   "Inser. Filament"
 	#define UI_TEXT_UNLOAD_FILAMENT "Retir. Filament"

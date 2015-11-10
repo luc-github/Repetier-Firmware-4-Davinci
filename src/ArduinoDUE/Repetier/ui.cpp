@@ -1517,10 +1517,12 @@ void UIDisplay::parse(const char *txt,bool ram)
                 {
                 addStringP(extruder[2].tempControl.targetTemperatureC>0?"\004":"\003");
                 }
+#if HAVE_HEATED_BED
              else if(c2=='7') //Bed Off
                 {
                 addStringP(heatedBedController.targetTemperatureC>0?"\004":"\003");
                 }
+#endif
         break;
 	    case 'C':
             if(c2=='1')
@@ -1619,8 +1621,11 @@ void UIDisplay::parse(const char *txt,bool ram)
             break;
 #endif
         case 'f':
-            if(c2 >= 'x' && c2 <= 'z') addFloat(Printer::maxFeedrate[c2 - 'x'], 5, 0);
+            if(c2 >= 'x' && c2 <= 'z' && ! (c2 == 'l' || c2 == 'u' ||c2 == 'd')) addFloat(Printer::maxFeedrate[c2 - 'x'], 5, 0);
             else if(c2 >= 'X' && c2 <= 'Z') addFloat(Printer::homingFeedrate[c2 - 'X'], 5, 0);
+            else if(c2 == 'l') addFloat(EEPROM::loading_feed_rate, 5, 0);
+            else if(c2 == 'u') addFloat(EEPROM::unloading_feed_rate, 5, 0);
+            else if(c2 == 'd') addFloat(EEPROM::unloading_loading_distance, 3, 0);
             break;
 //Davinci Specific, XYZ Min position
         case 'H':
@@ -1644,6 +1649,9 @@ void UIDisplay::parse(const char *txt,bool ram)
          break;
         case 'l':
             if(c2 == 'a') addInt(lastAction,4);
+#if defined(BADGE_LIGHT_PIN) && BADGE_LIGHT_PIN >= 0
+            else if(c2 == 'b') addStringOnOff(READ(BADGE_LIGHT_PIN));        // Lights on/off
+#endif
 #if defined(CASE_LIGHTS_PIN) && CASE_LIGHTS_PIN >= 0
             else if(c2 == 'o') addStringOnOff(READ(CASE_LIGHTS_PIN));        // Lights on/off
 //Davinci Specific, Light management
@@ -1665,11 +1673,30 @@ void UIDisplay::parse(const char *txt,bool ram)
                     else percent = (sd.sdpos >> 8) * 100.0 / (sd.filesize >> 8);
                     addFloat(percent, 3, 1);
                     if(col<MAX_COLS)
+						{
                         uid.printCols[col++] = '%';
+                        uid.printCols[col++] = 0;
+						}
                 }
                 else
 #endif
                     parse(statusMsg, true);
+//Davinci Wifi
+#if ENABLE_WIFI
+					static char lastmsg[21]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+					char currentmsg[21]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+					if(HAL::bwifion)
+						{
+						strcpy(currentmsg,uid.printCols);
+						//send only if different than previous and not empty
+						if (strcmp(lastmsg,currentmsg)!=0 && strlen(statusMsg)>0)
+							{
+							strcpy(lastmsg,currentmsg);
+							Com::print(Com::tStatus);
+							Com::printFLN(currentmsg);
+							}
+						}
+#endif
                 break;
             }
             if(c2 == 'c')
@@ -1781,38 +1808,44 @@ case 'P':
             if(c2 == 'x')
             {
 #if (X_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_X
-                addStringOnOff(Printer::isXMinEndstopHit());
+                //addStringOnOff(Printer::isXMinEndstopHit());
+                addStringP(Printer::isXMinEndstopHit()?"\003":"\004");
 #else
                 addStringP(ui_text_na);
 #endif
             }
             if(c2 == 'X')
 #if (X_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_X
-                addStringOnOff(Printer::isXMaxEndstopHit());
+                //addStringOnOff(Printer::isXMaxEndstopHit());
+                addStringP(Printer::isXMaxEndstopHit()?"\003":"\004");
 #else
                 addStringP(ui_text_na);
 #endif
             if(c2 == 'y')
 #if (Y_MIN_PIN > -1)&& MIN_HARDWARE_ENDSTOP_Y
-                addStringOnOff(Printer::isYMinEndstopHit());
+                //addStringOnOff(Printer::isYMinEndstopHit());
+                addStringP(Printer::isYMinEndstopHit()?"\003":"\004");
 #else
                 addStringP(ui_text_na);
 #endif
             if(c2 == 'Y')
 #if (Y_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Y
-                addStringOnOff(Printer::isYMaxEndstopHit());
+                //addStringOnOff(Printer::isYMaxEndstopHit());
+                addStringP(Printer::isYMaxEndstopHit()?"\003":"\004");
 #else
                 addStringP(ui_text_na);
 #endif
             if(c2 == 'z')
 #if (Z_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Z
-                addStringOnOff(Printer::isZMinEndstopHit());
+                //addStringOnOff(Printer::isZMinEndstopHit());
+                addStringP(Printer::isZMinEndstopHit()?"\003":"\004");
 #else
                 addStringP(ui_text_na);
 #endif
             if(c2=='Z')
 #if (Z_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Z
-                addStringOnOff(Printer::isZMaxEndstopHit());
+                //addStringOnOff(Printer::isZMaxEndstopHit());
+                addStringP(Printer::isZMaxEndstopHit()?"\003":"\004");
 #else
                 addStringP(ui_text_na);
 #endif
@@ -1870,6 +1903,11 @@ case 'P':
             }
             break;
 
+#if ENABLE_WIFI
+		case 'w':
+			if(c2=='o')addStringP(HAL::bwifion?ui_text_on:ui_text_off);        //wifi on/off
+			break;
+#endif
         case 'x':
             if(c2>='0' && c2<='4')
             {
@@ -2031,7 +2069,7 @@ void UIDisplay::setStatusP(PGM_P txt,bool error)
     }
     statusMsg[i]=0;
     if(error)
-        Printer::setUIErrorMessage(true);
+        Printer::setUIErrorMessage(true); 
 }
 void UIDisplay::setStatus(const char *txt,bool error)
 {
@@ -3248,8 +3286,10 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
         if (action==UI_ACTION_Z_1)istep=1;
         if (action==UI_ACTION_Z_10)istep=10;
         if (action==UI_ACTION_Z_100)istep=100;
+	#if !FEATURE_ENCODER
         increment=-increment; //upside down increment to allow keys to follow  Z movement, Up Key make Z going up, down key make Z going down
-        if (!Printer::isZHomed())//ask for home to secure movement
+	#endif        
+	if (!Printer::isZHomed())//ask for home to secure movement
         {
             if (confirmationDialog(UI_TEXT_DO_YOU ,UI_TEXT_HOME_Z,UI_TEXT_WARNING_POS_Z_UNKNOWN,UI_CONFIRMATION_TYPE_YES_NO,true))
                     {
@@ -3274,10 +3314,12 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
         int istep=1;
         if (action==UI_ACTION_E_10)istep=10;
         if (action==UI_ACTION_E_100)istep=100;
+	#if !FEATURE_ENCODER
         increment=-increment; //upside down increment to allow keys to follow  filament movement, Up Key make filament going up, down key make filament going down
+	#endif
         if(reportTempsensorError() or Printer::debugDryrun()) break;
         //check temperature
-        if(Extruder::current->tempControl.currentTemperatureC<=MIN_EXTRUDER_TEMP)
+        if(Extruder::current->tempControl.currentTemperatureC<=MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed())
             {
                 if (confirmationDialog(UI_TEXT_WARNING ,UI_TEXT_EXTRUDER_COLD,UI_TEXT_HEAT_EXTRUDER,UI_CONFIRMATION_TYPE_YES_NO,true))
                     {
@@ -3433,6 +3475,15 @@ case UI_ACTION_BED_TEMP_PLA :
         INCREMENT_MIN_MAX(Printer::maxZJerk,0.1,0.1,99.9);
         break;
 #endif
+	case UI_ACTION_LOADING_FEEDRATE:
+		INCREMENT_MIN_MAX(EEPROM::loading_feed_rate, 1, 1, 1000);
+        break;
+    case UI_ACTION_UNLOADING_FEEDRATE:
+		INCREMENT_MIN_MAX(EEPROM::unloading_feed_rate, 1, 1, 1000);
+        break;
+    case UI_ACTION_LOAD_UNLOAD_DISTANCE:
+		INCREMENT_MIN_MAX(EEPROM::unloading_loading_distance, 1, 1, 1000);
+        break;
     case UI_ACTION_HOMING_FEEDRATE_X:
     case UI_ACTION_HOMING_FEEDRATE_Y:
     case UI_ACTION_HOMING_FEEDRATE_Z:
@@ -3596,6 +3647,9 @@ bool UIDisplay::confirmationDialog(char * title,char * line1,char * line2,int ty
 {
 bool response=defaultresponse;
 bool process_it=true;
+#if FEATURE_ENCODER
+bool encoder_command=false;
+#endif
 int previousaction=0;
 int tmpmenulevel = menuLevel;
 if (menuLevel>3)menuLevel=3;
@@ -3631,6 +3685,20 @@ while (process_it)
     //process critical actions
     Commands::checkForPeriodicalActions(true);
     //be sure button is pressed and not same one
+    #if FEATURE_ENCODER
+    int16_t encodeChange = encoderPos;
+    encoderPos = 0;
+    if (encodeChange > 0 )
+		{
+		encoder_command=true;
+		lastButtonAction=UI_ACTION_BACK;	
+		}
+    if (encodeChange < 0 )
+		{
+		encoder_command=true;
+		lastButtonAction=UI_ACTION_RIGHT_KEY;
+		}
+    #endif
     if (lastButtonAction!=previousaction)
         {
          previousaction=lastButtonAction;
@@ -3643,6 +3711,12 @@ while (process_it)
             if (!(READ(CASE_LIGHTS_PIN)) && EEPROM::buselight)
                 {
                 TOGGLE(CASE_LIGHTS_PIN);
+                }
+            #endif
+            #if BADGE_LIGHT_PIN > 0
+            if (!(READ(BADGE_LIGHT_PIN)) && EEPROM::busebadgelight && EEPROM::buselight)
+                {
+                TOGGLE(BADGE_LIGHT_PIN);
                 }
             #endif
             #if defined(UI_BACKLIGHT_PIN)
@@ -3669,6 +3743,13 @@ while (process_it)
             }
         if(previousaction!=0)BEEP_SHORT;
         refreshPage();
+	#if FEATURE_ENCODER
+        if (encoder_command)
+			{
+				lastButtonAction=0;
+				encoder_command=false;
+			}
+	#endif
         }
     }//end while
  menuLevel=tmpmenulevel;
@@ -3707,6 +3788,12 @@ int UIDisplay::executeAction(int action, bool allowMoves)
     if (!(READ(CASE_LIGHTS_PIN)) && EEPROM::buselight)
         {
         TOGGLE(CASE_LIGHTS_PIN);
+        }
+    #endif
+    #if BADGE_LIGHT_PIN > 0
+    if (!(READ(BADGE_LIGHT_PIN)) && EEPROM::buselight && EEPROM::busebadgelight)
+        {
+        TOGGLE(BADGE_LIGHT_PIN);
         }
     #endif
     #if defined(UI_BACKLIGHT_PIN)
@@ -3946,6 +4033,14 @@ int UIDisplay::executeAction(int action, bool allowMoves)
         UI_STATUS(UI_TEXT_FIL_SENSOR_ONOFF);
      break;
 #endif
+ #if ENABLE_WIFI
+     case UI_ACTION_WIFI_ONOFF:
+         HAL::bwifion=!HAL::bwifion;
+         //save directly to eeprom
+        EEPROM:: update(EPR_WIFI_ON,EPR_TYPE_BYTE,HAL::bwifion,0);
+        UI_STATUS(UI_TEXT_WIFI_ONOFF);
+     break;
+#endif
  #if defined(TOP_SENSOR_PIN)
      case UI_ACTION_TOP_SENSOR_ONOFF:
          EEPROM::btopsensor=!EEPROM::btopsensor;
@@ -3968,6 +4063,19 @@ int UIDisplay::executeAction(int action, bool allowMoves)
             UI_STATUS(UI_TEXT_LIGHTS_ONOFF);
             break;
 #endif
+//Davinci Specific, save state to EEPROM
+#if BADGE_LIGHT_PIN > -1
+        case UI_ACTION_BADGE_LIGHT_ONOFF:
+            TOGGLE(BADGE_LIGHT_PIN);
+            if (READ(BADGE_LIGHT_PIN))
+            EEPROM::busebadgelight=true;
+            else
+            EEPROM::busebadgelight=false;
+            //save directly to eeprom
+            EEPROM:: update(EPR_BADGE_LIGHT_ON,EPR_TYPE_BYTE,EEPROM::busebadgelight,0);
+            UI_STATUS(UI_TEXT_BADGE_LIGHT_ONOFF);
+            break;
+#endif
 //Davinci Specific
 case UI_ACTION_LOAD_FAILSAFE:
             EEPROM::restoreEEPROMSettingsFromConfiguration();
@@ -3981,6 +4089,39 @@ case UI_ACTION_LOAD_FAILSAFE:
             else UI_STATUS(UI_TEXT_LOAD_FAILSAFE);
             //skipBeep = true;
             break;
+     case UI_ACTION_BED_DOWN:
+		{
+		if(!allowMoves) return UI_ACTION_BED_DOWN;
+		int tmpmenu=menuLevel;
+        int tmpmenupos=menuPos[menuLevel];
+         UIMenu *tmpmen = (UIMenu*)menu[menuLevel];
+		 if (!Printer::isZHomed())//ask for home to secure movement
+			{
+			 if (confirmationDialog(UI_TEXT_DO_YOU ,UI_TEXT_HOME_Z,UI_TEXT_WARNING_POS_Z_UNKNOWN,UI_CONFIRMATION_TYPE_YES_NO,true))
+				{
+				 executeAction(UI_ACTION_HOME_Z,true);
+				}
+			}
+		if(Printer::isZHomed())//check if accepted to home
+			{
+            menuLevel=0;
+            menuPos[0] = 0;
+            refreshPage();
+			UI_STATUS(UI_TEXT_PLEASE_WAIT);
+			Printer::lastCmdPos[Z_AXIS]=Printer::zMin+Printer::zMin+Printer::zLength;
+			Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+Printer::zMin+Printer::zLength,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+			Printer::updateCurrentPosition();
+			Commands::waitUntilEndOfAllMoves();
+			Commands::printCurrentPosition(PSTR("UI_ACTION_ZPOSITION "));
+			UI_STATUS(UI_TEXT_BED_DOWN);
+			}
+		Printer::setMenuMode(MENU_MODE_PRINTING,false);
+		menuLevel=tmpmenu;
+		menuPos[menuLevel]=tmpmenupos;
+		menu[menuLevel]=tmpmen;
+		refreshPage();
+		}
+		 break;
 #if ENABLE_CLEAN_NOZZLE==1
     case UI_ACTION_CLEAN_NOZZLE:
         {//be sure no issue
@@ -4067,8 +4208,17 @@ case UI_ACTION_LOAD_FAILSAFE:
          //just need to wait for key to be pressed
          break;
          }
+	#if FEATURE_ENCODER
+        //check encoder 
+		int16_t encodeChange = encoderPos;
+		bool encoder_command=false;
+		if (encodeChange > 0 ) encoder_command=true;
+		encoderPos = 0;
          //check what key is pressed
-         if (previousaction!=lastButtonAction)
+         if (previousaction!=lastButtonAction || encoder_command)
+	#else
+	 if (previousaction!=lastButtonAction)
+	#endif
             {
             previousaction=lastButtonAction;
             if(previousaction!=0)BEEP_SHORT;
@@ -4079,8 +4229,12 @@ case UI_ACTION_LOAD_FAILSAFE:
                 playsound(3000,240);
                 Printer::homeAxis(true,true,false);
                 }
-             if (lastButtonAction==UI_ACTION_BACK)//this means user want to cancel current action
-                {
+	#if FEATURE_ENCODER
+             if (lastButtonAction==UI_ACTION_BACK  || encodeChange > 0)//this means user want to cancel current action
+	#else 
+	     if (lastButtonAction==UI_ACTION_BACK)//this means user want to cancel current action
+	#endif               
+		{
                 if (confirmationDialog(UI_TEXT_PLEASE_CONFIRM ,UI_TEXT_CANCEL_ACTION,UI_TEXT_CLEANING_NOZZLE))
                     {
                     UI_STATUS(UI_TEXT_CANCELED);
@@ -4105,6 +4259,12 @@ case UI_ACTION_LOAD_FAILSAFE:
                     TOGGLE(CASE_LIGHTS_PIN);
                     }
                 #endif
+                #if BADGE_LIGHT_PIN > 0
+				if (!(READ(BADGE_LIGHT_PIN)) && EEPROM::busebadgelight && EEPROM::buselight)
+                {
+                TOGGLE(BADGE_LIGHT_PIN);
+                }
+				#endif
                 #if defined(UI_BACKLIGHT_PIN)
                 if (!(READ(UI_BACKLIGHT_PIN))) WRITE(UI_BACKLIGHT_PIN, HIGH);
                 #endif
@@ -4239,6 +4399,12 @@ case UI_ACTION_LOAD_FAILSAFE:
                     TOGGLE(CASE_LIGHTS_PIN);
                     }
                 #endif
+                #if BADGE_LIGHT_PIN > 0
+				if (!(READ(BADGE_LIGHT_PIN)) && EEPROM::busebadgelight && EEPROM::buselight)
+					{
+					TOGGLE(BADGE_LIGHT_PIN);
+					}
+				#endif
                 #if defined(UI_BACKLIGHT_PIN)
                 if (!(READ(UI_BACKLIGHT_PIN))) WRITE(UI_BACKLIGHT_PIN, HIGH);
                 #endif
@@ -4275,6 +4441,8 @@ case UI_ACTION_LOAD_FAILSAFE:
             {
             Com::printFLN(PSTR("RequestPause: No Filament!"));
             Commands::waitUntilEndOfAllMoves();
+            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::currentPositionSteps[Z_AXIS]+10,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+			Printer::moveToReal(Printer::xMin,Printer::yMin,IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::homingFeedrate[0]);
             }
         
         //to be sure no return menu
@@ -4314,6 +4482,12 @@ case UI_ACTION_LOAD_FAILSAFE:
                     TOGGLE(CASE_LIGHTS_PIN);
                     }
                 #endif
+                #if BADGE_LIGHT_PIN > 0
+				if (!(READ(BADGE_LIGHT_PIN)) && EEPROM::busebadgelight && EEPROM::buselight)
+					{
+					TOGGLE(BADGE_LIGHT_PIN);
+					}
+				#endif
                 #if defined(UI_BACKLIGHT_PIN)
                 if (!(READ(UI_BACKLIGHT_PIN))) WRITE(UI_BACKLIGHT_PIN, HIGH);
                 #endif
@@ -4488,7 +4662,7 @@ case UI_ACTION_LOAD_FAILSAFE:
                 if (load_dir==-1)
                     {
                     UI_STATUS(UI_TEXT_UNLOADING_FILAMENT);
-                    PrintLine::moveRelativeDistanceInSteps(0,0,0,load_dir * Printer::axisStepsPerMM[E_AXIS],4,false,false);
+                    PrintLine::moveRelativeDistanceInSteps(0,0,0,load_dir * Printer::axisStepsPerMM[E_AXIS],EEPROM::unloading_feed_rate,false,false);
                     if (extruderid==0)//filament sensor override to stop earlier
                     {
                         #if defined(FIL_SENSOR1_PIN)
@@ -4511,14 +4685,18 @@ case UI_ACTION_LOAD_FAILSAFE:
                 else
                     {
                     UI_STATUS(UI_TEXT_LOADING_FILAMENT);
-                    PrintLine::moveRelativeDistanceInSteps(0,0,0,load_dir * Printer::axisStepsPerMM[E_AXIS],2,false,false);
+                    PrintLine::moveRelativeDistanceInSteps(0,0,0,load_dir * Printer::axisStepsPerMM[E_AXIS],EEPROM::loading_feed_rate,false,false);
                     }
-                if (counter>=60)step = STEP_EXT_ASK_CONTINUE;
+                if (counter>=EEPROM::unloading_loading_distance)step = STEP_EXT_ASK_CONTINUE;
             }
             break;
          case STEP_EXT_ASK_CONTINUE:
             if(!PrintLine::hasLines())
             {
+				#if FEATURE_RETRACTION
+				if (load_dir==1)
+					Extruder::current->retractDistance(EEPROM_FLOAT(RETRACTION_LENGTH));
+				#endif
                 //ask to redo or stop
                 if (confirmationDialog(UI_TEXT_PLEASE_CONFIRM ,UI_TEXT_CONTINUE_ACTION,UI_TEXT_PUSH_FILAMENT,UI_CONFIRMATION_TYPE_YES_NO,true))
                         {
@@ -4535,8 +4713,17 @@ case UI_ACTION_LOAD_FAILSAFE:
             }
          break;
          }
+	#if FEATURE_ENCODER 
+         //check encoder 
+		int16_t encodeChange = encoderPos;
+		bool encoder_command=false;
+		if (encodeChange > 0 ) encoder_command=true;
+		encoderPos = 0;
          //check what key is pressed
-         if (previousaction!=lastButtonAction)
+         if (previousaction!=lastButtonAction || encoder_command)
+	#else
+	  if (previousaction!=lastButtonAction)
+	#endif
             {
             previousaction=lastButtonAction;
             if(previousaction!=0)BEEP_SHORT;
@@ -4547,7 +4734,11 @@ case UI_ACTION_LOAD_FAILSAFE:
                 playsound(3000,240);
                 UI_STATUS(UI_TEXT_PUSH_FILAMENT);
                 }
-             if (lastButtonAction==UI_ACTION_BACK)//this means user want to cancel current action
+	     #if FEATURE_ENCODER
+             if (lastButtonAction==UI_ACTION_BACK  || encodeChange > 0)//this means user want to cancel current action
+	     #else
+	     if (lastButtonAction==UI_ACTION_BACK)//this means user want to cancel current action
+	     #endif
                 {
                 if (confirmationDialog(UI_TEXT_PLEASE_CONFIRM ,UI_TEXT_CANCEL_ACTION,UI_TEXT_LOADUNLOAD_FILAMENT))
                     {
@@ -4573,6 +4764,12 @@ case UI_ACTION_LOAD_FAILSAFE:
                     TOGGLE(CASE_LIGHTS_PIN);
                     }
                 #endif
+                #if BADGE_LIGHT_PIN > 0
+				if (!(READ(BADGE_LIGHT_PIN)) && EEPROM::busebadgelight && EEPROM::buselight)
+					{
+					TOGGLE(BADGE_LIGHT_PIN);
+					}
+				#endif
                 #if defined(UI_BACKLIGHT_PIN)
                 if (!(READ(UI_BACKLIGHT_PIN))) WRITE(UI_BACKLIGHT_PIN, HIGH);
                 #endif
@@ -4857,8 +5054,17 @@ case UI_ACTION_LOAD_FAILSAFE:
             else    process_it=false;
             break;
          }
+	 #if FEATURE_ENCODER
+         //check encoder 
+		int16_t encodeChange = encoderPos;
+		bool encoder_command=false;
+		if (encodeChange > 0 ) encoder_command=true;
+		encoderPos = 0;
          //check what key is pressed
-         if (previousaction!=lastButtonAction)
+         if (previousaction!=lastButtonAction || encoder_command)
+	#else
+	if (previousaction!=lastButtonAction)
+	#endif
             {
             previousaction=lastButtonAction;
             if(previousaction!=0)BEEP_SHORT;
@@ -4866,7 +5072,11 @@ case UI_ACTION_LOAD_FAILSAFE:
                 {
                     step=STEP_AUTOLEVEL_SAVE_RESULTS;
                 }
-             if (lastButtonAction==UI_ACTION_BACK)//this means user want to cancel current action
+	     #if FEATURE_ENCODER
+             if (lastButtonAction==UI_ACTION_BACK  || encodeChange > 0)//this means user want to cancel current action
+	     #else
+	     if (lastButtonAction==UI_ACTION_BACK)//this means user want to cancel current action
+	     #endif
                 {
                 if (confirmationDialog(UI_TEXT_PLEASE_CONFIRM ,UI_TEXT_CANCEL_ACTION,UI_TEXT_AUTOLEVEL))
                     {
@@ -4894,6 +5104,12 @@ case UI_ACTION_LOAD_FAILSAFE:
                     TOGGLE(CASE_LIGHTS_PIN);
                     }
                 #endif
+                #if BADGE_LIGHT_PIN > 0
+				if (!(READ(BADGE_LIGHT_PIN)) && EEPROM::busebadgelight && EEPROM::buselight)
+					{
+					TOGGLE(BADGE_LIGHT_PIN);
+					}
+				#endif
                 #if defined(UI_BACKLIGHT_PIN)
                 if (!(READ(UI_BACKLIGHT_PIN))) WRITE(UI_BACKLIGHT_PIN, HIGH);
                 #endif
@@ -5130,8 +5346,17 @@ case UI_ACTION_LOAD_FAILSAFE:
             step =STEP_MANUAL_LEVEL_PAGE10;
             break;
         }
+	#if FEATURE_ENCODER
+         //check encoder 
+		int16_t encodeChange = encoderPos;
+		bool encoder_command=false;
+		if (encodeChange > 0 ) encoder_command=true;
+		encoderPos = 0;
          //check what key is pressed
-         if (previousaction!=lastButtonAction)
+         if (previousaction!=lastButtonAction || encoder_command)
+	#else
+	 if (previousaction!=lastButtonAction)
+	#endif
             {
             previousaction=lastButtonAction;
             if(previousaction!=0)BEEP_SHORT;
@@ -5198,7 +5423,11 @@ case UI_ACTION_LOAD_FAILSAFE:
                     process_it=false;
                     }
             }
-            else if (lastButtonAction==UI_ACTION_BACK)//this means user want to cancel current action
+	#if FEATURE_ENCODER
+            else if (lastButtonAction==UI_ACTION_BACK  || encodeChange > 0)//this means user want to cancel current action
+	#else
+	    else if (lastButtonAction==UI_ACTION_BACK)//this means user want to cancel current action
+	#endif
                 {
                 if (confirmationDialog(UI_TEXT_PLEASE_CONFIRM ,UI_TEXT_CANCEL_ACTION,UI_TEXT_MANUAL_LEVEL))
                     {
@@ -5239,6 +5468,12 @@ case UI_ACTION_LOAD_FAILSAFE:
                     TOGGLE(CASE_LIGHTS_PIN);
                     }
                 #endif
+                #if BADGE_LIGHT_PIN > 0
+				if (!(READ(BADGE_LIGHT_PIN)) && EEPROM::busebadgelight && EEPROM::buselight)
+					{
+					TOGGLE(BADGE_LIGHT_PIN);
+					}
+				#endif
                 #if defined(UI_BACKLIGHT_PIN)
                 if (!(READ(UI_BACKLIGHT_PIN))) WRITE(UI_BACKLIGHT_PIN, HIGH);
                 #endif
@@ -6038,6 +6273,12 @@ if ((ui_autolightoff_time<time) && (EEPROM::timepowersaving>0) )
             TOGGLE(CASE_LIGHTS_PIN);
             }
         #endif
+        #if BADGE_LIGHT_PIN > 0
+		if ((READ(BADGE_LIGHT_PIN)) && EEPROM::busebadgelight && EEPROM::buselight)
+			{
+			TOGGLE(BADGE_LIGHT_PIN);
+			}
+		#endif
         #if defined(UI_BACKLIGHT_PIN)
         WRITE(UI_BACKLIGHT_PIN, LOW);
         #endif

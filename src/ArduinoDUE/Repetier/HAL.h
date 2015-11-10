@@ -281,6 +281,10 @@ public:
 #if FEATURE_BEEPER
     static bool enablesound;
 #endif //FEATURE_BEEPER
+#if ENABLE_WIFI
+    static bool bwifion;
+#endif //wifi feature
+
     // do any hardware-specific initialization here
     static inline void hwSetup(void)
     {
@@ -552,22 +556,48 @@ public:
     }
     static inline void serialSetBaudrate(long baud)
     {
+	#if ENABLE_WIFI
+		WIFI_SERIAL.begin(baud);
+	#endif
         RFSERIAL.begin(baud);
     }
     static inline bool serialByteAvailable()
     {
+	#if ENABLE_WIFI
+		if(HAL::bwifion) return WIFI_SERIAL.available();
+		else 
+	#endif
         return RFSERIAL.available();
     }
     static inline uint8_t serialReadByte()
     {
+	#if ENABLE_WIFI
+		if(HAL::bwifion) return WIFI_SERIAL.read();
+		else 
+	#endif
         return RFSERIAL.read();
     }
     static inline void serialWriteByte(char b)
     {
+	#if ENABLE_WIFI
+		if(HAL::bwifion) 
+			{
+				WIFI_SERIAL.write(b);
+				if (b=='\n') 
+					{
+						HAL::delayMilliseconds(DELAY_BY_LINE);
+					}
+			}
+		else 
+	#endif
         RFSERIAL.write(b);
     }
     static inline void serialFlush()
     {
+	#if ENABLE_WIFI
+		if(HAL::bwifion) WIFI_SERIAL.flush();
+		else 
+	#endif
         RFSERIAL.flush();
     }
     static void setupTimer();
@@ -702,11 +732,25 @@ public:
 
 
     // Watchdog support
-    inline static void startWatchdog() {  WDT->WDT_MR = WDT_MR_WDRSTEN | WATCHDOG_INTERVAL | (WATCHDOG_INTERVAL << 16);WDT->WDT_CR = 0xA5000001;};
-    inline static void stopWatchdog() {}
+    //Davinci Specific
+		//inline static void startWatchdog() {  WDT->WDT_MR = WDT_MR_WDRSTEN | WATCHDOG_INTERVAL | (WATCHDOG_INTERVAL << 16);WDT->WDT_CR = 0xA5000001;};
+	//Enable the watchdog with the specified timeout. Should only be called once.
+	//timeout in milliseconds.
+    inline static void startWatchdog() {
+#if FEATURE_WATCHDOG
+		uint32_t timeout = 8000 * 256 / 1000; //8000ms = 8s
+		if (timeout == 0) timeout = 1;
+		else if (timeout > 0xFFF) timeout = 0xFFF;
+		timeout = WDT_MR_WDRSTEN | WDT_MR_WDV(timeout) | WDT_MR_WDD(timeout);
+		WDT_Enable (WDT, timeout);
+#endif
+	}
+    inline static void stopWatchdog() {WDT_Disable (WDT);}
+  
     inline static void pingWatchdog() {
 #if FEATURE_WATCHDOG
-    WDT->WDT_CR = 0xA5000001;
+    //WDT->WDT_CR = 0xA5000001;
+		WDT_Restart (WDT);
 #endif
     };
 
