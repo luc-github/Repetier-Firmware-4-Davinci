@@ -2,7 +2,9 @@
 ============================
 
 [![Join the chat at https://gitter.im/luc-github/Repetier-Firmware-0.92](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/luc-github/Repetier-Firmware-0.92?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)     
-Ide 1.6.5 and module Due 1.6.4 : [![Build Status](https://travis-ci.org/luc-github/ESP8266.svg?branch=master)](https://travis-ci.org/luc-github/ESP8266)     
+Ide 1.6.5 and module Due 1.6.4 : [![Build Status](https://travis-ci.org/luc-github/Repetier-Firmware-0.92.svg?branch=master)](https://travis-ci.org/luc-github/Repetier-Firmware-0.92)   
+    
+      
 This firmware is based on the popular repetier firmware and modified to work with first generation Da Vinci 1.0, 2.0 single fan, 2.0 dual fans and also AiO (NB:scanner function is not supported so AiO will work like an 1.0A)   
 If you change the board, currently DUE based are supported with RADDS, as well as Graphical screen and LCD with encoder, there are some sample configuration files provided for RADDS/DUE/GLCD using 1/128 step drivers.
 
