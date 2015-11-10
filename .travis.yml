@@ -14,11 +14,11 @@ before_script:
   - wget http://downloads.arduino.cc/arduino-1.6.5-linux64.tar.xz
   - tar xf arduino-1.6.5-linux64.tar.xz
   - mv arduino-1.6.5 $HOME/arduino_ide
-  - mkdir -p .arduino15/packages/arduino/hardware/sam
+  - mkdir -p $HOME/.arduino15/packages/arduino/hardware/sam
   - cd $HOME/.arduino15/packages/arduino/hardware/sam
   - wget http://downloads.arduino.cc/cores/sam-1.6.4.tar.bz2
   - tar xf sam-1.6.4.tar.bz2
-  - mkdir -p .arduino15/packages/arduino/tools/arm-none-eabi-gcc
+  - mkdir -p $HOME/.arduino15/packages/arduino/tools/arm-none-eabi-gcc
   - cd $HOME/.arduino15/packages/arduino/tools/arm-none-eabi-gcc
   - wget http://downloads.arduino.cc/gcc-arm-none-eabi-4.8.3-2014q1-linux64.tar.gz
   - tar xf gcc-arm-none-eabi-4.8.3-2014q1-linux64.tar.gz
