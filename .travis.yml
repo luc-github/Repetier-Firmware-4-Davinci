@@ -27,13 +27,26 @@ before_script:
   
 
 script:
-  - cd $TRAVIS_BUILD_DIR
+  - cd $TRAVIS_BUILD_DIR/src/ArduinoDUE/Repetier
   - source command.sh
   - export PATH="$HOME/arduino_ide:$PATH"
   - arduino --board arduino:sam:arduino_due_x --save-prefs
   - arduino --get-pref sketchbook.path
-  - build_sketch src/ArduinoDUE/Repetier/Repetier.ino
-
+  - build_sketch ./Repetier.ino
+  - sed -i 's/#define DAVINCI 1 /#define DAVINCI 2 /g' ./Configuration.h
+  - build_sketch ./Repetier.ino
+  - sed -i 's/#define DAVINCI 2 /#define DAVINCI 3 /g' ./Configuration.h
+  - build_sketch ./Repetier.ino
+  - sed -i 's/#define DAVINCI 3 /#define DAVINCI 0 /g' ./Configuration.h
+  - build_sketch ./Repetier.ino
+  - sed -i 's/#define DAVINCI 0 /#define DAVINCI 1 /g' ./Configuration.h
+  - sed -i 's/#define MODEL  0/#define MODEL  1/g' ./Configuration.h
+  - build_sketch ./Repetier.ino
+  - sed -i 's/#define DAVINCI 1 /#define DAVINCI 3 /g' ./Configuration.h
+  - build_sketch ./Repetier.ino
+  - sed -i 's/#define DAVINCI 3 /#define DAVINCI 4 /g' ./Configuration.h
+  - build_sketch ./Repetier.ino
+  
 notifications:
   email:
     on_success: change
