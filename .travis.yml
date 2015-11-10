@@ -16,8 +16,8 @@ before_script:
   - mv arduino-1.6.5 $HOME/arduino_ide
   - cd $HOME/arduino_ide/hardware/arduino
   - wget http://downloads.arduino.cc/cores/sam-1.6.4.tar.bz2
-  - mv sam-1.6.4 sam
   - tar xf sam-1.6.4.tar.bz2
+  - mv sam-1.6.4 sam
   - cd $HOME/arduino_ide/tools
   - wget http://downloads.arduino.cc/gcc-arm-none-eabi-4.8.3-2014q1-linux64.tar.gz
   - tar xf gcc-arm-none-eabi-4.8.3-2014q1-linux64.tar.gz
