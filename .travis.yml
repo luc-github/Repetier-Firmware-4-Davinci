@@ -26,6 +26,7 @@ before_script:
 
 script:
   - cd $TRAVIS_BUILD_DIR
+  - source command.sh
   - export PATH="$HOME/arduino_ide:$PATH"
   - arduino --board arduino:sam:generic --save-prefs
   - arduino --get-pref sketchbook.path
