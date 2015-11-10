@@ -27,8 +27,9 @@ before_script:
   
 
 script:
-  - cd $TRAVIS_BUILD_DIR/src/ArduinoDUE/Repetier
+  - cd $TRAVIS_BUILD_DIR
   - source command.sh
+  - cd $TRAVIS_BUILD_DIR/src/ArduinoDUE/Repetier
   - export PATH="$HOME/arduino_ide:$PATH"
   - arduino --board arduino:sam:arduino_due_x --save-prefs
   - arduino --get-pref sketchbook.path
