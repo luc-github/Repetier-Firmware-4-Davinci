@@ -23,6 +23,7 @@ before_script:
   - wget http://downloads.arduino.cc/gcc-arm-none-eabi-4.8.3-2014q1-linux64.tar.gz
   - tar xf gcc-arm-none-eabi-4.8.3-2014q1-linux64.tar.gz
   - mv gcc-arm-none-eabi-4.8.3-2014q1 4.8.3-2014q1
+  - cp -f "$TRAVIS_BUILD_DIR/src/ArduinoDUE/AdditionalArduinoFiles/Arduino - 1.6.5 -Due 1.6.4/Arduino15/packages/hardware/sam/1.6.4/variants/arduino_due_x/variant.cpp" $HOME/.arduino15/packages/arduino/hardware/sam/1.6.4/variants/arduino_due_x/variant.cpp 
   
 
 script:
@@ -31,8 +32,21 @@ script:
   - export PATH="$HOME/arduino_ide:$PATH"
   - arduino --board arduino:sam:arduino_due_x --save-prefs
   - arduino --get-pref sketchbook.path
-  - build_sketch src/ArduinoDUE/Repetier/Repetier.ino
-
+  - build_sketch ./src/ArduinoDUE/Repetier/Repetier.ino
+  - sed -i 's/#define DAVINCI 1 /#define DAVINCI 2 /g' ./src/ArduinoDUE/Repetier/Configuration.h
+  - build_sketch ./src/ArduinoDUE/Repetier/Repetier.ino
+  - sed -i 's/#define DAVINCI 2 /#define DAVINCI 3 /g' ./src/ArduinoDUE/Repetier/Configuration.h
+  - build_sketch ./src/ArduinoDUE/Repetier/Repetier.ino
+  - sed -i 's/#define DAVINCI 3 /#define DAVINCI 0 /g' ./src/ArduinoDUE/Repetier/Configuration.h
+  - build_sketch ./src/ArduinoDUE/Repetier/Repetier.ino
+  - sed -i 's/#define DAVINCI 0 /#define DAVINCI 1 /g' ./src/ArduinoDUE/Repetier/Configuration.h
+  - sed -i 's/#define MODEL  0/#define MODEL  1/g' ./src/ArduinoDUE/Repetier/Configuration.h
+  - build_sketch ./src/ArduinoDUE/Repetier/Repetier.ino
+  - sed -i 's/#define DAVINCI 1 /#define DAVINCI 3 /g' ./src/ArduinoDUE/Repetier/Configuration.h
+  - build_sketch ./src/ArduinoDUE/Repetier/Repetier.ino
+  - sed -i 's/#define DAVINCI 3 /#define DAVINCI 4 /g' ./src/ArduinoDUE/Repetier/Configuration.h
+  - build_sketch ./src/ArduinoDUE/Repetier/Repetier.ino
+  
 notifications:
   email:
     on_success: change
