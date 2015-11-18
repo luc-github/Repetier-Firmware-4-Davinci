@@ -20,7 +20,6 @@
 */
 
 #include "Repetier.h"
-#include "ui.h"
 
 #if SDSUPPORT
 
@@ -49,17 +48,17 @@ void SDCard::automount()
             uid.executeAction(UI_ACTION_TOP_MENU, true);
 #endif
             unmount();
-            UI_STATUS(UI_TEXT_SD_REMOVED);
+            UI_STATUS_F(Com::translatedF(UI_TEXT_SD_REMOVED_ID));
         }
     }
     else
     {
         if(!sdactive)
         {
-            UI_STATUS(UI_TEXT_SD_INSERTED);
+            UI_STATUS_F(Com::translatedF(UI_TEXT_SD_INSERTED_ID));
             Com::printFLN(PSTR("SD card inserted")); // Not translateable or host will not understand signal
             initsd();
-	    //Davinci Specific, init and autoprint are separated
+            //Davinci Specific, init and autoprint are separated
             autoPrint();
 #if UI_DISPLAY_TYPE != NO_DISPLAY
             if(sdactive) {
@@ -93,39 +92,36 @@ void SDCard::initsd()
     fat.chdir();
 //Davinci Specific,EEPROM is on SD Card
 #ifdef SDEEPROM
-	if (eepromBuffer != NULL && eepromSize > 0)
-	{
-		if (eepromFile.isOpen())
-			eepromFile.close();
-		if (!eepromFile.open(SD_EEPROM_FILENAME, O_RDWR | O_CREAT | O_SYNC) ||
-			eepromFile.read(eepromBuffer, eepromSize) != eepromSize)
-		{
-			Com::printFLN(Com::tOpenFailedFile, SD_EEPROM_FILENAME);
-		}
-
-	}
+    if (eepromBuffer != NULL && eepromSize > 0)
+    {
+        if (eepromFile.isOpen())
+            eepromFile.close();
+        if (!eepromFile.open(SD_EEPROM_FILENAME, O_RDWR | O_CREAT | O_SYNC) ||
+            eepromFile.read(eepromBuffer, eepromSize) != eepromSize)
+        {
+            Com::printFLN(Com::tOpenFailedFile, SD_EEPROM_FILENAME);
+        }
+    }
 #endif
 }
+
 #ifdef SDEEPROM
 bool SDCard::syncEeprom() {
-	if (!sdactive)
-	{
-		if (eepromFile.isOpen())
-			eepromFile.close();
-		return 0;
-	}
-
-	if (!eepromFile.seekSet(0))
-		return 0;
-
+    if (!sdactive)
+    {
+        if (eepromFile.isOpen())
+            eepromFile.close();
+        return 0;
+    }
+    if (!eepromFile.seekSet(0))
+        return 0;
 	return eepromFile.write(eepromBuffer, eepromSize) == eepromSize;
 }
 #endif
 
 void SDCard::autoPrint() {
-	if (!sdactive)
-		return;
-
+    if (!sdactive)
+        return;
     if(selectFile("init.g", true))
     {
         startPrint();
@@ -186,7 +182,7 @@ void SDCard::pausePrint(bool intern)
         Printer::moveToReal(0, 0.9 * EEPROM::deltaMaxRadius(), IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::maxFeedrate[X_AXIS]);
 #else
         //Davinci Specific, down bed and pause on Drip Box instead of front
-	if (Printer::lastCmdPos[Z_AXIS]+10<Printer::zMin+Printer::zLength)
+        if (Printer::lastCmdPos[Z_AXIS]+10<Printer::zMin+Printer::zLength)
           Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::lastCmdPos[Z_AXIS]+10,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
         Printer::moveToReal(Printer::xMin,Printer::yMin,IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
 #endif
@@ -198,10 +194,10 @@ void SDCard::continuePrint(bool intern)
 {
     if(!sd.sdactive) return;
     if(intern) {
-		//Davinci Specific, restore extruder for DUO
-		#if NUM_EXTRUDER>1
-		Extruder::selectExtruderById(Printer::lastextruderID);
-		#endif
+        //Davinci Specific, restore extruder for DUO
+        #if NUM_EXTRUDER>1
+        Extruder::selectExtruderById(Printer::lastextruderID);
+        #endif
         GCode::executeFString(PSTR(PAUSE_END_COMMANDS));
         Printer::GoToMemoryPosition(true, true, false, false, Printer::maxFeedrate[X_AXIS]);
         Printer::GoToMemoryPosition(false, false, true, false, Printer::maxFeedrate[Z_AXIS] / 2.0f);
@@ -229,27 +225,27 @@ void SDCard::stopPrint()
 
 void SDCard::writeCommand(GCode *code)
 {
-    unsigned int sum1=0,sum2=0; // for fletcher-16 checksum
+    unsigned int sum1 = 0, sum2 = 0; // for fletcher-16 checksum
     uint8_t buf[100];
-    uint8_t p=2;
+    uint8_t p = 2;
     file.writeError = false;
     int params = 128 | (code->params & ~1);
     *(int*)buf = params;
     if(code->isV2())   // Read G,M as 16 bit value
     {
         *(int*)&buf[p] = code->params2;
-        p+=2;
+        p += 2;
         if(code->hasString())
             buf[p++] = strlen(code->text);
         if(code->hasM())
         {
             *(int*)&buf[p] = code->M;
-            p+=2;
+            p += 2;
         }
         if(code->hasG())
         {
             *(int*)&buf[p]= code->G;
-            p+=2;
+            p += 2;
         }
     }
     else
@@ -266,27 +262,27 @@ void SDCard::writeCommand(GCode *code)
     if(code->hasX())
     {
         *(float*)&buf[p] = code->X;
-        p+=4;
+        p += 4;
     }
     if(code->hasY())
     {
         *(float*)&buf[p] = code->Y;
-        p+=4;
+        p += 4;
     }
     if(code->hasZ())
     {
         *(float*)&buf[p] = code->Z;
-        p+=4;
+        p += 4;
     }
     if(code->hasE())
     {
         *(float*)&buf[p] = code->E;
-        p+=4;
+        p += 4;
     }
     if(code->hasF())
     {
         *(float*)&buf[p] = code->F;
-        p+=4;
+        p += 4;
     }
     if(code->hasT())
     {
@@ -294,23 +290,68 @@ void SDCard::writeCommand(GCode *code)
     }
     if(code->hasS())
     {
-        *(long int*)&buf[p] = code->S;
-        p+=4;
+        *(int32_t*)&buf[p] = code->S;
+        p += 4;
     }
     if(code->hasP())
     {
-        *(long int*)&buf[p] = code->P;
-        p+=4;
+        *(int32_t*)&buf[p] = code->P;
+        p += 4;
     }
     if(code->hasI())
     {
         *(float*)&buf[p] = code->I;
-        p+=4;
+        p += 4;
     }
     if(code->hasJ())
     {
         *(float*)&buf[p] = code->J;
-        p+=4;
+        p += 4;
+    }
+    if(code->hasR())
+    {
+        *(float*)&buf[p] = code->R;
+        p += 4;
+    }
+    if(code->hasD())
+    {
+        *(float*)&buf[p] = code->D;
+        p += 4;
+    }
+    if(code->hasC())
+    {
+        *(float*)&buf[p] = code->C;
+        p += 4;
+    }
+    if(code->hasH())
+    {
+        *(float*)&buf[p] = code->H;
+        p += 4;
+    }
+    if(code->hasA())
+    {
+        *(float*)&buf[p] = code->A;
+        p += 4;
+    }
+    if(code->hasB())
+    {
+        *(float*)&buf[p] = code->B;
+        p += 4;
+    }
+    if(code->hasK())
+    {
+        *(float*)&buf[p] = code->K;
+        p += 4;
+    }
+    if(code->hasL())
+    {
+        *(float*)&buf[p] = code->L;
+        p += 4;
+    }
+    if(code->hasO())
+    {
+        *(float*)&buf[p] = code->O;
+        p += 4;
     }
     if(code->hasString())   // read 16 uint8_t into string
     {
@@ -322,7 +363,7 @@ void SDCard::writeCommand(GCode *code)
         }
         else
         {
-            for(uint8_t i=0; i<16; ++i) buf[p++] = *sp++;
+            for(uint8_t i = 0; i < 16; ++i) buf[p++] = *sp++;
         }
     }
     uint8_t *ptr = buf;
@@ -334,9 +375,9 @@ void SDCard::writeCommand(GCode *code)
         do
         {
             sum1 += *ptr++;
-            if(sum1>=255) sum1-=255;
+            if(sum1 >= 255) sum1 -= 255;
             sum2 += sum1;
-            if(sum2>=255) sum2-=255;
+            if(sum2 >= 255) sum2 -= 255;
         }
         while (--tlen);
     }
@@ -387,11 +428,11 @@ bool SDCard::showFilename(dir_t *p,const char *filename)
             else
               file_extension[0]=0;
             //check extension 
-			if ((strcasecmp(file_extension,"bin")==0) //all .bin
-			|| (strcasecmp(file_extension,"dat")==0)  //all .dat
-			|| (strcasecmp(file_extension,"hex")==0)  //all .hex
-			||  (strchr(filename,'.')==NULL)) return false; //all file without extension
-			}
+            if ((strcasecmp(file_extension,"bin")==0) //all .bin
+            || (strcasecmp(file_extension,"dat")==0)  //all .dat
+            || (strcasecmp(file_extension,"hex")==0)  //all .hex
+            ||  (strchr(filename,'.')==NULL)) return false; //all file without extension
+            }
     return true;
 }
 #endif
@@ -489,7 +530,7 @@ void SDCard::startWrite(char *filename)
     }
     else
     {
-        UI_STATUS(UI_TEXT_UPLOADING);
+        UI_STATUS_F(Com::translatedF(UI_TEXT_UPLOADING_ID));
         savetosd = true;
         Com::printFLN(Com::tWritingToFile,filename);
     }

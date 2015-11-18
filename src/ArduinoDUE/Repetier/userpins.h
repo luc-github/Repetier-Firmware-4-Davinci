@@ -115,6 +115,7 @@
 //USB Connection 
 #define RFSERIAL SerialUSB  // Native USB Port of the due 
 //EEPROM is on SDCard
+#define TWI_CLOCK_FREQ          100000
 #define EEPROM_AVAILABLE 1
 //EEprom on  SDCard
 #define SDEEPROM
