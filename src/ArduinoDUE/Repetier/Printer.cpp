@@ -181,6 +181,7 @@ flag8_t Endstops::accumulator = 0;
 flag8_t Endstops::lastState2 = 0;
 flag8_t Endstops::lastRead2 = 0;
 flag8_t Endstops::accumulator2 = 0;
+#endif
 //Davinci Specific, clean nozzle feature
 #if ENABLE_CLEAN_NOZZLE 
 void Printer::cleanNozzle(bool restoreposition)
@@ -200,7 +201,7 @@ void Printer::cleanNozzle(bool restoreposition)
     // move Z to zMin + 15 if under this position to be sure nozzle do not touch metal holder
     if (currentPosition[Z_AXIS] < zMin+15) moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,zMin+15,IGNORE_COORDINATE,homingFeedrate[0]);
     Commands::waitUntilEndOfAllMoves();
-    UI_STATUS_UPD_RAM(UI_TEXT_CLEANING_NOZZLE);
+    UI_STATUS_F(Com::translatedF(UI_TEXT_CLEANING_NOZZLE_ID));
 #if DAVINCI ==1
     //first step noze
     moveToReal(xMin+CLEAN_X-ENDSTOP_X_BACK_ON_HOME,yMin,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
@@ -275,7 +276,7 @@ void Printer::cleanNozzle(bool restoreposition)
         }
 #endif
     Commands::waitUntilEndOfAllMoves();
-    UI_STATUS_UPD_RAM(UI_TEXT_IDLE);
+    UI_STATUS_F(Com::translatedF(UI_TEXT_IDLE_ID));
     }
 #endif
 void Endstops::update() {

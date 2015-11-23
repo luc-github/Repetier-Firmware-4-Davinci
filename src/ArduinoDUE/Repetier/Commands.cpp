@@ -115,7 +115,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves)
                         //play alarm
                         playsound(1000,140);
                         playsound(3000,240);
-                        UI_STATUS_UPD(UI_TEXT_TOP_COVER_OPEN);
+                        UI_STATUS_F(Com::translatedF(UI_TEXT_TOP_COVER_OPEN_ID));
                         countersensor=0;
                         }
                     }
@@ -126,9 +126,9 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves)
                     //check if top was previously open
                     if (Printer::btop_Cover_open)
                         {   //erase only if no other status
-                            if  (String(UI_TEXT_TOP_COVER_OPEN).equals(String(uid.statusMsg)))
+                            if  (String(Com::translatedF(UI_TEXT_TOP_COVER_OPEN_ID)).equals(String(uid.statusMsg)))
                                 {
-                                     UI_STATUS_UPD("");
+                                     UI_STATUS_F(Com::translatedF(UI_TEXT_EMPTY_ID));
                                 }
                             Printer::btop_Cover_open=false;
                         }
@@ -142,7 +142,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves)
                 Printer::setMenuModeEx(MENU_MODE_STOP_REQUESTED,false);
                 //commands to run when stop
                 GCode::executeFString(PSTR(SD_RUN_ON_STOP));
-                UI_STATUS_UPD(UI_TEXT_IDLE);
+                UI_STATUS_F(Com::translatedF(UI_TEXT_IDLE_ID));
                 delay_flag_change2=0;
                 }
             else delay_flag_change2++;

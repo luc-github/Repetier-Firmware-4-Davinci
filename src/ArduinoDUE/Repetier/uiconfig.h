@@ -99,7 +99,7 @@ works, use the ascii charset 0 as fallback. Not the nicest for everything but wo
 
 /**
 What display type do you use?
-0 = No display
+0 = No display - do not use here. Set FEATURE_CONTROLLER 0 instead
 1 = LCD Display with 4 bit data bus
 2 = LCD Display with 8 bit data bus (currently not implemented, fallback to 1)
 3 = LCD Display with I2C connection, 4 bit mode
@@ -113,7 +113,29 @@ What display type do you use?
 
 #if UI_DISPLAY_TYPE == DISPLAY_U8G // Special case for graphic displays
 
-#define U8GLIB_ST7920 // Currently only this display from u8g lib is included.
+// You need to define which controller you use and set pins accodringly
+
+// For software spi assign these definitions
+// SCK Pin:  UI_DISPLAY_D4_PIN
+// Mosi Pin: UI_DISPLAY_ENABLE_PIN
+// CD Pin:   UI_DISPLAY_RS_PIN
+
+// ST7920 with software SPI
+#define U8GLIB_ST7920
+// SSD1306 with software SPI
+//#define U8GLIB_SSD1306_SW_SPI
+// SSD1306 over I2C using hardware I2C pins
+//#define U8GLIB_SSD1306_I2C
+// For the 8 bit ks0108 display you need to set these pins
+// UI_DISPLAY_D0_PIN,UI_DISPLAY_D1_PIN,UI_DISPLAY_D2_PIN,UI_DISPLAY_D3_PIN,UI_DISPLAY_D4_PIN,UI_DISPLAY_D5_PIN,UI_DISPLAY_D6_PIN,UI_DISPLAY_D7_PIN
+// UI_DISPLAY_ENABLE_PIN,UI_DISPLAY_CS1,UI_DISPLAY_CS2,
+// UI_DISPLAY_DI,UI_DISPLAY_RW_PIN,UI_DISPLAY_RESET_PIN
+//#define U8GLIB_KS0108
+//#define U8GLIB_KS0108_FAST
+// UI_DISPLAY_RS_PIN = CS
+// UI_DISPLAY_D5_PIN = A0
+//#define U8GLIB_ST7565_NHD_C2832_HW_SPI
+
 #define UI_LCD_WIDTH 128
 #define UI_LCD_HEIGHT 64
 
@@ -420,7 +442,6 @@ inline void uiCheckSlowEncoder() {
   UI_KEYS_I2C_CLICKENCODER_LOW_REV(_BV(2),_BV(0)); // click encoder on pins 0 and 2. Phase is connected with gnd for signals.
 #endif
 }
-
 void uiCheckSlowKeys(int &action) {
 #if defined(UI_HAS_I2C_KEYS) && UI_HAS_KEYS!=0
 #if UI_DISPLAY_I2C_CHIPTYPE==0
@@ -459,3 +480,6 @@ void uiCheckSlowKeys(int &action) {
 
 #endif
 #endif
+
+
+
