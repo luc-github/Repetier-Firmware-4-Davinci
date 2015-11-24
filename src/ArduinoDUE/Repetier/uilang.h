@@ -749,7 +749,7 @@
 #define UI_TEXT_PETTAPE_EN "Green PET tape"
 #define UI_TEXT_GLUESTICK_EN "Glue stick"
 #define UI_TEXT_CUSTOM_EN "Custom"
-#define UI_TEXT_COATING_CUSTOM_EN "Custom:%oCmm"
+#define UI_TEXT_COATING_CUSTOM_EN "Custom:%BCmm"
 #define UI_TEXT_LANGUAGE_EN "Language"
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
   #define UI_TEXT_MAINPAGE6_1_EN "\xa %ec/%Ec\xb0 X:%x0"
@@ -785,7 +785,7 @@
 #define UI_TEXT_EMPTY_EN ""
 #define UI_TEXT_TEMP_SET_EN cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_EN cTEMP "%ec" cDEG
-#define UI_TEXT_COATING_THICKNESS_EN " %oCmm"
+#define UI_TEXT_COATING_THICKNESS_EN " %BCmm"
 #define UI_TEXT_EXTR3_TEMP_EN "Temp. 4 :%e3/%E3" cDEG "C"
 #define UI_TEXT_EXTR4_TEMP_EN "Temp. 5 :%e4/%E4" cDEG "C"
 #define UI_TEXT_EXTR5_TEMP_EN "Temp. 6 :%e5/%E5" cDEG "C"

@@ -1531,8 +1531,13 @@ void UIDisplay::parse(const char *txt,bool ram)
             else if(c2 == 'J') addFloat(Printer::maxZJerk, 3, 1);
 #endif
             break;
-//Davinci Specific,
         case 'B':
+        if(c2 == 'C')     //Custom coating
+                {
+                         addFloat(Printer::zBedOffset, 3, 2);
+                         break;
+                }
+         //Davinci Specific,
         if(c2=='1') //heat PLA
                 {
                         bool allheat=true;
@@ -1834,11 +1839,6 @@ void UIDisplay::parse(const char *txt,bool ram)
                 break;
             }
 #endif
-            if(c2 == 'C')     //Custom coating
-            {
-                addFloat(Printer::zBedOffset, 3, 2);
-                break;
-            }
             // Extruder output level
             if(c2 >= '0' && c2 <= '9') ivalue = pwm_pos[c2 - '0'];
 #if HAVE_HEATED_BED

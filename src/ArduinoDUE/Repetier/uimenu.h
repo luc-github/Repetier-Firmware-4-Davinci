@@ -111,7 +111,7 @@ random stuff
 %on : current extruder number (1,2,3...)
 %oS : servo position
 %oY : babysteps counter
-%oC : Bed coating thickness
+%BC : Bed coating thickness
 
 stops
 %sx : State of x min endstop.
