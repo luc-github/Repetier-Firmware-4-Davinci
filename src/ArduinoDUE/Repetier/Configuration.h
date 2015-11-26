@@ -31,8 +31,8 @@
 //Version
 #define VERSION_MAJOR "1"
 #define VERSION_MINOR_YEAR "15"
-#define VERSION_MINOR_MONTH "10"
-#define VERSION_MINOR_DAY "30"
+#define VERSION_MINOR_MONTH "11"
+#define VERSION_MINOR_DAY "26"
 #define VERSION_BUILD "1"
 
 //Davinci screen is not standard reprap it is WINSTAR 16x4
@@ -1796,15 +1796,15 @@ Select the languages to use. On first startup user can select
 the language from a menu with activated languages. In Configuration->Language
 the language can be switched any time. */
 #define LANGUAGE_EN_ACTIVE 1 // English
-#define LANGUAGE_DE_ACTIVE 0 // German
-#define LANGUAGE_NL_ACTIVE 0 // Dutch
-#define LANGUAGE_PT_ACTIVE 0 // Brazilian portuguese
-#define LANGUAGE_IT_ACTIVE 0 // Italian
-#define LANGUAGE_ES_ACTIVE 0 // Spanish
-#define LANGUAGE_SE_ACTIVE 0 // Swedish
-#define LANGUAGE_FR_ACTIVE 0 // French
-#define LANGUAGE_CZ_ACTIVE 0 // Czech
-#define LANGUAGE_PL_ACTIVE 0 // Polish
+#define LANGUAGE_DE_ACTIVE 1 // German
+#define LANGUAGE_NL_ACTIVE 1 // Dutch
+#define LANGUAGE_PT_ACTIVE 1 // Brazilian portuguese
+#define LANGUAGE_IT_ACTIVE 1 // Italian
+#define LANGUAGE_ES_ACTIVE 1 // Spanish
+#define LANGUAGE_SE_ACTIVE 1 // Swedish
+#define LANGUAGE_FR_ACTIVE 1// French
+#define LANGUAGE_CZ_ACTIVE 1 // Czech
+#define LANGUAGE_PL_ACTIVE 1 // Polish
 
 /* Some displays loose their settings from time to time. Try uncommenting the 
 autorepair function if this is the case. It is not supported for all display
