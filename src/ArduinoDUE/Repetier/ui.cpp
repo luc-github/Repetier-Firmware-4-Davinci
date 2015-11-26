@@ -1739,11 +1739,21 @@ void UIDisplay::parse(const char *txt,bool ram)
             break;
         case 'O': // ops related stuff
             break;
-//Davinci Specific, XYZ Lenght
+//Davinci Specific, XYZ Lenght,Language
          case 'L':
              if(c2 == 'x') addFloat(Printer::xLength,4,0);
              else if(c2 == 'y') addFloat(Printer::yLength,4,0);
              else if(c2 == 'z') addFloat(Printer::zLength,4,0);
+             else if ((c2 == '0') && (Com::selectedLanguage ==0 ) )addStringP("\003");
+             else if ((c2 == '1') && (Com::selectedLanguage ==1 ) )addStringP("\003");
+             else if ((c2 == '2') && (Com::selectedLanguage ==2 ) )addStringP("\003");
+             else if ((c2 == '3') && (Com::selectedLanguage ==3 ) )addStringP("\003");
+             else if ((c2 == '4') && (Com::selectedLanguage ==4 ) )addStringP("\003");
+             else if ((c2 == '5') && (Com::selectedLanguage ==5 ) )addStringP("\003");
+             else if ((c2 == '6') && (Com::selectedLanguage ==6 ) )addStringP("\003");
+             else if ((c2 == '7') && (Com::selectedLanguage ==7 ) )addStringP("\003");
+             else if ((c2 == '8') && (Com::selectedLanguage ==8 ) )addStringP("\003");
+             else if ((c2 == '9') && (Com::selectedLanguage ==9 ) )addStringP("\003");
          break;
         case 'l':
             if(c2 == 'a') addInt(lastAction,4);
@@ -6338,6 +6348,39 @@ case UI_ACTION_LOAD_FAILSAFE:
 #if EEPROM_MODE != 0
             EEPROM::storeDataIntoEEPROM(0); // remember for next start
 #endif
+            switch(Com::selectedLanguage)
+            {
+			case 0:
+			UI_STATUS_UPD("\176English");
+			break;
+			case 1:
+			UI_STATUS_UPD("\176Deutsch");
+			break;
+			case 2:
+			UI_STATUS_UPD("\176Nederlandse");
+			break;
+			case 3:
+			UI_STATUS_UPD("\176Portugues");
+			break;
+			case 4:
+			UI_STATUS_UPD("\176Italiano");
+			break;
+			case 5:
+			UI_STATUS_UPD("\176Espanol");
+			break;
+			case 6:
+			UI_STATUS_UPD("\176Svenska");
+			break;
+			case 7:
+			UI_STATUS_UPD("\176Francais");
+			break;
+			case 8:
+			UI_STATUS_UPD("\176Cestina");
+			break;
+			case 9:
+			UI_STATUS_UPD("\176Polski");
+			break;
+			}
             break;
         }
     refreshPage();
