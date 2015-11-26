@@ -116,6 +116,19 @@ FSTRINGVALUE(Com::tSpaceRaw," RAW")
 FSTRINGVALUE(Com::tColon,":")
 FSTRINGVALUE(Com::tSlash,"/")
 FSTRINGVALUE(Com::tSpaceSlash," /")
+#if JSON_OUTPUT
+FSTRINGVALUE(Com::tJSONDir,"{\"dir\":\"")
+FSTRINGVALUE(Com::tJSONFiles,"\",\"files\":[")
+FSTRINGVALUE(Com::tJSONArrayEnd,"]}")
+FSTRINGVALUE(Com::tJSONErrorStart,"{\"err\":\"")
+FSTRINGVALUE(Com::tJSONErrorEnd,"\"}")
+FSTRINGVALUE(Com::tJSONFileInfoStart, "{\"err\":0,\"size\":");
+FSTRINGVALUE(Com::tJSONFileInfoHeight, ",\"height\":");
+FSTRINGVALUE(Com::tJSONFileInfoLayerHeight, ",\"layerHeight\":");
+FSTRINGVALUE(Com::tJSONFileInfoFilament, ",\"filament\":[");
+FSTRINGVALUE(Com::tJSONFileInfoGeneratedBy, "],\"generatedBy\":\"");
+FSTRINGVALUE(Com::tJSONFileInfoName, ",\"fileName\":\"");
+#endif // JSON_OUTPUT
 FSTRINGVALUE(Com::tSpeedMultiply,"SpeedMultiply:")
 FSTRINGVALUE(Com::tFlowMultiply,"FlowMultiply:")
 FSTRINGVALUE(Com::tFanspeed,"Fanspeed:")
@@ -454,6 +467,9 @@ FSTRINGVALUE(Com::tMCPCurrentSettings,"MCP4728 DAC Current Settings:")
 FSTRINGVALUE(Com::tPrinterModeFFF,"PrinterMode:FFF")
 FSTRINGVALUE(Com::tPrinterModeLaser,"PrinterMode:Laser")
 FSTRINGVALUE(Com::tPrinterModeCNC,"PrinterMode:CNC")
+#ifdef STARTUP_GCODE
+FSTRINGVALUE(Com::tStartupGCode,STARTUP_GCODE)
+#endif
 
 void Com::config(FSTRINGPARAM(text)) {
     printF(tConfig);

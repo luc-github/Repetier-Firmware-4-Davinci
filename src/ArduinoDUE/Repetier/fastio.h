@@ -246,6 +246,7 @@
 
   // 85 - USB
 #define DIO85_PORT PIOB
+//Davinci Specific
 #define DIO85_PIN PIO_PB11A_UOTGID // ID - VBOF
 
   // 86 - SPI CS2

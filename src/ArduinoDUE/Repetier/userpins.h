@@ -83,6 +83,7 @@
 #define TOP_SENSOR_PIN      6
 #define BADGE_LIGHT_PIN		-1
 #endif
+#undef SDSS
 #define SDSS            55
 #define MOSI_PIN        43
 #define MISO_PIN        73

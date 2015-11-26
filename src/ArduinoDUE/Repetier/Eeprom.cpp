@@ -48,8 +48,8 @@ void EEPROM:: update(long P,uint8_t T,long S,float X)
     uint8_t newcheck = computeChecksum();
     if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
         HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
-    readDataFromEEPROM(true);
-    Extruder::selectExtruderById(Extruder::current->id);
+    //readDataFromEEPROM(true);
+    //Extruder::selectExtruderById(Extruder::current->id);
 #else
     Com::printErrorF(Com::tNoEEPROMSupport);
 #endif

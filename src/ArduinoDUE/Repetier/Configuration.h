@@ -21,7 +21,7 @@
 
 // ################## EDIT THESE SETTINGS MANUALLY ################
 
-#define DAVINCI 1 // "0" if not DAVINCI, "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN, 4 for AiO (WITH NO SCANNER SUPPORT)
+#define DAVINCI 2 // "0" if not DAVINCI, "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN, 4 for AiO (WITH NO SCANNER SUPPORT)
 #define MODEL  0//"0" for first generation (jumper JP1 to reset ) , "1" for new generation   (jumper J37 to reset)
 #define REPURPOSE_FAN_TO_COOL_EXTRUSIONS 0 //Setting this to 1 will repurpose the main Extruder cooling fan to be controlled VIA M106/M107
                                                                                             //Warning: for DaVinci 1.0 need to add a permanent fan with power supply to cool extruder
@@ -200,13 +200,18 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 */
 #define DRIVE_SYSTEM CARTESIAN
 
+/* You can write some gcode to be executed on startup. Use this e.g. to set some 
+pins. Separate multiple gcodes with \n
+*/
+//#define STARTUP_GCODE ""
+
 // ##########################################################################################
 // ##                               Calibration                                            ##
 // ##########################################################################################
 
 /** Drive settings for the Delta printers
 */
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
     // ***************************************************
     // *** These parameter are only for Delta printers ***
     // ***************************************************
@@ -1754,6 +1759,13 @@ is also used for the heater if you have 2 extruders connected. */
   #define FAN_PIN -1
   #define FEATURE_FAN_CONTROL 0
 #endif
+
+
+/** Adds support for ESP8266 Duet web interface, PanelDue and probably some other things. 
+ * This essentially adds command M36/M408 and extends M20.
+ * Since it requires some memory do not enable it unless you have such a display!
+ *  */
+#define FEATURE_JSON 0
 
 /** For displays and keys there are too many permutations to handle them all in once.
 For the most common available combinations you can set the controller type here, so

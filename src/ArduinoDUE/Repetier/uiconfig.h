@@ -242,6 +242,13 @@ Define the pin
 
 #define UI_BACKLIGHT_PIN                78
 
+// Special pins for some u8g driven display
+
+//#define UI_DISPLAY_CS1 59
+//#define UI_DISPLAY_CS2 59
+//#define UI_DISPLAY_DI 59
+//#define UI_DISPLAY_RW_PIN 59
+//#define UI_DISPLAY_RESET_PIN 59
 #endif
 
 
@@ -390,7 +397,7 @@ void uiInitKeys() {
 //  UI_KEYS_INIT_MATRIX(32,47,45,43,41,39,37,35);
 #endif
 }
-void uiCheckKeys(int &action) {
+void uiCheckKeys(uint16_t &action) {
 #if UI_HAS_KEYS!=0
 
 //Davinci Specific, for cheat key
@@ -434,7 +441,7 @@ inline void uiCheckSlowEncoder() {
     HAL::i2cWrite(0x12); // GIOA
     HAL::i2cStop();
     HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
-    unsigned int keymask = HAL::i2cReadAck();
+    uint16_t keymask = HAL::i2cReadAck();
     keymask = keymask + (HAL::i2cReadNak()<<8);
 #endif
   HAL::i2cStop();
@@ -442,7 +449,7 @@ inline void uiCheckSlowEncoder() {
   UI_KEYS_I2C_CLICKENCODER_LOW_REV(_BV(2),_BV(0)); // click encoder on pins 0 and 2. Phase is connected with gnd for signals.
 #endif
 }
-void uiCheckSlowKeys(int &action) {
+void uiCheckSlowKeys(uint16_t &action) {
 #if defined(UI_HAS_I2C_KEYS) && UI_HAS_KEYS!=0
 #if UI_DISPLAY_I2C_CHIPTYPE==0
     HAL::i2cStartWait(UI_I2C_KEY_ADDRESS+I2C_READ);
@@ -453,7 +460,7 @@ void uiCheckSlowKeys(int &action) {
     HAL::i2cWrite(0x12); // GPIOA
     HAL::i2cStop();
     HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
-    unsigned int keymask = HAL::i2cReadAck();
+    uint16_t keymask = HAL::i2cReadAck();
     keymask = keymask + (HAL::i2cReadNak()<<8);
 #endif
     HAL::i2cStop();

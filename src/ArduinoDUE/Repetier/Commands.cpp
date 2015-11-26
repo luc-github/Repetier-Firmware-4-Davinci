@@ -21,7 +21,7 @@
 
 #include "Repetier.h"
 
-const uint8_t sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
+const int8_t sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
 int Commands::lowestRAMValue = MAX_RAM;
 int Commands::lowestRAMValueSend = MAX_RAM;
 
@@ -285,7 +285,7 @@ void Commands::printTemperatures(bool showRaw)
             Com::printF(Com::tColon,(1023 << (2 - ANALOG_REDUCE_BITS)) - extruder[i].tempControl.currentTemperature);
         }
     }
-#else if NUM_EXTRUDER == 1
+#elif NUM_EXTRUDER == 1
     if(showRaw)
     {
             Com::printF(Com::tSpaceRaw,(int)0);
@@ -1050,7 +1050,18 @@ void Commands::processGCode(GCode *com)
 #if ARC_SUPPORT
     case 2: // CW Arc
     case 3: // CCW Arc MOTION_MODE_CW_ARC: case MOTION_MODE_CCW_ARC:
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
+		{ // disable laser for G0 moves
+		bool laserOn = LaserDriver::laserOn;
+		if(com->G == 0 && Printer::mode == PRINTER_MODE_LASER) {
+			LaserDriver::laserOn = false;
+		}
+#endif // defined
         processArc(com);
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
+		LaserDriver::laserOn = laserOn;
+		}
+#endif // defined
         break;
 #endif
     case 4: // G4 dwell
@@ -1606,7 +1617,6 @@ void Commands::processGCode(GCode *com)
 */
 void Commands::processMCode(GCode *com)
 {
-    uint32_t codenum; //throw away variable
     switch( com->M )
     {
     case 3: // Spindle/laser on
@@ -1648,7 +1658,15 @@ void Commands::processMCode(GCode *com)
         break;
 #if SDSUPPORT
     case 20: // M20 - list SD card
+#if JSON_OUTPUT
+       if (com->hasString() && com->text[1] == '2') { // " S2 P/folder"
+            if (com->text[3] == 'P') {
+                sd.lsJSON(com->text + 4);
+            }
+        } else sd.ls();
+#else
         sd.ls();
+#endif
         break;
     case 21: // M21 - init SD card
         sd.mount();
@@ -1696,6 +1714,13 @@ void Commands::processMCode(GCode *com)
         {
             sd.fat.chdir();
             sd.makeDirectory(com->text);
+        }
+        break;
+#endif
+#if JSON_OUTPUT
+    case 36: // M36 JSON File Info
+        if (com->hasString()) {
+            sd.JSONFileInfo(com->text);
         }
         break;
 #endif
@@ -1936,6 +1961,7 @@ void Commands::processMCode(GCode *com)
     previousMillisCmd = HAL::timeInMilliseconds();
     break;
     case 190: // M190 - Wait bed for heater to reach target.
+		{
 #if HAVE_HEATED_BED
         if(Printer::debugDryrun()) break;
         UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_HEATING_BED_ID));
@@ -1946,6 +1972,7 @@ void Commands::processMCode(GCode *com)
         if(abs(heatedBedController.currentTemperatureC - heatedBedController.targetTemperatureC) < SKIP_M190_IF_WITHIN) break;
 #endif
         EVENT_WAITING_HEATER(-1);
+        uint32_t codenum; //throw away variable
         codenum = HAL::timeInMilliseconds();
         while(heatedBedController.currentTemperatureC + 0.5 < heatedBedController.targetTemperatureC && heatedBedController.targetTemperatureC > 25.0)
         {
@@ -1955,7 +1982,7 @@ void Commands::processMCode(GCode *com)
                 codenum = previousMillisCmd = HAL::timeInMilliseconds();
             }
             Commands::checkForPeriodicalActions(true);
-	    //Davinci Specific, STOP management
+            //Davinci Specific, STOP management
             if (Printer::isMenuModeEx(MENU_MODE_STOP_REQUESTED))break;
         }
 #endif
@@ -1963,6 +1990,7 @@ void Commands::processMCode(GCode *com)
 #endif
         UI_CLEAR_STATUS;
         previousMillisCmd = HAL::timeInMilliseconds();
+        }
         break;
 #if NUM_TEMPERATURE_LOOPS > 0
     case 116: // Wait for temperatures to reach target temperature
@@ -2009,7 +2037,7 @@ void Commands::processMCode(GCode *com)
 #else
             Extruder::setTemperatureForExtruder(0, 0);
 #endif
-#if HEATED_BED_TYPE != 0
+#if HAVE_HEATED_BED != 0
             Extruder::setHeatedBedTemperature(0,false);
 #endif
         }
@@ -2366,6 +2394,11 @@ void Commands::processMCode(GCode *com)
     case 402: // M402 Go to stored position
         Printer::GoToMemoryPosition(com->hasX(),com->hasY(),com->hasZ(),com->hasE(),(com->hasF() ? com->F : Printer::feedrate));
         break;
+#if JSON_OUTPUT
+    case 408:
+        Printer::showJSONStatus(com->hasS() ? static_cast<int>(com->S) : 0);
+        break;
+#endif
     case 450:
         Printer::reportPrinterMode();
         break;
@@ -2641,6 +2674,14 @@ void Commands::executeGCode(GCode *com)
             com->printCommand();
         }
     }
+#ifdef DEBUG_DRYRUN_ERROR
+    if(Printer::debugDryrun()) {
+        Com::printFLN("Dryrun was enabled");
+        com->printCommand();
+        Printer::debugLevel &= ~8;
+    }
+#endif
+
          //Davinci Specific, if some extruder command and we are not in pause - check filament sensor
         if (com->hasE() && !Printer:: isMenuMode(MENU_MODE_SD_PAUSED))
         {
@@ -2666,6 +2707,7 @@ void Commands::executeGCode(GCode *com)
             UIDisplay::ui_autolightoff_time=HAL::timeInMilliseconds()+EEPROM::timepowersaving;
             }
 #endif
+
     }
 Printer::setMenuModeEx(MENU_MODE_GCODE_PROCESSING,false);
 }
