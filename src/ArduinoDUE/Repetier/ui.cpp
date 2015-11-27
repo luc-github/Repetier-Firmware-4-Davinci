@@ -3319,6 +3319,7 @@ ZPOS2:
 #endif
         if((abs((int)Printer::zBabystepsMissing + (increment * BABYSTEP_MULTIPLICATOR))) < 20000)
         {
+			InterruptProtectedBlock noint;
             Printer::zBabystepsMissing += increment * BABYSTEP_MULTIPLICATOR;
             zBabySteps += increment * BABYSTEP_MULTIPLICATOR;
         }
