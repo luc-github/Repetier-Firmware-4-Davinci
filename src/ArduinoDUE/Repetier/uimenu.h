@@ -1883,10 +1883,10 @@ UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_adjust_pettape,UI_TEXT_PETTAPE_ID, UI_ACT
 UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_adjust_gluestick,UI_TEXT_GLUESTICK_ID, UI_ACTION_GLUESTICK,0,MENU_MODE_PRINTING, ALL_MODE)
 UI_MENU_CHANGEACTION_FILTER_T(ui_menu_adjust_custom,UI_TEXT_COATING_CUSTOM_ID,UI_ACTION_COATING_CUSTOM,0,MENU_MODE_PRINTING, ALL_MODE)
 #define UI_MENU_ADJUST {UI_MENU_ADDCONDBACK &ui_menu_adjust_nocoating,&ui_menu_adjust_buildtak,&ui_menu_adjust_kapton,&ui_menu_adjust_bluetape,&ui_menu_adjust_pettape,&ui_menu_adjust_gluestick,&ui_menu_adjust_custom}
-UI_MENU(ui_menu_adjust,UI_MENU_ADJUST,7+UI_MENU_BACKCNT)
+UI_MENU(ui_menu_adjust,UI_MENU_ADJUST,7+UI_MENU_BACKCNT);
 #define UI_MENU_COATING_CNT 1
 #define UI_MENU_COATING_COND &ui_menu_prepare,
-UI_MENU_SUBMENU_FILTER_T(ui_menu_prepare, UI_TEXT_BED_COATING_ID, ui_menu_adjust,0,MENU_MODE_PRINTING)
+UI_MENU_SUBMENU_FILTER_T(ui_menu_prepare, UI_TEXT_BED_COATING_ID, ui_menu_adjust,0,MENU_MODE_PRINTING, ALL_MODE);
 
 #else
 #define UI_MENU_COATING_CNT 0
