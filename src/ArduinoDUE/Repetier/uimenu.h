@@ -1859,7 +1859,7 @@ UI_MENU_CHANGEACTION_T(ui_menu_off_xpos,UI_TEXT_X_OFFSET_ID,UI_ACTION_XOFF, ADVA
 UI_MENU_CHANGEACTION_T(ui_menu_off_ypos,UI_TEXT_Y_OFFSET_ID,UI_ACTION_YOFF, ADVANCED_MODE)
 UI_MENU_CHANGEACTION_T(ui_menu_off_zpos,UI_TEXT_Z_OFFSET_ID,UI_ACTION_ZOFF, ADVANCED_MODE)
 
-#define UI_MENU_POSITIONS_SIZE_SETTINGS {UI_MENU_ADDCONDBACK &ui_menu_x_length,&ui_menu_y_length,&ui_menu_z_length UI_TOOGLE_AUTOLEVEL_ENTRY ,&ui_menu_x_min,&ui_menu_y_min,&ui_menu_z_min}
+#define UI_MENU_POSITIONS_SIZE_SETTINGS {UI_MENU_ADDCONDBACK &ui_menu_x_length,&ui_menu_y_length,&ui_menu_z_length UI_TOOGLE_AUTOLEVEL_ENTRY ,&ui_menu_x_min,&ui_menu_y_min,&ui_menu_z_min,ui_menu_off_xpos,ui_menu_off_ypos,ui_menu_off_zpos,}
 UI_MENU(ui_menu_positions_size_seetings,UI_MENU_POSITIONS_SIZE_SETTINGS,9+UI_TOOGLE_AUTOLEVEL_COUNT+UI_MENU_BACKCNT);//BUG without this ; compilation crash
 
 UI_MENU_SUBMENU_T(ui_menu_positions_size_settings_entry, UI_TEXT_POSITION_ID, ui_menu_positions_size_seetings, ADVANCED_MODE)
