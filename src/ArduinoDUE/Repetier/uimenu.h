@@ -1005,7 +1005,7 @@ UI_MENU_SUBMENU_T(ui_menu_conf_accel,   UI_TEXT_ACCELERATION_ID, ui_menu_accel)
 UI_MENU_SUBMENU_T(ui_menu_conf_feed,    UI_TEXT_FEEDRATE_ID,     ui_menu_feedrate)
 UI_MENU_SUBMENU_T(ui_menu_conf_extr,    UI_TEXT_EXTRUDER_ID,     ui_menu_cextr)
 #if HAVE_HEATED_BED
- UI_MENU_SUBMENU_T(ui_menu_conf_bed,    UI_TEXT_HEATING_BED_ID,  ui_menu_bedconf)
+ UI_MENU_SUBMENU_T(ui_menu_conf_bed,    UI_TEXT_BED_ID,  ui_menu_bedconf)
  #define UI_MENU_BEDCONF_COND ,&ui_menu_conf_bed
  #define UI_MENU_BEDCONF_CNT 1
 #else
@@ -1092,7 +1092,7 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_back,UI_TEXT_BACK_ID,UI_ACTION_BACK, ALL_MODE)
 #if EEPROM_MODE != 0
 #define FIRSTLANG 1
 #if LANGUAGE_EN_ACTIVE
-    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_en,"English %L0",UI_ACTION_LANGUAGE_EN, ADVANCED_MODE)
+    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_en,"English       %L0",UI_ACTION_LANGUAGE_EN, ADVANCED_MODE)
 #define ADD_LANG_EN &ui_menu_setlang_en
 #undef FIRSTLANG
 #define FIRSTLANG 0
@@ -1100,7 +1100,7 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_back,UI_TEXT_BACK_ID,UI_ACTION_BACK, ALL_MODE)
 #define ADD_LANG_EN
 #endif // LANGUAGE_EN_ACTIVE
 #if LANGUAGE_DE_ACTIVE
-    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_de,"Deutsch  %L1",UI_ACTION_LANGUAGE_DE, ADVANCED_MODE)
+    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_de,"Deutsch       %L1",UI_ACTION_LANGUAGE_DE, ADVANCED_MODE)
 #if FIRSTLANG
 #define ADD_LANG_DE &ui_menu_setlang_de
 #undef FIRSTLANG
@@ -1112,7 +1112,7 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_back,UI_TEXT_BACK_ID,UI_ACTION_BACK, ALL_MODE)
 #define ADD_LANG_DE
 #endif // LANGUAGE_DE_ACTIVE
 #if LANGUAGE_ES_ACTIVE
-    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_es,"Espanol %L5",UI_ACTION_LANGUAGE_ES, ADVANCED_MODE)
+    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_es,"Espanol       %L5",UI_ACTION_LANGUAGE_ES, ADVANCED_MODE)
 #if FIRSTLANG
 #define ADD_LANG_ES &ui_menu_setlang_es
 #undef FIRSTLANG
@@ -1124,7 +1124,7 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_back,UI_TEXT_BACK_ID,UI_ACTION_BACK, ALL_MODE)
 #define ADD_LANG_ES
 #endif // LANGUAGE_ES_ACTIVE
 #if LANGUAGE_PT_ACTIVE
-    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_pt,"Portugues %L3",UI_ACTION_LANGUAGE_PT, ADVANCED_MODE)
+    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_pt,"Portugues     %L3",UI_ACTION_LANGUAGE_PT, ADVANCED_MODE)
 #if FIRSTLANG
 #define ADD_LANG_PT &ui_menu_setlang_pt
 #undef FIRSTLANG
@@ -1136,7 +1136,7 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_back,UI_TEXT_BACK_ID,UI_ACTION_BACK, ALL_MODE)
 #define ADD_LANG_PT
 #endif // LANGUAGE_PT_ACTIVE
 #if LANGUAGE_FR_ACTIVE
-    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_fr,"Francais %L7",UI_ACTION_LANGUAGE_FR, ADVANCED_MODE)
+    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_fr,"Francais      %L7",UI_ACTION_LANGUAGE_FR, ADVANCED_MODE)
 #if FIRSTLANG
 #define ADD_LANG_FR &ui_menu_setlang_fr
 #undef FIRSTLANG
@@ -1148,7 +1148,7 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_back,UI_TEXT_BACK_ID,UI_ACTION_BACK, ALL_MODE)
 #define ADD_LANG_FR
 #endif // LANGUAGE_FR_ACTIVE
 #if LANGUAGE_NL_ACTIVE
-    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_nl,"Nederlandse %L2",UI_ACTION_LANGUAGE_NL, ADVANCED_MODE)
+    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_nl,"Nederlandse   %L2",UI_ACTION_LANGUAGE_NL, ADVANCED_MODE)
 #if FIRSTLANG
 #define ADD_LANG_NL &ui_menu_setlang_nl
 #undef FIRSTLANG
@@ -1160,7 +1160,7 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_back,UI_TEXT_BACK_ID,UI_ACTION_BACK, ALL_MODE)
 #define ADD_LANG_NL
 #endif // LANGUAGE_NL_ACTIVE
 #if LANGUAGE_IT_ACTIVE
-    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_it,"Italiano %L4",UI_ACTION_LANGUAGE_IT, ADVANCED_MODE)
+    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_it,"Italiano      %L4",UI_ACTION_LANGUAGE_IT, ADVANCED_MODE)
 #if FIRSTLANG
 #define ADD_LANG_IT &ui_menu_setlang_it
 #undef FIRSTLANG
@@ -1172,7 +1172,7 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_back,UI_TEXT_BACK_ID,UI_ACTION_BACK, ALL_MODE)
 #define ADD_LANG_IT
 #endif // LANGUAGE_IT_ACTIVE
 #if LANGUAGE_SE_ACTIVE
-    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_se,"Svenska %L6",UI_ACTION_LANGUAGE_SE, ADVANCED_MODE)
+    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_se,"Svenska       %L6",UI_ACTION_LANGUAGE_SE, ADVANCED_MODE)
 #if FIRSTLANG
 #define ADD_LANG_SE &ui_menu_setlang_se
 #undef FIRSTLANG
@@ -1184,7 +1184,7 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_back,UI_TEXT_BACK_ID,UI_ACTION_BACK, ALL_MODE)
 #define ADD_LANG_SE
 #endif // LANGUAGE_SE_ACTIVE
 #if LANGUAGE_CZ_ACTIVE
-    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_cz,"Cestina %L8",UI_ACTION_LANGUAGE_CZ, ADVANCED_MODE)
+    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_cz,"Cestina       %L8",UI_ACTION_LANGUAGE_CZ, ADVANCED_MODE)
 #if FIRSTLANG
 #define ADD_LANG_CZ &ui_menu_setlang_cz
 #undef FIRSTLANG
@@ -1196,7 +1196,7 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_back,UI_TEXT_BACK_ID,UI_ACTION_BACK, ALL_MODE)
 #define ADD_LANG_CZ
 #endif // LANGUAGE_CZ_ACTIVE
 #if LANGUAGE_PL_ACTIVE
-    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_pl,"Polski %L9",UI_ACTION_LANGUAGE_PL, ADVANCED_MODE)
+    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_pl,"Polski        %L9",UI_ACTION_LANGUAGE_PL, ADVANCED_MODE)
 #if FIRSTLANG
 #define ADD_LANG_PL &ui_menu_setlang_pl
 #undef FIRSTLANG
@@ -1775,15 +1775,15 @@ UI_MENU_SUBMENU_T(ui_menu_conf_extr, UI_TEXT_EXTRUDER_ID, ui_menu_cextr, ADVANCE
 UI_MENU_CHANGEACTION_T(ui_menu_bed_temp_abs, UI_TEXT_BED_TEMP_ABS_ID, UI_ACTION_BED_TEMP_ABS, ADVANCED_MODE)
 UI_MENU_CHANGEACTION_T(ui_menu_bed_temp_pla, UI_TEXT_BED_TEMP_PLA_ID, UI_ACTION_BED_TEMP_PLA, ADVANCED_MODE)
  #if TEMP_PID
-  #define UI_MENU_BEDCONF {UI_MENU_ADDCONDBACK  &ui_menu_bed_temp_abs, &ui_menu_bed_temp_pla ,&ui_menu_cext_manager,&ui_menu_cext_pgain,&ui_menu_cext_igain,&ui_menu_cext_dgain,&ui_menu_cext_dmin,&ui_menu_cext_dmax,&ui_menu_cext_pmax}
-  UI_MENU(ui_menu_bedconf, UI_MENU_BEDCONF, 10);//BUG without this ; compilation crash
+  #define UI_MENU_BEDCONF {UI_MENU_ADDCONDBACK &ui_menu_bed_temp_abs, &ui_menu_bed_temp_pla, &ui_menu_cext_manager,&ui_menu_cext_pgain,&ui_menu_cext_igain,&ui_menu_cext_dgain,&ui_menu_cext_dmin,&ui_menu_cext_dmax,&ui_menu_cext_pmax}
+  UI_MENU(ui_menu_bedconf, UI_MENU_BEDCONF, 9+UI_MENU_BACKCNT);//BUG without this ; compilation crash
  #else
   #define UI_MENU_BEDCONF {UI_MENU_ADDCONDBACK  &ui_menu_bed_temp_abs, &ui_menu_bed_temp_pla, &ui_menu_cext_manager, &ui_menu_cext_pmax}
-  UI_MENU(ui_menu_bedconf, UI_MENU_BEDCONF, 5);//BUG without this ; compilation crash
+  UI_MENU(ui_menu_bedconf, UI_MENU_BEDCONF, 4+UI_MENU_BACKCNT );//BUG without this ; compilation crash , 
  #endif
 #endif
 #if HAVE_HEATED_BED
- UI_MENU_SUBMENU_T(ui_menu_conf_bed, UI_TEXT_HEATING_BED_ID, ui_menu_bedconf, ADVANCED_MODE)
+ UI_MENU_SUBMENU_T(ui_menu_conf_bed, UI_TEXT_BED_ID, ui_menu_bedconf, ADVANCED_MODE)
  #define UI_MENU_BEDCONF_COND ,&ui_menu_conf_bed
  #define UI_MENU_BEDCONF_CNT 1
 #else
@@ -1793,7 +1793,7 @@ UI_MENU_CHANGEACTION_T(ui_menu_bed_temp_pla, UI_TEXT_BED_TEMP_PLA_ID, UI_ACTION_
 
 //version
 #define UI_VERSION_STRING_FULL  VERSION_MAJOR "." VERSION_MINOR_YEAR "-" VERSION_MINOR_MONTH "-" VERSION_MINOR_DAY "_" VERSION_BUILD "." DAVINCI_TYPE MODEL_TYPE 
-#define UI_PAGE_VERSION UI_PRINTER_NAME,"",UI_VERSION_STRING_FULL,"Repetier " REPETIER_VERSION "Mod"
+#define UI_PAGE_VERSION UI_PRINTER_NAME,"",UI_VERSION_STRING_FULL,"Repetier " REPETIER_VERSION "M"
 UI_MENU_ACTION4C(ui_page_version,UI_ACTION_DUMMY,UI_PAGE_VERSION, ALL_MODE)
 UI_MENU_ACTIONCOMMAND_T(ui_menu_version, UI_TEXT_VERSION_MENU_ID, UI_ACTION_VERSION, ALL_MODE)
 
