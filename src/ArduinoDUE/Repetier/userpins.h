@@ -89,7 +89,7 @@
 #define MISO_PIN        73
 #define SCK_PIN         42
 #define SDPOWER                 -1
-#define SDCARDDETECT            74
+#define ORIG_SDCARDDETECT            74
 #define SDSUPPORT       true
 #define SDCARDDETECTINVERTED    0
 #define DUE_SOFTWARE_SPI

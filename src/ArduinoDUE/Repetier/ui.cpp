@@ -1537,7 +1537,7 @@ void UIDisplay::parse(const char *txt,bool ram)
         case 'B':
         if(c2 == 'C')     //Custom coating
                 {
-                         addFloat(Printer::zBedOffset, 3, 2);
+                         addFloat(Printer::zBedOffset, 2, 2);
                          break;
                 }
          //Davinci Specific,
@@ -2058,7 +2058,7 @@ case 'P':
             }
             else if(c2=='p')
             {
-                addFloat(currHeaterForSetup->pidPGain, 4,2);
+                addFloat(currHeaterForSetup->pidPGain, 3,2);
             }
             else if(c2=='d')
             {
@@ -4251,13 +4251,14 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
 #ifdef CASE_LIGHTS2_PIN
             TOGGLE(CASE_LIGHTS2_PIN);
 #endif
+            delay(100);
             //Davinci Specific, save state to EEPROM
-            if (READ(CASE_LIGHTS_PIN))
-            EEPROM::buselight=true;
+            if(READ(CASE_LIGHTS_PIN))
+                EEPROM::buselight=true;
             else
-            EEPROM::buselight=false;
+                EEPROM::buselight=false;
             //save directly to eeprom
-            EEPROM:: update(EPR_LIGHT_ON,EPR_TYPE_BYTE,EEPROM::buselight,0);
+            EEPROM:: update(EPR_LIGHT_ON,EPR_TYPE_BYTE,byte(EEPROM::buselight),0);
             Printer::reportCaseLightStatus();
             UI_STATUS_F(Com::translatedF(UI_TEXT_LIGHTS_ONOFF_ID));
             break;

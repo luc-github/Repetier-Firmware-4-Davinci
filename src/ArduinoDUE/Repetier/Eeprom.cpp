@@ -48,7 +48,7 @@ void EEPROM:: update(long P,uint8_t T,long S,float X)
     uint8_t newcheck = computeChecksum();
     if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
         HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
-    //readDataFromEEPROM(true);
+    readDataFromEEPROM(true);
     //Extruder::selectExtruderById(Extruder::current->id);
 #else
     Com::printErrorF(Com::tNoEEPROMSupport);
@@ -760,7 +760,7 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
         if(sum < 2.7 || sum > 3.3)
             Printer::resetTransformationMatrix(false);
         Printer::setAutolevelActive(HAL::eprGetByte(EPR_AUTOLEVEL_ACTIVE));
-        Com::printArrayFLN(Com::tTransformationMatrix,Printer::autolevelTransformation, 9, 6);
+        //Com::printArrayFLN(Com::tTransformationMatrix,Printer::autolevelTransformation, 9, 6);
     }
 #endif
     if(includeExtruder)

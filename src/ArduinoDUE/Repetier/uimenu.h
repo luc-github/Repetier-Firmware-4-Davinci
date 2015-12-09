@@ -271,23 +271,13 @@ for 2 row displays. You can add additional pages or change the default pages lik
   #define UI_NUM_PAGES 1+UI_PRINTTIME_COUNT+UI_EXTRUDERS_PAGES_COUNT
 
 #elif UI_ROWS >= 4
- #if HAVE_HEATED_BED
 ///Davinci Specific, page 1-2-3, they are diferrent if you have 1 or 2 extruders, and if you are in Easy Mode or Advanced Mode
-   #if NUM_EXTRUDER == 1
-   UI_PAGE4(ui_page1,"\005%ec/%Ec\007%eB/%Eb","Z:%x2","Mul:%om Buf:%oB","%os", ADVANCED_MODE)
-   UI_PAGE4(ui_page1e,"\005%ec/%Ec\002C","\007%eB/%Eb\002C","Z:%x2","%os", EASY_MODE)
-   #else
-   UI_PAGE4(ui_page1,"\005%e0/%E0\005%e1/%E1","\007%eB/%EbMul:%om%%%","Z:%x2","%os", ADVANCED_MODE)
-   UI_PAGE4(ui_page1e,"\0051 %e0/%E0\002C","\0052 %e1/%E1\002C","\007 %eB/%Eb\002C","%os", EASY_MODE)
-   #endif
- #else
-   //UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,"Z:%x2 mm",UI_TEXT_PAGE_BUFFER,"%os", ALL_MODE)
-    #if NUM_EXTRUDER == 1
-   UI_PAGE4(ui_page1,"\005%ec/%Ec\002","Z:%x2","Buffer:%oB","%os", ALL_MODE)
-   #else
-   UI_PAGE4(ui_page1,"\005%e0/%E0\005%e1/%E1","Buffer:%oB","%os", ALL_MODE)
-   #endif
- #endif
+#if HAVE_HEATED_BED
+   UI_PAGE4_T(ui_page1,UI_TEXT_P1_L1_ID,UI_TEXT_P1_L2_ID,UI_TEXT_P1_L3_ID,UI_TEXT_STATUS_ID, ADVANCED_MODE)
+   UI_PAGE4_T(ui_page1e,UI_TEXT_P1_L1_EASY_ID,UI_TEXT_P1_L2_EASY_ID,UI_TEXT_P1_L3_EASY_ID,UI_TEXT_STATUS_ID, EASY_MODE)
+#else
+   UI_PAGE4_T(ui_page1,UI_TEXT_P1_L1_ID,UI_TEXT_P1_L2_ID,UI_TEXT_P1_L3_ID,UI_TEXT_STATUS_ID, ALL_MODE)
+#endif
  //page 2
 #if MAX_HARDWARE_ENDSTOP_X || MAX_HARDWARE_ENDSTOP_Y || MAX_HARDWARE_ENDSTOP_Z
  UI_PAGE4(ui_page2,"X:%x0 mm   %sx %sX","Y:%x1 mm   %sy %sY","Z:%x2 mm   %sz %sZ","%os", ALL_MODE)
@@ -1729,10 +1719,10 @@ UI_MENU_CHANGEACTION_T(ui_menu_ext_wait_temp, UI_TEXT_EXTR_WAIT_RETRACT_TEMP_ID,
 UI_MENU_CHANGEACTION_T(ui_menu_ext_wait_units, UI_TEXT_EXTR_WAIT_RETRACT_UNITS_ID, UI_ACTION_EXTR_WAIT_RETRACT_UNITS, ADVANCED_MODE)
 #define UI_MENU_ADV_CNT 0
 #define UI_MENU_ADVANCE
-#ifdef USE_ADVANCE
+#if USE_ADVANCE
 #define UI_MENU_ADV_CNT 1
 #define UI_MENU_ADVANCE ,&ui_menu_cext_advancel
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
 #define UI_MENU_ADV_CNT 2
 #define UI_MENU_ADVANCE ,&ui_menu_cext_advancel,&ui_menu_cext_advancek
 UI_MENU_CHANGEACTION_T(ui_menu_cext_advancek,UI_TEXT_EXTR_ADVANCE_K_ID,UI_ACTION_ADVANCE_K, ADVANCED_MODE)
@@ -1741,7 +1731,7 @@ UI_MENU_CHANGEACTION_T(ui_menu_cext_advancel,UI_TEXT_EXTR_ADVANCE_L_ID,UI_ACTION
 #endif
 UI_MENU_CHANGEACTION_T( ui_menu_cext_manager, UI_TEXT_EXTR_MANAGER_ID, UI_ACTION_EXTR_HEATMANAGER, ADVANCED_MODE)
 UI_MENU_CHANGEACTION_T( ui_menu_cext_pmax, UI_TEXT_EXTR_PMAX_ID, UI_ACTION_PID_MAX, ADVANCED_MODE)
-#ifdef TEMP_PID
+#if TEMP_PID
 UI_MENU_CHANGEACTION_FILTER_T(ui_menu_cext_pgain, UI_TEXT_EXTR_PGAIN_ID, UI_ACTION_PID_PGAIN, MENU_MODE_FULL_PID, 0, ADVANCED_MODE)
 UI_MENU_CHANGEACTION_FILTER_T(ui_menu_cext_igain, UI_TEXT_EXTR_IGAIN_ID, UI_ACTION_PID_IGAIN, MENU_MODE_FULL_PID, 0, ADVANCED_MODE)
 UI_MENU_CHANGEACTION_FILTER_T(ui_menu_cext_dgain, UI_TEXT_EXTR_DGAIN_ID, UI_ACTION_PID_DGAIN, MENU_MODE_FULL_PID, 0, ADVANCED_MODE)

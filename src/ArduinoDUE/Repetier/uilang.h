@@ -96,7 +96,7 @@
 #define LANGUAGE_PL_ID 9
 
 #define NUM_LANGUAGES_KNOWN 10
-#define NUM_TRANSLATED_WORDS 401
+#define NUM_TRANSLATED_WORDS 407
 
 // For selectable translations we refer to each text by a id which gets
 // defined here. The list starts at 0 and defines the position in the
@@ -503,6 +503,13 @@
 #define UI_TEXT_MAIN_LINE1_ID 398
 #define UI_TEXT_MAIN_LINE2_ID 399
 #define UI_TEXT_AUTOLEVEL_MATRIX_ID 400
+#define UI_TEXT_P1_L1_ID 401
+#define UI_TEXT_P1_L2_ID 402
+#define UI_TEXT_P1_L3_ID 403
+#define UI_TEXT_P1_L1_EASY_ID 404
+#define UI_TEXT_P1_L2_EASY_ID 405
+#define UI_TEXT_P1_L3_EASY_ID 406
+
 
 
 
@@ -520,7 +527,7 @@
 #define UI_TEXT_OFF_EN              "Off"
 #define UI_TEXT_NA_EN               "N/A" // Output for not available
 #define UI_TEXT_YES_EN              "Yes"
-#define UI_TEXT_NO_EN               "No"
+#define UI_TEXT_NO_EN               " No"
 #define UI_TEXT_PRINT_POS_EN        "Printing..."
 #define UI_TEXT_PRINTING_EN         "Printing"
 #define UI_TEXT_IDLE_EN             "Idle"
@@ -563,17 +570,17 @@
 #if NUM_EXTRUDER == 1
 #define UI_TEXT_EXTR0_OFF_EN        "SwitchOff Ext %B4"
 #else
-#define UI_TEXT_EXTR0_OFF_EN        "SwitchOff Ext1 %B4"
+#define UI_TEXT_EXTR0_OFF_EN        "SwitchOff Ext1%B4"
 #endif
 #define UI_TEXT_EXTR1_OFF_EN        "SwitchOff Ext2%B5"
 #define UI_TEXT_EXTR2_OFF_EN        "SwitchOff Ext3%B6"
-#define UI_TEXT_EXTR0_SELECT_EN     "%X0Select Extr.1"
-#define UI_TEXT_EXTR1_SELECT_EN     "%X1Select Extr.2"
-#define UI_TEXT_EXTR2_SELECT_EN     "%X2Select Extr.3"
+#define UI_TEXT_EXTR0_SELECT_EN     "Select Extr.1 %X0"
+#define UI_TEXT_EXTR1_SELECT_EN     "Select Extr.2 %X1"
+#define UI_TEXT_EXTR2_SELECT_EN     "Select Extr.3 %X2"
 #define UI_TEXT_EXTR_ORIGIN_EN      "Set Origin"
-#define UI_TEXT_PRINT_X_EN "Print X:%ax"
-#define UI_TEXT_PRINT_Y_EN "Print Y:%ay"
-#define UI_TEXT_PRINT_Z_EN "Print Z:%az"
+#define UI_TEXT_PRINT_X_EN "Print X:  %ax"
+#define UI_TEXT_PRINT_Y_EN "Print Y:  %ay"
+#define UI_TEXT_PRINT_Z_EN "Print Z:  %az"
 #define UI_TEXT_PRINT_Z_DELTA_EN "Print:%az"
 #define UI_TEXT_MOVE_X_EN "Move X:   %aX"
 #define UI_TEXT_MOVE_Y_EN "Move Y:   %aY"
@@ -668,11 +675,11 @@
 #define UI_TEXT_EXTR_START_FEED_EN "Start FR: %Xf"
 #define UI_TEXT_EXTR_MAX_FEED_EN "Max FR:   %XF"
 #define UI_TEXT_EXTR_ACCEL_EN "Accel:    %XA"
-#define UI_TEXT_EXTR_WATCH_EN "Stab.Time:%Xw"
+#define UI_TEXT_EXTR_WATCH_EN "Stab.Time: %Xw"
 #define UI_TEXT_EXTR_ADVANCE_L_EN "Advance L.: %Xl"
 #define UI_TEXT_EXTR_ADVANCE_K_EN "Advance Q.: %Xa"
 #define UI_TEXT_EXTR_MANAGER_EN "Ctrl:%Xh"
-#define UI_TEXT_EXTR_PGAIN_EN "PID P:  %Xp"
+#define UI_TEXT_EXTR_PGAIN_EN "PID P:   %Xp"
 #define UI_TEXT_EXTR_DEADTIME_EN "Deadtime:%Xp"
 #define UI_TEXT_EXTR_DMAX_DT_EN "Control PWM:%XM"
 #define UI_TEXT_EXTR_IGAIN_EN "PID I:  %Xi"
@@ -680,8 +687,8 @@
 #define UI_TEXT_EXTR_DMIN_EN "Drive Min:  %Xm"
 #define UI_TEXT_EXTR_DMAX_EN "Drive Max:  %XM"
 #define UI_TEXT_EXTR_PMAX_EN "PID Max:    %XD"
-#define UI_TEXT_STRING_HM_BANGBANG_EN "BangBang"
-#define UI_TEXT_STRING_HM_PID_EN "PID"
+#define UI_TEXT_STRING_HM_BANGBANG_EN "  BangBang"
+#define UI_TEXT_STRING_HM_PID_EN "       PID"
 #define UI_TEXT_STRING_ACTION_EN "Action:%la"
 #define UI_TEXT_HEATING_EXTRUDER_EN "Heating Extruder%Ne"
 #define UI_TEXT_HEATING_BED_EN "Heating Bed"
@@ -709,28 +716,28 @@
 #define UI_TEXT_SET_P3_EN "Set P3"
 #define UI_TEXT_CALCULATE_LEVELING_EN "Calculate Leveling"
 #define UI_TEXT_LEVEL_EN "Level delta"
-#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP_EN "Wait T.:%XT" cDEG "C"
-#define UI_TEXT_EXTR_WAIT_RETRACT_UNITS_EN "Wait U.: %XU mm"
+#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP_EN "Wait T.: %XT" cDEG "C"
+#define UI_TEXT_EXTR_WAIT_RETRACT_UNITS_EN "Wait U.:  %XU mm"
 #define UI_TEXT_SD_REMOVED_EN "SD Card removed"
 #define UI_TEXT_SD_INSERTED_EN "SD Card inserted"
 #define UI_TEXT_PRINTER_READY_EN "Printer ready."
-#define UI_TEXT_PRINTTIME_DAYS_EN " days_EN "
+#define UI_TEXT_PRINTTIME_DAYS_EN " days  "
 #define UI_TEXT_PRINTTIME_HOURS_EN ":"
 #define UI_TEXT_PRINTTIME_MINUTES_EN ""
 #define UI_TEXT_PRINT_TIME_EN "Printing time"
 #define UI_TEXT_PRINT_FILAMENT_EN "Filament printed"
 #define UI_TEXT_PRINTED_EN "printed"
 #define UI_TEXT_POWER_EN "ATX power on/off"
-#define UI_TEXT_STRING_HM_DEADTIME_EN "Dead Time"
-#define UI_TEXT_STRING_HM_SLOWBANG_EN "SlowBang"
+#define UI_TEXT_STRING_HM_DEADTIME_EN " Dead Time"
+#define UI_TEXT_STRING_HM_SLOWBANG_EN "  SlowBang"
 #define UI_TEXT_STOP_PRINT_EN "Stop Print"
-#define UI_TEXT_Z_BABYSTEPPING_EN "Z Babystep.:%oYmm"
+#define UI_TEXT_Z_BABYSTEPPING_EN "Z babyS:%oYmm"
 #define UI_TEXT_CHANGE_FILAMENT_EN "Change filament"
 #define UI_TEXT_WIZ_CH_FILAMENT1_EN "Change filament"
 #define UI_TEXT_WIZ_CH_FILAMENT2_EN "Rotate to move"
 #define UI_TEXT_WIZ_CH_FILAMENT3_EN "filament up/down"
 #define UI_TEXT_CLICK_DONE_EN "Click when done"
-#define UI_TEXT_AUTOLEVEL_ONOFF_EN "Autolevel: %ll"
+#define UI_TEXT_AUTOLEVEL_ONOFF_EN "Autolevel:  %ll"
 #define UI_TEXT_SERVOPOS_EN "Servo pos.: %oS"
 #define UI_TEXT_IGNORE_M106_EN "Ignore M106 cmd %Fi"
 #define UI_TEXT_WIZ_REHEAT1_EN "Click to reheat"
@@ -749,26 +756,26 @@
 #define UI_TEXT_PETTAPE_EN "Green PET tape"
 #define UI_TEXT_GLUESTICK_EN "Glue stick"
 #define UI_TEXT_CUSTOM_EN "Custom"
-#define UI_TEXT_COATING_CUSTOM_EN "Custom:%BCmm"
+#define UI_TEXT_COATING_CUSTOM_EN "Custom: %BCmm"
 #define UI_TEXT_LANGUAGE_EN "Language"
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
-  #define UI_TEXT_MAINPAGE6_1_EN "\xa %ec/%Ec\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_EN "\xa %ec/%Ec\xb0 X:%x0"
 #else
-  #define UI_TEXT_MAINPAGE6_1_EN "\xa %e0/%E0\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_EN "\xa %e0/%E0\xb0 X:%x0"
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
-  #define UI_TEXT_MAINPAGE6_2_EN "\xa %e1/%E1\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_EN "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
-  #define UI_TEXT_MAINPAGE6_2_EN "\xe %eb/%Eb\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_EN "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-  #define UI_TEXT_MAINPAGE6_2_EN "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_EN "             Y:%x1"
 #endif
 #if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
- #define UI_TEXT_MAINPAGE6_3_EN "\xe %eb/%Eb\xb0 Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_EN "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
-  #define UI_TEXT_MAINPAGE6_3_EN "Copies: %ed    Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_EN "Copies: %ed    Z:%x2"
 #else
-  #define UI_TEXT_MAINPAGE6_3_EN "Flow:\xfd %of%%%   Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_EN "Flow:\xfd %of%%%   Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_EN "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_EN "Buf: %oB"
@@ -776,7 +783,7 @@
 #define UI_TEXT_MAINPAGE_TEMP_BED_EN cTEMP "%ec/%Ec" cDEG "B%eB/%Eb" cDEG
 #define UI_TEXT_MAINPAGE_BED_EN "B%eB/%Eb" cDEG
 #define UI_TEXT_MAINPAGE_Z_BUF_EN "Z:%x2  Buf : %oB"
-#define UI_TEXT_MAINPAGE_MUL_EUSAGE_EN "Mul: %om   E:%x4"
+#define UI_TEXT_MAINPAGE_MUL_EUSAGE_EN "Mul: %om%%%  E:%x4"
 #define UI_TEXT_MAINPAGE_XY_EN "X:%x0 Y:%x1"
 #define UI_TEXT_PRINT_TIME_VALUE_EN "%Ut"
 #define UI_TEXT_PRINT_FILAMENT_VALUE_EN "%Uf m"
@@ -801,9 +808,9 @@
 #define UI_TEXT_DITTO_3_EN "%D3 3 copies"
 #define UI_TEXT_ZPROBE_HEIGHT_EN "Z-probe height:%zh"
 #define UI_TEXT_OFFSETS_EN "Set print offsets"
-#define UI_TEXT_X_OFFSET_EN "Set X offset:%T0mm"
-#define UI_TEXT_Y_OFFSET_EN "Set Y offset:%T1mm"
-#define UI_TEXT_Z_OFFSET_EN "Set Z offset:%T2mm"
+#define UI_TEXT_X_OFFSET_EN "X offset:%T0mm"
+#define UI_TEXT_Y_OFFSET_EN "Y offset:%T1mm"
+#define UI_TEXT_Z_OFFSET_EN "Zoffset:%T2mm"
 #define UI_TEXT_LOAD_FILAMENT_EN "Load Filament"
 #define UI_TEXT_UNLOAD_FILAMENT_EN "Unload Filament"
 #if NUM_EXTRUDER == 1
@@ -811,15 +818,15 @@
 #define UI_TEXT_CLEANING_DRIPBOX_EN "Cleaning Dripbox"
 #define UI_TEXT_CLEAN_DRIPBOX_EN "Clean Dripbox"
 #define UI_TEXT_CLEAN_DRIPBOX_3_EN "Dripbox"
-#define UI_TEXT_EXTR_XOFF_EN "Xoffset:%Xx"
-#define UI_TEXT_EXTR_YOFF_EN "Yoffset:%Xy"
+#define UI_TEXT_EXTR_XOFF_EN "Xoffst:%Xxmm"
+#define UI_TEXT_EXTR_YOFF_EN "Yoffst:%Xymm"
 #else
 #define UI_TEXT_FIL_SENSOR_ONOFF_EN "Fil.Sensors:%sf"
 #define UI_TEXT_CLEAN_DRIPBOX_EN "Clean Dripboxes"
 #define UI_TEXT_CLEANING_DRIPBOX_EN "Cleaning Dripboxes"
 #define UI_TEXT_CLEAN_DRIPBOX_3_EN "Dripboxes"
-#define UI_TEXT_EXTR_XOFF_EN "Xoffst:%Xx"
-#define UI_TEXT_EXTR_YOFF_EN "Yoffst:%Xy"
+#define UI_TEXT_EXTR_XOFF_EN "Xoffst:%Xxmm"
+#define UI_TEXT_EXTR_YOFF_EN "Yoffst:%Xymm"
 #endif
 #define UI_TEXT_LOAD_RIGHT_FILAMENT_EN "Load Right \005"
 #define UI_TEXT_UNLOAD_RIGHT_FILAMENT_EN "Unload Right \005"
@@ -903,7 +910,7 @@
 #define UI_TEXT_LOAD_UNLOAD_EN "Load/Unload"
 #define UI_TEXT_BED_EN "Bed"
 #define UI_TEXT_BED_OFF_EN "SwitchOff Bed %B7"
-#define UI_TEXT_LIGHT_OFF_AFTER_EN "Light AutoOff_EN "
+#define UI_TEXT_LIGHT_OFF_AFTER_EN "Light AutoOff"
 #define UI_TEXT_LIGHT_OFF_AFTER2A_EN "Dis. After:%il"
 #define UI_TEXT_LIGHT_OFF_AFTER2B_EN "[min] 0=Off"
 #define UI_TEXT_WARNING_POS_X_UNKNOWN_EN "Real X unknown !"
@@ -925,15 +932,15 @@
 #define UI_TEXT_CLEAN1_EN "Clean nozzle and"
 #define UI_TEXT_CLEAN2_EN "plates first ?"
 #define UI_TEXT_DISPLAY_MODE_EN "Mode:%Md"
-#define UI_TEXT_EASY_MODE_EN "Easy"
-#define UI_TEXT_ADVANCED_MODE_EN "Advanced"
+#define UI_TEXT_EASY_MODE_EN "      Easy"
+#define UI_TEXT_ADVANCED_MODE_EN "  Advanced"
 #define UI_TEXT_POWER_SAVE_EN "Powersave:%Ps"
 #define UI_TEXT_BADGE_LIGHT_ONOFF_EN "Badge light:%lb"
-#define UI_TEXT_SOUND_ONOF_EN "Sound:  %so"
-#define UI_TEXT_YES_SELECTED_EN "  [Yes]    No_EN "
-#define UI_TEXT_NO_SELECTED_EN "   Yes    [No]_EN "
+#define UI_TEXT_SOUND_ONOF_EN "Sound:      %so"
+#define UI_TEXT_YES_SELECTED_EN "  [Yes]    No"
+#define UI_TEXT_NO_SELECTED_EN "   Yes    [No] "
 #define UI_TEXT_PLEASE_CONFIRM_EN "Please confirm"
-#define UI_TEXT_CANCEL_ACTION_EN "Cancel:_EN "
+#define UI_TEXT_CANCEL_ACTION_EN "Cancel:"
 #define UI_TEXT_CONTINUE_ACTION_EN "Continue"
 #define UI_TEXT_CANCELED_EN "Action canceled!"
 #define UI_TEXT_CONFIRMED_EN "Action confirmed!"
@@ -955,6 +962,45 @@
 #define UI_TEXT_MAIN_LINE2_EN "\007%eB/%Eb"
 #endif
 #define UI_TEXT_AUTOLEVEL_MATRIX_EN "Autolevel Matrix"
+#if HAVE_HEATED_BED
+///Davinci Specific, page 1-2-3, they are different if you have 1 or 2 extruders, and if you are in Easy Mode or Advanced Mode
+#if NUM_EXTRUDER == 1
+#define UI_TEXT_P1_L1_EN "\005%ec/%Ec\007%eB/%Eb"
+#define UI_TEXT_P1_L2_EN "Z:%x2"
+#define UI_TEXT_P1_L3_EN "Mul:%om%%%Buf:%oB"
+
+#define UI_TEXT_P1_L1_EASY_EN "\005%ec/%Ec\002C"
+#define UI_TEXT_P1_L2_EASY_EN "\007%eB/%Eb\002C"
+#define UI_TEXT_P1_L3_EASY_EN "Z:%x2"
+
+#else
+#define UI_TEXT_P1_L1_EN "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_EN "\007%eB/%EbMul:%om%%%"
+#define UI_TEXT_P1_L3_EN "Z:%x2"
+
+#define UI_TEXT_P1_L1_EASY_EN "\0051 %e0/%E0\002C"
+#define UI_TEXT_P1_L2_EASY_EN "\0052 %e1/%E1\002C"
+#define UI_TEXT_P1_L3_EASY_EN "\007 %eB/%Eb\002C"
+#endif
+#else
+#if NUM_EXTRUDER == 1
+#define UI_TEXT_P1_L1_EN "\005%ec/%Ec\002"
+#define UI_TEXT_P1_L2_EN "Z:%x2"
+#define UI_TEXT_P1_L3_EN "Buffer:%oB"
+
+#define UI_TEXT_P1_L1_EASY_EN "\005%ec/%Ec\002"
+#define UI_TEXT_P1_L2_EASY_EN "Z:%x2"
+#define UI_TEXT_P1_L3_EASY_EN "Buffer:%oB"
+#else
+#define UI_TEXT_P1_L1_EN "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_EN "Z:%x2"
+#define UI_TEXT_P1_L3_EN "Buffer:%oB"
+
+#define UI_TEXT_P1_L1_EASY_EN "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_EASY_EN "Z:%x2"
+#define UI_TEXT_P1_L3_EASY_EN "Buffer:%oB"
+#endif
+#endif
 
 
 // *************** German translation ****************
@@ -1195,23 +1241,23 @@
 #define UI_TEXT_COATING_CUSTOM_DE "Indiv.:%BCmm"
 #define UI_TEXT_LANGUAGE_DE "Sprache"
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
-  #define UI_TEXT_MAINPAGE6_1_DE "\xa %ec/%Ec\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_DE "\xa %ec/%Ec\xb0 X:%x0"
 #else
-  #define UI_TEXT_MAINPAGE6_1_DE "\xa %e0/%E0\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_DE "\xa %e0/%E0\xb0 X:%x0"
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
-  #define UI_TEXT_MAINPAGE6_2_DE "\xa %e1/%E1\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_DE "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
-  #define UI_TEXT_MAINPAGE6_2_DE "\xe %eb/%Eb\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_DE "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-  #define UI_TEXT_MAINPAGE6_2_DE "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_DE "             Y:%x1"
 #endif
 #if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
- #define UI_TEXT_MAINPAGE6_3_DE "\xe %eb/%Eb\xb0 Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_DE "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
-  #define UI_TEXT_MAINPAGE6_3_DE "Kopien: %ed    Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_DE "Kopien: %ed    Z:%x2"
 #else
-  #define UI_TEXT_MAINPAGE6_3_DE "Fluss:\xfd %of%%%  Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_DE "Fluss:\xfd %of%%%  Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_DE "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_DE "Puf: %oB"
@@ -1398,6 +1444,46 @@
 #define UI_TEXT_MAIN_LINE2_DE   "\007%eB/%Eb"
 #endif
 #define UI_TEXT_AUTOLEVEL_MATRIX_DE   "Autolevel Matrix"
+#if HAVE_HEATED_BED
+///Davinci Specific, page 1-2-3, they are different if you have 1 or 2 extruders, and if you are in Easy Mode or Advanced Mode
+#if NUM_EXTRUDER == 1
+#define UI_TEXT_P1_L1_DE "\005%ec/%Ec\007%eB/%Eb"
+#define UI_TEXT_P1_L2_DE "Z:%x2"
+#define UI_TEXT_P1_L3_DE "Mul:%om Buf:%oB"
+
+#define UI_TEXT_P1_L1_EASY_DE "\005%ec/%Ec\002C"
+#define UI_TEXT_P1_L2_EASY_DE "\007%eB/%Eb\002C"
+#define UI_TEXT_P1_L3_EASY_DE "Z:%x2"
+
+#else
+#define UI_TEXT_P1_L1_DE "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_DE "\007%eB/%EbMul:%om%%%"
+#define UI_TEXT_P1_L3_DE "Z:%x2"
+
+#define UI_TEXT_P1_L1_EASY_DE "\0051 %e0/%E0\002C"
+#define UI_TEXT_P1_L2_EASY_DE "\0052 %e1/%E1\002C"
+#define UI_TEXT_P1_L3_EASY_DE "\007 %eB/%Eb\002C"
+#endif
+#else
+#if NUM_EXTRUDER == 1
+#define UI_TEXT_P1_L1_DE "\005%ec/%Ec\002"
+#define UI_TEXT_P1_L2_DE "Z:%x2"
+#define UI_TEXT_P1_L3_DE "Buffer:%oB"
+
+#define UI_TEXT_P1_L1_EASY_DE "\005%ec/%Ec\002"
+#define UI_TEXT_P1_L2_EASY_DE "Z:%x2"
+#define UI_TEXT_P1_L3_EASY_DE "Buffer:%oB"
+#else
+#define UI_TEXT_P1_L1_DE "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_DE "Z:%x2"
+#define UI_TEXT_P1_L3_DE "Buffer:%oB"
+
+#define UI_TEXT_P1_L1_EASY_DE "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_EASY_DE "Z:%x2"
+#define UI_TEXT_P1_L3_EASY_DE "Buffer:%oB"
+#endif
+#endif
+
 
 
 
@@ -1639,23 +1725,23 @@
 #define UI_TEXT_COATING_CUSTOM_NL "Custom:%BCmm"
 #define UI_TEXT_LANGUAGE_NL "Taal"
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
-  #define UI_TEXT_MAINPAGE6_1_NL "\xa %ec/%Ec\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_NL "\xa %ec/%Ec\xb0 X:%x0"
 #else
-  #define UI_TEXT_MAINPAGE6_1_NL "\xa %e0/%E0\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_NL "\xa %e0/%E0\xb0 X:%x0"
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
-  #define UI_TEXT_MAINPAGE6_2_NL "\xa %e1/%E1\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_NL "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
-  #define UI_TEXT_MAINPAGE6_2_NL "\xe %eb/%Eb\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_NL "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-  #define UI_TEXT_MAINPAGE6_2_NL "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_NL "             Y:%x1"
 #endif
 #if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
- #define UI_TEXT_MAINPAGE6_3_NL "\xe %eb/%Eb\xb0 Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_NL "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
-  #define UI_TEXT_MAINPAGE6_3_NL "Kopieen: %ed   Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_NL "Kopieen: %ed   Z:%x2"
 #else
-  #define UI_TEXT_MAINPAGE6_3_NL "Flow:\xfd %of%%%   Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_NL "Flow:\xfd %of%%%   Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_NL "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_NL "Buf: %oB"
@@ -1842,6 +1928,46 @@
 #define UI_TEXT_MAIN_LINE2_NL "\007%eB/%Eb"
 #endif
 #define UI_TEXT_AUTOLEVEL_MATRIX_NL "Autolevel Matrix"
+#if HAVE_HEATED_BED
+///Davinci Specific, page 1-2-3, they are different if you have 1 or 2 extruders, and if you are in Easy Mode or Advanced Mode
+#if NUM_EXTRUDER == 1
+#define UI_TEXT_P1_L1_NL "\005%ec/%Ec\007%eB/%Eb"
+#define UI_TEXT_P1_L2_NL "Z:%x2"
+#define UI_TEXT_P1_L3_NL "Mul:%om Buf:%oB"
+
+#define UI_TEXT_P1_L1_EASY_NL "\005%ec/%Ec\002C"
+#define UI_TEXT_P1_L2_EASY_NL "\007%eB/%Eb\002C"
+#define UI_TEXT_P1_L3_EASY_NL "Z:%x2"
+
+#else
+#define UI_TEXT_P1_L1_NL "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_NL "\007%eB/%EbMul:%om%%%"
+#define UI_TEXT_P1_L3_NL "Z:%x2"
+
+#define UI_TEXT_P1_L1_EASY_NL "\0051 %e0/%E0\002C"
+#define UI_TEXT_P1_L2_EASY_NL "\0052 %e1/%E1\002C"
+#define UI_TEXT_P1_L3_EASY_NL "\007 %eB/%Eb\002C"
+#endif
+#else
+#if NUM_EXTRUDER == 1
+#define UI_TEXT_P1_L1_NL "\005%ec/%Ec\002"
+#define UI_TEXT_P1_L2_NL "Z:%x2"
+#define UI_TEXT_P1_L3_NL "Buffer:%oB"
+
+#define UI_TEXT_P1_L1_EASY_NL "\005%ec/%Ec\002"
+#define UI_TEXT_P1_L2_EASY_NL "Z:%x2"
+#define UI_TEXT_P1_L3_EASY_NL "Buffer:%oB"
+#else
+#define UI_TEXT_P1_L1_NL "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_NL "Z:%x2"
+#define UI_TEXT_P1_L3_NL "Buffer:%oB"
+
+#define UI_TEXT_P1_L1_EASY_NL "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_EASY_NL "Z:%x2"
+#define UI_TEXT_P1_L3_EASY_NL "Buffer:%oB"
+#endif
+#endif
+
 
 
 
@@ -2083,23 +2209,23 @@
 #define UI_TEXT_COATING_CUSTOM_PT "Person.:%oCmm"
 #define UI_TEXT_LANGUAGE_PT "Idioma"
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
-  #define UI_TEXT_MAINPAGE6_1_PT "\xa %ec/%Ec\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_PT "\xa %ec/%Ec\xb0 X:%x0"
 #else
-  #define UI_TEXT_MAINPAGE6_1_PT "\xa %e0/%E0\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_PT "\xa %e0/%E0\xb0 X:%x0"
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
-  #define UI_TEXT_MAINPAGE6_2_PT "\xa %e1/%E1\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_PT "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
-  #define UI_TEXT_MAINPAGE6_2_PT "\xe %eb/%Eb\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_PT "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-  #define UI_TEXT_MAINPAGE6_2_PT "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_PT "             Y:%x1"
 #endif
 #if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
- #define UI_TEXT_MAINPAGE6_3_PT "\xe %eb/%Eb\xb0 Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_PT "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
-  #define UI_TEXT_MAINPAGE6_3_PT "Copias: %ed    Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_PT "Copias: %ed    Z:%x2"
 #else
-  #define UI_TEXT_MAINPAGE6_3_PT "Fluxo:\xfd %of%%%  Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_PT "Fluxo:\xfd %of%%%  Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_PT "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_PT "Buf: %oB"
@@ -2286,6 +2412,46 @@
 #define UI_TEXT_MAIN_LINE2_PT "\007%eB/%Eb"
 #endif
 #define UI_TEXT_AUTOLEVEL_MATRIX_PT "Autolevel Matrix"
+#if HAVE_HEATED_BED
+///Davinci Specific, page 1-2-3, they are different if you have 1 or 2 extruders, and if you are in Easy Mode or Advanced Mode
+#if NUM_EXTRUDER == 1
+#define UI_TEXT_P1_L1_PT "\005%ec/%Ec\007%eB/%Eb"
+#define UI_TEXT_P1_L2_PT "Z:%x2"
+#define UI_TEXT_P1_L3_PT "Mul:%om Buf:%oB"
+
+#define UI_TEXT_P1_L1_EASY_PT "\005%ec/%Ec\002C"
+#define UI_TEXT_P1_L2_EASY_PT "\007%eB/%Eb\002C"
+#define UI_TEXT_P1_L3_EASY_PT "Z:%x2"
+
+#else
+#define UI_TEXT_P1_L1_PT "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_PT "\007%eB/%EbMul:%om%%%"
+#define UI_TEXT_P1_L3_PT "Z:%x2"
+
+#define UI_TEXT_P1_L1_EASY_PT "\0051 %e0/%E0\002C"
+#define UI_TEXT_P1_L2_EASY_PT "\0052 %e1/%E1\002C"
+#define UI_TEXT_P1_L3_EASY_PT "\007 %eB/%Eb\002C"
+#endif
+#else
+#if NUM_EXTRUDER == 1
+#define UI_TEXT_P1_L1_PT "\005%ec/%Ec\002"
+#define UI_TEXT_P1_L2_PT "Z:%x2"
+#define UI_TEXT_P1_L3_PT "Buffer:%oB"
+
+#define UI_TEXT_P1_L1_EASY_PT "\005%ec/%Ec\002"
+#define UI_TEXT_P1_L2_EASY_PT "Z:%x2"
+#define UI_TEXT_P1_L3_EASY_PT "Buffer:%oB"
+#else
+#define UI_TEXT_P1_L1_PT "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_PT "Z:%x2"
+#define UI_TEXT_P1_L3_PT "Buffer:%oB"
+
+#define UI_TEXT_P1_L1_EASY_PT "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_EASY_PT "Z:%x2"
+#define UI_TEXT_P1_L3_EASY_PT "Buffer:%oB"
+#endif
+#endif
+
 
 
 
@@ -2315,7 +2481,7 @@
 #define UI_TEXT_HOME_Y_IT           "Origine Y"
 #define UI_TEXT_HOME_Z_IT           "Origine Z"
 #define UI_TEXT_PREHEAT_PLA_IT      "Presicaldamento PLA %B1"
-#define UI_TEXT_PREHEAT_ABS_IT      "Presicaldamento ABS %B2"
+#define UI_TEXT_PREHEAT_ABS_IT      "Presicaldamento ABS%B2"
 #define UI_TEXT_LIGHTS_ONOFF_IT     "Luci:%lo"
 #define UI_TEXT_COOLDOWN_IT         "Raffreddamento"
 #define UI_TEXT_SET_TO_ORIGIN_IT    "Imposta come Origine"
@@ -2527,23 +2693,23 @@
 #define UI_TEXT_COATING_CUSTOM_IT "Usanza:%oCmm"
 #define UI_TEXT_LANGUAGE_IT "Lingua"
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
-  #define UI_TEXT_MAINPAGE6_1_IT "\xa %ec/%Ec\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_IT "\xa %ec/%Ec\xb0 X:%x0"
 #else
-  #define UI_TEXT_MAINPAGE6_1_IT "\xa %e0/%E0\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_IT "\xa %e0/%E0\xb0 X:%x0"
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
-  #define UI_TEXT_MAINPAGE6_2_IT "\xa %e1/%E1\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_IT "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
-  #define UI_TEXT_MAINPAGE6_2_IT "\xe %eb/%Eb\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_IT "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-  #define UI_TEXT_MAINPAGE6_2_IT "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_IT "             Y:%x1"
 #endif
 #if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
- #define UI_TEXT_MAINPAGE6_3_IT "\xe %eb/%Eb\xb0 Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_IT "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
-  #define UI_TEXT_MAINPAGE6_3_IT "Copie: %ed     Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_IT "Copie: %ed     Z:%x2"
 #else
-  #define UI_TEXT_MAINPAGE6_3_IT "Flusso:\xfd %of%%% Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_IT "Flusso:\xfd %of%%% Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_IT "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_IT "Buf: %oB"
@@ -2730,6 +2896,46 @@
 #define UI_TEXT_MAIN_LINE2_IT   "\007%eB/%Eb"
 #endif
 #define UI_TEXT_AUTOLEVEL_MATRIX_IT   "Autolevel Matrix"
+#if HAVE_HEATED_BED
+///Davinci Specific, page 1-2-3, they are different if you have 1 or 2 extruders, and if you are in Easy Mode or Advanced Mode
+#if NUM_EXTRUDER == 1
+#define UI_TEXT_P1_L1_IT "\005%ec/%Ec\007%eB/%Eb"
+#define UI_TEXT_P1_L2_IT "Z:%x2"
+#define UI_TEXT_P1_L3_IT "Mul:%om Buf:%oB"
+
+#define UI_TEXT_P1_L1_EASY_IT "\005%ec/%Ec\002C"
+#define UI_TEXT_P1_L2_EASY_IT "\007%eB/%Eb\002C"
+#define UI_TEXT_P1_L3_EASY_IT "Z:%x2"
+
+#else
+#define UI_TEXT_P1_L1_IT "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_IT "\007%eB/%EbMul:%om%%%"
+#define UI_TEXT_P1_L3_IT "Z:%x2"
+
+#define UI_TEXT_P1_L1_EASY_IT "\0051 %e0/%E0\002C"
+#define UI_TEXT_P1_L2_EASY_IT "\0052 %e1/%E1\002C"
+#define UI_TEXT_P1_L3_EASY_IT "\007 %eB/%Eb\002C"
+#endif
+#else
+#if NUM_EXTRUDER == 1
+#define UI_TEXT_P1_L1_IT "\005%ec/%Ec\002"
+#define UI_TEXT_P1_L2_IT "Z:%x2"
+#define UI_TEXT_P1_L3_IT "Buffer:%oB"
+
+#define UI_TEXT_P1_L1_EASY_IT "\005%ec/%Ec\002"
+#define UI_TEXT_P1_L2_EASY_IT "Z:%x2"
+#define UI_TEXT_P1_L3_EASY_IT "Buffer:%oB"
+#else
+#define UI_TEXT_P1_L1_IT "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_IT "Z:%x2"
+#define UI_TEXT_P1_L3_IT "Buffer:%oB"
+
+#define UI_TEXT_P1_L1_EASY_IT "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_EASY_IT "Z:%x2"
+#define UI_TEXT_P1_L3_EASY_IT "Buffer:%oB"
+#endif
+#endif
+
 
 
 
@@ -2971,23 +3177,23 @@
 #define UI_TEXT_COATING_CUSTOM_ES "Especial:%BCmm"
 #define UI_TEXT_LANGUAGE_ES "Idioma"
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
-  #define UI_TEXT_MAINPAGE6_1_ES "\xa %ec/%Ec\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_ES "\xa %ec/%Ec\xb0 X:%x0"
 #else
-  #define UI_TEXT_MAINPAGE6_1_ES "\xa %e0/%E0\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_ES "\xa %e0/%E0\xb0 X:%x0"
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
-  #define UI_TEXT_MAINPAGE6_2_ES "\xa %e1/%E1\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_ES "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
-  #define UI_TEXT_MAINPAGE6_2_ES "\xe %eb/%Eb\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_ES "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-  #define UI_TEXT_MAINPAGE6_2_ES "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_ES "             Y:%x1"
 #endif
 #if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
- #define UI_TEXT_MAINPAGE6_3_ES "\xe %eb/%Eb\xb0 Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_ES "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
-  #define UI_TEXT_MAINPAGE6_3_ES "Copias: %ed    Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_ES "Copias: %ed    Z:%x2"
 #else
-  #define UI_TEXT_MAINPAGE6_3_ES "Flujo:\xfd %of%%%  Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_ES "Flujo:\xfd %of%%%  Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_ES "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_ES "Buf: %oB"
@@ -3174,6 +3380,46 @@
 #define UI_TEXT_MAIN_LINE2_ES   "\007%eB/%Eb"
 #endif
 #define UI_TEXT_AUTOLEVEL_MATRIX_ES   "Autolevel Matrix"
+#if HAVE_HEATED_BED
+///Davinci Specific, page 1-2-3, they are different if you have 1 or 2 extruders, and if you are in Easy Mode or Advanced Mode
+#if NUM_EXTRUDER == 1
+#define UI_TEXT_P1_L1_ES "\005%ec/%Ec\007%eB/%Eb"
+#define UI_TEXT_P1_L2_ES "Z:%x2"
+#define UI_TEXT_P1_L3_ES "Mul:%om Buf:%oB"
+
+#define UI_TEXT_P1_L1_EASY_ES "\005%ec/%Ec\002C"
+#define UI_TEXT_P1_L2_EASY_ES "\007%eB/%Eb\002C"
+#define UI_TEXT_P1_L3_EASY_ES "Z:%x2"
+
+#else
+#define UI_TEXT_P1_L1_ES "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_ES "\007%eB/%EbMul:%om%%%"
+#define UI_TEXT_P1_L3_ES "Z:%x2"
+
+#define UI_TEXT_P1_L1_EASY_ES "\0051 %e0/%E0\002C"
+#define UI_TEXT_P1_L2_EASY_ES "\0052 %e1/%E1\002C"
+#define UI_TEXT_P1_L3_EASY_ES "\007 %eB/%Eb\002C"
+#endif
+#else
+#if NUM_EXTRUDER == 1
+#define UI_TEXT_P1_L1_ES "\005%ec/%Ec\002"
+#define UI_TEXT_P1_L2_ES "Z:%x2"
+#define UI_TEXT_P1_L3_ES "Buffer:%oB"
+
+#define UI_TEXT_P1_L1_EASY_ES "\005%ec/%Ec\002"
+#define UI_TEXT_P1_L2_EASY_ES "Z:%x2"
+#define UI_TEXT_P1_L3_EASY_ES "Buffer:%oB"
+#else
+#define UI_TEXT_P1_L1_ES "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_ES "Z:%x2"
+#define UI_TEXT_P1_L3_ES "Buffer:%oB"
+
+#define UI_TEXT_P1_L1_EASY_ES "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_EASY_ES "Z:%x2"
+#define UI_TEXT_P1_L3_EASY_ES "Buffer:%oB"
+#endif
+#endif
+
 
 
 
@@ -3416,23 +3662,23 @@
 #define UI_TEXT_COATING_CUSTOM_SE "Anpassad:%BCmm"
 #define UI_TEXT_LANGUAGE_SE "Sprak"
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
-  #define UI_TEXT_MAINPAGE6_1_SE "\xa %ec/%Ec\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_SE "\xa %ec/%Ec\xb0 X:%x0"
 #else
-  #define UI_TEXT_MAINPAGE6_1_SE "\xa %e0/%E0\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_SE "\xa %e0/%E0\xb0 X:%x0"
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
-  #define UI_TEXT_MAINPAGE6_2_SE "\xa %e1/%E1\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_SE "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
-  #define UI_TEXT_MAINPAGE6_2_SE "\xe %eb/%Eb\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_SE "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-  #define UI_TEXT_MAINPAGE6_2_SE "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_SE "             Y:%x1"
 #endif
 #if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
- #define UI_TEXT_MAINPAGE6_3_SE "\xe %eb/%Eb\xb0 Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_SE "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
-  #define UI_TEXT_MAINPAGE6_3_SE "Kopior: %ed    Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_SE "Kopior: %ed    Z:%x2"
 #else
-  #define UI_TEXT_MAINPAGE6_3_SE "Fl" STR_ouml "de:\xfd %of%%%  Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_SE "Fl" STR_ouml "de:\xfd %of%%%  Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_SE "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_SE "Buf: %oB"
@@ -3619,6 +3865,46 @@
 #define UI_TEXT_MAIN_LINE2_SE   "\007%eB/%Eb"
 #endif
 #define UI_TEXT_AUTOLEVEL_MATRIX_SE   "Autolevel Matrix"
+#if HAVE_HEATED_BED
+///Davinci Specific, page 1-2-3, they are different if you have 1 or 2 extruders, and if you are in Easy Mode or Advanced Mode
+#if NUM_EXTRUDER == 1
+#define UI_TEXT_P1_L1_SE "\005%ec/%Ec\007%eB/%Eb"
+#define UI_TEXT_P1_L2_SE "Z:%x2"
+#define UI_TEXT_P1_L3_SE "Mul:%om Buf:%oB"
+
+#define UI_TEXT_P1_L1_EASY_SE "\005%ec/%Ec\002C"
+#define UI_TEXT_P1_L2_EASY_SE "\007%eB/%Eb\002C"
+#define UI_TEXT_P1_L3_EASY_SE "Z:%x2"
+
+#else
+#define UI_TEXT_P1_L1_SE "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_SE "\007%eB/%EbMul:%om%%%"
+#define UI_TEXT_P1_L3_SE "Z:%x2"
+
+#define UI_TEXT_P1_L1_EASY_SE "\0051 %e0/%E0\002C"
+#define UI_TEXT_P1_L2_EASY_SE "\0052 %e1/%E1\002C"
+#define UI_TEXT_P1_L3_EASY_SE "\007 %eB/%Eb\002C"
+#endif
+#else
+#if NUM_EXTRUDER == 1
+#define UI_TEXT_P1_L1_EN "\005%ec/%Ec\002"
+#define UI_TEXT_P1_L2_EN "Z:%x2"
+#define UI_TEXT_P1_L3_EN "Buffer:%oB"
+
+#define UI_TEXT_P1_L1_EASY_EN "\005%ec/%Ec\002"
+#define UI_TEXT_P1_L2_EASY_EN "Z:%x2"
+#define UI_TEXT_P1_L3_EASY_EN "Buffer:%oB"
+#else
+#define UI_TEXT_P1_L1_EN "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_EN "Z:%x2"
+#define UI_TEXT_P1_L3_EN "Buffer:%oB"
+
+#define UI_TEXT_P1_L1_EASY_EN "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_EASY_EN "Z:%x2"
+#define UI_TEXT_P1_L3_EASY_EN "Buffer:%oB"
+#endif
+#endif
+
 
 
 
@@ -3643,10 +3929,10 @@
 #define UI_TEXT_SD_CARD_FR          "Carte SD"
 #define UI_TEXT_DEBUGGING_FR        "Deboguer"
 #define UI_TEXT_HOME_DELTA_FR       "Init. orig. Delta"
-#define UI_TEXT_HOME_ALL_FR         "Init. tout"
-#define UI_TEXT_HOME_X_FR           "Init. orig. X"
-#define UI_TEXT_HOME_Y_FR           "Init. orig. Y"
-#define UI_TEXT_HOME_Z_FR           "Init. orig. Z"
+#define UI_TEXT_HOME_ALL_FR         "Initialise axes"
+#define UI_TEXT_HOME_X_FR           "Initialise X"
+#define UI_TEXT_HOME_Y_FR           "Initialise Y"
+#define UI_TEXT_HOME_Z_FR           "Initialise Z"
 #define UI_TEXT_PREHEAT_PLA_FR      "Prechauf. PLA %B1"
 #define UI_TEXT_PREHEAT_ABS_FR      "Prechauf. ABS %B2"
 #define UI_TEXT_LIGHTS_ONOFF_FR     "Eclairage : %lo"
@@ -3687,18 +3973,18 @@
 #define UI_TEXT_MOVE_Y_FR           "Deplac. Y:%aY"
 #define UI_TEXT_MOVE_Z_FR           "Deplac. Z:%aZ"
 #define UI_TEXT_MOVE_Z_DELTA_FR     "Deplac.:%aZ"
-#define UI_TEXT_JERK_FR             "Jerk:    %aj"
-#define UI_TEXT_ZJERK_FR            "Z-Jerk:    %aJ"
+#define UI_TEXT_JERK_FR             "Jerk:     %aj"
+#define UI_TEXT_ZJERK_FR            "Z-Jerk:   %aJ"
 #define UI_TEXT_ACCELERATION_FR     "Acceleration"
 #define UI_TEXT_STORE_TO_EEPROM_FR  "Enreg. \176 EEPROM"
 #define UI_TEXT_LOAD_EEPROM_FR       "Charg. \177 EEPROM"
-#define UI_TEXT_DBG_ECHO_FR         "Echo   :%do"
-#define UI_TEXT_DBG_INFO_FR         "Info   :%di"
-#define UI_TEXT_DBG_ERROR_FR        "Erreurs :%de"
-#define UI_TEXT_DBG_DRYRUN_FR       "Sans filam.::%dd"
+#define UI_TEXT_DBG_ECHO_FR         "Echo       :%do"
+#define UI_TEXT_DBG_INFO_FR         "Information:%di"
+#define UI_TEXT_DBG_ERROR_FR        "Erreur :    %de"
+#define UI_TEXT_DBG_DRYRUN_FR       "Mode test:  %dd"
 #define UI_TEXT_OPS_OFF_FR          "%O0 OPS Off"
-#define UI_TEXT_OPS_CLASSIC_FR      "%O1 OPS Classiq."
-#define UI_TEXT_OPS_FAST_FR         "%O2 OPS Rapide"
+#define UI_TEXT_OPS_CLASSIC_FR      "%O1 OPS classiq."
+#define UI_TEXT_OPS_FAST_FR         "%O2 OPS rapide"
 #define UI_TEXT_OPS_RETRACT_FR      "Retract. :%Or"
 #define UI_TEXT_OPS_BACKSLASH_FR    "Backsl. :%Ob"
 #define UI_TEXT_OPS_MINDIST_FR      "Min.dist:%Od"
@@ -3711,13 +3997,13 @@
 #define UI_TEXT_MOUNT_CARD_FR       "Inserer carte"
 #define UI_TEXT_DELETE_FILE_FR      "Supp. fichier"
 #define UI_TEXT_FEEDRATE_FR         "Vitesse"
-#define UI_TEXT_FEED_MAX_X_FR       "Max X:%fx"
-#define UI_TEXT_FEED_MAX_Y_FR       "Max Y:%fy"
-#define UI_TEXT_FEED_MAX_Z_FR       "Max Z:%fz"
+#define UI_TEXT_FEED_MAX_X_FR       "Max X:    %fx"
+#define UI_TEXT_FEED_MAX_Y_FR       "Max Y:    %fy"
+#define UI_TEXT_FEED_MAX_Z_FR       "Max Z:    %fz"
 #define UI_TEXT_FEED_MAX_Z_DELTA_FR "Max:%fz"
-#define UI_TEXT_FEED_HOME_X_FR      "Init. X:%fX"
-#define UI_TEXT_FEED_HOME_Y_FR      "Init. Y:%fY"
-#define UI_TEXT_FEED_HOME_Z_FR      "Init. Z:%fZ"
+#define UI_TEXT_FEED_HOME_X_FR      "Init. X:  %fX"
+#define UI_TEXT_FEED_HOME_Y_FR      "Init. Y:  %fY"
+#define UI_TEXT_FEED_HOME_Z_FR      "Init. Z:  %fZ"
 #define UI_TEXT_FEED_HOME_Z_DELTA_FR "Init.:%fZ"
 #define UI_TEXT_ACTION_XPOSITION4A_FR "X:%x0 mm"
 #define UI_TEXT_ACTION_XPOSITION4B_FR "Min butee:%sx"
@@ -3765,31 +4051,31 @@
 #define UI_TEXT_FAN_75_FR            "Ventil. 75%%%"
 #define UI_TEXT_FAN_FULL_FR          "Ventil. Max"
 #define UI_TEXT_STEPPER_INACTIVE_FR  "Arret moteurs"
-#define UI_TEXT_STEPPER_INACTIVE2A_FR "Des. apres: %is"
-#define UI_TEXT_STEPPER_INACTIVE2B_FR "[min] 0=Off"
-#define UI_TEXT_POWER_INACTIVE_FR    "Arret alim."
-#define UI_TEXT_POWER_INACTIVE2A_FR   "Des. apres: %ip"
-#define UI_TEXT_POWER_INACTIVE2B_FR   "[min] 0=Off"
+#define UI_TEXT_STEPPER_INACTIVE2A_FR "Arret apres: %is"
+#define UI_TEXT_STEPPER_INACTIVE2B_FR "[min] 0=Non"
+#define UI_TEXT_POWER_INACTIVE_FR    "Arret total"
+#define UI_TEXT_POWER_INACTIVE2A_FR   "Arret apres: %ip"
+#define UI_TEXT_POWER_INACTIVE2B_FR    "[min] 0=Non"
 #define UI_TEXT_GENERAL_FR           "General"
 #define UI_TEXT_BAUDRATE_FR          "Baudrate:%oc"
-#define UI_TEXT_EXTR_STEPS_FR        "Pas/MM:%Se"
-#define UI_TEXT_EXTR_START_FEED_FR   "Start FR:%Xf"
-#define UI_TEXT_EXTR_MAX_FEED_FR     "Max FR:%XF"
-#define UI_TEXT_EXTR_ACCEL_FR        "Accel:%XA"
+#define UI_TEXT_EXTR_STEPS_FR        "Pas/mm:   %Se"
+#define UI_TEXT_EXTR_START_FEED_FR   "Debit min:%Xf"
+#define UI_TEXT_EXTR_MAX_FEED_FR     "Debit max:%XF"
+#define UI_TEXT_EXTR_ACCEL_FR        "Accel:    %XA"
 #define UI_TEXT_EXTR_WATCH_FR        "Stab.Temps:%Xw"
-#define UI_TEXT_EXTR_ADVANCE_L_FR    "Avance L.: %Xl"
-#define UI_TEXT_EXTR_ADVANCE_K_FR    "Avance Q.: %Xa"
+#define UI_TEXT_EXTR_ADVANCE_L_FR    "Avance L.:  %Xl"
+#define UI_TEXT_EXTR_ADVANCE_K_FR    "Avance Q.:%Xa"
 #define UI_TEXT_EXTR_MANAGER_FR      "Controle:%Xh"
-#define UI_TEXT_EXTR_PGAIN_FR        "PID P:%Xp"
-#define UI_TEXT_EXTR_DEADTIME_FR     "Temps Mort:%Xp"
-#define UI_TEXT_EXTR_DMAX_DT_FR      "Controle PWM:%XM"
-#define UI_TEXT_EXTR_IGAIN_FR        "PID I:%Xi"
-#define UI_TEXT_EXTR_DGAIN_FR        "PID D:%Xd"
+#define UI_TEXT_EXTR_PGAIN_FR        "PID P:  %Xp"
+#define UI_TEXT_EXTR_DEADTIME_FR     "T. mort: %Xp"
+#define UI_TEXT_EXTR_DMAX_DT_FR      "ControlePWM:%XM"
+#define UI_TEXT_EXTR_IGAIN_FR        "PID I:  %Xi"
+#define UI_TEXT_EXTR_DGAIN_FR        "PID D:  %Xd"
 #define UI_TEXT_EXTR_DMIN_FR         "Drive Min:%Xm"
 #define UI_TEXT_EXTR_DMAX_FR         "Drive Max:%XM"
-#define UI_TEXT_EXTR_PMAX_FR         "PID Max:%XD"
-#define UI_TEXT_STRING_HM_BANGBANG_FR "BangBang"
-#define UI_TEXT_STRING_HM_PID_FR     "PID"
+#define UI_TEXT_EXTR_PMAX_FR         "PID Max:    %XD"
+#define UI_TEXT_STRING_HM_BANGBANG_FR "  Bang"
+#define UI_TEXT_STRING_HM_PID_FR     "   PID"
 #define UI_TEXT_STRING_ACTION_FR     "Action:%la"
 #define UI_TEXT_HEATING_EXTRUDER_FR  "Chauffe extrud.%Ne"
 #define UI_TEXT_HEATING_BED_FR       "Chauffe plat."
@@ -3806,8 +4092,8 @@
 #define UI_TEXT_PAGE_EXTRUDER2_FR     "E2:%e1/%E1\002C\176%o1"
 #define UI_TEXT_PAGE_EXTRUDER3_FR     "E3:%e2/%E2\002C\176%o2"
 #define UI_TEXT_PAGE_BED_FR          " B:%eb/%Eb\002C\176%ob"
-#define UI_TEXT_SPEED_MULTIPLY_FR    "Vitesse :%om%%%"
-#define UI_TEXT_FLOW_MULTIPLY_FR     "Debit :%of%%%"
+#define UI_TEXT_SPEED_MULTIPLY_FR    "Vitesse :  %om%%%"
+#define UI_TEXT_FLOW_MULTIPLY_FR     "Debit :    %of%%%"
 #define UI_TEXT_SHOW_MEASUREMENT_FR  "Montrer mesure"
 #define UI_TEXT_RESET_MEASUREMENT_FR "R.A.Z mesure"
 #define UI_TEXT_SET_MEASURED_ORIGIN_FR "Regler Z=0"
@@ -3817,7 +4103,7 @@
 #define UI_TEXT_SET_P3_FR            "Regler P3"
 #define UI_TEXT_CALCULATE_LEVELING_FR "Calibration"
 #define UI_TEXT_LEVEL_FR             "Niveau delta"
-#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP_FR  "Att. Temp.%XT\002C"
+#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP_FR  "Att.temp:%XT\002C"
 #define UI_TEXT_EXTR_WAIT_RETRACT_UNITS_FR "Att. Units:%XUmm"
 #define UI_TEXT_SD_REMOVED_FR       "Carte SD retiree"
 #define UI_TEXT_SD_INSERTED_FR      "Carte SD inseree"
@@ -3828,14 +4114,14 @@
 #define UI_TEXT_PRINT_TIME_FR          "Temps impression"
 #define UI_TEXT_PRINT_FILAMENT_FR      "Filament imprime"
 #define UI_TEXT_PRINTED_FR           "Imprime"
-#define UI_TEXT_POWER_FR               "ATX power on/off"
-#define UI_TEXT_STRING_HM_DEADTIME_FR  "PWM"
-#define UI_TEXT_STRING_HM_SLOWBANG_FR  "TOR"
-#define UI_TEXT_STOP_PRINT_FR          "Arret Impress."
-#define UI_TEXT_Z_BABYSTEPPING_FR "Z P.aP. :%oYmm"
-#define UI_TEXT_CHANGE_FILAMENT_FR "Changement Filament"
-#define UI_TEXT_WIZ_CH_FILAMENT1_FR "Changement Filament"
-#define UI_TEXT_WIZ_CH_FILAMENT2_FR "Tournez Deplacer"
+#define UI_TEXT_POWER_FR               "Alimentation"
+#define UI_TEXT_STRING_HM_DEADTIME_FR  "   PWM"
+#define UI_TEXT_STRING_HM_SLOWBANG_FR  "   TOR"
+#define UI_TEXT_STOP_PRINT_FR          "Arret impress."
+#define UI_TEXT_Z_BABYSTEPPING_FR "Z PaP. :%oYmm"
+#define UI_TEXT_CHANGE_FILAMENT_FR "Changement filament"
+#define UI_TEXT_WIZ_CH_FILAMENT1_FR "Changement filament"
+#define UI_TEXT_WIZ_CH_FILAMENT2_FR "Tournez deplacer"
 #define UI_TEXT_WIZ_CH_FILAMENT3_FR "Filament haut/bas"
 #define UI_TEXT_CLICK_DONE_FR "Continuer avec Clic"
 #define UI_TEXT_AUTOLEVEL_ONOFF_FR  "Calib. Auto:%ll"
@@ -3860,23 +4146,23 @@
 #define UI_TEXT_COATING_CUSTOM_FR "Special:%BCmm"
 #define UI_TEXT_LANGUAGE_FR "Langue"
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
-  #define UI_TEXT_MAINPAGE6_1_FR "\xa %ec/%Ec\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_FR "\xa %ec/%Ec\xb0 X:%x0"
 #else
-  #define UI_TEXT_MAINPAGE6_1_FR "\xa %e0/%E0\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_FR "\xa %e0/%E0\xb0 X:%x0"
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
-  #define UI_TEXT_MAINPAGE6_2_FR "\xa %e1/%E1\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_FR "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
-  #define UI_TEXT_MAINPAGE6_2_FR "\xe %eb/%Eb\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_FR "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-  #define UI_TEXT_MAINPAGE6_2_FR "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_FR "             Y:%x1"
 #endif
 #if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
- #define UI_TEXT_MAINPAGE6_3_FR "\xe %eb/%Eb\xb0 Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_FR "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
-  #define UI_TEXT_MAINPAGE6_3_FR "Copies: %ed    Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_FR "Copies: %ed    Z:%x2"
 #else
-  #define UI_TEXT_MAINPAGE6_3_FR "Debit:\xfd %of%%%   Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_FR "Debit:\xfd %of%%%   Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_FR "Vitesse: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_FR "Tampon: %oB"
@@ -3898,50 +4184,50 @@
 #define UI_TEXT_EXTR4_TEMP_FR "Temp. 5 :%e4/%E4" cDEG "C"
 #define UI_TEXT_EXTR5_TEMP_FR "Temp. 6 :%e5/%E5" cDEG "C"
 #define UI_TEXT_EXTR3_OFF_FR "Extr. 4 eteint"
-#define UI_TEXT_EXTR4_OFF_FR "Ext. 5 eteint"
+#define UI_TEXT_EXTR4_OFF_FR "Extr. 5 eteint"
 #define UI_TEXT_EXTR5_OFF_FR "Extr. 6 eteint"
 #define UI_TEXT_EXTR3_SELECT_FR "%X3 Select. Extr. 4"
 #define UI_TEXT_EXTR4_SELECT_FR "%X4 Select. Extr. 5"
 #define UI_TEXT_EXTR5_SELECT_FR "%X5 Select. Extr. 6"
-#define UI_TEXT_DITTO_0_FR "%D0 Aucune Copie"
+#define UI_TEXT_DITTO_0_FR "%D0 Aucune copie"
 #define UI_TEXT_DITTO_1_FR "%D1 1 Copie"
 #define UI_TEXT_DITTO_2_FR "%D2 2 Copies"
 #define UI_TEXT_DITTO_3_FR "%D3 3 Copies"
 #define UI_TEXT_ZPROBE_HEIGHT_FR "Sonde Z:%zh"
 #define UI_TEXT_OFFSETS_FR "Decalage Imp."
-#define UI_TEXT_X_OFFSET_FR "Dec. X:%T0mm"
-#define UI_TEXT_Y_OFFSET_FR "Dec. Y:%T1mm"
-#define UI_TEXT_Z_OFFSET_FR "Dec. Z:%T2mm"
+#define UI_TEXT_X_OFFSET_FR "Decal. X:%T0mm"
+#define UI_TEXT_Y_OFFSET_FR "Decal. Y:%T1mm"
+#define UI_TEXT_Z_OFFSET_FR "Decal.Z:%T2mm"
 #define UI_TEXT_LOAD_FILAMENT_FR     "Inser. Filament"
 #define UI_TEXT_UNLOAD_FILAMENT_FR    "Retir. Filament"
 #if NUM_EXTRUDER == 1
-#define UI_TEXT_FIL_SENSOR_ONOFF_FR    "Detect.Fil.:%sf"
-#define UI_TEXT_CLEANING_DRIPBOX_FR    "Nettoyage Reser"
-#define UI_TEXT_CLEAN_DRIPBOX_FR    "Nettoyage Reser"
+#define UI_TEXT_FIL_SENSOR_ONOFF_FR    "Detect.fil: %sf"
+#define UI_TEXT_CLEANING_DRIPBOX_FR    "Nettoyage reser"
+#define UI_TEXT_CLEAN_DRIPBOX_FR    "Nettoyage reser"
 #define UI_TEXT_CLEAN_DRIPBOX_3_FR    "le reservoir"
 #define UI_TEXT_EXTR_XOFF_FR    "Deca.X:%Xx"
 #define UI_TEXT_EXTR_YOFF_FR    "Deca.Y:%Xy"
 #else
-#define UI_TEXT_FIL_SENSOR_ONOFF_FR   "Detect.Fil:%sf"
-#define UI_TEXT_CLEAN_DRIPBOX_FR    "Nettoyage Reser"
-#define UI_TEXT_CLEANING_DRIPBOX_FR    "Nettoyage Reser"
+#define UI_TEXT_FIL_SENSOR_ONOFF_FR   "Detect.fil: %sf"
+#define UI_TEXT_CLEAN_DRIPBOX_FR    "Nettoyage reser"
+#define UI_TEXT_CLEANING_DRIPBOX_FR    "Nettoyage reser"
 #define UI_TEXT_CLEAN_DRIPBOX_3_FR    "les reservoirs"
-#define UI_TEXT_EXTR_XOFF_FR    "Dec.X:%Xx"
-#define UI_TEXT_EXTR_YOFF_FR    "Dec.Y:%Xy"
+#define UI_TEXT_EXTR_XOFF_FR    "Decal. X:%Xx"
+#define UI_TEXT_EXTR_YOFF_FR    "Decal. Y:%Xy"
 #endif
-#define UI_TEXT_LOAD_RIGHT_FILAMENT_FR     "Inserer \005Droit "
-#define UI_TEXT_UNLOAD_RIGHT_FILAMENT_FR     "Retirer \005Droit "
-#define UI_TEXT_LOAD_LEFT_FILAMENT_FR   "Inserer \005Gauche"
-#define UI_TEXT_UNLOAD_LEFT_FILAMENT_FR    "Retirer \005Gauche"
-#define UI_TEXT_FEED_LOADING_FILAMENT_FR    "Chargmt:%fl"
-#define UI_TEXT_FEED_UNLOADING_FILAMENT_FR    "Dech. F.:%fu"
-#define UI_TEXT_LOADING_UNLOADING_DISTANCE_FR    "Dist.charg: %fd"
+#define UI_TEXT_LOAD_RIGHT_FILAMENT_FR     "Inserer \005droit "
+#define UI_TEXT_UNLOAD_RIGHT_FILAMENT_FR     "Retirer \005droit "
+#define UI_TEXT_LOAD_LEFT_FILAMENT_FR   "Inserer \005gauche"
+#define UI_TEXT_UNLOAD_LEFT_FILAMENT_FR    "Retirer \005gauche"
+#define UI_TEXT_FEED_LOADING_FILAMENT_FR    "Inserer F:%fl"
+#define UI_TEXT_FEED_UNLOADING_FILAMENT_FR    "Retirer F:%fu"
+#define UI_TEXT_LOADING_UNLOADING_DISTANCE_FR    "Dist.inser: %fd"
 #define UI_TEXT_BED_DOWN_FR    "Plateau en bas"
 #define UI_TEXT_WIFI_ONOFF_FR    "Wifi:       %wo"
 #define UI_TEXT_REDO_ACTION_FR    "Recommencer ?"
-#define UI_TEXT_X_LENGTH_FR    "LongueurX:%Lxmm"
-#define UI_TEXT_Y_LENGTH_FR   "LongueurY:%Lymm"
-#define UI_TEXT_Z_LENGTH_FR    "LongueurZ:%Lzmm"
+#define UI_TEXT_X_LENGTH_FR    "Dist X:  %Lxmm"
+#define UI_TEXT_Y_LENGTH_FR   "Dist Y:  %Lymm"
+#define UI_TEXT_Z_LENGTH_FR    "Dist Z:  %Lzmm"
 #define UI_TEXT_EXT_TEMP_ABS_FR    "T\002Ext.ABS:%t1\002C"
 #define UI_TEXT_EXT_TEMP_PLA_FR    "T\002Ext.PLA:%t2\002C"
 #define UI_TEXT_BED_TEMP_ABS_FR    "T\002PlatABS:%t3\002C"
@@ -3952,7 +4238,7 @@
 #define UI_TEXT_ALERT_NO_FILAMENTD_FR    "charger filament"
 #define UI_TEXT_MANUAL_BED_LEVEL_PAGE_1A_FR    "Tournez 4X les"
 #define UI_TEXT_MANUAL_BED_LEVEL_PAGE_1B_FR    "3 ecrous de"
-#define UI_TEXT_MANUAL_BED_LEVEL_PAGE_1C_FR    "nivelement"
+#define UI_TEXT_MANUAL_BED_LEVEL_PAGE_1C_FR    "nivellement"
 #define UI_TEXT_MANUAL_BED_LEVEL_PAGE_1D_FR    "sous le lit."
 #define UI_TEXT_MANUAL_BED_LEVEL_PAGE_2A_FR     "Je vais deplacer"
 #define UI_TEXT_MANUAL_BED_LEVEL_PAGE_2B_FR    "l'extrudeur sur"
@@ -3993,38 +4279,38 @@
 #define UI_TEXT_X_MIN_SETTING_FR    "Xmin: %Hxmm"
 #define UI_TEXT_Y_MIN_SETTING_FR    "Ymin: %Hymm"
 #define UI_TEXT_Z_MIN_SETTING_FR    "Zmin: %Hzmm"
-#define UI_TEXT_TOP_COVER_OPEN_FR    "Capot Ouvert!"
-#define UI_TEXT_TOP_SENSOR_ONOFF_FR   "Capt.capot:%st"
-#define UI_TEXT_VERSION_MENU_FR    "Version Systeme"
-#define UI_TEXT_COOLDOWN_MENU_FR    "Refroidiss.  %B3"
+#define UI_TEXT_TOP_COVER_OPEN_FR    "Capot ouvert!"
+#define UI_TEXT_TOP_SENSOR_ONOFF_FR   "Capt.capot: %st"
+#define UI_TEXT_VERSION_MENU_FR    "Version systeme"
+#define UI_TEXT_COOLDOWN_MENU_FR    "Arret chauffe %B3"
 #define UI_TEXT_WAIT_OK_FR    "Ok continuer"
 #define UI_TEXT_FAILED_FR    "Echoue"
-#define UI_TEXT_PLEASE_WAIT_FR    "Attendre,,,"
+#define UI_TEXT_PLEASE_WAIT_FR    "Attendre…"
 #define UI_TEXT_MANUAL_LEVEL_FR    "Calib. Manuelle"
 #define UI_TEXT_WARNING_FR    "Attention!!!"
 #define UI_TEXT_EXTRUDER_COLD_FR    "E%Ne trop froid!"
-#define UI_TEXT_HEAT_EXTRUDER_FR     "Chauffe extrud.?"
-#define UI_TEXT_WRITE_DEBUG_FR    "Ecrire Debug"
-#define UI_TEXT_POWER_SAVE_MENU_FR    "Mode Eco"
+#define UI_TEXT_HEAT_EXTRUDER_FR     "Chauffer extru.?"
+#define UI_TEXT_WRITE_DEBUG_FR    "Ecrire debug"
+#define UI_TEXT_POWER_SAVE_MENU_FR    "Mode eco"
 #define UI_TEXT_MAINTENANCE_FR    "Maintenance"
 #define UI_TEXT_SETTINGS_FR    "Parametres"
-#define UI_TEXT_LOAD_UNLOAD_FR    "Charg./Dechar."
+#define UI_TEXT_LOAD_UNLOAD_FR    "Insere/Retire"
 #define UI_TEXT_BED_FR    "Plateau"
 #define UI_TEXT_BED_OFF_FR    "Plat. eteint %B7"
 #define UI_TEXT_LIGHT_OFF_AFTER_FR    "LED eteint    "
-#define UI_TEXT_LIGHT_OFF_AFTER2A_FR    "Des. apres:%il"
-#define UI_TEXT_LIGHT_OFF_AFTER2B_FR    "[min] 0=Off"
+#define UI_TEXT_LIGHT_OFF_AFTER2A_FR  "Arret apres:%il"
+#define UI_TEXT_LIGHT_OFF_AFTER2B_FR    "[min] 0=Non"
 #define UI_TEXT_WARNING_POS_X_UNKNOWN_FR    "Pos X inconnue !"
 #define UI_TEXT_WARNING_POS_Y_UNKNOWN_FR    "Pos Y inconnue !"
 #define UI_TEXT_WARNING_POS_Z_UNKNOWN_FR    "Pos Z inconnue !"
 #define UI_TEXT_MOVING_FR    "Deplacement..."
 #define UI_TEXT_PREPARING_FR    "Preparation..."
 #define UI_TEXT_KEEP_LIGHT_ON_FR    "LED Impres.:%lk"
-#define UI_TEXT_LOADING_FILAMENT_FR    "Chargem. Fil. \005"
-#define UI_TEXT_UNLOADING_FILAMENT_FR    "Decharg. Fil. \005"
-#define UI_TEXT_LOADUNLOAD_FILAMENT_FR    "Charg./Decharg."
+#define UI_TEXT_LOADING_FILAMENT_FR    "Insere fil. \005"
+#define UI_TEXT_UNLOADING_FILAMENT_FR    "Retire fil. \005"
+#define UI_TEXT_LOADUNLOAD_FILAMENT_FR    "Insere/Retire"
 #define UI_TEXT_AUTOLEVEL_FR    "Auto calib."
-#define UI_TEXT_Z_PROBE_FAILED_FR    "Echec Calibr."
+#define UI_TEXT_Z_PROBE_FAILED_FR    "Echec calibr."
 #define UI_TEXT_SAVE_FR    "Enr.  EEPROM ?"
 #define UI_TEXT_ZMIN_FR    "zMin : %zm"
 #define UI_TEXT_ZPROBING_FR    "Calibration..."
@@ -4033,26 +4319,26 @@
 #define UI_TEXT_CLEAN1_FR    "Nettoyer la buse"
 #define UI_TEXT_CLEAN2_FR   "et les contacts?"
 #define UI_TEXT_DISPLAY_MODE_FR    "Mode:%Md"
-#define UI_TEXT_EASY_MODE_FR     "Basique"
-#define UI_TEXT_ADVANCED_MODE_FR    "Expert"
+#define UI_TEXT_EASY_MODE_FR     "   Basique"
+#define UI_TEXT_ADVANCED_MODE_FR    "    Expert"
 #define UI_TEXT_POWER_SAVE_FR    "Mode Eco:  %Ps"
 #define UI_TEXT_BADGE_LIGHT_ONOFF_FR    "Badge :%lb"
 #define UI_TEXT_SOUND_ONOF_FR    "Son:        %so"
 #define UI_TEXT_YES_SELECTED_FR    "  [Oui]    Non"
-#define UI_TEXT_NO_SELECTED_FR    "    Oui    [Non]"
+#define UI_TEXT_NO_SELECTED_FR    "   Oui    [Non]"
 #define UI_TEXT_PLEASE_CONFIRM_FR    "Confimer SVP"
 #define UI_TEXT_CANCEL_ACTION_FR    "Annuler:"
 #define UI_TEXT_CONTINUE_ACTION_FR    "Continuer"
 #define UI_TEXT_CANCELED_FR    "Action annulee!"
 #define UI_TEXT_CONFIRMED_FR    "Action confirmee!"
-#define UI_TEXT_CLEAN_NOZZLE_FR    "Nettoyage Buse"
-#define UI_TEXT_CLEANING_NOZZLE_FR    "Nettoyage Buse"
-#define UI_TEXT_CLEAN_DRIPBOX_1_FR    "Vous Pouvez"
-#define UI_TEXT_CLEAN_DRIPBOX_2_FR    "Nettoyer"
+#define UI_TEXT_CLEAN_NOZZLE_FR    "Nettoyage buse"
+#define UI_TEXT_CLEANING_NOZZLE_FR    "Nettoyage buse"
+#define UI_TEXT_CLEAN_DRIPBOX_1_FR    "Vous pouvez"
+#define UI_TEXT_CLEAN_DRIPBOX_2_FR    "nettoyer"
 #define UI_TEXT_PUSH_FILAMENT_FR    "Charger filament"
 #define UI_TEXT_WAIT_FILAMENT_FR    "Ok pour demarrer"
 #define UI_TEXT_LOAD_FAILSAFE2_FR    "Apres chargement"
-#define UI_TEXT_LOAD_FAILSAFE_FR    "R.A.Z. EEPROM ?"
+#define UI_TEXT_LOAD_FAILSAFE_FR    "R.A.Z. EEPROM "
 #define UI_TEXT_HEATING_FR    "Chauffage..."
 #define UI_TEXT_WAIT_FOR_OK_FR    "OK pour quitter"
 #if NUM_EXTRUDER == 1
@@ -4063,8 +4349,45 @@
 #define UI_TEXT_MAIN_LINE2_FR    "\007%eB/%Eb"
 #endif
 #define UI_TEXT_AUTOLEVEL_MATRIX_FR    "Calibration data"
+#if HAVE_HEATED_BED
+///Davinci Specific, page 1-2-3, they are different if you have 1 or 2 extruders, and if you are in Easy Mode or Advanced Mode
+#if NUM_EXTRUDER == 1
+#define UI_TEXT_P1_L1_FR "\005%ec/%Ec\007%eB/%Eb"
+#define UI_TEXT_P1_L2_FR "Z:%x2"
+#define UI_TEXT_P1_L3_FR "Deb:%om%%%Tmp:%oB"
 
+#define UI_TEXT_P1_L1_EASY_FR "\005%ec/%Ec\002C"
+#define UI_TEXT_P1_L2_EASY_FR "\007%eB/%Eb\002C"
+#define UI_TEXT_P1_L3_EASY_FR "Z:%x2"
 
+#else
+#define UI_TEXT_P1_L1_FR "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_FR "\007%eB/%EbDeb:%om%%%"
+#define UI_TEXT_P1_L3_FR "Z:%x2"
+
+#define UI_TEXT_P1_L1_EASY_FR "\0051 %e0/%E0\002C"
+#define UI_TEXT_P1_L2_EASY_FR "\0052 %e1/%E1\002C"
+#define UI_TEXT_P1_L3_EASY_FR "\007 %eB/%Eb\002C"
+#endif
+#else
+#if NUM_EXTRUDER == 1
+#define UI_TEXT_P1_L1_FR "\005%ec/%Ec\002"
+#define UI_TEXT_P1_L2_FR "Z:%x2"
+#define UI_TEXT_P1_L3_FR "Tampon:%oB"
+
+#define UI_TEXT_P1_L1_EASY_FR "\005%ec/%Ec\002"
+#define UI_TEXT_P1_L2_EASY_FR "Z:%x2"
+#define UI_TEXT_P1_L3_EASY_FR "Tampon:%oB"
+#else
+#define UI_TEXT_P1_L1_FR "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_FR "Z:%x2"
+#define UI_TEXT_P1_L3_FR "Tampon:%oB"
+
+#define UI_TEXT_P1_L1_EASY_FR "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_EASY_FR "Z:%x2"
+#define UI_TEXT_P1_L3_EASY_FR "Tampon:%oB"
+#endif
+#endif
 
 
 
@@ -4310,23 +4633,23 @@
 #define UI_TEXT_COATING_CUSTOM_CZ "Vlastni:%BCmm"
 #define UI_TEXT_LANGUAGE_CZ "Jazyk"
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
-  #define UI_TEXT_MAINPAGE6_1_CZ "\xa %ec/%Ec\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_CZ "\xa %ec/%Ec\xb0 X:%x0"
 #else
-  #define UI_TEXT_MAINPAGE6_1_CZ "\xa %e0/%E0\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_CZ "\xa %e0/%E0\xb0 X:%x0"
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
-  #define UI_TEXT_MAINPAGE6_2_CZ "\xa %e1/%E1\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_CZ "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
-  #define UI_TEXT_MAINPAGE6_2_CZ "\xe %eb/%Eb\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_CZ "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-  #define UI_TEXT_MAINPAGE6_2_CZ "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_CZ "             Y:%x1"
 #endif
 #if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
- #define UI_TEXT_MAINPAGE6_3_CZ "\xe %eb/%Eb\xb0 Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_CZ "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
-  #define UI_TEXT_MAINPAGE6_3_CZ "Kopii: %ed     Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_CZ "Kopii: %ed     Z:%x2"
 #else
-  #define UI_TEXT_MAINPAGE6_3_CZ "Flow:\xfd %of%%%   Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_CZ "Flow:\xfd %of%%%   Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_CZ "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_CZ "Buf: %oB"
@@ -4513,6 +4836,46 @@
 #define UI_TEXT_MAIN_LINE2_CZ   "\007%eB/%Eb"
 #endif
 #define UI_TEXT_AUTOLEVEL_MATRIX_CZ   "Autolevel Matrix"
+#if HAVE_HEATED_BED
+///Davinci Specific, page 1-2-3, they are different if you have 1 or 2 extruders, and if you are in Easy Mode or Advanced Mode
+#if NUM_EXTRUDER == 1
+#define UI_TEXT_P1_L1_CZ "\005%ec/%Ec\007%eB/%Eb"
+#define UI_TEXT_P1_L2_CZ "Z:%x2"
+#define UI_TEXT_P1_L3_CZ "Mul:%om Buf:%oB"
+
+#define UI_TEXT_P1_L1_EASY_CZ "\005%ec/%Ec\002C"
+#define UI_TEXT_P1_L2_EASY_CZ "\007%eB/%Eb\002C"
+#define UI_TEXT_P1_L3_EASY_CZ "Z:%x2"
+
+#else
+#define UI_TEXT_P1_L1_CZ "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_CZ "\007%eB/%EbMul:%om%%%"
+#define UI_TEXT_P1_L3_CZ "Z:%x2"
+
+#define UI_TEXT_P1_L1_EASY_CZ "\0051 %e0/%E0\002C"
+#define UI_TEXT_P1_L2_EASY_CZ "\0052 %e1/%E1\002C"
+#define UI_TEXT_P1_L3_EASY_CZ "\007 %eB/%Eb\002C"
+#endif
+#else
+#if NUM_EXTRUDER == 1
+#define UI_TEXT_P1_L1_CZ "\005%ec/%Ec\002"
+#define UI_TEXT_P1_L2_CZ "Z:%x2"
+#define UI_TEXT_P1_L3_CZ "Buffer:%oB"
+
+#define UI_TEXT_P1_L1_EASY_CZ "\005%ec/%Ec\002"
+#define UI_TEXT_P1_L2_EASY_CZ "Z:%x2"
+#define UI_TEXT_P1_L3_EASY_CZ "Buffer:%oB"
+#else
+#define UI_TEXT_P1_L1_CZ "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_CZ "Z:%x2"
+#define UI_TEXT_P1_L3_CZ "Buffer:%oB"
+
+#define UI_TEXT_P1_L1_EASY_CZ "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_EASY_CZ "Z:%x2"
+#define UI_TEXT_P1_L3_EASY_CZ "Buffer:%oB"
+#endif
+#endif
+
 
 
 
@@ -4756,23 +5119,23 @@
 #define UI_TEXT_COATING_CUSTOM_PL "Inna grubosc:%BCmm"
 #define UI_TEXT_LANGUAGE_PL "Jezyk"
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
-  #define UI_TEXT_MAINPAGE6_1_PL "\xa %ec/%Ec\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_PL "\xa %ec/%Ec\xb0 X:%x0"
 #else
-  #define UI_TEXT_MAINPAGE6_1_PL "\xa %e0/%E0\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_PL "\xa %e0/%E0\xb0 X:%x0"
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
-  #define UI_TEXT_MAINPAGE6_2_PL "\xa %e1/%E1\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_PL "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
-  #define UI_TEXT_MAINPAGE6_2_PL "\xe %eb/%Eb\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_PL "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-  #define UI_TEXT_MAINPAGE6_2_PL "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_PL "             Y:%x1"
 #endif
 #if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
- #define UI_TEXT_MAINPAGE6_3_PL "\xe %eb/%Eb\xb0 Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_PL "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
-  #define UI_TEXT_MAINPAGE6_3_PL "Kopie: %ed     Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_PL "Kopie: %ed     Z:%x2"
 #else
-  #define UI_TEXT_MAINPAGE6_3_PL "Przep:\xfd %of%%%  Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_PL "Przep:\xfd %of%%%  Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_PL "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_PL "Buf: %oB"
@@ -4959,4 +5322,44 @@
 #define UI_TEXT_MAIN_LINE2_PL   "\007%eB/%Eb"
 #endif
 #define UI_TEXT_AUTOLEVEL_MATRIX_PL   "Autolevel Matrix"
+#if HAVE_HEATED_BED
+///Davinci Specific, page 1-2-3, they are different if you have 1 or 2 extruders, and if you are in Easy Mode or Advanced Mode
+#if NUM_EXTRUDER == 1
+#define UI_TEXT_P1_L1_PL "\005%ec/%Ec\007%eB/%Eb"
+#define UI_TEXT_P1_L2_PL "Z:%x2"
+#define UI_TEXT_P1_L3_PL "Mul:%om Buf:%oB"
+
+#define UI_TEXT_P1_L1_EASY_PL "\005%ec/%Ec\002C"
+#define UI_TEXT_P1_L2_EASY_PL "\007%eB/%Eb\002C"
+#define UI_TEXT_P1_L3_EASY_PL "Z:%x2"
+
+#else
+#define UI_TEXT_P1_L1_PL "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_PL "\007%eB/%EbMul:%om%%%"
+#define UI_TEXT_P1_L3_PL "Z:%x2"
+
+#define UI_TEXT_P1_L1_EASY_PL "\0051 %e0/%E0\002C"
+#define UI_TEXT_P1_L2_EASY_PL "\0052 %e1/%E1\002C"
+#define UI_TEXT_P1_L3_EASY_PL "\007 %eB/%Eb\002C"
+#endif
+#else
+#if NUM_EXTRUDER == 1
+#define UI_TEXT_P1_L1_PL "\005%ec/%Ec\002"
+#define UI_TEXT_P1_L2_PL "Z:%x2"
+#define UI_TEXT_P1_L3_PL "Buffer:%oB"
+
+#define UI_TEXT_P1_L1_EASY_PL "\005%ec/%Ec\002"
+#define UI_TEXT_P1_L2_EASY_PL "Z:%x2"
+#define UI_TEXT_P1_L3_EASY_PL "Buffer:%oB"
+#else
+#define UI_TEXT_P1_L1_PL "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_PL "Z:%x2"
+#define UI_TEXT_P1_L3_PL "Buffer:%oB"
+
+#define UI_TEXT_P1_L1_EASY_PL "\005%e0/%E0\005%e1/%E1"
+#define UI_TEXT_P1_L2_EASY_PL "Z:%x2"
+#define UI_TEXT_P1_L3_EASY_PL "Buffer:%oB"
+#endif
+#endif
+
 
