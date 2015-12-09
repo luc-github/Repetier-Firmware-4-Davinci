@@ -4354,7 +4354,7 @@
 #if NUM_EXTRUDER == 1
 #define UI_TEXT_P1_L1_FR "\005%ec/%Ec\007%eB/%Eb"
 #define UI_TEXT_P1_L2_FR "Z:%x2"
-#define UI_TEXT_P1_L3_FR "Deb:%om%%%Tmp:%oB"
+#define UI_TEXT_P1_L3_FR "Vit:%om%%%Tmp:%oB"
 
 #define UI_TEXT_P1_L1_EASY_FR "\005%ec/%Ec\002C"
 #define UI_TEXT_P1_L2_EASY_FR "\007%eB/%Eb\002C"
@@ -4362,7 +4362,7 @@
 
 #else
 #define UI_TEXT_P1_L1_FR "\005%e0/%E0\005%e1/%E1"
-#define UI_TEXT_P1_L2_FR "\007%eB/%EbDeb:%om%%%"
+#define UI_TEXT_P1_L2_FR "\007%eB/%EbVit:%om%%%"
 #define UI_TEXT_P1_L3_FR "Z:%x2"
 
 #define UI_TEXT_P1_L1_EASY_FR "\0051 %e0/%E0\002C"
