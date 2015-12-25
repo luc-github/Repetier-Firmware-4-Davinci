@@ -79,7 +79,7 @@ Or a great video done by Daniel Gonos: https://www.youtube.com/watch?v=rjuCvlnpB
 ***
 ##Implemented
 * Standard GCODE commands
-* Single/Dual extruders support (DaVinci 1.0/2.0 all generations but AiO)
+* Single/Dual extruders support (DaVinci 1.0(a)/2.0(a) and AiO without scanner)
 * Single Fan / Dual fans support according printer configuration
 * Repurpose of second fan usage to be controlled by M106/M107 commands on Da Vinci 2.0
 * Sound and Lights management, including powersaving function (light can be managed remotely by GCODE)
