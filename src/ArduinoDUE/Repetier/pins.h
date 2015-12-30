@@ -581,7 +581,7 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_E1_DIR_PIN 34
 #define ORIG_E1_ENABLE_PIN 30
  
-#define sdpower   -1
+#define SDPOWER   -1
 // 10 if using HW spi. 53 if using SW SPI
 #define SDSS 53 
 #define LED_PIN   13
@@ -1058,7 +1058,10 @@ STEPPER_CURRENT_CONTROL
 #define E5_ENABLE_PIN ORIG_E5_ENABLE_PIN
 
 #define FAN_PIN ORIG_FAN_PIN
+#ifdef ORIG_FAN2_PIN
 #define FAN2_PIN ORIG_FAN2_PIN
+#endif
+
 #define PS_ON_PIN ORIG_PS_ON_PIN
 
 #ifndef ORIG_SDCARDDETECT

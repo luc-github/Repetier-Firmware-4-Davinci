@@ -66,7 +66,7 @@ uint8_t Printer::menuModeEx = 0;
 uint Printer::lastextruderID;
 #endif
 uint8_t Printer::debugLevel = 6; ///< Bitfield defining debug output. 1 = echo, 2 = info, 4 = error, 8 = dry run., 16 = Only communication, 32 = No moves
-uint8_t Printer::stepsPerTimerCall = 1;
+fast8_t Printer::stepsPerTimerCall = 1;
 uint8_t Printer::menuMode = 0;
 uint8_t Printer::mode = DEFAULT_PRINTER_MODE;
 uint8_t Printer::fanSpeed = 0; // Last fan speed set with M106/M107
@@ -81,7 +81,7 @@ float Printer::zBedOffset = Z_PROBE_Z_OFFSET;
 #if FEATURE_AUTOLEVEL
 float Printer::autolevelTransformation[9]; ///< Transformation matrix
 #endif
-uint32_t Printer::interval;           ///< Last step duration in ticks.
+uint32_t Printer::interval = 30000;           ///< Last step duration in ticks.
 uint32_t Printer::timer;              ///< used for acceleration/deceleration timing
 uint32_t Printer::stepNumber;         ///< Step number in current move.
 #if USE_ADVANCE
@@ -161,6 +161,10 @@ float Printer::memoryF = -1;
 #if GANTRY
 int8_t Printer::motorX;
 int8_t Printer::motorYorZ;
+#endif
+#if FAN_THERMO_PIN > -1
+float Printer::thermoMinTemp = FAN_THERMO_MIN_TEMP;
+float Printer::thermoMaxTemp = FAN_THERMO_MAX_TEMP;
 #endif
 #ifdef DEBUG_SEGMENT_LENGTH
 float Printer::maxRealSegmentLength = 0;
@@ -408,7 +412,29 @@ void Printer::constrainDestinationCoords()
 #endif
 }
 #endif
-
+void Printer::setDebugLevel(uint8_t newLevel) {
+	debugLevel = newLevel;
+	Com::printFLN(PSTR("DebugLevel:"),(int)newLevel);
+}
+void Printer::toggleEcho() {
+	setDebugLevel(debugLevel ^ 32);
+}
+void Printer::toggleInfo() {
+	setDebugLevel(debugLevel ^ 2);
+}	
+void Printer::toggleErrors() {
+	setDebugLevel(debugLevel ^ 4);
+}
+void Printer::toggleDryRun() {
+	setDebugLevel(debugLevel ^ 8);
+}
+void Printer::toggleCommunication() {
+	setDebugLevel(debugLevel ^ 16);	
+}
+void Printer::toggleNoMoves() {
+	setDebugLevel(debugLevel ^ 32);
+}
+	
 bool Printer::isPositionAllowed(float x,float y,float z)
 {
     if(isNoDestinationCheck())  return true;
@@ -426,18 +452,32 @@ bool Printer::isPositionAllowed(float x,float y,float z)
 }
 
 void Printer::setFanSpeedDirectly(uint8_t speed) {
-#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
-    if(pwm_pos[NUM_EXTRUDER + 2] == speed)
+#if FAN_PIN > -1 && FEATURE_FAN_CONTROL
+    if(pwm_pos[PWM_FAN1] == speed)
         return;
 #if FAN_KICKSTART_TIME
-    if(fanKickstart == 0 && speed > pwm_pos[NUM_EXTRUDER + 2] && speed < 85)
+    if(fanKickstart == 0 && speed > pwm_pos[PWM_FAN1] && speed < 85)
     {
-         if(pwm_pos[NUM_EXTRUDER + 2]) fanKickstart = FAN_KICKSTART_TIME / 100;
-         else                          fanKickstart = FAN_KICKSTART_TIME / 25;
+         if(pwm_pos[PWM_FAN1]) fanKickstart = FAN_KICKSTART_TIME / 100;
+         else                  fanKickstart = FAN_KICKSTART_TIME / 25;
     }
 #endif
-    pwm_pos[NUM_EXTRUDER + 2] = speed;
+    pwm_pos[PWM_FAN1] = speed;
 #endif
+}
+void Printer::setFan2SpeedDirectly(uint8_t speed) {
+	#if FAN2_PIN > -1 && FEATURE_FAN2_CONTROL
+	if(pwm_pos[PWM_FAN2] == speed)
+		return;
+	#if FAN_KICKSTART_TIME
+	if(fan2Kickstart == 0 && speed > pwm_pos[PWM_FAN2] && speed < 85)
+	{
+		if(pwm_pos[PWM_FAN2]) fan2Kickstart = FAN_KICKSTART_TIME / 100;
+		else                  fan2Kickstart = FAN_KICKSTART_TIME / 25;
+	}
+	#endif
+	pwm_pos[PWM_FAN2] = speed;
+	#endif
 }
 
 void Printer::reportPrinterMode() {
@@ -601,11 +641,11 @@ void Printer::kill(uint8_t only_steppers)
         Printer::setAllKilled(true);
     }
     else UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_STEPPER_DISABLED_ID));
-#if FAN_BOARD_PIN>-1
+#if FAN_BOARD_PIN > -1
 #if HAVE_HEATED_BED
     if(heatedBedController.targetTemperatureC < 15)      // turn off FAN_BOARD only if bed heater is off
 #endif
-       pwm_pos[NUM_EXTRUDER + 1] = 0;
+       pwm_pos[PWM_BOARD_FAN] = 0;
 #endif // FAN_BOARD_PIN
 }
 
@@ -1039,9 +1079,17 @@ SET_INPUT(FIL_SENSOR2_PIN);
     PULLUP(Z_PROBE_PIN, HIGH);
 #endif
 #endif // FEATURE_FEATURE_Z_PROBE
-#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
+#if FAN_PIN > -1 && FEATURE_FAN_CONTROL
     SET_OUTPUT(FAN_PIN);
     WRITE(FAN_PIN, LOW);
+#endif
+#if FAN2_PIN > -1 && FEATURE_FAN2_CONTROL
+	SET_OUTPUT(FAN2_PIN);
+	WRITE(FAN2_PIN, LOW);
+#endif
+#if FAN_THERMO_PIN > -1
+	SET_OUTPUT(FAN_THERMO_PIN);
+	WRITE(FAN_THERMO_PIN, LOW);
 #endif
 #if FAN_BOARD_PIN>-1
     SET_OUTPUT(FAN_BOARD_PIN);
@@ -1095,7 +1143,7 @@ SET_INPUT(FIL_SENSOR2_PIN);
     SET_OUTPUT(EXT5_EXTRUDER_COOLER_PIN);
     WRITE(EXT5_EXTRUDER_COOLER_PIN, LOW);
 #endif
-// Initalize jam sensors
+// Initialize jam sensors
 #if defined(EXT0_JAM_PIN) && EXT0_JAM_PIN > -1
     SET_INPUT(EXT0_JAM_PIN);
     PULLUP(EXT0_JAM_PIN, EXT0_JAM_PULLUP);
@@ -1221,7 +1269,6 @@ SET_INPUT(FIL_SENSOR2_PIN);
     for(uint8_t i = 0; i < E_AXIS_ARRAY; i++)
     {
         currentPositionSteps[i] = 0;
-        currentPosition[i] = 0.0;
     }
     currentPosition[X_AXIS] = currentPosition[Y_AXIS]= currentPosition[Z_AXIS] =  0.0;
 //setAutolevelActive(false); // fixme delete me
@@ -1266,6 +1313,9 @@ SET_INPUT(FIL_SENSOR2_PIN);
   #endif
 #endif
     EVENT_INITIALIZE;
+#ifdef STARTUP_GCODE
+GCode::executeFString(Com::tStartupGCode);
+#endif
 #if EEPROM_MODE != 0 && UI_DISPLAY_TYPE != NO_DISPLAY
     if(EEPROM::getStoredLanguage() == 254) {
             Com::printFLN(PSTR("Needs language selection"));
@@ -1298,7 +1348,7 @@ void Printer::defaultLoopActions()
         if(stepperInactiveTime != 0 && curtime >  stepperInactiveTime )
             Printer::kill(true);
     }
-#if SDCARDDETECT>-1 && SDSUPPORT
+#if SDCARDDETECT > -1 && SDSUPPORT
     sd.automount();
 #endif
 //Davinci Specific, EEPROM is on SD Card
@@ -1322,7 +1372,7 @@ void Printer::MemoryPosition()
 
 void Printer::GoToMemoryPosition(bool x, bool y, bool z, bool e, float feed)
 {
-    if(memoryF < 0) return; // Not stored before call, so we ignor eit
+    if(memoryF < 0) return; // Not stored before call, so we ignore it
     bool all = !(x || y || z);
     moveToReal((all || x ? (lastCmdPos[X_AXIS] = memoryX) : IGNORE_COORDINATE)
                ,(all || y ?(lastCmdPos[Y_AXIS] = memoryY) : IGNORE_COORDINATE)
@@ -1376,7 +1426,7 @@ void Printer::homeZAxis() // Delta z homing
 	Endstops::fillFromAccumulator();
 	if (Endstops::xMax() && Endstops::yMax() && Endstops::zMax()) {
 		// Back off for retest
-		PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_MOVE, 0, Printer::homingFeedrate[Z_AXIS]/ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
+		PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_MOVE, 0, Printer::homingFeedrate[Z_AXIS]/ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, true);
 		//Endstops::report();
 		// Check for proper release of all (XYZ) endstops
 		if (!(Endstops::xMax() || Endstops::yMax() || Endstops::zMax())) {
@@ -1385,12 +1435,12 @@ void Printer::homeZAxis() // Delta z homing
 		    deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR);
 		    Endstops::fillFromAccumulator();
 			//Endstops::report();
-			// Check that all endstoips (XYZ) were hit again
+			// Check that all endstops (XYZ) were hit again
 			if (Endstops::xMax() && Endstops::yMax() && Endstops::zMax()) {
 				homingSuccess = true; // Assume success in case there is no back move
 #if defined(ENDSTOP_Z_BACK_ON_HOME)
 				if(ENDSTOP_Z_BACK_ON_HOME > 0) {
-					PrintLine::moveRelativeDistanceInSteps(0, 0, 2 * axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homingFeedrate[Z_AXIS], true, false);
+					PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homingFeedrate[Z_AXIS], true, true);
 					//Endstops::report();
 					// Check for missing release of any (XYZ) endstop
 					if (Endstops::xMax() || Endstops::yMax() || Endstops::zMax()) {
@@ -1629,13 +1679,21 @@ void Printer::homeZAxis() // cartesian homing
 #endif
         PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS] * 2 * ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR,0,homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,true);
         setHoming(false);
+		int32_t zCorrection = 0;
+#if MIN_HARDWARE_ENDSTOP_Z && FEATURE_Z_PROBE && Z_PROBE_PIN==Z_MIN_PIN
+		// Fix error from z probe testing
+		zCorrection -= axisStepsPerMM[Z_AXIS]*EEPROM::zProbeHeight();
+#endif		
 #if defined(ENDSTOP_Z_BACK_ON_HOME)
+		// If we want to go up a bit more for some reason
         if(ENDSTOP_Z_BACK_ON_HOME > 0)
-            PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS]*-ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homingFeedrate[Z_AXIS],true,false);
+		zCorrection -= axisStepsPerMM[Z_AXIS]*ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR;
 #endif
 #if Z_HOME_DIR < 0
-        PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS] * -Printer::zBedOffset * Z_HOME_DIR,0,homingFeedrate[Z_AXIS],true,false);
+		// Fix bed coating
+		zCorrection += axisStepsPerMM[Z_AXIS] * Printer::zBedOffset;
 #endif
+        PrintLine::moveRelativeDistanceInSteps(0,0,zCorrection,0,homingFeedrate[Z_AXIS],true,false);
         currentPositionSteps[Z_AXIS] = ((Z_HOME_DIR == -1) ? zMinSteps : zMaxSteps - Printer::zBedOffset * axisStepsPerMM[Z_AXIS]);
 #if NUM_EXTRUDER > 0
         currentPositionSteps[Z_AXIS] -= Extruder::current->zOffset;
@@ -1743,7 +1801,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
         Extruder::setTemperatureForExtruder(actTemp[Extruder::current->id], Extruder::current->id, false, actTemp[Extruder::current->id] > MAX_ROOM_TEMPERATURE);
 #endif
         if(Z_HOME_DIR < 0) startZ = Printer::zMin;
-        else startZ = Printer::zMin + Printer::zLength;
+        else startZ = Printer::zMin + Printer::zLength - zBedOffset;
     }
 }
 #endif
@@ -1765,7 +1823,13 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
     }
 #endif
     updateCurrentPosition(true);
+#if defined(Z_UP_AFTER_HOME) && Z_HOME_DIR < 0
+	//PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS]*Z_UP_AFTER_HOME * Z_HOME_DIR,0,homingFeedrate[Z_AXIS],true,false);
+	if(zaxis)
+		startZ = Z_UP_AFTER_HOME;
+#endif
     moveToReal(startX, startY, startZ, IGNORE_COORDINATE, homingFeedrate[X_AXIS]);
+	updateCurrentPosition(true);
     UI_CLEAR_STATUS
     Commands::printCurrentPosition(PSTR("homeAxis "));
 }
@@ -2171,6 +2235,11 @@ void Printer::showConfiguration() {
     Com::config(PSTR("HeatedBed:"),HAVE_HEATED_BED);
     Com::config(PSTR("SDCard:"),SDSUPPORT);
     Com::config(PSTR("Fan:"),FAN_PIN > -1 && FEATURE_FAN_CONTROL);
+#if FEATURE_FAN2_CONTROL && defined(FAN2_PIN) && FAN2_PIN > -1	
+    Com::config(PSTR("Fan2:1"));
+#else
+    Com::config(PSTR("Fan2:0"));
+#endif	
     Com::config(PSTR("LCD:"),FEATURE_CONTROLLER != NO_CONTROLLER);
     Com::config(PSTR("SoftwarePowerSwitch:"),PS_ON_PIN > -1);
     Com::config(PSTR("XHomeDir:"),X_HOME_DIR);
@@ -2467,90 +2536,98 @@ int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const
 #if JSON_OUTPUT
 void Printer::showJSONStatus(int type) {
     bool firstOccurrence;
+
+    Com::printF(PSTR("{\"status\": \""));
+    if (PrintLine::linesCount == 0) {
+        Com::print('I'); // IDLING
+#if SDSUPPORT
+    } else if (sd.sdactive) {
+        Com::print('P'); // SD PRINTING
+#endif
+    } else {
+        Com::print('B'); // SOMETHING ELSE, BUT SOMETHIG
+    }
+    Com::printF(PSTR("\",\"coords\": {"));
+    Com::printF(PSTR("\"axesHomed\":["));
+    Com::printF(isHomed() ? PSTR("1, 1, 1") : PSTR("0, 0, 0"));
+    Com::printF(PSTR("],\"extr\":["));
+    firstOccurrence = true;
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
+        if (!firstOccurrence) Com::print(',');
+        Com::print(extruder[i].extrudePosition / extruder[i].stepsPerMM);
+        firstOccurrence = false;
+    }
+    Com::printF(PSTR("],\"xyz\":["));
+    Com::print(currentPosition[X_AXIS]); // X
+    Com::print(',');
+    Com::print(currentPosition[Y_AXIS]); // Y
+    Com::print(',');
+    Com::print(currentPosition[Z_AXIS]); // Z
+    Com::printF(PSTR("]},\"currentTool\":"));
+    Com::print(Extruder::current->id);
+    Com::printF(PSTR(",\"params\": {\"atxPower\":"));
+    Com::print(isPowerOn()?'1':'0');
+    Com::printF(PSTR(",\"fanPercent\":["));
+#if FEATURE_FAN_CONTROL	
+    Com::print(getFanSpeed() / 2.55f);
+#endif	
+#if FEATURE_FAN2_CONTROL
+    Com::printF(Com::tComma,getFan2Speed() / 2.55f);
+#endif
+    Com::printF(PSTR("],\"speedFactor\":"));
+    Com::print(Printer::feedrateMultiply);
+    Com::printF(PSTR(",\"extrFactors\":["));
+    firstOccurrence = true;
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
+        if (!firstOccurrence) Com::print(',');
+        Com::print((int)Printer::extrudeMultiply); // Really *100? 100 is normal
+        firstOccurrence = false;
+    }
+    Com::printF(PSTR("]},"));
+    // SEQ??
+    Com::printF(PSTR("\"temps\": {"));
+#if HAVE_HEATED_BED
+    Com::printF(PSTR("\"bed\": {\"current\":"));
+    Com::print(heatedBedController.currentTemperatureC);
+    Com::printF(PSTR(",\"active\":"));
+    Com::print(heatedBedController.targetTemperatureC);
+    Com::printF(PSTR(",\"state\":"));
+    Com::print(heatedBedController.targetTemperatureC > 0 ? '2' : '1');
+    Com::printF(PSTR("},"));
+#endif
+    Com::printF(PSTR("\"heads\": {\"current\": ["));
+    firstOccurrence = true;
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
+        if (!firstOccurrence) Com::print(',');
+        Com::print(extruder[i].tempControl.currentTemperatureC);
+        firstOccurrence = false;
+    }
+    Com::printF(PSTR("],\"active\": ["));
+    firstOccurrence = true;
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
+        if (!firstOccurrence) Com::print(',');
+        Com::print(extruder[i].tempControl.targetTemperatureC);
+        firstOccurrence = false;
+    }
+    Com::printF(PSTR("],\"state\": ["));
+    firstOccurrence = true;
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
+        if (!firstOccurrence) Com::print(',');
+        Com::print(extruder[i].tempControl.targetTemperatureC > EXTRUDER_FAN_COOL_TEMP?'2':'1');
+        firstOccurrence = false;
+    }
+    Com::printF(PSTR("]}},\"time\":"));
+    Com::print(HAL::timeInMilliseconds());
+
     switch (type) {
         default:
         case 0:
         case 1:
-            Com::printF(PSTR("{\"state\": \""));
-            if (PrintLine::linesCount == 0) {
-                Com::print('I'); // IDLING
-            } else if (sd.sdactive) {
-                Com::print('P'); // SD PRINTING
-            } else {
-                Com::print('B'); // SOMETHING ELSE, BUT SOMETHIG
-            }
-            Com::printF(PSTR("\",\"coords\": {"));
-            Com::printF(PSTR("\"axesHomed\":["));
-            Com::printF(isHomed() ? PSTR("1, 1, 1") : PSTR("0, 0, 0"));
-            Com::printF(PSTR("],\"extr\":["));
-            firstOccurrence = true;
-            for (int i = 0; i < NUM_EXTRUDER; i++) {
-                if (!firstOccurrence) Com::print(',');
-                Com::print(extruder[i].extrudePosition / extruder[i].stepsPerMM);
-                firstOccurrence = false;
-            }
-            Com::printF(PSTR("],\"xyz\":["));
-            Com::print(currentPosition[X_AXIS]); // X
-            Com::print(',');
-            Com::print(currentPosition[Y_AXIS]); // Y
-            Com::print(',');
-            Com::print(currentPosition[Z_AXIS]); // Z
-            Com::printF(PSTR("]},\"currentTool\":"));
-            Com::print(Extruder::current->id);
-            Com::printF(PSTR(",\"params\": {\"atxPower\":"));
-            Com::print(isPowerOn()?'1':'0');
-            Com::printF(PSTR(",\"fanPercent\":"));
-            Com::print(getFanSpeed());
-            Com::printF(PSTR(",\"speedFactor\":"));
-            Com::print(Printer::feedrateMultiply);
-            Com::printF(PSTR(",\"extrFactors\":["));
-            firstOccurrence = true;
-            for (int i = 0; i < NUM_EXTRUDER; i++) {
-                if (!firstOccurrence) Com::print(',');
-                Com::print((int)Printer::extrudeMultiply); // Really *100? 100 is normal
-                firstOccurrence = false;
-            }
-            Com::printF(PSTR("]},"));
-            // SEQ??
-            Com::printF(PSTR("\"temps\": {"));
-#if HAVE_HEATED_BED
-            Com::printF(PSTR("\"bed\": {\"current\":"));
-            Com::print(heatedBedController.currentTemperatureC);
-            Com::printF(PSTR(",\"active\":"));
-            Com::print(heatedBedController.targetTemperatureC);
-            Com::printF(PSTR(",\"state\":"));
-            Com::print(heatedBedController.targetTemperatureC > 0 ? '2' : '1');
-            Com::printF(PSTR("},"));
-#endif
-            Com::printF(PSTR("\"heads\": {\"current\": ["));
-            firstOccurrence = true;
-            for (int i = 0; i < NUM_EXTRUDER; i++) {
-                if (!firstOccurrence) Com::print(',');
-                Com::print(extruder[i].tempControl.currentTemperatureC);
-                firstOccurrence = false;
-            }
-            Com::printF(PSTR("],\"active\": ["));
-            firstOccurrence = true;
-            for (int i = 0; i < NUM_EXTRUDER; i++) {
-                if (!firstOccurrence) Com::print(',');
-                Com::print(extruder[i].tempControl.targetTemperatureC);
-                firstOccurrence = false;
-            }
-            Com::printF(PSTR("],\"state\": ["));
-            firstOccurrence = true;
-            for (int i = 0; i < NUM_EXTRUDER; i++) {
-                if (!firstOccurrence) Com::print(',');
-                Com::print(extruder[i].tempControl.targetTemperatureC > EXTRUDER_FAN_COOL_TEMP?'2':'1');
-                firstOccurrence = false;
-            }
-            Com::printF(PSTR("]}},\"time\":"));
-            Com::print(HAL::timeInMilliseconds());
-            Com::printFLN(PSTR("}"));
             break;
         case 2:
             // UNTIL PRINT ESTIMATE TIMES ARE IMPLEMENTED
             // NO DURATION INFO IS SUPPORTED
-            Com::printF(PSTR("{\"coldExtrudeTemp\":0,\"coldRetractTemp\":0.0,\"geometry\":\""));
+            Com::printF(PSTR(",\"coldExtrudeTemp\":0,\"coldRetractTemp\":0.0,\"geometry\":\""));
 #if (DRIVE_SYSTEM == DELTA)
             Com::printF(PSTR("delta"));
 #elif (DRIVE_SYSTEM == CARTESIAN)
@@ -2572,10 +2649,10 @@ void Printer::showJSONStatus(int type) {
                 Com::print('}');
                 firstOccurrence = false;
             }
-            Com::printFLN(PSTR("]}"));
+            Com::printFLN(PSTR("]"));
             break;
         case 3:
-            Com::printF(PSTR("{\"currentLayer\":"));
+            Com::printF(PSTR(",\"currentLayer\":"));
 #if SDSUPPORT
             if (sd.sdactive && sd.fileInfo.layerHeight > 0) { // ONLY CAN TELL WHEN SD IS PRINTING
                 Com::print((int) (currentPosition[Z_AXIS] / sd.fileInfo.layerHeight));
@@ -2609,11 +2686,10 @@ void Printer::showJSONStatus(int type) {
 #else
             Com::print('0');
 #endif
-            Com::printFLN(PSTR("}"));
             break;
         case 4:
         case 5:
-            Com::printF(PSTR("{\"axisMins\":["));
+            Com::printF(PSTR(",\"axisMins\":["));
             Com::print((int) X_MIN_POS);
             Com::print(',');
             Com::print((int) Y_MIN_POS);
@@ -2659,9 +2735,11 @@ void Printer::showJSONStatus(int type) {
                 Com::print(',');
                 Com::print(extruder[i].maxFeedrate);
             }
-            Com::printFLN(PSTR("]}"));
+            Com::printFLN(PSTR("]"));
             break;
     }
+
+    Com::printFLN(PSTR("}"));
 }
 
 

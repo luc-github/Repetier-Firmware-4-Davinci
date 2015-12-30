@@ -62,8 +62,9 @@ RepRap M Codes
 
 - M104 - Set extruder target temp
 - M105 - Read current temp
-- M106 - Fan on (only if repurpose fan is enabled)
-- M107 - Fan off (only if repurpose fan is enabled)
+M106/M107 work only if repurpose fan is enabled, as by default fan is managed by temperature
+- M106 S<speed> P<fan> - Fan on speed = 0..255, P = 0 or 1, 0 is default and can be omitted
+- M107 P<fan> - Fan off, P = 0 or 1, 0 is default and can be omitted
 - M109 - Wait for extruder current temp to reach target temp.
 - M114 - Display current position
 
@@ -140,6 +141,7 @@ Custom M Codes
 - M451 - Set printer mode to FFF
 - M452 - Set printer mode to laser
 - M453 - Set printer mode to CNC
+- M460 X<minTemp> Y<maxTemp> : Set temperature range for thermistor controlled fan
 - M500 Store settings to EEPROM
 - M501 Load settings from EEPROM
 - M502 Reset settings to the one in configuration.h. Does not store values in EEPROM!

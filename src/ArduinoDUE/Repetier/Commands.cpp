@@ -316,8 +316,14 @@ void Commands::changeFlowrateMultiply(int factor)
     Com::printFLN(Com::tFlowMultiply, factor);
 }
 
+#if FEATURE_FAN_CONTROL
 uint8_t fanKickstart;
-void Commands::setFanSpeed(int speed)
+#endif
+#if FEATURE_FAN2_CONTROL
+uint8_t fan2Kickstart;
+#endif
+
+void Commands::setFanSpeed(int speed, bool immediately)
 {
 #if FAN_PIN >- 1 && FEATURE_FAN_CONTROL
     if(Printer::fanSpeed == speed)
@@ -325,10 +331,24 @@ void Commands::setFanSpeed(int speed)
     speed = constrain(speed,0,255);
     Printer::setMenuMode(MENU_MODE_FAN_RUNNING,speed != 0);
     Printer::fanSpeed = speed;
-    if(PrintLine::linesCount == 0)
-        Printer::setFanSpeedDirectly(speed);
+    if(PrintLine::linesCount == 0 || immediately) {
+        if(Printer::mode == PRINTER_MODE_FFF)
+        {
+	        for(fast8_t i = 0; i < PRINTLINE_CACHE_SIZE; i++)
+			    PrintLine::lines[i].secondSpeed = speed;         // fill all printline buffers with new fan speed value
+        }
+		Printer::setFanSpeedDirectly(speed);
+	}
     Com::printFLN(Com::tFanspeed,speed); // send only new values to break update loops!
 #endif
+}
+void Commands::setFan2Speed(int speed)
+{
+	#if FAN2_PIN >- 1 && FEATURE_FAN2_CONTROL
+	speed = constrain(speed,0,255);
+	Printer::setFan2SpeedDirectly(speed);
+	Com::printFLN(Com::tFan2speed,speed); // send only new values to break update loops!
+	#endif
 }
 
 void Commands::reportPrinterUsage()
@@ -1251,7 +1271,7 @@ void Commands::processGCode(GCode *com)
         Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h1 = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
         //Davinci Specific, better error management
-	if(h1 < 0)
+        if(h1 < 0)
                 {
                 Printer::zMin =  zMin_save;
                 Printer::setAutolevelActive(true);
@@ -1263,7 +1283,7 @@ void Commands::processGCode(GCode *com)
         Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h2 = Printer::runZProbe(false,false);
         //Davinci Specific, better error management
-	if(h2 < 0)
+        if(h2 < 0)
               {
                 Printer::zMin =  zMin_save;
                 Printer::setAutolevelActive(true);
@@ -1275,7 +1295,7 @@ void Commands::processGCode(GCode *com)
         Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h3 = Printer::runZProbe(false,true);
         //Davinci Specific, better error management
-	if(h3 < 0)
+        if(h3 < 0)
               {
                 Printer::zMin =  zMin_save;
                 Printer::setAutolevelActive(true);
@@ -1717,7 +1737,7 @@ void Commands::processMCode(GCode *com)
         }
         break;
 #endif
-#if JSON_OUTPUT
+#if JSON_OUTPUT && SDSUPPORT
     case 36: // M36 JSON File Info
         if (com->hasString()) {
             sd.JSONFileInfo(com->text);
@@ -2008,26 +2028,25 @@ void Commands::processMCode(GCode *com)
     case 106: // M106 Fan On
         if(!(Printer::flag2 & PRINTER_FLAG2_IGNORE_M106_COMMAND))
         {
-            if(com->hasP())
-                Commands::waitUntilEndOfAllMoves();
-            setFanSpeed(com->hasS() ? com->S : 255);
+            if(com->hasP() && com->P == 1)
+	            setFan2Speed(com->hasS() ? com->S : 255);
+			else
+	            setFanSpeed(com->hasS() ? com->S : 255);
         }
         break;
     case 107: // M107 Fan Off
-        if(!(Printer::flag2 & PRINTER_FLAG2_IGNORE_M106_COMMAND))
-        {
-            if(com->hasP())
-                Commands::waitUntilEndOfAllMoves();
-            setFanSpeed(0);
-        }
+        if(com->hasP() && com->P == 1)
+	        setFan2Speed(0);
+		else
+	        setFanSpeed(0);
         break;
 #endif
     case 111: // M111 enable/disable run time debug flags
-        if(com->hasS()) Printer::debugLevel = com->S;
+        if(com->hasS()) Printer::setDebugLevel(static_cast<uint8_t>(com->S));
         if(com->hasP())
         {
-            if (com->P > 0) Printer::debugLevel |= com->P;
-            else Printer::debugLevel &= ~(-com->P);
+            if (com->P > 0) Printer::debugSet(static_cast<uint8_t>(com->P));
+            else Printer::debugReset(static_cast<uint8_t>(-com->P));
         }
         if(Printer::debugDryrun())   // simulate movements without printing
         {
@@ -2072,6 +2091,7 @@ void Commands::processMCode(GCode *com)
     case 163: // M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive
         if(com->hasS() && com->hasP() && com->S < NUM_EXTRUDER && com->S >= 0)
             Extruder::setMixingWeight(com->S, com->P);
+		Extruder::recomputeMixingExtruderSteps();
         break;
     case 164: /// M164 S<virtNum> P<0 = dont store eeprom,1 = store to eeprom> - Store weights as virtual extruder S
         if(!com->hasS() || com->S < 0 || com->S >= VIRTUAL_EXTRUDER) break; // ignore illigal values
@@ -2136,8 +2156,8 @@ void Commands::processMCode(GCode *com)
         TemperatureController *temp = &Extruder::current->tempControl;
         if(com->hasS())
         {
-            if(com->S<0) break;
-            if(com->S<NUM_EXTRUDER) temp = &extruder[com->S].tempControl;
+            if(com->S < 0) break;
+            if(com->S < NUM_EXTRUDER) temp = &extruder[com->S].tempControl;
 #if HAVE_HEATED_BED
             else temp = &heatedBedController;
 #else
@@ -2418,6 +2438,14 @@ void Commands::processMCode(GCode *com)
 #endif
         Printer::reportPrinterMode();
         break;
+#if FAN_THERMO_PIN > -1
+	case 460: // M460 X<minTemp> Y<maxTemp> : Set temperature range for thermo controlled fan
+		if(com->hasX())
+			Printer::thermoMinTemp = com->X;
+		if(com->hasY())
+			Printer::thermoMaxTemp = com->Y;
+		break;
+#endif
     case 500: // M500
     {
 #if EEPROM_MODE != 0
@@ -2678,7 +2706,7 @@ void Commands::executeGCode(GCode *com)
     if(Printer::debugDryrun()) {
         Com::printFLN("Dryrun was enabled");
         com->printCommand();
-        Printer::debugLevel &= ~8;
+        Printer::debugReset(8);
     }
 #endif
 
@@ -2729,7 +2757,7 @@ void Commands::emergencyStop()
     Extruder::manageTemperatures();
     for(uint8_t i = 0; i < NUM_EXTRUDER + 3; i++)
         pwm_pos[i] = 0;
-#if EXT0_HEATER_PIN > -1
+#if EXT0_HEATER_PIN > -1 && NUM_EXTRUDER > 0
     WRITE(EXT0_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
 #if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1
@@ -2750,10 +2778,10 @@ void Commands::emergencyStop()
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
     WRITE(FAN_PIN, 0);
 #endif
-#if HEATED_BED_HEATER_PIN > -1
+#if HAVE_HEATED_BED && HEATED_BED_HEATER_PIN > -1
     WRITE(HEATED_BED_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
-    UI_STATUS_UPD(UI_TEXT_KILLED);
+    UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_KILLED_ID));
     HAL::delayMilliseconds(200);
     InterruptProtectedBlock noInts;
     while(1) {}

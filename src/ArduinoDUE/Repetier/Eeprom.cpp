@@ -760,6 +760,8 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
         if(sum < 2.7 || sum > 3.3)
             Printer::resetTransformationMatrix(false);
         Printer::setAutolevelActive(HAL::eprGetByte(EPR_AUTOLEVEL_ACTIVE));
+        //Davinci Specific
+        //remove garbage output
         //Com::printArrayFLN(Com::tTransformationMatrix,Printer::autolevelTransformation, 9, 6);
     }
 #endif
@@ -977,7 +979,7 @@ void EEPROM::init()
                 if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
                     HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
             }
-            Com::printFLN(PSTR("EEprom baud rate restored from configuration."));
+            Com::printFLN(PSTR("EEPROM baud rate restored from configuration."));
             Com::printFLN(PSTR("RECOMPILE WITH USE_CONFIGURATION_BAUD_RATE == 0 to alter baud rate via EEPROM"));
         }
     }

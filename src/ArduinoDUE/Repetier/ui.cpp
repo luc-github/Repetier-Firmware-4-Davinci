@@ -1534,12 +1534,12 @@ void UIDisplay::parse(const char *txt,bool ram)
             else if(c2 == 'J') addFloat(Printer::maxZJerk, 3, 1);
 #endif
             break;
-        case 'B':
-        if(c2 == 'C')     //Custom coating
-                {
-                         addFloat(Printer::zBedOffset, 2, 2);
-                         break;
-                }
+		case 'B':
+            if(c2 == 'C')	 //Custom coating
+            {
+	            addFloat(Printer::zBedOffset, 3, 2);
+	            break;
+            }
          //Davinci Specific,
         if(c2=='1') //heat PLA
                 {
@@ -1905,6 +1905,8 @@ case 'P':
             #endif
             break;
         case 's': // Endstop positions
+        Endstops::update();
+        Endstops::update(); // double test to get right signal. Needed for crosstalk protection.
             //Davinci Specific, sound and sensor
         #if FEATURE_BEEPER
             if(c2=='o')addStringOnOff(HAL::enablesound);        // sound on/off
@@ -2308,6 +2310,7 @@ void UIDisplay::goDir(char *name)
 }
 
 //Davinci Specific, integrate function in class
+/** write file names at current position to lcd */
 void UIDisplay::sdrefresh(uint16_t &r,char cache[UI_ROWS][MAX_COLS+1])
 {
 #if SDSUPPORT
@@ -3971,7 +3974,6 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
 {
     int ret = 0;
 #if UI_HAS_KEYS == 1
-//    bool skipBeep = false;
  //Davinci Specific, powermanagement and specific variables
     bool process_it=false;
     int previousaction=0;
@@ -4153,16 +4155,16 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             Printer::setOrigin(0, 0, 0);
             break;
         case UI_ACTION_DEBUG_ECHO:
-            Printer::debugLevel ^= 1;
+            Printer::toggleEcho();
             break;
         case UI_ACTION_DEBUG_INFO:
-            Printer::debugLevel ^= 2;
+            Printer::toggleInfo();
             break;
         case UI_ACTION_DEBUG_ERROR:
-            Printer::debugLevel ^= 4;
+            Printer::toggleErrors();
             break;
         case UI_ACTION_DEBUG_DRYRUN:
-            Printer::debugLevel ^= 8;
+            Printer::toggleDryRun();
             if(Printer::debugDryrun())   // simulate movements without printing
             {
                 for(int i = 0;i < NUM_EXTRUDER; i++)
@@ -6005,20 +6007,20 @@ case UI_ACTION_LOAD_FAILSAFE:
         case UI_ACTION_FAN_25:
         case UI_ACTION_FAN_50:
         case UI_ACTION_FAN_75:
-            Commands::setFanSpeed((action - UI_ACTION_FAN_OFF) * 64);
+            Commands::setFanSpeed((action - UI_ACTION_FAN_OFF) * 64, true);
             break;
         case UI_ACTION_FAN_FULL:
-            Commands::setFanSpeed(255);
+            Commands::setFanSpeed(255, true);
             break;
         case UI_ACTION_FAN_SUSPEND:
         {
             static uint8_t lastFanSpeed = 255;
             if(Printer::getFanSpeed()==0)
-                Commands::setFanSpeed(lastFanSpeed);
+                Commands::setFanSpeed(lastFanSpeed, true);
             else
             {
                 lastFanSpeed = Printer::getFanSpeed();
-                Commands::setFanSpeed(0);
+                Commands::setFanSpeed(0, true);
             }
         }
         break;
@@ -6273,10 +6275,10 @@ case UI_ACTION_LOAD_FAILSAFE:
 #endif
         break;
         case UI_ACTION_FAN_UP:
-            Commands::setFanSpeed(Printer::getFanSpeed() + 32);
+            Commands::setFanSpeed(Printer::getFanSpeed() + 32, true);
             break;
         case UI_ACTION_FAN_DOWN:
-            Commands::setFanSpeed(Printer::getFanSpeed() - 32);
+            Commands::setFanSpeed(Printer::getFanSpeed() - 32, true);
             break;
         case UI_ACTION_KILL:
             Commands::emergencyStop();

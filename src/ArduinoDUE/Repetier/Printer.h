@@ -113,7 +113,7 @@ union wizardVar
 // define an integer number of steps more than large enough to get to endstop from anywhere
 #define HOME_DISTANCE_STEPS (Printer::zMaxSteps-Printer::zMinSteps+1000)
 #define HOME_DISTANCE_MM (HOME_DISTANCE_STEPS * invAxisStepsPerMM[Z_AXIS])
-// Some dfines to make clearer reading, as we overload these cartesion memory locations for delta
+// Some defines to make clearer reading, as we overload these cartesian memory locations for delta
 #define towerAMaxSteps Printer::xMaxSteps
 #define towerBMaxSteps Printer::yMaxSteps
 #define towerCMaxSteps Printer::zMaxSteps
@@ -270,6 +270,7 @@ public:
 
 class Printer
 {
+    static uint8_t debugLevel;
 public:
 #if USE_ADVANCE
     static volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
@@ -306,10 +307,9 @@ public:
     static uint8_t mode;
     static uint8_t fanSpeed; // Last fan speed set with M106/M107
     static float zBedOffset;
-    static uint8_t debugLevel;
     static uint8_t flag0,flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
     static uint8_t flag2;
-    static uint8_t stepsPerTimerCall;
+    static fast8_t stepsPerTimerCall;
     static uint32_t interval;    ///< Last step duration in ticks.
     static uint32_t timer;              ///< used for acceleration/deceleration timing
     static uint32_t stepNumber;         ///< Step number in current move.
@@ -353,6 +353,10 @@ public:
 #endif
 #if FEATURE_AUTOLEVEL
     static float autolevelTransformation[9]; ///< Transformation matrix
+#endif
+#if FAN_THERMO_PIN > -1
+	static float thermoMinTemp;
+	static float thermoMaxTemp;
 #endif
     static int16_t zBabystepsMissing;
     static float minimumSpeed;               ///< lowest allowed speed to keep integration error small
@@ -427,7 +431,14 @@ public:
     {
         return (menuMode & mode) == mode;
     }
-
+	static void setDebugLevel(uint8_t newLevel);
+	static void toggleEcho();
+	static void toggleInfo();
+	static void toggleErrors();
+	static void toggleDryRun();
+	static void toggleCommunication();
+	static void toggleNoMoves();
+	static INLINE uint8_t getDebugLevel() {return debugLevel;}
     //Davinci Specific, extra mode
     static INLINE void setMenuModeEx(uint8_t mode,bool on)
     {
@@ -477,15 +488,16 @@ public:
 
     static INLINE void debugSet(uint8_t flags)
     {
-        debugLevel |= flags;
+        setDebugLevel(debugLevel | flags);
     }
 
     static INLINE void debugReset(uint8_t flags)
     {
-        debugLevel &= ~flags;
+        setDebugLevel(debugLevel & ~flags);
     }
     /** Sets the pwm for the fan speed. Gets called by motion control ot Commands::setFanSpeed. */
     static void setFanSpeedDirectly(uint8_t speed);
+    static void setFan2SpeedDirectly(uint8_t speed);
     /** \brief Disable stepper motor for x direction. */
     static INLINE void disableXStepper()
     {
@@ -851,8 +863,8 @@ public:
     static INLINE void unsetAllSteppersDisabled()
     {
         flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED;
-#if FAN_BOARD_PIN>-1
-        pwm_pos[NUM_EXTRUDER + 1] = 255;
+#if FAN_BOARD_PIN > -1
+        pwm_pos[PWM_BOARD_FAN] = 255;
 #endif // FAN_BOARD_PIN
     }
     static INLINE bool isAnyTempsensorDefect()
@@ -1106,7 +1118,11 @@ public:
     static bool isPositionAllowed(float x,float y,float z);
     static INLINE int getFanSpeed()
     {
-        return (int)pwm_pos[NUM_EXTRUDER + 2];
+        return (int)pwm_pos[PWM_FAN1];
+    }
+    static INLINE int getFan2Speed()
+    {
+	    return (int)pwm_pos[PWM_FAN2];
     }
 #if NONLINEAR_SYSTEM
     static INLINE void setDeltaPositions(long xaxis, long yaxis, long zaxis)

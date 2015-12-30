@@ -920,10 +920,14 @@ UI_MENU_CHANGEACTION_T(ui_menu_ext_wait_units,      UI_TEXT_EXTR_WAIT_RETRACT_UN
 #define UI_MENU_ADV_CNT 0
 #define UI_MENU_ADVANCE
 #if USE_ADVANCE
+#undef UI_MENU_ADV_CNT
 #define UI_MENU_ADV_CNT 1
+#undef UI_MENU_ADVANCE
 #define UI_MENU_ADVANCE ,&ui_menu_cext_advancel
 #if ENABLE_QUADRATIC_ADVANCE
+#undef UI_MENU_ADV_CNT
 #define UI_MENU_ADV_CNT 2
+#undef UI_MENU_ADVANCE
 #define UI_MENU_ADVANCE ,&ui_menu_cext_advancel,&ui_menu_cext_advancek
 UI_MENU_CHANGEACTION_T(ui_menu_cext_advancek,UI_TEXT_EXTR_ADVANCE_K_ID,UI_ACTION_ADVANCE_K)
 #endif
