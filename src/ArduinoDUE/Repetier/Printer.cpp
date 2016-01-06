@@ -218,7 +218,7 @@ void Printer::cleanNozzle(bool restoreposition)
 	#endif
 	#if DAVINCI ==4 || DAVINCI ==0
 	moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,zMin+3,IGNORE_COORDINATE,homingFeedrate[Z_AXIS]);
-    Commands::waitUntilEndOfAllMoves();
+	Commands::waitUntilEndOfAllMoves();
 	//first step noze
 	moveToReal(xMin,yMin+CLEAN_Y-1,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	//second step
@@ -230,7 +230,51 @@ void Printer::cleanNozzle(bool restoreposition)
 	//fifth step
 	moveToReal(xMin,yMin+CLEAN_Y+2,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	#endif
-	#if DAVINCI ==2 || DAVINCI ==3
+	#if DAVINCI ==2 && MODEL ==1 || DAVINCI ==3 && MODEL ==1
+	//first step
+	moveToReal(xMin + CLEAN_X-ENDSTOP_X_BACK_ON_HOME,yMin + CLEAN_Y-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//second step
+	moveToReal(xMin-ENDSTOP_X_BACK_ON_HOME,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//third step
+	moveToReal(xMin+CLEAN_X-ENDSTOP_X_BACK_ON_HOME,yMin+CLEAN_Y-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//fourth step
+	moveToReal(xMin-ENDSTOP_X_BACK_ON_HOME,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//move out to be sure first drop go to purge box
+        moveToReal(xLength-2,yMin+CLEAN_Y-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+        moveToReal(xLength-2,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+        Commands::waitUntilEndOfAllMoves();
+        //first step
+        moveToReal(xLength-20,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//second step
+	moveToReal(IGNORE_COORDINATE,yMin+CLEAN_Y-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//third step
+	moveToReal(xLength,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//fourth step
+	moveToReal(IGNORE_COORDINATE,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//fifth step	
+	moveToReal(xLength-20,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//sixth step
+	moveToReal(IGNORE_COORDINATE,yMin+CLEAN_Y-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//seventh step
+	moveToReal(xLength,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//eigth step
+	moveToReal(IGNORE_COORDINATE,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//ninth step
+	moveToReal(xLength-20,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+
+        
+        Commands::waitUntilEndOfAllMoves();
+	//back to original position and original extruder
+        //X,Y first then Z
+	if (restoreposition)
+		{
+		moveToReal(tmp_x,tmp_y,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+		moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,tmp_z,IGNORE_COORDINATE,homingFeedrate[0]);
+		Commands::waitUntilEndOfAllMoves();
+		Extruder::selectExtruderById(tmp_extruderid);
+		}
+        #endif
+        #if DAVINCI ==2 && MODEL ==0 || DAVINCI ==3 && MODEL ==0
 	//first step
 	moveToReal(xMin + CLEAN_X-ENDSTOP_X_BACK_ON_HOME,yMin + CLEAN_Y-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	//second step
