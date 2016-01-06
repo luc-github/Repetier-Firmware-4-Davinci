@@ -218,7 +218,7 @@ void Printer::cleanNozzle(bool restoreposition)
 	#endif
 	#if DAVINCI ==4 || DAVINCI ==0
 	moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,zMin+3,IGNORE_COORDINATE,homingFeedrate[Z_AXIS]);
-	Commands::waitUntilEndOfAllMoves();
+	 Commands::waitUntilEndOfAllMoves();
 	//first step noze
 	moveToReal(xMin,yMin+CLEAN_Y-1,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	//second step
