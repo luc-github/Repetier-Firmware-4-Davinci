@@ -241,25 +241,21 @@ void Printer::cleanNozzle(bool restoreposition)
 	moveToReal(xMin-ENDSTOP_X_BACK_ON_HOME,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	//move out to be sure first drop go to purge box
         moveToReal(xLength-2,yMin+10,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
-        moveToReal(xLength-2,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+        moveToReal(IGNORE_COORDINATE,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
         Commands::waitUntilEndOfAllMoves();
         //first step
         moveToReal(xLength-10,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	//second step
-	moveToReal(IGNORE_COORDINATE,yMin+10,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	moveToReal(xLength-5,yMin+10,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	//third step
-	moveToReal(xLength,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
-	//fourth step
-	moveToReal(IGNORE_COORDINATE,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
-	//fifth step	
+	moveToReal(xLength,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//fourth step	
 	moveToReal(xLength-10,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	//fifth step
+	moveToReal(xLength-5,yMin+10,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	//sixth step
-	moveToReal(IGNORE_COORDINATE,yMin+10,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	moveToReal(xLength,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	//seventh step
-	moveToReal(xLength,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
-	//eigth step
-	moveToReal(IGNORE_COORDINATE,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
-	//ninth step
 	moveToReal(xLength-10,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 
         
