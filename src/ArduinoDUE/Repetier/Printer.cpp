@@ -244,19 +244,19 @@ void Printer::cleanNozzle(bool restoreposition)
         moveToReal(IGNORE_COORDINATE,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
         Commands::waitUntilEndOfAllMoves();
         //first step
-        moveToReal(xLength-10,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+        moveToReal(xLength-15,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	//second step
-	moveToReal(xLength-5,yMin+10,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	moveToReal(xLength-3,yMin+10,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	//third step
 	moveToReal(xLength,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	//fourth step	
-	moveToReal(xLength-10,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	moveToReal(xLength-15,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	//fifth step
-	moveToReal(xLength-5,yMin+10,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	moveToReal(xLength-3,yMin+10,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	//sixth step
 	moveToReal(xLength,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	//seventh step
-	moveToReal(xLength-10,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
+	moveToReal(xLength-15,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 
         
         Commands::waitUntilEndOfAllMoves();
