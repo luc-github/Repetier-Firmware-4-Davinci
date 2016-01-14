@@ -230,7 +230,7 @@ void Printer::cleanNozzle(bool restoreposition)
 	//fifth step
 	moveToReal(xMin,yMin+CLEAN_Y+2,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	#endif
-	#if DAVINCI ==2 && MODEL ==1 || DAVINCI ==3
+	#if DAVINCI ==2 || DAVINCI ==3
 	//first step
 	moveToReal(xMin + CLEAN_X-ENDSTOP_X_BACK_ON_HOME,yMin + CLEAN_Y-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	//second step
