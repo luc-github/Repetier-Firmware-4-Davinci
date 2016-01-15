@@ -16,7 +16,7 @@
 
 */
 
-#include "Repetier.h"
+#include "Repetier.h"c
 
 //Davinci Specific, for fancy effects
 extern void playsound(int tone,int duration);
@@ -248,7 +248,6 @@ void Printer::cleanNozzle(bool restoreposition, int8_t extT)
 		{
 		        moveToReal(xLength-2,yMin+10,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 		        moveToReal(IGNORE_COORDINATE,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
-		        //Commands::waitUntilEndOfAllMoves();
 		        //first step
 		        moveToReal(xLength-15,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 			//second step
