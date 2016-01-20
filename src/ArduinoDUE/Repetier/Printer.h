@@ -973,7 +973,7 @@ public:
     static void homeAxis(bool xaxis,bool yaxis,bool zaxis); /// Home axis
 //Davinci Specific, clean nozzle feature
 #if ENABLE_CLEAN_NOZZLE 
-    static void cleanNozzle(bool restoreposition=true);
+    static void cleanNozzle(bool restoreposition=true, int8_t extT=-1);
 #endif
     static void setOrigin(float xOff,float yOff,float zOff);
     static bool isPositionAllowed(float x,float y,float z);

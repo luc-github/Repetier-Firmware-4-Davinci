@@ -1365,8 +1365,9 @@ void Commands::processMCode(GCode *com)
 //Davinci Specific, Clean noozle and light management
 #if ENABLE_CLEAN_NOZZLE
         case 100:
-            Printer::cleanNozzle();
-            break;
+          if (com->hasT() && ((com->T == 0)||(com->T == 1)))Printer::cleanNozzle(true, com->T);
+          else Printer::cleanNozzle();
+          break;
 #endif
 //Davinci Specific, Light management
 #if CASE_LIGHTS_PIN>=0
