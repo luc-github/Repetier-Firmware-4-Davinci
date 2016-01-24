@@ -76,11 +76,14 @@
 #endif
 #define ORIG_PS_ON_PIN      -1
 #define PS_ON_PIN       ORIG_PS_ON_PIN
-#if DAVINCI==4
+#if MODEL==0
+#define TOP_SENSOR_PIN      6
+#else
 #define TOP_SENSOR_PIN      64
+#endif
+#if DAVINCI==4
 #define BADGE_LIGHT_PIN		6
 #else
-#define TOP_SENSOR_PIN      6
 #define BADGE_LIGHT_PIN		-1
 #endif
 #define SDSS            55
