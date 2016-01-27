@@ -231,7 +231,7 @@ void Printer::cleanNozzle(bool restoreposition, int8_t extT)
 	moveToReal(xMin,yMin+CLEAN_Y+2,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 	#endif
 	#if DAVINCI ==2 || DAVINCI ==3
-		if(extT == 0 || extT == -1)
+		if(extT == 1 || extT == -1)
 		{
 			//first step
 			moveToReal(xMin + CLEAN_X-ENDSTOP_X_BACK_ON_HOME,yMin + CLEAN_Y-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
@@ -244,7 +244,7 @@ void Printer::cleanNozzle(bool restoreposition, int8_t extT)
 			//move out to be sure first drop go to purge box
 			Commands::waitUntilEndOfAllMoves();
 		}
-		if(extT == 1 || extT == -1)
+		if(extT == 0 || extT == -1)
 		{
 		        moveToReal(xLength,yMin+10,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
 		        moveToReal(IGNORE_COORDINATE,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
