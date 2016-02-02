@@ -241,19 +241,23 @@
 #if NUM_EXTRUDER == 1
 #define UI_TEXT_EXTR0_TEMP       "Extrud.:  %E0" cDEG "C"
 #else
-#define UI_TEXT_EXTR0_TEMP       "Extrud. 1:%E0" cDEG "C"
+#define UI_TEXT_EXTR0_TEMP       "Left Ext: %E0" cDEG "C"
 #endif
-#define UI_TEXT_EXTR1_TEMP       "Extrud. 2:%E1" cDEG "C"
+#define UI_TEXT_EXTR1_TEMP       "Right Ext:%E1" cDEG "C"
 #define UI_TEXT_EXTR2_TEMP       "Extrud. 3:%E2" cDEG "C"
 #if NUM_EXTRUDER == 1
 #define UI_TEXT_EXTR0_OFF        "SwitchOff Ext %B4"
 #else
-#define UI_TEXT_EXTR0_OFF        "SwitchOff Ext1%B4"
+#define UI_TEXT_EXTR0_OFF        "Disable Left  %B4"
 #endif
-#define UI_TEXT_EXTR1_OFF        "SwitchOff Ext2%B5"
+#define UI_TEXT_EXTR1_OFF        "Disable Right %B5"
 #define UI_TEXT_EXTR2_OFF        "SwitchOff Ext3%B6"
+#if NUM_EXTRUDER == 1
 #define UI_TEXT_EXTR0_SELECT     "%X0Select Extr.1"
-#define UI_TEXT_EXTR1_SELECT     "%X1Select Extr.2"
+#else
+#define UI_TEXT_EXTR0_SELECT     "%X0Select Left"
+#endif
+#define UI_TEXT_EXTR1_SELECT     "%X1Select Right"
 #define UI_TEXT_EXTR2_SELECT     "%X2Select Extr.3"
 #define UI_TEXT_EXTR_ORIGIN      "Set Origin"
 #define UI_TEXT_PRINT_X          "Print X:%ax"
