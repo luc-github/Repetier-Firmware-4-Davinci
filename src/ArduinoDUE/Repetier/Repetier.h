@@ -24,27 +24,29 @@
 
 #include <math.h>
 #include <stdint.h>
-#define REPETIER_VERSION "0.92.6"
+#define REPETIER_VERSION "0.92.9"
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
 // ##########################################################################################
-// These are run time sqitchable debug flags
+// These are run time switchable debug flags
 enum debugFlags {DEB_ECHO = 0x1, DEB_INFO = 0x2, DEB_ERROR = 0x4,DEB_DRYRUN = 0x8,
                  DEB_COMMUNICATION = 0x10, DEB_NOMOVES = 0x20, DEB_DEBUG = 0x40
                 };
 
 /** Uncomment, to see detailed data for every move. Only for debugging purposes! */
 //#define DEBUG_QUEUE_MOVE
+/** write infos about path planner changes */
+//#define DEBUG_PLANNER
 /** Allows M111 to set bit 5 (16) which disables all commands except M111. This can be used
-to test your data througput or search for communication problems. */
+to test your data throughput or search for communication problems. */
 #define INCLUDE_DEBUG_COMMUNICATION 1
 /** Allows M111 so set bit 6 (32) which disables moves, at the first tried step. In combination
 with a dry run, you can test the speed of path computations, which are still performed. */
 #define INCLUDE_DEBUG_NO_MOVE 1
 /** Writes the free RAM to output, if it is less then at the last test. Should always return
 values >500 for safety, since it doesn't catch every function call. Nice to tweak cache
-usage or for seraching for memory induced errors. Switch it off for production, it costs execution time. */
+usage or for searching for memory induced errors. Switch it off for production, it costs execution time. */
 //#define DEBUG_FREE_MEMORY
 //#define DEBUG_ADVANCE
 /** If enabled, writes the created generic table to serial port at startup. */
@@ -53,7 +55,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 //#define DEBUG_STEPCOUNT
 /** This enables code to make M666 drop an ok, so you get problems with communication. It is to test host robustness. */
 //#define DEBUG_COM_ERRORS
-/** Adds a menu point in quick settings to write debg informations to the host in case of hangs where the ui still works. */
+/** Adds a menu point in quick settings to write debug informations to the host in case of hangs where the ui still works. */
 //#define DEBUG_PRINT
 //#define DEBUG_DELTA_OVERFLOW
 //#define DEBUG_DELTA_REALPOS
@@ -76,6 +78,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define BIPOD 5
 #define XZ_GANTRY 8
 #define ZX_GANTRY 9
+#define GANTRY_FAKE 10
 
 #define WIZARD_STACK_SIZE 8
 #define IGNORE_COORDINATE 999999
@@ -130,6 +133,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define HOME_ORDER_ZXY 5
 #define HOME_ORDER_ZYX 6
 #define HOME_ORDER_ZXYTZ 7 // Needs hot hotend for correct homing
+#define HOME_ORDER_XYTZ 8 // Needs hot hotend for correct homing
 
 #define NO_CONTROLLER 0
 #define UICONFIG_CONTROLLER 1
@@ -154,6 +158,8 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define CONTROLLER_BAM_DICE_DUE 20
 #define CONTROLLER_VIKI2 21
 #define CONTROLLER_LCD_MP_PHARAOH_DUE 22
+#define CONTROLLER_SPARKLCD_ADAPTER 23
+#define CONTROLLER_ZONESTAR 24
 #define CONTROLLER_FELIX_DUE 405
 
 //direction flags
@@ -182,11 +188,63 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define PRINTER_MODE_FFF 0
 #define PRINTER_MODE_LASER 1
 #define PRINTER_MODE_CNC 2
-// we can not prevent this as some configs need a parameter and others not
+
+#define ILLEGAL_Z_PROBE -888
+
+// we can not prevent this as some configurations need a parameter and others not
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
 #include "Configuration.h"
+
+#ifndef SHARED_EXTRUDER_HEATER
+#define SHARED_EXTRUDER_HEATER 0
+#endif
+
+#ifndef DUAL_X_AXIS
+#define DUAL_X_AXIS 0
+#endif
+
+#if SHARED_EXTRUDER_HEATER || MIXING_EXTRUDER
+#undef EXT1_HEATER_PIN
+#undef EXT2_HEATER_PIN
+#undef EXT3_HEATER_PIN
+#undef EXT4_HEATER_PIN
+#undef EXT5_HEATER_PIN
+#define EXT1_HEATER_PIN -1
+#define EXT2_HEATER_PIN -1
+#define EXT3_HEATER_PIN -1
+#define EXT4_HEATER_PIN -1
+#define EXT5_HEATER_PIN -1
+#endif
+
+#ifndef BOARD_FAN_SPEED
+#define BOARD_FAN_SPEED
+#endif
+
+#ifndef MAX_JERK_DISTANCE
+#define MAX_JERK_DISTANCE 0.6
+#endif
+#define XY_GANTRY 1
+#define YX_GANTRY 2
+#define DELTA 3
+#define TUGA 4
+#define BIPOD 5
+#define XZ_GANTRY 8
+#define ZX_GANTRY 9
+#if defined(FAST_COREXYZ) && !(DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY || DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY || DRIVE_SYSTEM==GANTRY_FAKE)
+#undef FAST_COREXYZ
+#endif
+#ifdef FAST_COREXYZ
+#if DELTA_SEGMENTS_PER_SECOND_PRINT < 30
+#undef DELTA_SEGMENTS_PER_SECOND_PRINT
+#define DELTA_SEGMENTS_PER_SECOND_PRINT 30 // core is linear, no subsegments needed
+#endif
+#if DELTA_SEGMENTS_PER_SECOND_MOVE < 30
+#undef DELTA_SEGMENTS_PER_SECOND_MOVE
+#define DELTA_SEGMENTS_PER_SECOND_MOVE 30
+#endif
+#endif
 
 inline void memcopy2(void *dest,void *source) {
 	*((int16_t*)dest) = *((int16_t*)source);
@@ -197,6 +255,10 @@ inline void memcopy4(void *dest,void *source) {
 
 #ifndef JSON_OUTPUT
 #define JSON_OUTPUT 0
+#endif
+
+#if !defined(ZPROBE_MIN_TEMPERATURE) && defined(ZHOME_MIN_TEMPERATURE)
+#define ZPROBE_MIN_TEMPERATURE ZHOME_MIN_TEMPERATURE
 #endif
 
 #if FEATURE_Z_PROBE && Z_PROBE_PIN < 0
@@ -219,7 +281,7 @@ inline void memcopy4(void *dest,void *source) {
 #define ZHOME_Y_POS IGNORE_COORDINATE
 #endif
 
-// MS1 MS2 Stepper Driver Microstepping mode table
+// MS1 MS2 Stepper Driver Micro stepping mode table
 #define MICROSTEP1 LOW,LOW
 #define MICROSTEP2 HIGH,LOW
 #define MICROSTEP4 LOW,HIGH
@@ -255,7 +317,7 @@ inline void memcopy4(void *dest,void *source) {
 #define SOFTWARE_LEVELING (defined(FEATURE_SOFTWARE_LEVELING) && (DRIVE_SYSTEM==DELTA))
 /**  \brief Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
 */
-#ifndef ROD_RADIUS
+#if !defined(ROD_RADIUS) && DRIVE_SYSTEM == DELTA
 #define ROD_RADIUS (PRINTER_RADIUS-END_EFFECTOR_HORIZONTAL_OFFSET-CARRIAGE_HORIZONTAL_OFFSET)
 #endif
 
@@ -263,7 +325,7 @@ inline void memcopy4(void *dest,void *source) {
 #define UI_SPEEDDEPENDENT_POSITIONING true
 #endif
 
-#if DRIVE_SYSTEM==DELTA || DRIVE_SYSTEM==TUGA || DRIVE_SYSTEM==BIPOD
+#if DRIVE_SYSTEM==DELTA || DRIVE_SYSTEM==TUGA || DRIVE_SYSTEM==BIPOD || defined(FAST_COREXYZ)
 #define NONLINEAR_SYSTEM 1
 #else
 #define NONLINEAR_SYSTEM 0
@@ -273,16 +335,16 @@ inline void memcopy4(void *dest,void *source) {
 #define MANUAL_CONTROL 1
 #endif
 
-#define GANTRY ( DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY || DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY)
+#define GANTRY ( DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY || DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY || DRIVE_SYSTEM==GANTRY_FAKE)
 
-//Step to split a cirrcle in small Lines
+//Step to split a circle in small Lines
 #ifndef MM_PER_ARC_SEGMENT
 #define MM_PER_ARC_SEGMENT 1
 #define MM_PER_ARC_SEGMENT_BIG 3
 #else
 #define MM_PER_ARC_SEGMENT_BIG MM_PER_ARC_SEGMENT
 #endif
-//After this count of steps a new SIN / COS caluclation is startet to correct the circle interpolation
+//After this count of steps a new SIN / COS calculation is started to correct the circle interpolation
 #define N_ARC_CORRECTION 25
 
 // Test for shared cooler
@@ -357,7 +419,7 @@ inline void memcopy4(void *dest,void *source) {
 #define EXT1_ANALOG_CHANNEL
 #endif
 
-#if NUM_EXTRUDER > 2 && EXT2_TEMPSENSOR_TYPE<101
+#if NUM_EXTRUDER > 2 && EXT2_TEMPSENSOR_TYPE < 101
 #define EXT2_ANALOG_INPUTS 1
 #define EXT2_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS
 #define EXT2_ANALOG_CHANNEL ACCOMMA1 EXT2_TEMPSENSOR_PIN
@@ -393,7 +455,7 @@ inline void memcopy4(void *dest,void *source) {
 #define EXT4_ANALOG_CHANNEL
 #endif
 
-#if NUM_EXTRUDER > 5 && EXT5_TEMPSENSOR_TYPE<101
+#if NUM_EXTRUDER > 5 && EXT5_TEMPSENSOR_TYPE < 101
 #define EXT5_ANALOG_INPUTS 1
 #define EXT5_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS
 #define EXT5_ANALOG_CHANNEL ACCOMMA4 EXT5_TEMPSENSOR_PIN
@@ -405,11 +467,10 @@ inline void memcopy4(void *dest,void *source) {
 #define EXT5_ANALOG_CHANNEL
 #endif
 
-#if HAVE_HEATED_BED && HEATED_BED_SENSOR_TYPE<101
+#if HAVE_HEATED_BED && HEATED_BED_SENSOR_TYPE < 101
 #define BED_ANALOG_INPUTS 1
 #define BED_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS
 #define BED_ANALOG_CHANNEL ACCOMMA5 HEATED_BED_SENSOR_PIN
-#undef BEKOMMA
 #define BED_KOMMA ,
 #else
 #define BED_ANALOG_INPUTS 0
@@ -422,9 +483,20 @@ inline void memcopy4(void *dest,void *source) {
 #define THERMO_ANALOG_INPUTS 1
 #define THERMO_ANALOG_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS+BED_ANALOG_INPUTS
 #define THERMO_ANALOG_CHANNEL BED_KOMMA FAN_THERMO_THERMISTOR_PIN
+#define THERMO_COMMA ,
 #else
 #define THERMO_ANALOG_INPUTS 0
 #define THERMO_ANALOG_CHANNEL
+#define THERMO_COMMA BED_KOMMA
+#endif
+
+#if defined(ADC_KEYPAD_PIN) && (ADC_KEYPAD_PIN > -1)
+#define KEYPAD_ANALOG_INPUTS 1
+#define KEYPAD_ANALOG_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS+BED_ANALOG_INPUTS+THERMO_ANALOG_INPUTS
+#define KEYPAD_ANALOG_CHANNEL THERMO_COMMA ADC_KEYPAD_PIN
+#else
+#define KEYPAD_ANALOG_INPUTS 0
+#define KEYPAD_ANALOG_CHANNEL
 #endif
 
 #ifndef DEBUG_FREE_MEMORY
@@ -434,10 +506,10 @@ inline void memcopy4(void *dest,void *source) {
 #endif
 
 /** \brief number of analog input signals. Normally 1 for each temperature sensor */
-#define ANALOG_INPUTS (EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS+BED_ANALOG_INPUTS+THERMO_ANALOG_INPUTS)
+#define ANALOG_INPUTS (EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS+BED_ANALOG_INPUTS+THERMO_ANALOG_INPUTS+KEYPAD_ANALOG_INPUTS)
 #if ANALOG_INPUTS > 0
 /** Channels are the MUX-part of ADMUX register */
-#define  ANALOG_INPUT_CHANNELS {EXT0_ANALOG_CHANNEL EXT1_ANALOG_CHANNEL EXT2_ANALOG_CHANNEL EXT3_ANALOG_CHANNEL EXT4_ANALOG_CHANNEL EXT5_ANALOG_CHANNEL BED_ANALOG_CHANNEL THERMO_ANALOG_CHANNEL}
+#define  ANALOG_INPUT_CHANNELS {EXT0_ANALOG_CHANNEL EXT1_ANALOG_CHANNEL EXT2_ANALOG_CHANNEL EXT3_ANALOG_CHANNEL EXT4_ANALOG_CHANNEL EXT5_ANALOG_CHANNEL BED_ANALOG_CHANNEL THERMO_ANALOG_CHANNEL KEYPAD_ANALOG_CHANNEL}
 #endif
 
 #define MENU_MODE_SD_MOUNTED 1
@@ -463,6 +535,11 @@ inline void memcopy4(void *dest,void *source) {
 #ifndef Z_ACCELERATION_TOP
 #define Z_ACCELERATION_TOP 0
 #endif
+
+#ifndef KEEP_ALIVE_INTERVAL
+#define KEEP_ALIVE_INTERVAL 2000
+#endif
+
 //Davinci Specific
 #define MENU_MODE_STOP_REQUESTED 1
 #define MENU_MODE_STOP_DONE  2
@@ -824,7 +901,7 @@ extern long baudrate;
 
 extern unsigned int counterPeriodical;
 extern volatile uint8_t executePeriodical;
-extern uint8_t counter250ms;
+extern uint8_t counter500ms;
 extern void writeMonitor();
 #if FEATURE_FAN_CONTROL
 extern uint8_t fanKickstart;

@@ -348,10 +348,9 @@ class HAL
         WDT_Disable(WDT);
       #endif
   
-//Davinci Specific
-#ifdef TWI_CLOCK_FREQ
-      HAL::i2cInit(TWI_CLOCK_FREQ);
-#endif //TWI_CLOCK_FREQ
+      #if EEPROM_AVAILABLE == EEPROM_I2C || UI_DISPLAY_TYPE == 3 //init i2c when EEprom installed or using i2c display
+      HAL::i2cInit(TWI_CLOCK_FREQ); 
+      #endif
       // make debugging startup easier
       //Serial.begin(115200);
       TimeTick_Configure(F_CPU_TRUE);
@@ -501,7 +500,6 @@ class HAL
       v.l = value;
       eprBurnValue(pos, sizeof(long), v);
       memcopy4(&virtualEeprom[pos],&value);
-      //*(long*)(void*)&virtualEeprom[pos] = value;
     }
     static inline void eprSetFloat(unsigned int pos, float value)
     {
@@ -513,44 +511,29 @@ class HAL
     static inline uint8_t eprGetByte(unsigned int pos)
     {
       return *(uint8_t*)&virtualEeprom[pos];
-      //eeval_t v = eprGetValue(pos,1);
-      //return v.b[0];
     }
     static inline int16_t eprGetInt16(unsigned int pos)
     {
       int16_t v;
       memcopy2(&v,&virtualEeprom[pos]);
       return v;
-      //return *(int16_t*)(void*)&virtualEeprom[pos];
-      //eeval_t v;
-      //v.i = 0;
-      //v = eprGetValue(pos, 2);
-      //return v.i;
     }
     static inline int32_t eprGetInt32(unsigned int pos)
     {
       int32_t v;
       memcopy4(&v,&virtualEeprom[pos]);
       return v;
-      //eeval_t v = eprGetValue(pos, 4);
-      //return v.i;
     }
     static inline long eprGetLong(unsigned int pos)
     {
       int32_t v;
       memcopy4(&v,&virtualEeprom[pos]);
       return v;
-      //return *(long*)(void*)&virtualEeprom[pos];
-      //eeval_t v = eprGetValue(pos, sizeof(long));
-      //return v.l;
     }
     static inline float eprGetFloat(unsigned int pos) {
       float v;
       memcopy4(&v,&virtualEeprom[pos]);
       return v;
-      //return *(float*)(void*)&virtualEeprom[pos];
-      //eeval_t v = eprGetValue(pos, sizeof(float));
-      //return v.f;
     }
 
     // Write any data type to EEPROM
@@ -607,7 +590,7 @@ class HAL
       delayMilliseconds(EEPROM_PAGE_WRITE_TIME);   // wait for page write to complete
 #elif EEPROM_AVAILABLE == EEPROM_I2C
       i2cStartAddr(EEPROM_SERIAL_ADDR << 1 | I2C_WRITE, pos);
-      i2cWriting(newvalue.b[0]);        // write first byte
+      i2cWrite(newvalue.b[0]);        // write first byte
       for (int i = 1; i < size; i++) {
         pos++;
         // writes cannot cross page boundary
@@ -617,13 +600,14 @@ class HAL
           delayMilliseconds(EEPROM_PAGE_WRITE_TIME);
           i2cStartAddr(EEPROM_SERIAL_ADDR << 1, pos);
         } else {
-          i2cTxFinished();      // wait for transmission register to empty
+         while ( (TWI_INTERFACE->TWI_SR & TWI_SR_TXRDY) != TWI_SR_TXRDY);// wait for transmission register to empty
         }
-        i2cWriting(newvalue.b[i]);
+        i2cWrite(newvalue.b[i]);
       }
       i2cStop();          // signal end of transaction
       delayMilliseconds(EEPROM_PAGE_WRITE_TIME);   // wait for page write to complete
 #endif//(MOTHERBOARD==500) || (MOTHERBOARD==501)
+//Davinci Specific
 #endif //SDEEPROM
 #endif //EEPROM_MODE!=0
     }
@@ -669,8 +653,6 @@ class HAL
       size--;
       // set read location
       i2cStartAddr(EEPROM_SERIAL_ADDR << 1 | I2C_READ, pos);
-      // begin transmission from device
-      i2cStartBit();
       for (i = 0; i < size; i++) {
         // read an incomming byte
         v.b[i] = i2cReadAck();
@@ -678,7 +660,16 @@ class HAL
       // read last byte
       v.b[i] = i2cReadNak();
       return v;
+#else
+     eeval_t v;
+     int i;
+     for (i = 0; i < size; i++) {
+        // read an incomming byte
+        v.b[i] = 0;
+     }
+     return v;       
 #endif //(MOTHERBOARD==500) || (MOTHERBOARD==501)
+//Davinci Specific
 #endif //SDEEPROM
 #endif //EEPROM_MODE!=0
     }
@@ -842,11 +833,10 @@ class HAL
 
     static inline void spiSend(const uint8_t* buf , size_t n)
     {
-      uint8_t response;
       if (n == 0) return;
       WRITE(SDSS, LOW);
       for (uint16_t i = 0; i < n; i++) {
-        response = spiTransfer(buf[i]);
+        spiTransfer(buf[i]);
       }
       WRITE(SDSS, HIGH);
     }
@@ -854,14 +844,12 @@ class HAL
     inline __attribute__((always_inline))
     static void spiSendBlock(uint8_t token, const uint8_t* buf)
     {
-      uint8_t response;
-
       WRITE(SDSS, LOW);
-      response = spiTransfer(token);
+      spiTransfer(token);
 
       for (uint16_t i = 0; i < 512; i++)
       {
-        response = spiTransfer(buf[i]);
+        spiTransfer(buf[i]);
       }
       WRITE(SDSS, HIGH);
     }
@@ -892,18 +880,18 @@ class HAL
 #endif  /*DUE_SOFTWARE_SPI*/
 
     // I2C Support
+    static void i2cSetClockspeed(uint32_t clockSpeedHz);
     static void i2cInit(unsigned long clockSpeedHz);
     static void i2cStartWait(unsigned char address);
-    static unsigned char i2cStart(unsigned char address);
+    static uint8_t i2cStart(unsigned char address);
     static void i2cStartAddr(unsigned char address, unsigned int pos);
     static void i2cStop(void);
     static void i2cStartBit(void);
     static void i2cCompleted (void);
     static void i2cTxFinished(void);
-    static void i2cWriting( uint8_t data );
-    static unsigned char i2cWrite( unsigned char data );
-    static unsigned char i2cReadAck(void);
-    static unsigned char i2cReadNak(void);
+    static void i2cWrite( uint8_t data );
+    static uint8_t i2cReadAck(void);
+    static uint8_t i2cReadNak(void);
 
 
     // Watchdog support

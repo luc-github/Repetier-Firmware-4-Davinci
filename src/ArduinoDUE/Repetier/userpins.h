@@ -76,11 +76,14 @@
 #endif
 #define ORIG_PS_ON_PIN      -1
 #define PS_ON_PIN       ORIG_PS_ON_PIN
-#if DAVINCI==4
+#if MODEL==0
+#define TOP_SENSOR_PIN      6
+#else
 #define TOP_SENSOR_PIN      64
+#endif
+#if DAVINCI==4
 #define BADGE_LIGHT_PIN		6
 #else
-#define TOP_SENSOR_PIN      6
 #define BADGE_LIGHT_PIN		-1
 #endif
 #undef SDSS
@@ -116,7 +119,7 @@
 //USB Connection 
 #define RFSERIAL SerialUSB  // Native USB Port of the due 
 //EEPROM is on SDCard
-#define EEPROM_AVAILABLE 1
+#define EEPROM_AVAILABLE EEPROM_SDCARD
 //EEprom on  SDCard
 #define SDEEPROM
 

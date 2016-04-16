@@ -39,7 +39,7 @@ Each of the following events describe the parameter and when it is called.
 #define EVENT_KILL(only_steppers) {}
 // Gets called when a jam was detected.
 #define EVENT_JAM_DETECTED {}
-// Gets called everytime the jam detection signal switches. Steps are the extruder steps since last change.
+// Gets called every time the jam detection signal switches. Steps are the extruder steps since last change.
 #define EVENT_JAM_SIGNAL_CHANGED(extruderId,steps) {}
 // Gets called if a heater decoupling is detected.
 #define EVENT_HEATER_DECOUPLED(id) {}
@@ -49,14 +49,20 @@ Each of the following events describe the parameter and when it is called.
 #define EVENT_START_UI_ACTION(shortAction) {}
 // Gets called if a nextPrevius actions gets executed.
 #define EVENT_START_NEXTPREVIOUS(action,increment) {}
+// Gets called before a move is queued. Gives the ability to limit moves.
+#define EVENT_CONTRAIN_DESTINATION_COORDINATES
+// Gets called when a fatal error occurs and all actions should be stopped
+#define EVENT_FATAL_ERROR_OCCURED
+// Gets called after a M999 to continue from fatal errors
+#define EVENT_CONTINUE_FROM_FATAL_ERROR
 
-// Called to initalize laser pins. Return false to prevent default initalization.
+// Called to initialize laser pins. Return false to prevent default initialization.
 #define EVENT_INITALIZE_LASER true
 // Set laser to intensity level 0 = off, 255 = full. Return false if you have overridden the setting routine.
 // with true the default solution will set it as digital value.
 #define EVENT_SET_LASER(intensity) true
 
-// Called to initalize cnc pins. Return false to prevent default initalization.
+// Called to initialize CNC pins. Return false to prevent default initialization.
 #define EVENT_INITALIZE_CNC true
 // Turn off spindle
 #define EVENT_SPINDLE_OFF true
@@ -72,6 +78,9 @@ Each of the following events describe the parameter and when it is called.
 // #define EVENT_UNHANDLED_G_CODE(c) eventUnhandledGCode(c)
 #define EVENT_UNHANDLED_G_CODE(c) false
 #define EVENT_UNHANDLED_M_CODE(c) false
+
+// Called when bed temperature is set
+#define EVENT_SET_BED_TEMP(temp,boop)
 
 // This gets called every time the user has saved a value to eeprom
 // or any other reason why dependent values may need recomputation.

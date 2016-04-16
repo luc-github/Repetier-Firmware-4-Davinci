@@ -42,7 +42,7 @@
 #define FLAG_JOIN_START_FIXED 4
 /** Start filament retraction at move start */
 #define FLAG_JOIN_START_RETRACT 8
-/** Wait for filament pushback, before ending move */
+/** Wait for filament push back, before ending move */
 #define FLAG_JOIN_END_RETRACT 16
 /** Disable retract for this line */
 #define FLAG_JOIN_NO_RETRACT 32
@@ -53,15 +53,13 @@
 // Printing related data
 #if NONLINEAR_SYSTEM
 // Allow the delta cache to store segments for every line in line cache. Beware this gets big ... fast.
-// DELTASEGMENTS_PER_PRINTLINE *
-#define DELTA_CACHE_SIZE (DELTASEGMENTS_PER_PRINTLINE * PRINTLINE_CACHE_SIZE)
 
 class PrintLine;
 typedef struct
 {
     flag8_t dir; 									///< Direction of delta movement.
     uint16_t deltaSteps[TOWER_ARRAY];   				    ///< Number of steps in move.
-    inline void checkEndstops(PrintLine *cur,bool checkall);
+    inline bool checkEndstops(PrintLine *cur,bool checkall);
     inline void setXMoveFinished()
     {
         dir &= ~XSTEP;
@@ -158,14 +156,14 @@ typedef struct
     {
         dir |= X_DIRPOS << axis;
     }
-} DeltaSegment;
+} NonlinearSegment;
 extern uint8_t lastMoveID;
 #endif
 class UIDisplay;
 class PrintLine   // RAM usage: 24*4+15 = 113 Byte
 {
     friend class UIDisplay;
-#if CPU_ARCH==ARCH_ARM
+#if CPU_ARCH == ARCH_ARM
     static volatile bool nlFlag;
 #endif
 public:
@@ -186,18 +184,18 @@ private:
     float speedZ;                   ///< Speed in z direction at fullInterval in mm/s
     float speedE;                   ///< Speed in E direction at fullInterval in mm/s
     float fullSpeed;                ///< Desired speed mm/s
-    float invFullSpeed;             ///< 1.0/fullSpeed for fatser computation
-    float accelerationDistance2;             ///< Real 2.0*distanceÜacceleration mm²/s²
+    float invFullSpeed;             ///< 1.0/fullSpeed for faster computation
+    float accelerationDistance2;    ///< Real 2.0*distance*acceleration mm²/s²
     float maxJunctionSpeed;         ///< Max. junction speed between this and next segment
-    float startSpeed;               ///< Staring speed in mm/s
+    float startSpeed;               ///< Starting speed in mm/s
     float endSpeed;                 ///< Exit speed in mm/s
     float minSpeed;
     float distance;
 #if NONLINEAR_SYSTEM
-    uint8_t numDeltaSegments;		///< Number of delta segments left in line. Decremented by stepper timer.
+    uint8_t numNonlinearSegments;		///< Number of delta segments left in line. Decremented by stepper timer.
     uint8_t moveID;					///< ID used to identify moves which are all part of the same line
-    int32_t numPrimaryStepPerSegment;	///< Number of primary bresenham axis steps in each delta segment
-    DeltaSegment segments[DELTASEGMENTS_PER_PRINTLINE];
+    int32_t numPrimaryStepPerSegment;	///< Number of primary Bresenham axis steps in each delta segment
+    NonlinearSegment segments[DELTASEGMENTS_PER_PRINTLINE];
 #endif
     ticks_t fullInterval;     ///< interval at full speed in ticks/step.
     uint16_t accelSteps;        ///< How much steps does it take, to reach the plateau.
@@ -214,7 +212,7 @@ private:
     int32_t advanceStart;
     int32_t advanceEnd;
 #endif
-    uint16_t advanceL;         ///< Recomputated L value
+    uint16_t advanceL;         ///< Recomputed L value
 #endif
 #ifdef DEBUG_STEPCOUNT
     int32_t totalStepsRemaining;
@@ -345,23 +343,29 @@ public:
 
     inline void setXMoveFinished()
     {
-#if DRIVE_SYSTEM == CARTESIAN || NONLINEAR_SYSTEM
-        dir &= ~16;
-#else
+#if DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY
         dir &= ~48;
+#elif DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY		
+		dir &= ~80
+#else
+        dir &= ~16;
 #endif
     }
     inline void setYMoveFinished()
     {
-#if DRIVE_SYSTEM == CARTESIAN || NONLINEAR_SYSTEM
-        dir &= ~32;
-#else
+#if DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY
         dir &= ~48;
+#else
+        dir &= ~32;
 #endif
     }
     inline void setZMoveFinished()
     {
+#if DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY		
+		dir &= ~80
+#else		
         dir &= ~64;
+#endif		
     }
     inline void setXYMoveFinished()
     {
@@ -516,7 +520,7 @@ public:
     }
     INLINE void startXStep()
     {
-#if !(GANTRY)
+#if !(GANTRY) || defined(FAST_COREXYZ)
         Printer::startXStep();
 #else
 #if DRIVE_SYSTEM == XY_GANTRY || DRIVE_SYSTEM == XZ_GANTRY
@@ -550,7 +554,7 @@ public:
     }
     INLINE void startYStep()
     {
-#if !(GANTRY) || DRIVE_SYSTEM == ZX_GANTRY || DRIVE_SYSTEM == XZ_GANTRY
+#if !(GANTRY) || DRIVE_SYSTEM == ZX_GANTRY || DRIVE_SYSTEM == XZ_GANTRY || defined(FAST_COREXYZ)
         Printer::startYStep();
 #else
 #if DRIVE_SYSTEM == XY_GANTRY
@@ -585,7 +589,7 @@ public:
     }
     INLINE void startZStep()
     {
-#if !(GANTRY) || DRIVE_SYSTEM == YX_GANTRY || DRIVE_SYSTEM == XY_GANTRY
+#if !(GANTRY) || DRIVE_SYSTEM == YX_GANTRY || DRIVE_SYSTEM == XY_GANTRY || defined(FAST_COREXYZ)
         Printer::startZStep();
 #else
 #if DRIVE_SYSTEM == XZ_GANTRY
@@ -618,8 +622,8 @@ public:
 #endif
     }
     void updateStepsParameter();
-    float safeSpeed();
-    void calculateMove(float axis_diff[],uint8_t pathOptimize);
+    float safeSpeed(fast8_t drivingAxis);
+    void calculateMove(float axis_diff[],uint8_t pathOptimize,fast8_t distanceBase);
     void logLine();
     INLINE long getWaitTicks()
     {
@@ -681,9 +685,14 @@ public:
     static inline void backwardPlanner(ufast8_t p,ufast8_t last);
     static void updateTrapezoids();
     static uint8_t insertWaitMovesIfNeeded(uint8_t pathOptimize, uint8_t waitExtraLines);
+#if !NONLINEAR_SYSTEM
     static void queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize);
-    static void moveRelativeDistanceInSteps(int32_t x,int32_t y,int32_t z,int32_t e,float feedrate,bool waitEnd,bool check_endstop);
-    static void moveRelativeDistanceInStepsReal(int32_t x,int32_t y,int32_t z,int32_t e,float feedrate,bool waitEnd);
+#if DISTORTION_CORRECTION
+	static void queueCartesianSegmentTo(uint8_t check_endstops, uint8_t pathOptimize);
+#endif
+#endif	
+    static void moveRelativeDistanceInSteps(int32_t x,int32_t y,int32_t z,int32_t e,float feedrate,bool waitEnd,bool check_endstop,bool pathOptimize = true);
+    static void moveRelativeDistanceInStepsReal(int32_t x,int32_t y,int32_t z,int32_t e,float feedrate,bool waitEnd,bool pathOptimize = true);
 #if ARC_SUPPORT
     static void arc(float *position, float *target, float *offset, float radius, uint8_t isclockwise);
 #endif
@@ -696,9 +705,9 @@ public:
         p = (p == PRINTLINE_CACHE_SIZE - 1 ? 0 : p + 1);
     }
 #if NONLINEAR_SYSTEM
-    static uint8_t queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint8_t softEndstop);
+    static uint8_t queueNonlinearMove(uint8_t check_endstops,uint8_t pathOptimize, uint8_t softEndstop);
     static inline void queueEMove(int32_t e_diff,uint8_t check_endstops,uint8_t pathOptimize);
-    inline uint16_t calculateDeltaSubSegments(uint8_t softEndstop);
+    inline uint16_t calculateNonlinearSubSegments(uint8_t softEndstop);
     static inline void calculateDirectionAndDelta(int32_t difference[], ufast8_t *dir, int32_t delta[]);
     static inline uint8_t calculateDistance(float axis_diff[], uint8_t dir, float *distance);
 #if SOFTWARE_LEVELING && DRIVE_SYSTEM == DELTA

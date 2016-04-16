@@ -302,6 +302,8 @@
 #define DIO100_PIN PIO_PC11
 #endif
 
+
+
 // Additional Pins for Davinci board
 #if (MOTHERBOARD == 999)
 //118

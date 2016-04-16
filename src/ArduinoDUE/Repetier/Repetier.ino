@@ -39,7 +39,7 @@ Implemented Codes
 - G0  -> G1
 - G1  - Coordinated Movement X Y Z E, S1 disables boundary check, S0 enables it
 - G4  - Dwell S<seconds> or P<milliseconds>
-- G10 S<1 = long retract, 0 = short retract = default> retracts filament accoridng to stored setting
+- G10 S<1 = long retract, 0 = short retract = default> retracts filament according to stored setting
 - G11 S<1 = long retract, 0 = short retract = default> = Undo retraction according to stored setting
 - G20 - Units for G0/G1 are inches.
 - G21 - Units for G0/G1 are mm.
@@ -47,10 +47,10 @@ Implemented Codes
 - G29 S<0..2> - Z-Probe at the 3 defined probe points. S = 1 measure avg. zHeight, S = 2 store avg zHeight
 - G30 P<0..3> - Single z-probe at current position P = 1 first measurement, P = 2 Last measurement P = 0 or 3 first and last measurement
 - G31 - Write signal of probe sensor
-- G32 S<0..2> P<0..1> - Autolevel print bed. S = 1 measure zLength, S = 2 Measue and store new zLength
+- G32 S<0..2> P<0..1> - Autolevel print bed. S = 1 measure zLength, S = 2 Measure and store new zLength
 - G90 - Use absolute coordinates
 - G91 - Use relative coordinates
-- G92 - Set current position to cordinates given
+- G92 - Set current position to coordinates given
 - G131 - set extruder offset position to 0 - needed for calibration with G132
 - G132 - calibrate endstop positions. Call this, after calling G131 and after centering the extruder holder.
 - G133 - measure steps until max endstops for deltas. Can be used to detect lost steps within tolerances of endstops.
@@ -70,6 +70,9 @@ M106/M107 work only if repurpose fan is enabled, as by default fan is managed by
 
 Custom M Codes
 
+- M3 - Spindle on, Clockwise or Laser on during G1 moves.
+- M4 - Spindle on, Counterclockwise.
+- M5 - Spindle off, Laser off.
 - M20  - List SD card
 - M21  - Init SD card
 - M22  - Release SD card
@@ -91,9 +94,9 @@ Custom M Codes
 - M84  - Disable steppers until next move,
         or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
 - M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
-- M92  - Set axisStepsPerMM - same syntax as G1
+- M92  - Set axisStepsPerMM - same syntax as G92
 - M99 S<delayInSec> X0 Y0 Z0 - Disable motors for S seconds (default 10) for given axis.
-- M100 clean nozzle
+- M100 T<extruderNum> clean nozzle, no extruder specified clean all available
 - M104 S<temp> T<extruder> P1 F1 - Set temperature without wait. P1 = wait for moves to finish, F1 = beep when temp. reached first time
 - M105 X0 - Get temperatures. If X0 is added, the raw analog values are also written.
 - M112 - Emergency kill
@@ -116,18 +119,18 @@ Custom M Codes
 - M209 S<0/1> - Enable/disable autoretraction
 - M220 S<Feedrate multiplier in percent> - Increase/decrease given feedrate
 - M221 S<Extrusion flow multiplier in percent> - Increase/decrease given flow rate
-- M228 P<pin> S<state 0/1> - Wait for pin getting state S. Add X0 to init as input without pullup and X1 for input with pullup.
+- M226 P<pin> S<state 0/1> - Wait for pin getting state S. Add X0 to init as input without pullup and X1 for input with pullup.
 - M231 S<OPS_MODE> X<Min_Distance> Y<Retract> Z<Backlash> F<ReatrctMove> - Set OPS parameter
 - M232 - Read and reset max. advance values
 - M233 X<AdvanceK> Y<AdvanceL> - Set temporary advance K-value to X and linear term advanceL to Y
 - M251 Measure Z steps from homing stop (Delta printers). S0 - Reset, S1 - Print, S2 - Store to Z length (also EEPROM if enabled)
 - M280 S<mode> - Set ditto printing mode. mode: 0 = off, 1 = 1 extra extruder, 2 = 2 extra extruder, 3 = 3 extra extruders
-- M281 Test if watchdog is running and working.
+- M281 Test if watchdog is running and working. Use M281 X0 to disable watchdog on AVR boards. Sometimes needed for boards with old bootloaders to allow reflashing.
 - M300 S<Frequency> P<DurationMillis> play frequency
 - M302 S<0 or 1> - allow cold extrusion. Without S parameter it will allow. S1 will disallow.
 - M303 P<extruder/bed> S<printTemerature> X0 R<Repetitions>- Autodetect pid values. Use P<NUM_EXTRUDER> for heated bed. X0 saves result in EEPROM. R is number of cycles.
-- M320 - Activate autolevel
-- M321 - Deactivate autolevel
+- M320 S<0/1> - Activate autolevel, S1 stores it in eeprom
+- M321 S<0/1> - Deactivate autolevel, S1 stores it in eeprom
 - M322 - Reset autolevel matrix
 - M323 S0/S1 enable disable distortion correction P0 = not permanent, P1 = permanent = default
 - M340 P<servoId> S<pulseInUS> R<autoOffIn ms>: servoID = 0..3, Servos are controlled by a pulse with normally between 500 and 2500 with 1500ms in center position. 0 turns servo off. R allows automatic disabling after a while.
@@ -150,6 +153,7 @@ Custom M Codes
 - M601 S<1/0> - Pause extruders. Paused extrudes disable heaters and motor. Unpausing reheats extruder to old temp.
 - M602 S<1/0> P<1/0>- Debug jam control (S) Disable jam control (P). If enabled it will log signal changes and will not trigger jam errors!
 - M908 P<address> S<value> : Set stepper current for digipot (RAMBO board)
+- M999 - Continue from fatal error. M999 S1 will create a fatal error for testing.
 */
 
 #include "Repetier.h"
