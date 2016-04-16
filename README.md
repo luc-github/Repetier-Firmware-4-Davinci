@@ -1,4 +1,4 @@
-##Da Vinci Firmware based on Repetier (0.92.6) Alpha - ready for testing  
+##Da Vinci Firmware based on Repetier (0.92.9) pre - Alpha - no test done yet  
 ============================
 
 [![Join the chat at https://gitter.im/luc-github/Repetier-Firmware-0.92](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/luc-github/Repetier-Firmware-0.92?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)    
