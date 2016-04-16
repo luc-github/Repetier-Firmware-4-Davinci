@@ -264,7 +264,7 @@ void Printer::cleanNozzle(bool restoreposition, int8_t extT)
         Commands::waitUntilEndOfAllMoves();
         }
     if(extT == 0 || extT == -1)
-        
+        {
         moveToReal(xLength,yMin+10,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
         moveToReal(IGNORE_COORDINATE,yMin-ENDSTOP_Y_BACK_ON_HOME,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[0]);
         //first step
