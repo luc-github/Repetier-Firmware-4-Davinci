@@ -28,16 +28,17 @@ before_script:
   - source command.sh
 env:
   matrix:
-    - DAVINCI=1M0
-    - DAVINCI=2M0
-    - DAVINCI=3M0
-    - DAVINCI=0M0
-    - DAVINCI=1M1
-    - DAVINCI=3M1
-    - DAVINCI=4M1
+    - DAVINCI=1 MODEL=0
+    - DAVINCI=2 MODEL=0
+    - DAVINCI=3 MODEL=0
+    - DAVINCI=0 MODEL=0
 
 script:
-    - sh buildscript.sh
+    - sed -i 's/#define DAVINCI 0 /#define DAVINCI $DAVINCI /g' ./src/ArduinoDUE/Repetier/Configuration.h
+	- sed -i 's/#define DAVINCI 2 /#define DAVINCI $DAVINCI /g' ./src/ArduinoDUE/Repetier/Configuration.h
+	- sed -i 's/#define DAVINCI 3 /#define DAVINCI $DAVINCI /g' ./src/ArduinoDUE/Repetier/Configuration.h
+	- sed -i 's/#define DAVINCI 4 /#define DAVINCI $DAVINCI /g' ./src/ArduinoDUE/Repetier/Configuration.h
+	- sed -i 's/#define MODEL  1/#define MODEL  $MODEL/g' ./src/ArduinoDUE/Repetier/Configuration.h
     - cd $TRAVIS_BUILD_DIR
     - source command.sh
     - export PATH="$HOME/arduino_ide:$PATH"
