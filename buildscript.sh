@@ -1,7 +1,5 @@
 #!/bin/bash
 
-cd $TRAVIS_BUILD_DIR
-source command.sh
 export PATH="$HOME/arduino_ide:$PATH"
 arduino --board arduino:sam:arduino_due_x --save-prefs
 arduino --get-pref sketchbook.path

@@ -25,6 +25,7 @@ before_script:
   - mv gcc-arm-none-eabi-4.8.3-2014q1 4.8.3-2014q1
 #  - cp -f "$TRAVIS_BUILD_DIR/src/ArduinoDUE/AdditionalArduinoFiles/Arduino - 1.6.8 -Due 1.6.7/Arduino15/packages/hardware/sam/1.6.7/variants/arduino_due_x/variant.cpp" $HOME/.arduino15/packages/arduino/hardware/sam/1.6.7/variants/arduino_due_x/variant.cpp 
   - cd $TRAVIS_BUILD_DIR
+  - source command.sh
 env:
   matrix:
     - DAVINCI=1M0
