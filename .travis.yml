@@ -9,7 +9,7 @@ before_install:
   - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16"
 env:
  matrix:
-  - DAVINCI=1 MODEL=0
+  - DAVINCI=2 MODEL=0
 before_script:
   - "export DISPLAY=:99.0"
   - sleep 3 # give xvfb some time to start
@@ -35,6 +35,7 @@ script:
   - arduino --board arduino:sam:arduino_due_x --save-prefs
   - arduino --get-pref sketchbook.path
   - sed -i "s/#define DAVINCI 1 /#define DAVINCI $DAVINCI /g" ./src/ArduinoDUE/Repetier/Configuration.h
+  - head -n 30 ./src/ArduinoDUE/Repetier/Configuration.h
   - build_sketch ./src/ArduinoDUE/Repetier/Repetier.ino
   
 notifications:
