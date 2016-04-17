@@ -34,12 +34,12 @@ env:
     - DAVINCI=0 MODEL=0
 
 script:
-    - sed -i 's/#define DAVINCI 0 /#define DAVINCI $DAVINCI /g' ./src/ArduinoDUE/Repetier/Configuration.h
-	- sed -i 's/#define DAVINCI 2 /#define DAVINCI $DAVINCI /g' ./src/ArduinoDUE/Repetier/Configuration.h
-	- sed -i 's/#define DAVINCI 3 /#define DAVINCI $DAVINCI /g' ./src/ArduinoDUE/Repetier/Configuration.h
-	- sed -i 's/#define DAVINCI 4 /#define DAVINCI $DAVINCI /g' ./src/ArduinoDUE/Repetier/Configuration.h
-	- sed -i 's/#define MODEL  1/#define MODEL  $MODEL/g' ./src/ArduinoDUE/Repetier/Configuration.h
     - cd $TRAVIS_BUILD_DIR
+    - sed -i 's/#define DAVINCI 0 /#define DAVINCI $DAVINCI /g' ./src/ArduinoDUE/Repetier/Configuration.h
+    - sed -i 's/#define DAVINCI 2 /#define DAVINCI $DAVINCI /g' ./src/ArduinoDUE/Repetier/Configuration.h
+    - sed -i 's/#define DAVINCI 3 /#define DAVINCI $DAVINCI /g' ./src/ArduinoDUE/Repetier/Configuration.h
+    - sed -i 's/#define DAVINCI 4 /#define DAVINCI $DAVINCI /g' ./src/ArduinoDUE/Repetier/Configuration.h
+    - sed -i 's/#define MODEL  1/#define MODEL  $MODEL/g' ./src/ArduinoDUE/Repetier/Configuration.h
     - source command.sh
     - export PATH="$HOME/arduino_ide:$PATH"
     - arduino --board arduino:sam:arduino_due_x --save-prefs
