@@ -48,7 +48,6 @@ script:
   - sed -i "s/#define DAVINCI 4 /#define DAVINCI $DAVINCI /g" ./src/ArduinoDUE/Repetier/Configuration.h
   - sed -i "s/#define MODEL  1/#define MODEL  $MODEL/g" ./src/ArduinoDUE/Repetier/Configuration.h
   - sed -i "s/#define MODEL  0/#define MODEL  $MODEL/g" ./src/ArduinoDUE/Repetier/Configuration.h
-  - head -n 30 ./src/ArduinoDUE/Repetier/Configuration.h
   - build_sketch ./src/ArduinoDUE/Repetier/Repetier.ino
   
 notifications:
