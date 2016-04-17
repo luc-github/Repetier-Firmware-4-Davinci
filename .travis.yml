@@ -31,7 +31,7 @@ env:
     - DAVINCI=2M0
     - DAVINCI=3M0
     - DAVINCI=0M0
-	- DAVINCI=1M1
+    - DAVINCI=1M1
     - DAVINCI=3M1
     - DAVINCI=4M1
 
