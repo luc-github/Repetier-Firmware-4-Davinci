@@ -1754,16 +1754,30 @@ void UIDisplay::parse(const char *txt,bool ram)
              if(c2 == 'x') addFloat(Printer::xLength,4,0);
              else if(c2 == 'y') addFloat(Printer::yLength,4,0);
              else if(c2 == 'z') addFloat(Printer::zLength,4,0);
+             //English selected
              else if ((c2 == '0') && (Com::selectedLanguage ==0 ) )addStringP("\003");
+             //German selected
              else if ((c2 == '1') && (Com::selectedLanguage ==1 ) )addStringP("\003");
+             //Dutch selected
              else if ((c2 == '2') && (Com::selectedLanguage ==2 ) )addStringP("\003");
+             //Portuguese selected
              else if ((c2 == '3') && (Com::selectedLanguage ==3 ) )addStringP("\003");
+             //Italian selected
              else if ((c2 == '4') && (Com::selectedLanguage ==4 ) )addStringP("\003");
+             //Spanish selected
              else if ((c2 == '5') && (Com::selectedLanguage ==5 ) )addStringP("\003");
+             //Swedish selected
              else if ((c2 == '6') && (Com::selectedLanguage ==6 ) )addStringP("\003");
+             //French selected
              else if ((c2 == '7') && (Com::selectedLanguage ==7 ) )addStringP("\003");
+             //Czech selected
              else if ((c2 == '8') && (Com::selectedLanguage ==8 ) )addStringP("\003");
+             //Polish selected
              else if ((c2 == '9') && (Com::selectedLanguage ==9 ) )addStringP("\003");
+             //Turkish selected
+             else if ((c2 == 'a') && (Com::selectedLanguage ==10) )addStringP("\003");
+             //Finnish selected
+             else if ((c2 == 'b') && (Com::selectedLanguage ==11) )addStringP("\003");
          break;
         case 'l':
             if(c2 == 'a') addInt(lastAction,4);

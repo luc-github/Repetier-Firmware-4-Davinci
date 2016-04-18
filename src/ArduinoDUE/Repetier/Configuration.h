@@ -24,15 +24,15 @@
 #define DAVINCI 1 // "0" if not DAVINCI, "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN, 4 for AiO (WITH NO SCANNER SUPPORT)
 #define MODEL  0//"0" for first generation (jumper JP1 to reset ) , "1" for new generation   (jumper J37 to reset)
 #define REPURPOSE_FAN_TO_COOL_EXTRUSIONS 0 //Setting this to 1 will repurpose the main Extruder cooling fan to be controlled VIA M106/M107
-                                                                                            //Warning: for DaVinci 1.0 need to add a permanent fan with power supply to cool extruder
+                                           //Warning: for DaVinci 1.0 need to add a permanent fan with power supply to cool extruder
 
 // ################ END MANUAL SETTINGS ##########################
 
 //Version
 #define VERSION_MAJOR "1"
-#define VERSION_MINOR_YEAR "15"
-#define VERSION_MINOR_MONTH "12"
-#define VERSION_MINOR_DAY "09"
+#define VERSION_MINOR_YEAR "16"
+#define VERSION_MINOR_MONTH "18"
+#define VERSION_MINOR_DAY "04"
 #define VERSION_BUILD "1"
 
 //Davinci screen is not standard reprap it is WINSTAR 16x4
@@ -1918,12 +1918,12 @@ Select the languages to use. On first startup user can select
 the language from a menu with activated languages. In Configuration->Language
 the language can be switched any time. */
 #define LANGUAGE_EN_ACTIVE 1 // English
-#define LANGUAGE_DE_ACTIVE 0 // German
+#define LANGUAGE_DE_ACTIVE 1 // German
 #define LANGUAGE_NL_ACTIVE 1 // Dutch
 #define LANGUAGE_PT_ACTIVE 0 // Brazilian portuguese
 #define LANGUAGE_IT_ACTIVE 0 // Italian
 #define LANGUAGE_ES_ACTIVE 0 // Spanish
-#define LANGUAGE_FI_ACTIVE 1 // Finnish
+#define LANGUAGE_FI_ACTIVE 0 // Finnish
 #define LANGUAGE_SE_ACTIVE 0 // Swedish
 #define LANGUAGE_FR_ACTIVE 1 // French
 #define LANGUAGE_CZ_ACTIVE 0 // Czech
