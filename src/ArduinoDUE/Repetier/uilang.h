@@ -4295,7 +4295,7 @@
 #define UI_TEXT_COOLDOWN_MENU_FR    "Arret chauffe %B3"
 #define UI_TEXT_WAIT_OK_FR    "Ok continuer"
 #define UI_TEXT_FAILED_FR    "Echoue"
-#define UI_TEXT_PLEASE_WAIT_FR    "Attendre…"
+#define UI_TEXT_PLEASE_WAIT_FR    "Attendre..."
 #define UI_TEXT_MANUAL_LEVEL_FR    "Calib. Manuelle"
 #define UI_TEXT_WARNING_FR    "Attention!!!"
 #define UI_TEXT_EXTRUDER_COLD_FR    "E%Ne trop froid!"
