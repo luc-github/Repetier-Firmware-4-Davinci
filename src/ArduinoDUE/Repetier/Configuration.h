@@ -1584,7 +1584,7 @@ to recalibrate z.
 #define Z_PROBE_WAIT_BEFORE_TEST 0
 /** Speed of z-axis in mm/s when probing */
 #define Z_PROBE_SPEED 1
-#define Z_PROBE_XY_SPEED 150
+#define Z_PROBE_XY_SPEED 30
 #define Z_PROBE_SWITCHING_DISTANCE 1.5 // Distance to safely switch off probe after it was activated
 #define Z_PROBE_REPETITIONS 1 // Repetitions for probing at one point. 
 /** The height is the difference between activated probe position and nozzle height. */
