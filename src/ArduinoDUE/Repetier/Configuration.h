@@ -1585,7 +1585,7 @@ to recalibrate z.
 /** Speed of z-axis in mm/s when probing */
 #define Z_PROBE_SPEED 1
 #define Z_PROBE_XY_SPEED 30
-#define Z_PROBE_SWITCHING_DISTANCE 1.5 // Distance to safely switch off probe after it was activated
+#define Z_PROBE_SWITCHING_DISTANCE 5 // Distance to safely switch off probe after it was activated
 #define Z_PROBE_REPETITIONS 1 // Repetitions for probing at one point. 
 /** The height is the difference between activated probe position and nozzle height. */
 #if MODEL==0
@@ -1924,7 +1924,7 @@ the language can be switched any time. */
 #define LANGUAGE_IT_ACTIVE 0 // Italian
 #define LANGUAGE_ES_ACTIVE 0 // Spanish
 #define LANGUAGE_FI_ACTIVE 0 // Finnish
-#define LANGUAGE_SE_ACTIVE 0 // Swedish
+#define LANGUAGE_SE_ACTIVE 1 // Swedish
 #define LANGUAGE_FR_ACTIVE 1 // French
 #define LANGUAGE_CZ_ACTIVE 0 // Czech
 #define LANGUAGE_PL_ACTIVE 0 // Polish
