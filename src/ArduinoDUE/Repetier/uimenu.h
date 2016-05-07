@@ -1375,7 +1375,7 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_autolevel, UI_TEXT_AUTOLEVEL_ID, UI_ACTION_AUTOL
 #if NUM_EXTRUDER == 1
         #define UI_PAGE_AUTOLEVEL "\005%ec/%Ec\002","\007%eB/%Eb\002","Z:%x2","%os"
 #else
-        #define UI_PAGE_AUTOLEVEL"\005%e0/%E0\005%e1/%E1","\007%eB/%Eb","Z:%x2","%os"
+        #define UI_PAGE_AUTOLEVEL "\005%e0/%E0\005%e1/%E1","\007%eB/%Eb","Z:%x2","%os"
 #endif
 
 UI_MENU_ACTION4C(ui_menu_autolevel_page,UI_ACTION_DUMMY,UI_PAGE_AUTOLEVEL, ALL_MODE)
@@ -1785,10 +1785,14 @@ UI_MENU_CHANGEACTION_T(ui_menu_ext_wait_units, UI_TEXT_EXTR_WAIT_RETRACT_UNITS_I
 #define UI_MENU_ADV_CNT 0
 #define UI_MENU_ADVANCE
 #if USE_ADVANCE
+#undef UI_MENU_ADV_CNT
 #define UI_MENU_ADV_CNT 1
+#undef UI_MENU_ADVANCE
 #define UI_MENU_ADVANCE ,&ui_menu_cext_advancel
 #if ENABLE_QUADRATIC_ADVANCE
+#undef UI_MENU_ADV_CNT
 #define UI_MENU_ADV_CNT 2
+#undef UI_MENU_ADVANCE
 #define UI_MENU_ADVANCE ,&ui_menu_cext_advancel,&ui_menu_cext_advancek
 UI_MENU_CHANGEACTION_T(ui_menu_cext_advancek,UI_TEXT_EXTR_ADVANCE_K_ID,UI_ACTION_ADVANCE_K, ADVANCED_MODE)
 #endif

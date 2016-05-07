@@ -451,7 +451,7 @@ class HAL
       //Davinci Specific
 #if FEATURE_BEEPER
       if (!enablesound)return;
-#endif.
+#endif
       SET_OUTPUT(pin);
       tone_pin = pin;
       pmc_set_writeprotect(false);
