@@ -4672,7 +4672,7 @@ case UI_ACTION_LOAD_FAILSAFE:
             {
             Com::printFLN(PSTR("RequestPause: No Filament!"));
             Commands::waitUntilEndOfAllMoves();
-            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::currentPositionSteps[Z_AXIS]+10,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+            //Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::currentPositionSteps[Z_AXIS]+10,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
             Printer::moveToReal(Printer::xMin,Printer::yMin,IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::homingFeedrate[0]);
             }
         
