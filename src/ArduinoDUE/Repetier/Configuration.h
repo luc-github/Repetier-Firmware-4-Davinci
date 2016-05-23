@@ -103,8 +103,8 @@
 
 //Laser and turntable
 #if DAVINCI == 4
-#define TURNTABLE_STEP_PER_MM 5.20 // 3200 / perimeter (P= 196 * pi)
-#define DEFAULT_SPEED 100
+#define TURNTABLE_STEP_PER_MM 110 
+#define DEFAULT_SPEED 10
 #define TURNTABLE_INVERT_ENABLE 0
 #define TURNTABLE_INVERT_DIR 0
 #define NUM_MOTOR_DRIVERS 1 
