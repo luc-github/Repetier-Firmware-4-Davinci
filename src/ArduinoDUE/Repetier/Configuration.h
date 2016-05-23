@@ -107,7 +107,7 @@
 #define DEFAULT_SPEED 100
 #define TURNTABLE_INVERT_ENABLE 0
 #define TURNTABLE_INVERT_DIR 0
-#define NUM_MOTOR_DRIVERS 0 
+#define NUM_MOTOR_DRIVERS 1 
 #define MOTOR_DRIVER_1(var) StepperDriver<TURNTABLE_STEP_PIN,TURNTABLE_DIR_PIN,TURNTABLE_ENABLE_PIN,TURNTABLE_INVERT_ENABLE,TURNTABLE_INVERT_DIR> var(TURNTABLE_STEP_PER_MM,DEFAULT_SPEED)
 #endif
 
@@ -2072,9 +2072,9 @@ Values must be in range 1..255
 
 // ####### Advanced stuff for very special function #########
 
-#define NUM_MOTOR_DRIVERS 0
+//#define NUM_MOTOR_DRIVERS 0
 // #define MOTOR_DRIVER_x StepperDriver<int stepPin, int dirPin, int enablePin,bool invertDir, bool invertEnable>(float stepsPerMM,float speed)
-#define MOTOR_DRIVER_1(var) StepperDriver<E1_STEP_PIN, E1_DIR_PIN, E1_ENABLE_PIN, false, false> var(100.0f,5.0f)
+//#define MOTOR_DRIVER_1(var) StepperDriver<E1_STEP_PIN, E1_DIR_PIN, E1_ENABLE_PIN, false, false> var(100.0f,5.0f)
 
 /*
   You can expand firmware functionality with events and you own event handler.

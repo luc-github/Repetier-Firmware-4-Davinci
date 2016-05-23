@@ -78,15 +78,14 @@
 #else
 #define TOP_SENSOR_PIN      64
 #endif
-#if DAVINCI==4
+#if DAVINCI == 4
 #define BADGE_LIGHT_PIN		6
-
 #define TURNTABLE_STEP_PIN     22
 #define TURNTABLE_DIR_PIN      13
-#define TURNTABLE_ENABLE_PIN   26 //HIGH = Disabled
-#define LASER1_PIN   101    //Low = off
-#define LED_LASER1_PIN   7 //0 = off 
-#define LASER2_PIN   2     //Low = off
+#define TURNTABLE_ENABLE_PIN   26 
+#define LASER1_PIN 101 
+#define LED_LASER1_PIN 7
+#define LASER2_PIN   2
 #define LED_LASER2_PIN 108
 #else
 #define BADGE_LIGHT_PIN		-1

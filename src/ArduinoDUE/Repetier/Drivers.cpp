@@ -57,7 +57,7 @@ void commandG201(GCode &code)
     //Davinci Specific
     if(code.hasF())
 		{
-		delayUS = 500000 / (code.F * stepsPerMM);
+		motorDrivers[id]->setdelayUS( 500000 / (code.F * motorDrivers[id]->getstepsPerMM()));
 		}
     motorDrivers[id]->gotoPosition(code.X);
 }

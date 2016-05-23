@@ -306,6 +306,12 @@
 
 // Additional Pins for Davinci board
 #if (MOTHERBOARD == 999)
+//101
+#define DIO101_PORT PIOC
+#define DIO101_PIN PIO_PC27
+//108
+#define DIO108_PORT PIOC
+#define DIO108_PIN PIO_PC20
 //118
 #define DIO118_PORT PIOB
 #define DIO118_PIN PIO_PB3A_ETX1
