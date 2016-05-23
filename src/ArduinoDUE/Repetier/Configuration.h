@@ -21,7 +21,7 @@
 
 // ################## EDIT THESE SETTINGS MANUALLY ################
 
-#define DAVINCI 1 // "0" if not DAVINCI, "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN, 4 for AiO (WITH NO SCANNER SUPPORT)
+#define DAVINCI 4 // "0" if not DAVINCI, "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN, 4 for AiO (WITH NO SCANNER SUPPORT)
 #define MODEL  0//"0" for first generation (jumper JP1 to reset ) , "1" for new generation   (jumper J37 to reset)
 #define REPURPOSE_FAN_TO_COOL_EXTRUSIONS 0 //Setting this to 1 will repurpose the main Extruder cooling fan to be controlled VIA M106/M107
                                            //Warning: for DaVinci 1.0 need to add a permanent fan with power supply to cool extruder
@@ -100,6 +100,16 @@
 #define CASE_WIFI_DEFAULT_ON 0
 //default mode is advanced
 #define CASE_DISPLAY_MODE_DEFAULT 1
+
+//Laser and turntable
+#if DAVINCI == 4
+#define TURNTABLE_STEP_PER_MM 5.20 // 3200 / perimeter (P= 196 * pi)
+#define DEFAULT_SPEED 100
+#define TURNTABLE_INVERT_ENABLE 0
+#define TURNTABLE_INVERT_DIR 0
+#define NUM_MOTOR_DRIVERS 0 
+#define MOTOR_DRIVER_1(var) StepperDriver<TURNTABLE_STEP_PIN,TURNTABLE_DIR_PIN,TURNTABLE_ENABLE_PIN,TURNTABLE_INVERT_ENABLE,TURNTABLE_INVERT_DIR> var(TURNTABLE_STEP_PER_MM,DEFAULT_SPEED)
+#endif
 
 /* Some words on units:
 

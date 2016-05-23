@@ -44,7 +44,7 @@ MotorDriverInterface *getMotorDriver(int idx)
 }
 
 /**
-Run motor P until it is at position X
+Run motor P until it is at position X at speed F
 */
 void commandG201(GCode &code)
 {
@@ -54,6 +54,11 @@ void commandG201(GCode &code)
     if(id < 0) id = 0;
     if(id >= NUM_MOTOR_DRIVERS) id = 0;
     if(!code.hasX()) return;
+    //Davinci Specific
+    if(code.hasF())
+		{
+		delayUS = 500000 / (code.F * stepsPerMM);
+		}
     motorDrivers[id]->gotoPosition(code.X);
 }
 
