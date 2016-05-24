@@ -80,9 +80,6 @@
 #endif
 #if DAVINCI == 4
 #define BADGE_LIGHT_PIN		6
-#define TURNTABLE_STEP_PIN     22
-#define TURNTABLE_DIR_PIN      13
-#define TURNTABLE_ENABLE_PIN   26 
 #define LASER1_PIN 101 
 #define LED_LASER1_PIN 7
 #define LASER2_PIN   2
