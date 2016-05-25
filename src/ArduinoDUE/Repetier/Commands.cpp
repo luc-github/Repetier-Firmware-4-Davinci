@@ -1711,8 +1711,10 @@ void Commands::processMCode(GCode *com) {
             break;
 #if DAVINCI == 4
 	   case 17:
+			getMotorDriver(0)->disable();
 			break;
 	   case 18:
+			getMotorDriver(0)->enable();
 			break;
 		case 60:
 			Com::printFLN("",500);
