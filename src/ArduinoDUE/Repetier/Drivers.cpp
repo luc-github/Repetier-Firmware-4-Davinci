@@ -53,12 +53,12 @@ void commandG201(GCode &code)
         id = code.P;
     if(id < 0) id = 0;
     if(id >= NUM_MOTOR_DRIVERS) id = 0;
-    if(!code.hasX()) return;
     //Davinci Specific
     if(code.hasF())
 		{
 		motorDrivers[id]->setdelayUS( 500000 / (code.F * motorDrivers[id]->getstepsPerMM()));
 		}
+	if(!code.hasX()) return;
     motorDrivers[id]->gotoPosition(code.X);
 }
 

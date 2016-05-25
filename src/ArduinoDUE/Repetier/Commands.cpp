@@ -1709,6 +1709,31 @@ void Commands::processMCode(GCode *com) {
        case 50://kill print
             uid.executeAction(UI_ACTION_SD_STOP,true);
             break;
+#if DAVINCI == 4
+	   case 17:
+			break;
+	   case 18:
+			break;
+		case 60:
+			Com::printFLN("",500);
+			break;
+		case 70:
+			if (com->hasT() && com->T == 1) WRITE(LASER2_PIN, LOW);
+			else WRITE(LASER1_PIN, LOW);
+			break;
+		case 71:
+			if (com->hasT() && com->T == 1) WRITE(LASER2_PIN, HIGH);
+			else WRITE(LASER1_PIN, HIGH);
+			break;
+		case 72:
+			if (com->hasT() && com->T == 1) WRITE(LED_LASER2_PIN, LOW);
+			else WRITE(LED_LASER2_PIN, LOW);
+			break;
+		case 73:
+			if (com->hasT() && com->T == 1) WRITE(LED_LASER2_PIN, HIGH);
+			else WRITE(LED_LASER1_PIN, HIGH);
+			break;
+#endif
         case 80: // M80 - ATX Power On
 #if PS_ON_PIN>-1
             Commands::waitUntilEndOfAllMoves();
