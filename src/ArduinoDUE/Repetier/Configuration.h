@@ -31,8 +31,8 @@
 //Version
 #define VERSION_MAJOR "1"
 #define VERSION_MINOR_YEAR "16"
-#define VERSION_MINOR_MONTH "18"
-#define VERSION_MINOR_DAY "04"
+#define VERSION_MINOR_MONTH "05"
+#define VERSION_MINOR_DAY "26"
 #define VERSION_BUILD "1"
 
 //Davinci screen is not standard reprap it is WINSTAR 16x4
@@ -103,7 +103,11 @@
 
 //Laser and turntable
 #if DAVINCI == 4
-#define TURNTABLE_STEP_PER_MM 110 
+#define TURNTABLE_STEP_PER_MM 110
+//table perimeter in mm for angle rotation as not direct drive for turntable
+//#define TURNTABLE_PERIMETER 616 
+//P/360 => 616/360 = 1.711111
+#define TURNTABLE_MM_PER_DEG 1.7111111 
 #define DEFAULT_SPEED 10
 #define TURNTABLE_INVERT_ENABLE 0
 #define TURNTABLE_INVERT_DIR 0

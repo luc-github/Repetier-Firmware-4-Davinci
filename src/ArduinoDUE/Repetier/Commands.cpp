@@ -1262,6 +1262,12 @@ void Commands::processGCode(GCode *com) {
             break;
 #endif
 #endif
+//Davinci AiO specific
+#if DAVINCI == 4
+	case 50: //G50     : reset origin position
+		getMotorDriver(0)->setCurrentAs(0);
+		break;
+#endif
         case 90: // G90
             Printer::relativeCoordinateMode = false;
             if(com->internalCommand)
@@ -1716,9 +1722,13 @@ void Commands::processMCode(GCode *com) {
 	   case 18:
 			getMotorDriver(0)->enable();
 			break;
+//Davinci AiO Specific
+#if DAVINCI == 4 
 		case 60:
+		//M60 Tn is reading ldr as no ldr - just return fake value, hope 500 is ok
 			Com::printFLN("",500);
 			break;
+#endif
 		case 70:
 			if (com->hasT() && com->T == 1) WRITE(LASER2_PIN, LOW);
 			else WRITE(LASER1_PIN, LOW);
