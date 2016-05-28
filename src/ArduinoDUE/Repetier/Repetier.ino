@@ -58,6 +58,19 @@ Implemented Codes
 - T0 - select extruder 1
 - T1 - select extruder 2
 
+Davinci AiO codes for Horus usage
+- G201 Fnnn : motor speed
+- G201 Xnnn : move motor in mm
+- G201 Ennn : move motor in deg
+- G50       : reset motor origin position
+- M17       : motor_disable
+- M18		: motor_enable
+- M70 Tn    : switch off laser n, 0 index based
+- M71 Tn    : switch on laser n, 0 index based 
+- M72 Tn    : switch off white led n, 0 index based
+- M73 Tn    : switch on white led n, 0 index based
+- M60 Tn    : read ldr sensor, actually fake as always return 500
+
 RepRap M Codes
 
 - M104 - Set extruder target temp
