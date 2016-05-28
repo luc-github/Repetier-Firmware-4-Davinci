@@ -80,10 +80,10 @@
 #endif
 #if DAVINCI == 4
 #define BADGE_LIGHT_PIN		6
-#define LASER1_PIN 101 
-#define LED_LASER1_PIN 7
-#define LASER2_PIN   2
-#define LED_LASER2_PIN 108
+#define LASER1_PIN 2 
+#define LED_LASER1_PIN 108
+#define LASER2_PIN   101 
+#define LED_LASER2_PIN 7
 #else
 #define BADGE_LIGHT_PIN		-1
 #endif
