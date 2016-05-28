@@ -1739,7 +1739,7 @@ void Commands::processMCode(GCode *com) {
 			break;
 		case 72:
 			if (com->hasT() && com->T == 1) WRITE(LED_LASER2_PIN, LOW);
-			else WRITE(LED_LASER2_PIN, LOW);
+			else WRITE(LED_LASER1_PIN, LOW);
 			break;
 		case 73:
 			if (com->hasT() && com->T == 1) WRITE(LED_LASER2_PIN, HIGH);
