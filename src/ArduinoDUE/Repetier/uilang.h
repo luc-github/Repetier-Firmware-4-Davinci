@@ -98,7 +98,7 @@
 #define LANGUAGE_FI_ID 11
 
 #define NUM_LANGUAGES_KNOWN 12
-#define NUM_TRANSLATED_WORDS 408
+#define NUM_TRANSLATED_WORDS 417
 
 // For selectable translations we refer to each text by a id which gets
 // defined here. The list starts at 0 and defines the position in the
@@ -512,6 +512,15 @@
 #define UI_TEXT_P1_L2_EASY_ID 405
 #define UI_TEXT_P1_L3_EASY_ID 406
 #define UI_TEXT_DBG_ENDSTOP_ID 407 //     "EndStop:%dp"
+#define UI_TEXT_MENU_SCANNER_ID 408
+#define UI_TEXT_PREPARE_SCANNER_ID 409
+#define UI_TEXT_LASER1_ONOFF_ID 410
+#define UI_TEXT_LASER2_ONOFF_ID 411
+#define UI_TEXT_LED1_ONOFF_ID 412
+#define UI_TEXT_LED2_ONOFF_ID 413
+#define UI_TEXT_CHANGE_TABLE_SPEED_ID 414
+#define UI_TEXT_ROTATE_TABLE_ID 415
+#define UI_TEXT_RELEASE_TABLE_ID 416
 
 
 
@@ -1004,6 +1013,15 @@
 #define UI_TEXT_P1_L3_EASY_EN "Buffer:%oB"
 #endif
 #endif
+#define UI_TEXT_MENU_SCANNER_EN    "Scanner"
+#define UI_TEXT_PREPARE_SCANNER_EN    "Prepare scan"
+#define UI_TEXT_LASER1_ONOFF_EN        "Right laser:%PA"
+#define UI_TEXT_LASER2_ONOFF_EN       "Left laser :%PB"
+#define UI_TEXT_LED1_ONOFF_EN           "Right LED  :%P1"
+#define UI_TEXT_LED2_ONOFF_EN          "Left LED   :%P2"
+#define UI_TEXT_CHANGE_TABLE_SPEED_EN    "Speed :%PS"
+#define UI_TEXT_ROTATION_TABLE_EN     "Rotate +/-"
+#define UI_TEXT_RELEASE_TABLE_EN      "Release table"
 
 
 // *************** German translation ****************
@@ -1487,6 +1505,15 @@
 #define UI_TEXT_P1_L3_EASY_DE "Puffer:%oB"
 #endif
 #endif
+#define UI_TEXT_MENU_SCANNER_DE    "Scanner"
+#define UI_TEXT_PREPARE_SCANNER_DE    "Prepare scan"
+#define UI_TEXT_LASER1_ONOFF_DE        "Right laser:%PA"
+#define UI_TEXT_LASER2_ONOFF_DE       "Left laser :%PB"
+#define UI_TEXT_LED1_ONOFF_DE           "Right LED  :%P1"
+#define UI_TEXT_LED2_ONOFF_DE          "Left LED   :%P2"
+#define UI_TEXT_CHANGE_TABLE_SPEED_DE    "Speed :%PS"
+#define UI_TEXT_ROTATION_TABLE_DE     "Rotate +/-"
+#define UI_TEXT_RELEASE_TABLE_DE      "Release table"
 
 
 // Dutch translation
@@ -1970,6 +1997,15 @@
 #define UI_TEXT_P1_L3_EASY_NL "Buffer:%oB"
 #endif
 #endif
+#define  UI_TEXT_MENU_SCANNER_NL    "Scanner"
+#define UI_TEXT_PREPARE_SCANNER_NL    "Prepare scan"
+#define UI_TEXT_LASER1_ONOFF_NL        "Right laser:%PA"
+#define UI_TEXT_LASER2_ONOFF_NL       "Left laser :%PB"
+#define UI_TEXT_LED1_ONOFF_NL           "Right LED  :%P1"
+#define UI_TEXT_LED2_ONOFF_NL          "Left LED   :%P2"
+#define UI_TEXT_CHANGE_TABLE_SPEED_NL    "Speed :%PS"
+#define UI_TEXT_ROTATION_TABLE_NL     "Rotate +/-"
+#define UI_TEXT_RELEASE_TABLE_NL      "Release table"
 
 
 
@@ -2457,6 +2493,16 @@
 #define UI_TEXT_P1_L3_EASY_PT "Buffer:%oB"
 #endif
 #endif
+#define UI_TEXT_DBG_ENDSTOP_PT      "EndStop:%dp"
+#define UI_TEXT_MENU_SCANNER_PT    "Scanner"
+#define UI_TEXT_PREPARE_SCANNER_PT    "Prepare scan"
+#define UI_TEXT_LASER1_ONOFF_PT        "Right laser:%PA"
+#define UI_TEXT_LASER2_ONOFF_PT       "Left laser :%PB"
+#define UI_TEXT_LED1_ONOFF_PT           "Right LED  :%P1"
+#define UI_TEXT_LED2_ONOFF_PT          "Left LED   :%P2"
+#define UI_TEXT_CHANGE_TABLE_SPEED_PT    "Speed :%PS"
+#define UI_TEXT_ROTATION_TABLE_PT     "Rotate +/-"
+#define UI_TEXT_RELEASE_TABLE_PT      "Release table"
 
 
 
@@ -2942,6 +2988,15 @@
 #define UI_TEXT_P1_L3_EASY_IT "Buffer:%oB"
 #endif
 #endif
+#define UI_TEXT_MENU_SCANNER_IT    "Scanner"
+#define UI_TEXT_PREPARE_SCANNER_IT    "Prepare scan"
+#define UI_TEXT_LASER1_ONOFF_IT        "Right laser:%PA"
+#define UI_TEXT_LASER2_ONOFF_IT       "Left laser :%PB"
+#define UI_TEXT_LED1_ONOFF_IT           "Right LED  :%P1"
+#define UI_TEXT_LED2_ONOFF_IT          "Left LED   :%P2"
+#define UI_TEXT_CHANGE_TABLE_SPEED_IT    "Speed :%PS"
+#define UI_TEXT_ROTATION_TABLE_IT     "Rotate +/-"
+#define UI_TEXT_RELEASE_TABLE_IT      "Release table"
 
 
 
@@ -3427,6 +3482,15 @@
 #define UI_TEXT_P1_L3_EASY_ES "Buffer:%oB"
 #endif
 #endif
+#define  UI_TEXT_MENU_SCANNER_ES    "Scanner"
+#define UI_TEXT_PREPARE_SCANNER_ES    "Prepare scan"
+#define UI_TEXT_LASER1_ONOFF_ES        "Right laser:%PA"
+#define UI_TEXT_LASER2_ONOFF_ES       "Left laser :%PB"
+#define UI_TEXT_LED1_ONOFF_ES           "Right LED  :%P1"
+#define UI_TEXT_LED2_ONOFF_ES          "Left LED   :%P2"
+#define UI_TEXT_CHANGE_TABLE_SPEED_ES    "Speed :%PS"
+#define UI_TEXT_ROTATION_TABLE_ES     "Rotate +/-"
+#define UI_TEXT_RELEASE_TABLE_ES      "Release table"
 
 
 
@@ -3913,6 +3977,15 @@
 #endif
 #endif
 #define UI_TEXT_DBG_ENDSTOP_SE      "EndStop:%dp"
+#define UI_TEXT_MENU_SCANNER_SE    "Scanner"
+#define UI_TEXT_PREPARE_SCANNER_SE    "Prepare scan"
+#define UI_TEXT_LASER1_ONOFF_SE        "Right laser:%PA"
+#define UI_TEXT_LASER2_ONOFF_SE       "Left laser :%PB"
+#define UI_TEXT_LED1_ONOFF_SE           "Right LED  :%P1"
+#define UI_TEXT_LED2_ONOFF_SE          "Left LED   :%P2"
+#define UI_TEXT_CHANGE_TABLE_SPEED_SE    "Speed :%PS"
+#define UI_TEXT_ROTATION_TABLE_SE     "Rotate +/-"
+#define UI_TEXT_RELEASE_TABLE_SE      "Release table"
 
 
 
@@ -4399,6 +4472,15 @@
 #define UI_TEXT_P1_L3_EASY_FR "Tampon:%oB"
 #endif
 #endif
+#define  UI_TEXT_MENU_SCANNER_FR    "Numeriser"
+#define UI_TEXT_PREPARE_SCANNER_FR    "Prepare table"
+#define UI_TEXT_LASER1_ONOFF_FR        "Laser droit:%PA"
+#define UI_TEXT_LASER2_ONOFF_FR       "Lasergauche:%PB"
+#define UI_TEXT_LED1_ONOFF_FR           "LED  droite:%P1"
+#define UI_TEXT_LED2_ONOFF_FR          "LED  gauche:%P2"
+#define UI_TEXT_CHANGE_TABLE_SPEED_FR    "Vitesse :%PS"
+#define UI_TEXT_ROTATION_TABLE_FR     "Rotation +/-"
+#define UI_TEXT_RELEASE_TABLE_FR      "Liberer table"
 
 
 
@@ -4887,6 +4969,15 @@
 #define UI_TEXT_P1_L3_EASY_CZ "Buffer:%oB"
 #endif
 #endif
+#define UI_TEXT_MENU_SCANNER_CZ    "Scanner"
+#define UI_TEXT_PREPARE_SCANNER_CZ    "Prepare scan"
+#define UI_TEXT_LASER1_ONOFF_CZ        "Right laser:%PA"
+#define UI_TEXT_LASER2_ONOFF_CZ       "Left laser :%PB"
+#define UI_TEXT_LED1_ONOFF_CZ           "Right LED  :%P1"
+#define UI_TEXT_LED2_ONOFF_CZ          "Left LED   :%P2"
+#define UI_TEXT_CHANGE_TABLE_SPEED_CZ    "Speed :%PS"
+#define UI_TEXT_ROTATION_TABLE_CZ     "Rotate +/-"
+#define UI_TEXT_RELEASE_TABLE_CZ      "Release table"
 
 
 
@@ -5374,6 +5465,16 @@
 #define UI_TEXT_P1_L3_EASY_PL "Buffer:%oB"
 #endif
 #endif
+#define UI_TEXT_MENU_SCANNER_PL    "Scanner"
+#define UI_TEXT_PREPARE_SCANNER_PL    "Prepare scan"
+#define UI_TEXT_LASER1_ONOFF_PL        "Right laser:%PA"
+#define UI_TEXT_LASER2_ONOFF_PL       "Left laser :%PB"
+#define UI_TEXT_LED1_ONOFF_PL           "Right LED  :%P1"
+#define UI_TEXT_LED2_ONOFF_PL          "Left LED   :%P2"
+#define UI_TEXT_CHANGE_TABLE_SPEED_PL    "Speed :%PS"
+#define UI_TEXT_ROTATION_TABLE_PL     "Rotate +/-"
+#define UI_TEXT_RELEASE_TABLE_PL      "Release table"
+
 
 // Türk
 
@@ -5856,6 +5957,15 @@
 #define UI_TEXT_P1_L3_EASY_TR "Buffer:%oB"
 #endif
 #endif
+#define UI_TEXT_MENU_SCANNER_TR    "Scanner"
+#define UI_TEXT_PREPARE_SCANNER_TR    "Prepare scan"
+#define UI_TEXT_LASER1_ONOFF_TR        "Right laser:%PA"
+#define UI_TEXT_LASER2_ONOFF_TR       "Left laser :%PB"
+#define UI_TEXT_LED1_ONOFF_TR           "Right LED  :%P1"
+#define UI_TEXT_LED2_ONOFF_TR          "Left LED   :%P2"
+#define UI_TEXT_CHANGE_TABLE_SPEED_TR    "Speed :%PS"
+#define UI_TEXT_ROTATION_TABLE_TR     "Rotate +/-"
+#define UI_TEXT_RELEASE_TABLE_TR      "Release table"
 
 
 // *************** Finnish translation ****************
@@ -6340,3 +6450,12 @@
 #define UI_TEXT_P1_L3_EASY_FI "Buffer:%oB"
 #endif
 #endif
+#define UI_TEXT_MENU_SCANNER_FI    "Scanner"
+#define UI_TEXT_PREPARE_SCANNER_FI    "Prepare scan"
+#define UI_TEXT_LASER1_ONOFF_FI        "Right laser:%PA"
+#define UI_TEXT_LASER2_ONOFF_FI       "Left laser :%PB"
+#define UI_TEXT_LED1_ONOFF_FI           "Right LED  :%P1"
+#define UI_TEXT_LED2_ONOFF_FI          "Left LED   :%P2"
+#define UI_TEXT_CHANGE_TABLE_SPEED_FI    "Speed :%PS"
+#define UI_TEXT_ROTATION_TABLE_FI     "Rotate +/-"
+#define UI_TEXT_RELEASE_TABLE_FI      "Release table"

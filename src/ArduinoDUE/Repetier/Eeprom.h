@@ -223,6 +223,9 @@ public:
     static void init();
     static void initBaudrate();
     //Davinci Specific
+#if DAVINCI == 4
+	static float rotate_speed;
+#endif
     static bool buselight; 
     static bool busebadgelight;
     static bool busesensor;

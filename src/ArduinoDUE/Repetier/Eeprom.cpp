@@ -100,6 +100,9 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 #if CASE_LIGHTS_PIN > 0
     EEPROM::buselight = bool(CASE_LIGHT_DEFAULT_ON);
 #endif
+#if DAVINCI == 4
+	EEPROM::rotate_speed = DEFAULT_SPEED;
+#endif
 #if BADGE_LIGHT_PIN > -1
     EEPROM::busebadgelight = bool(CASE_BADGE_LIGHT_DEFAULT_ON);
 #endif
@@ -374,6 +377,9 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 
 }
 //Davinci Specific
+#if DAVINCI == 4
+float EEPROM::rotate_speed = DEFAULT_SPEED;
+#endif
 bool EEPROM::buselight = false;
 bool EEPROM::busebadgelight = false;
 bool EEPROM::busesensor = false;

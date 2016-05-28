@@ -1629,6 +1629,29 @@ UI_MENU_SUBMENU_T(ui_menu_bed_entry, UI_TEXT_BED_ID, ui_menu_bed, ADVANCED_MODE)
 #define UI_MENU_BED_ENTRY_CNT 0
 #endif
 
+
+//****scanner menu
+#if DAVINCI == 4
+UI_MENU_ACTIONCOMMAND_T(ui_menu_prepare_scanner,UI_TEXT_PREPARE_SCANNER_ID,UI_ACTION_PREPARE_SCANNER, ALL_MODE)
+UI_MENU_ACTIONCOMMAND_T(ui_menu_laser1,UI_TEXT_LASER1_ONOFF_ID,UI_ACTION_LASER1_ONOFF, ALL_MODE)
+UI_MENU_ACTIONCOMMAND_T(ui_menu_led_1,UI_TEXT_LED1_ONOFF_ID,UI_ACTION_LED1_ONOFF, ALL_MODE)
+UI_MENU_ACTIONCOMMAND_T(ui_menu_laser_2,UI_TEXT_LASER2_ONOFF_ID,UI_ACTION_LASER2_ONOFF, ALL_MODE)
+UI_MENU_ACTIONCOMMAND_T(ui_menu_led_2,UI_TEXT_LED2_ONOFF_ID,UI_ACTION_LED2_ONOFF, ALL_MODE)
+UI_MENU_CHANGEACTION_T(ui_menu_speed_rotation,UI_TEXT_CHANGE_TABLE_SPEED_ID,UI_ACTION_CHANGE_TABLE_SPEED, ALL_MODE)
+UI_MENU_CHANGEACTION_T(ui_menu_rotate_table,UI_TEXT_ROTATE_TABLE_ID,UI_ACTION_ROTATE_TABLE, ALL_MODE)
+UI_MENU_ACTIONCOMMAND_T(ui_menu_release_scanner,UI_TEXT_RELEASE_TABLE_ID,UI_ACTION_RELEASE_TABLE, ALL_MODE)
+
+#define UI_MENU_SCANNER {UI_MENU_ADDCONDBACK &ui_menu_prepare_scanner,&ui_menu_laser1,&ui_menu_led_1,&ui_menu_laser_2,&ui_menu_led_2,&ui_menu_speed_rotation,&ui_menu_rotate_table,&ui_menu_release_scanner}
+UI_MENU(ui_menu_scanner,UI_MENU_SCANNER,8 + UI_MENU_BACKCNT);//BUG without this ; compilation crash
+UI_MENU_SUBMENU_T(ui_menu_scanner_entry, UI_TEXT_MENU_SCANNER_ID, ui_menu_scanner, ADVANCED_MODE)
+
+#define UI_MENU_SCANNER_ENTRY_COND &ui_menu_scanner_entry,
+#define UI_MENU_SCANNER_ENTRY_CNT 1
+#else
+#define UI_MENU_SCANNER_ENTRY_COND
+#define UI_MENU_SCANNER_ENTRY_CNT 0
+#endif
+
 //****Settings  menu
 //display mode
 UI_MENU_ACTIONCOMMAND_T(ui_menu_display_mode,UI_TEXT_DISPLAY_MODE_ID,UI_ACTION_DISPLAY_MODE, ALL_MODE)
@@ -2038,8 +2061,8 @@ UI_MENU(ui_menu_debugging,UI_MENU_DEBUGGING,5 + DEBUG_PRINT_COUNT + UI_MENU_BACK
 UI_MENU_SUBMENU_T(ui_menu_debugging_entry, UI_TEXT_DEBUGGING_ID,ui_menu_debugging, ADVANCED_MODE)
 
 // **************Main menu
-#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK  SD_PRINTFILE_ENTRY &ui_menu_maintenance_entry, &ui_menu_positions_entry,&ui_menu_extruder_entry, UI_MENU_BED_ENTRY_COND UI_MENU_FAN_COND  &ui_menu_settings_entry, UI_MENU_SD_COND  &ui_menu_debugging_entry}
-UI_MENU(ui_menu_main,UI_MENU_MAIN,5+UI_MENU_BACKCNT+UI_MENU_SD_CNT+UI_MENU_FAN_CNT+SD_PRINTFILE_ENTRY_CNT +UI_MENU_BED_ENTRY_CNT);//BUG without this ; compilation crash
+#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK  SD_PRINTFILE_ENTRY &ui_menu_maintenance_entry, &ui_menu_positions_entry,&ui_menu_extruder_entry, UI_MENU_BED_ENTRY_COND UI_MENU_FAN_COND UI_MENU_SCANNER_ENTRY_COND &ui_menu_settings_entry, UI_MENU_SD_COND  &ui_menu_debugging_entry}
+UI_MENU(ui_menu_main,UI_MENU_MAIN,5+UI_MENU_BACKCNT+UI_MENU_SD_CNT+UI_MENU_FAN_CNT+SD_PRINTFILE_ENTRY_CNT +UI_MENU_BED_ENTRY_CNT + UI_MENU_SCANNER_ENTRY_CNT);//BUG without this ; compilation crash
 
 ///////////END MENU DEFINITION
 

@@ -1904,7 +1904,15 @@ void UIDisplay::parse(const char *txt,bool ram)
 #endif
               }
         break;
-case 'P':
+       case 'P':
+#if DAVINCI == 4
+	        if(c2=='A') addStringOnOff(READ(LASER1_PIN));
+	        else if(c2=='B') addStringOnOff(READ(LASER2_PIN));
+	        else if(c2=='1') addStringOnOff(READ(LED_LASER1_PIN));
+	        else if(c2=='2') addStringOnOff(READ(LED_LASER2_PIN));
+	        else if(c2=='S') addFloat(EEPROM::rotate_speed,2,2);
+	        else
+#endif
             if(c2=='N') addStringP(PSTR(UI_PRINTER_NAME));
             #if UI_AUTOLIGHTOFF_AFTER > 0
             else if(c2=='s')
@@ -3396,6 +3404,28 @@ ZPOS2:
     break;
 
  //Davinci Specific, special commands
+#if DAVINCI == 4
+	case UI_ACTION_ROTATE_TABLE:
+        {
+		getMotorDriver(0)->disable();
+		getMotorDriver(0)->setCurrentAs(0);
+		//rotate
+		if (increment > 0 ) getMotorDriver(0)->gotoPosition(TURNTABLE_MM_PER_DEG * 360); //move in degres
+		else getMotorDriver(0)->gotoPosition(TURNTABLE_MM_PER_DEG * -360); //move in degres
+		getMotorDriver(0)->enable();
+		break;
+		}
+	case UI_ACTION_CHANGE_TABLE_SPEED:
+        {
+		//change speed
+		float tmp_pos = EEPROM::rotate_speed;
+		INCREMENT_MIN_MAX(tmp_pos,0.2,0.2,100);
+		EEPROM::rotate_speed = tmp_pos;
+		getMotorDriver(0)->setdelayUS( 500000 / (tmp_pos * getMotorDriver(0)->getstepsPerMM()));
+		break;
+		}
+
+#endif
     case UI_ACTION_X_1:
     case UI_ACTION_X_10:
     case UI_ACTION_X_100:
@@ -4532,6 +4562,54 @@ case UI_ACTION_LOAD_FAILSAFE:
  #endif
         break;
         }
+#endif
+
+#if DAVINCI == 4
+	case UI_ACTION_PREPARE_SCANNER:
+        {
+		//Home first
+        Printer::homeAxis(true,true,true);
+        //lock motor
+        getMotorDriver(0)->enable();
+        //power off every led / laser
+        WRITE(LASER1_PIN, LOW);
+        WRITE(LASER2_PIN, LOW);
+        WRITE(LED_LASER1_PIN, LOW);
+        WRITE(LED_LASER2_PIN, LOW);
+        UI_STATUS_F(Com::translatedF(UI_TEXT_PREPARING_ID));
+        Commands::waitUntilEndOfAllMoves();
+		break;
+		}
+	case UI_ACTION_RELEASE_TABLE:
+        {
+        //lock motor
+        getMotorDriver(0)->disable();
+		break;
+		}
+	case UI_ACTION_LASER1_ONOFF:
+        {
+		//toogle laser 1
+        TOGGLE(LASER1_PIN);
+		break;
+		}
+	case UI_ACTION_LASER2_ONOFF:
+        {
+		//toogle laser 2
+        TOGGLE(LASER2_PIN);
+		break;
+		}
+	case UI_ACTION_LED1_ONOFF:
+        {
+		//toogle LED laser 1
+        TOGGLE(LED_LASER1_PIN);
+		break;
+		}
+	case UI_ACTION_LED2_ONOFF:
+        {
+		//toogle LED laser 2
+        TOGGLE(LED_LASER2_PIN);
+		break;
+		}
 #endif
 
 #if ENABLE_CLEAN_DRIPBOX==1
