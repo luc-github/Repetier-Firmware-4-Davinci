@@ -171,14 +171,22 @@ class Board(object):
             if not self._laser_enabled[index]:
                 self._laser_enabled[index] = True
                 #Davici Specific
-                self._send_command("M71 T" + str(index))
+                if index == 0: 
+                    strindex="1"
+                else :
+                    strindex="0"
+                self._send_command("M71 T" + strindex)
 
     def laser_off(self, index):
         if self._is_connected:
             if self._laser_enabled[index]:
                 self._laser_enabled[index] = False
                 #Davici Specific
-                self._send_command("M70 T" + str(index))
+                if index == 0: 
+                    strindex="1"
+                else :
+                    strindex="0"
+                self._send_command("M70 T" + strindex)
 
     def lasers_on(self):
         for i in xrange(self._laser_number):
