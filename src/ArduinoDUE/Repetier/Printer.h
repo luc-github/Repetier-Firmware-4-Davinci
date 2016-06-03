@@ -316,6 +316,11 @@ public:
 #if NUM_EXTRUDER>1
     static uint lastextruderID;
 #endif
+    //Davinci specific, for communication between GCODE command and printer menu  
+#if FEATURE_Z_PROBE
+	static bool zprobe_ok;
+	static float Z_probe[3];
+#endif
     static uint8_t menuMode;
     static float axisStepsPerMM[];
     static float invAxisStepsPerMM[];

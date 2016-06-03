@@ -98,7 +98,7 @@
 #define LANGUAGE_FI_ID 11
 
 #define NUM_LANGUAGES_KNOWN 12
-#define NUM_TRANSLATED_WORDS 417
+#define NUM_TRANSLATED_WORDS 418
 
 // For selectable translations we refer to each text by a id which gets
 // defined here. The list starts at 0 and defines the position in the
@@ -521,7 +521,7 @@
 #define UI_TEXT_CHANGE_TABLE_SPEED_ID 414
 #define UI_TEXT_ROTATE_TABLE_ID 415
 #define UI_TEXT_RELEASE_TABLE_ID 416
-
+#define UI_TEXT_Z_MIN_CALCULATION_ID 417
 
 
 // Universal definitions
@@ -1022,7 +1022,7 @@
 #define UI_TEXT_CHANGE_TABLE_SPEED_EN    "Speed :%PS"
 #define UI_TEXT_ROTATION_TABLE_EN     "Rotate +/-"
 #define UI_TEXT_RELEASE_TABLE_EN      "Release table"
-
+#define UI_TEXT_Z_MIN_CALCULATION_EN      "Zmin evaluation"
 
 // *************** German translation ****************
 
@@ -1514,7 +1514,7 @@
 #define UI_TEXT_CHANGE_TABLE_SPEED_DE    "Speed :%PS"
 #define UI_TEXT_ROTATION_TABLE_DE     "Rotate +/-"
 #define UI_TEXT_RELEASE_TABLE_DE      "Release table"
-
+#define UI_TEXT_Z_MIN_CALCULATION_DE      "Zmin evaluation"
 
 // Dutch translation
 
@@ -2006,7 +2006,7 @@
 #define UI_TEXT_CHANGE_TABLE_SPEED_NL    "Speed :%PS"
 #define UI_TEXT_ROTATION_TABLE_NL     "Rotate +/-"
 #define UI_TEXT_RELEASE_TABLE_NL      "Release table"
-
+#define UI_TEXT_Z_MIN_CALCULATION_NL      "Zmin evaluation"
 
 
 
@@ -2503,7 +2503,7 @@
 #define UI_TEXT_CHANGE_TABLE_SPEED_PT    "Speed :%PS"
 #define UI_TEXT_ROTATION_TABLE_PT     "Rotate +/-"
 #define UI_TEXT_RELEASE_TABLE_PT      "Release table"
-
+#define UI_TEXT_Z_MIN_CALCULATION_PT      "Zmin evaluation"
 
 
 
@@ -2997,7 +2997,7 @@
 #define UI_TEXT_CHANGE_TABLE_SPEED_IT    "Speed :%PS"
 #define UI_TEXT_ROTATION_TABLE_IT     "Rotate +/-"
 #define UI_TEXT_RELEASE_TABLE_IT      "Release table"
-
+#define UI_TEXT_Z_MIN_CALCULATION_IT      "Zmin evaluation"
 
 
 
@@ -3491,7 +3491,7 @@
 #define UI_TEXT_CHANGE_TABLE_SPEED_ES    "Speed :%PS"
 #define UI_TEXT_ROTATION_TABLE_ES     "Rotate +/-"
 #define UI_TEXT_RELEASE_TABLE_ES      "Release table"
-
+#define UI_TEXT_Z_MIN_CALCULATION_ES      "Zmin evaluation"
 
 
 
@@ -3986,7 +3986,7 @@
 #define UI_TEXT_CHANGE_TABLE_SPEED_SE    "Speed :%PS"
 #define UI_TEXT_ROTATION_TABLE_SE     "Rotate +/-"
 #define UI_TEXT_RELEASE_TABLE_SE      "Release table"
-
+#define UI_TEXT_Z_MIN_CALCULATION_SE      "Zmin evaluation"
 
 
 
@@ -4481,7 +4481,7 @@
 #define UI_TEXT_CHANGE_TABLE_SPEED_FR    "Vitesse :%PS"
 #define UI_TEXT_ROTATION_TABLE_FR     "Rotation +/-"
 #define UI_TEXT_RELEASE_TABLE_FR      "Liberer table"
-
+#define UI_TEXT_Z_MIN_CALCULATION_FR      "Calcul de Zmin"
 
 
 
@@ -4978,7 +4978,7 @@
 #define UI_TEXT_CHANGE_TABLE_SPEED_CZ    "Speed :%PS"
 #define UI_TEXT_ROTATION_TABLE_CZ     "Rotate +/-"
 #define UI_TEXT_RELEASE_TABLE_CZ      "Release table"
-
+#define UI_TEXT_Z_MIN_CALCULATION_CZ      "Zmin evaluation"
 
 
 
@@ -5474,7 +5474,7 @@
 #define UI_TEXT_CHANGE_TABLE_SPEED_PL    "Speed :%PS"
 #define UI_TEXT_ROTATION_TABLE_PL     "Rotate +/-"
 #define UI_TEXT_RELEASE_TABLE_PL      "Release table"
-
+#define UI_TEXT_Z_MIN_CALCULATION_PL      "Zmin evaluation"
 
 // Türk
 
@@ -5966,7 +5966,7 @@
 #define UI_TEXT_CHANGE_TABLE_SPEED_TR    "Speed :%PS"
 #define UI_TEXT_ROTATION_TABLE_TR     "Rotate +/-"
 #define UI_TEXT_RELEASE_TABLE_TR      "Release table"
-
+#define UI_TEXT_Z_MIN_CALCULATION_TR      "Zmin evaluation"
 
 // *************** Finnish translation ****************
 // ********** By Matti Granstedt 28.01.2016 ***********
@@ -6459,3 +6459,4 @@
 #define UI_TEXT_CHANGE_TABLE_SPEED_FI    "Speed :%PS"
 #define UI_TEXT_ROTATION_TABLE_FI     "Rotate +/-"
 #define UI_TEXT_RELEASE_TABLE_FI      "Release table"
+#define UI_TEXT_Z_MIN_CALCULATION_FI      "Zmin evaluation"

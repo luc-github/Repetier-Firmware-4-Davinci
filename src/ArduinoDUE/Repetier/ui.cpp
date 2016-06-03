@@ -88,7 +88,6 @@ HAL::delayMilliseconds(duration);
 HAL::noTone(BEEPER_PIN);
 #endif
 }
-float Z_probe[3];
 void beep(uint8_t duration,uint8_t count)
 {
 #if FEATURE_BEEPER
@@ -2196,24 +2195,24 @@ void UIDisplay::parse(const char *txt,bool ram)
                 addFloat(-Printer::coordinateOffset[c2-'0'],4,0);
             break;
 
-//Davinci Specific, autoleveling display
+//Davinci Specific, z probe display
          case 'Z':
             if(c2=='1' || c2=='2' || c2=='3')
                     {
                         int p = c2- '0';
                         p--;
-                        if (Z_probe[p] == -1000)
+                        if (Printer::Z_probe[p] == -1000)
                             {
                                 addStringP("  --.--- mm");
                             }
                         else
-                             if (Z_probe[p] == -2000)
+                             if (Printer::Z_probe[p] == -2000)
                             {
                                 addStringP(Com::translatedF(UI_TEXT_FAILED_ID));
                             }
                         else
                             {
-                                addFloat(Z_probe[p]-10 ,4,3);
+                                addFloat(Printer::Z_probe[p]-10 ,4,3);
                                 addStringP(" mm");
                             }
                     }
@@ -4744,6 +4743,11 @@ case UI_ACTION_LOAD_FAILSAFE:
         int tmpmenupos=menuPos[menuLevel];
         UIMenu *tmpmen = (UIMenu*)menu[menuLevel];
         process_it=true;
+        //to be sure no return menu
+#if UI_AUTORETURN_TO_MENU_AFTER!=0
+        bool btmp_autoreturn=benable_autoreturn; //save current value
+        benable_autoreturn=false;//desactivate no need to test if active or not
+#endif
         //if printing from SD pause
         if(sd.sdmode )sd.pausePrint(true);
         else //if printing from Host, request a pause
@@ -4754,11 +4758,6 @@ case UI_ACTION_LOAD_FAILSAFE:
             Printer::moveToReal(Printer::xMin,Printer::yMin,IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::homingFeedrate[0]);
             }
         
-        //to be sure no return menu
-#if UI_AUTORETURN_TO_MENU_AFTER!=0
-        bool btmp_autoreturn=benable_autoreturn; //save current value
-        benable_autoreturn=false;//desactivate no need to test if active or not
-#endif
         playsound(3000,240);
         playsound(4000,240);
         playsound(5000,240);
@@ -5119,11 +5118,10 @@ case UI_ACTION_LOAD_FAILSAFE:
         break;
         }
 #if FEATURE_AUTOLEVEL
-/*        case UI_ACTION_AUTOLEVEL:
+		case UI_ACTION_AUTOLEVEL:
+			break;
+		case UI_ACTION_ZMIN_CALCULATION:
         {
-        Z_probe[0]=-1000;
-        Z_probe[1]=-1000;
-        Z_probe[2]=-1000;
         //be sure no issue
         if(reportTempsensorError() or Printer::debugDryrun()) break;
 //to be sure no return menu
@@ -5131,7 +5129,7 @@ case UI_ACTION_LOAD_FAILSAFE:
         bool btmp_autoreturn=benable_autoreturn; //save current value
         benable_autoreturn=false;//desactivate no need to test if active or not
 #endif
-        int tmpmenu=menuLevel;
+		int tmpmenu=menuLevel;
         int tmpmenupos=menuPos[menuLevel];
         UIMenu *tmpmen = (UIMenu*)menu[menuLevel];
         //save current target temp
@@ -5159,19 +5157,12 @@ case UI_ACTION_LOAD_FAILSAFE:
          #endif
          if(menuLevel>0) menuLevel--;
          pushMenu(&ui_menu_autolevel_page,true);
-        UI_STATUS_F(Com::translatedF(UI_TEXT_HEATING_ID));
-        process_it=true;
-        printedTime = HAL::timeInMilliseconds();
-        step=STEP_AUTOLEVEL_HEATING;
-        float h1,h2,h3;
-        float oldFeedrate = Printer::feedrate;
-        int xypoint=1;
-        float z = 0;
-        int32_t sum ,probeDepth;
-        int32_t lastCorrection;
-        float distance;
-        int status=STATUS_OK;
-        float currentzMin = Printer::zMin;
+         UI_STATUS_F(Com::translatedF(UI_TEXT_HEATING_ID));
+         process_it=true;
+         printedTime = HAL::timeInMilliseconds();
+         step=STEP_AUTOLEVEL_HEATING;
+         int status=STATUS_OK;
+         float currentzMin = Printer::zMin;
 
         while (process_it)
         {
@@ -5204,120 +5195,62 @@ case UI_ACTION_LOAD_FAILSAFE:
             //no need to be extremely accurate so no need stable temperature
             if(abs(extruder[0].tempControl.currentTemperatureC- extruder[0].tempControl.targetTemperatureC)<2)
                 {
-                step = STEP_ZPROBE_SCRIPT;
+                step = STEP_AUTOLEVEL_START;
                 }
             #if NUM_EXTRUDER==2
-            if(!((abs(extruder[1].tempControl.currentTemperatureC- extruder[1].tempControl.targetTemperatureC)<2) && (step == STEP_ZPROBE_SCRIPT)))
+            if(!((abs(extruder[1].tempControl.currentTemperatureC- extruder[1].tempControl.targetTemperatureC)<2)))
                 {
                 step = STEP_AUTOLEVEL_WAIT_FOR_TEMPERATURE;
                 }
             #endif
             #if HAVE_HEATED_BED==true
-            if(!((abs(heatedBedController.currentTemperatureC-heatedBedController.targetTemperatureC)<2) && (step == STEP_ZPROBE_SCRIPT)))
+            if(!((abs(heatedBedController.currentTemperatureC-heatedBedController.targetTemperatureC)<2)))
                 {
                 step = STEP_AUTOLEVEL_WAIT_FOR_TEMPERATURE;
                 }
             #endif
          break;
-         case STEP_ZPROBE_SCRIPT:
-            //Home first
-            Printer::homeAxis(true,true,true);
-            //then put bed +10mm
-            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+10,IGNORE_COORDINATE,Printer::homingFeedrate[0]);
-            Commands::waitUntilEndOfAllMoves();
-            //Startup script
-            GCode::executeFString(Com::tZProbeStartScript);
-            step = STEP_AUTOLEVEL_START;
-            break;
          case STEP_AUTOLEVEL_START:
-            Printer::coordinateOffset[0] = Printer::coordinateOffset[1] = Printer::coordinateOffset[2] = 0;
-            Printer::setAutolevelActive(false); // iterate
+			// iterate
             step = STEP_AUTOLEVEL_MOVE;
-            Z_probe[0]=-1000;
-            Z_probe[1]=-1000;
-            Z_probe[2]=-1000;
+            Printer::Z_probe[0]=-1000;
+			Printer::Z_probe[1]=-1000;
+			Printer::Z_probe[2]=-1000;
             if(menuLevel>0) menuLevel--;
             pushMenu(&ui_menu_autolevel_results_page,true);
+            //Home first
+			Printer::homeAxis(true,true,true);
             break;
 
         case STEP_AUTOLEVEL_MOVE:
             UI_STATUS_F(Com::translatedF(UI_TEXT_ZPOSITION_ID));
-            if (xypoint==1)Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
-
-            else if (xypoint==2) Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
-            else Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+            //put bed down
+		    Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+EEPROM::zProbeBedDistance(),IGNORE_COORDINATE,Printer::homingFeedrate[0]);
+		    //now do the probe
             step = STEP_AUTOLEVEL_DO_ZPROB;
             break;
         case STEP_AUTOLEVEL_DO_ZPROB:
             {
             UI_STATUS_F(Com::translatedF(UI_TEXT_ZPROBING_ID));
-            sum = 0;
-            probeDepth = (int32_t)((float)Z_PROBE_SWITCHING_DISTANCE*Printer::axisStepsPerMM[Z_AXIS]);
-            lastCorrection = Printer::currentPositionSteps[Z_AXIS];
-            #if NONLINEAR_SYSTEM
-                Printer::realDeltaPositionSteps[Z_AXIS] = Printer::currentDeltaPositionSteps[Z_AXIS]; // update real
-            #endif
-            probeDepth = 2 * (Printer::zMaxSteps - Printer::zMinSteps);
-            Printer::stepsRemainingAtZHit = -1;
-            Printer::setZProbingActive(true);
-            PrintLine::moveRelativeDistanceInSteps(0,0,-probeDepth,0,EEPROM::zProbeSpeed(),true,true);
-            if(Printer::stepsRemainingAtZHit<0)
+            //do Z probe
+            GCode::executeFString(PSTR("G29 S1 I0"));
+            
+            //check results
+            if(Printer::zprobe_ok == false)
                 {
                 Com::printErrorFLN(Com::tZProbeFailed);
+                playsound(3000,240);
+                playsound(5000,240);
+                playsound(3000,240);
                 UI_STATUS_F(Com::translatedF(UI_TEXT_Z_PROBE_FAILED_ID));
-                 Z_probe[xypoint-1]=-2000;
                 process_it=false;
-                Printer::setZProbingActive(false);
                 status=STATUS_FAIL;
                 uid.refreshPage();
-                PrintLine::moveRelativeDistanceInSteps(0,0,10*Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[0],true,false);
-                playsound(3000,240);
-                playsound(5000,240);
-                playsound(3000,240);
-                break;
-                }
-            Printer::setZProbingActive(false);
-            Printer::currentPositionSteps[Z_AXIS] += Printer::stepsRemainingAtZHit; // now current position is correct
-            sum += lastCorrection - Printer::currentPositionSteps[Z_AXIS];
-            distance = (float)sum * Printer::invAxisStepsPerMM[Z_AXIS] / (float)1.00 + EEPROM::zProbeHeight();
-            Com::printF(Com::tZProbe,distance);
-            Com::printF(Com::tSpaceXColon,Printer::realXPosition());
-            Com::printFLN(Com::tSpaceYColon,Printer::realYPosition());
-            uid.setStatusP(Com::tHitZProbe);
-             Z_probe[xypoint-1]=distance;
-            uid.refreshPage();
-            // Go back to start position
-            PrintLine::moveRelativeDistanceInSteps(0,0,lastCorrection-Printer::currentPositionSteps[Z_AXIS],0,EEPROM::zProbeSpeed(),true,false);
-            if(xypoint==1)
-                {
-                xypoint++;
-                step = STEP_AUTOLEVEL_MOVE;
-                h1=distance;
-                }
-            else if(xypoint==2)
-                {
-                xypoint++;
-                step = STEP_AUTOLEVEL_MOVE;
-                h2=distance;
                 }
             else{
-                h3=distance;
-                Printer::buildTransformationMatrix(h1,h2,h3);
-                z = -((Printer::autolevelTransformation[0]*Printer::autolevelTransformation[5]-
-                         Printer::autolevelTransformation[2]*Printer::autolevelTransformation[3])*
-                        (float)Printer::currentPositionSteps[Y_AXIS]*Printer::invAxisStepsPerMM[Y_AXIS]+
-                        (Printer::autolevelTransformation[2]*Printer::autolevelTransformation[4]-
-                         Printer::autolevelTransformation[1]*Printer::autolevelTransformation[5])*
-                        (float)Printer::currentPositionSteps[X_AXIS]*Printer::invAxisStepsPerMM[X_AXIS])/
-                      (Printer::autolevelTransformation[1]*Printer::autolevelTransformation[3]-Printer::autolevelTransformation[0]*Printer::autolevelTransformation[4]);
-
-                Printer::zMin = 0;
-                step = STEP_AUTOLEVEL_RESULTS;
-                playsound(3000,240);
-                playsound(4000,240);
-                playsound(5000,240);
-                UI_STATUS_F(Com::translatedF(UI_TEXT_WAIT_OK_ID));
-                }
+				step = STEP_AUTOLEVEL_RESULTS;
+				UI_STATUS_F(Com::translatedF(UI_TEXT_WAIT_OK_ID));
+				}
             break;
             }
         case STEP_AUTOLEVEL_RESULTS:
@@ -5327,38 +5260,22 @@ case UI_ACTION_LOAD_FAILSAFE:
                 playsound(3000,240);
                 playsound(4000,240);
                 playsound(5000,240);
-            if (confirmationDialog(Com::translatedF(UI_TEXT_PLEASE_CONFIRM_ID),Com::translatedF(UI_TEXT_SAVE_ID),Com::translatedF(UI_TEXT_AUTOLEVEL_MATRIX_ID)))
+                Printer::zMin = ((Printer::Z_probe[0] + Printer::Z_probe[1] +Printer::Z_probe[2]) * 0.3333333333) - EEPROM::zProbeBedDistance();
+            if (confirmationDialog(Com::translatedF(UI_TEXT_PLEASE_CONFIRM_ID),Com::translatedF(UI_TEXT_SAVE_ID),Com::translatedF(UI_TEXT_Z_MIN_SETTING_ID)))
                 {
-                //save matrix to memory as individual save to eeprom erase all
-                float tmpmatrix[9];
-                for(uint8_t ti=0; ti<9; ti++)tmpmatrix[ti]=Printer::autolevelTransformation[ti];
                 //save to eeprom
                 EEPROM:: update(EPR_Z_HOME_OFFSET,EPR_TYPE_FLOAT,0,Printer::zMin);
-                //Set autolevel to false for saving
-                 EEPROM:: update(EPR_AUTOLEVEL_ACTIVE,EPR_TYPE_BYTE,0,0);
-                 Printer::setAutolevelActive(false);
-                //save Matrix
-                 for(uint8_t ti=0; ti<9; ti++)EEPROM:: update(EPR_AUTOLEVEL_MATRIX + (((int)ti) << 2),EPR_TYPE_FLOAT,0,tmpmatrix[ti]);
-                 //Set autolevel to true
-                 EEPROM:: update(EPR_AUTOLEVEL_ACTIVE,EPR_TYPE_BYTE,1,0);
-                 Printer::setAutolevelActive(true);
-                 for(uint8_t ti=0; ti<9; ti++)Printer::autolevelTransformation[ti]=tmpmatrix[ti];
+                currentzMin = Printer::zMin;
                 }
             else{
                 //back to original value
                 Printer::zMin=currentzMin;
                 }
-            if (confirmationDialog(Com::translatedF(UI_TEXT_DO_YOU_ID) ,Com::translatedF(UI_TEXT_REDO_ACTION_ID),Com::translatedF(UI_TEXT_AUTOLEVEL_ID)))
+            if (confirmationDialog(Com::translatedF(UI_TEXT_DO_YOU_ID) ,Com::translatedF(UI_TEXT_REDO_ACTION_ID),Com::translatedF(UI_TEXT_Z_MIN_CALCULATION_ID)))
                     {
                     if(menuLevel>0) menuLevel--;
-                     pushMenu(&ui_menu_autolevel_page,true);
-                    xypoint=1;
-                    z = 0;
-                    currentzMin = Printer::zMin;
-                    Printer::setAutolevelActive(true);
-                    Printer::updateDerivedParameter();
-                    Printer::updateCurrentPosition(true);
-                    step=STEP_ZPROBE_SCRIPT;
+                    pushMenu(&ui_menu_autolevel_page,true);
+                    step=STEP_AUTOLEVEL_START;
                     }
             else    process_it=false;
             break;
@@ -5387,9 +5304,8 @@ case UI_ACTION_LOAD_FAILSAFE:
          if (lastButtonAction==UI_ACTION_BACK)//this means user want to cancel current action
          #endif
                 {
-                if (confirmationDialog(Com::translatedF(UI_TEXT_PLEASE_CONFIRM_ID) ,Com::translatedF(UI_TEXT_CANCEL_ACTION_ID),Com::translatedF(UI_TEXT_AUTOLEVEL_ID)))
+                if (confirmationDialog(Com::translatedF(UI_TEXT_PLEASE_CONFIRM_ID) ,Com::translatedF(UI_TEXT_CANCEL_ACTION_ID),Com::translatedF(UI_TEXT_Z_MIN_CALCULATION_ID)))
                     {
-                    Printer::setZProbingActive(false);
                     status=STATUS_CANCEL;
                     PrintLine::moveRelativeDistanceInSteps(0,0,10*Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[0],true,false);
                     UI_STATUS_F(Com::translatedF(UI_TEXT_CANCELED_ID));
@@ -5434,14 +5350,10 @@ case UI_ACTION_LOAD_FAILSAFE:
         #if HAVE_HEATED_BED==true
           Extruder::setHeatedBedTemperature(bedtarget);
         #endif
-        Printer::setAutolevelActive(true);
-        Printer::updateDerivedParameter();
-        Printer::updateCurrentPosition(true);
         //home again
-        Printer::homeAxis(true,true,true);
-        Printer::feedrate = oldFeedrate;
         if(status==STATUS_OK)
             {
+			Printer::homeAxis(true,true,true);
             UI_STATUS_F(Com::translatedF(UI_TEXT_PRINTER_READY_ID));
             menuLevel=tmpmenu;
             menuPos[menuLevel]=tmpmenupos;
@@ -5453,12 +5365,15 @@ case UI_ACTION_LOAD_FAILSAFE:
             while (Printer::isMenuMode(MENU_MODE_PRINTING))Commands::checkForPeriodicalActions(true);
             UI_STATUS_F(Com::translatedF(UI_TEXT_Z_PROBE_FAILED_ID));
             menuLevel=0;
+            refreshPage();
             }
         else if (status==STATUS_CANCEL)
             {
             while (Printer::isMenuMode(MENU_MODE_PRINTING))Commands::checkForPeriodicalActions(true);
+            Printer::homeAxis(true,true,true);
             UI_STATUS_F(Com::translatedF(UI_TEXT_CANCELED_ID));
             menuLevel=0;
+            refreshPage();
             }
 //restore autoreturn function
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
@@ -5471,7 +5386,7 @@ case UI_ACTION_LOAD_FAILSAFE:
         refreshPage();
         break;
         }
-*/
+
 #endif
 
         case UI_ACTION_MANUAL_LEVEL:

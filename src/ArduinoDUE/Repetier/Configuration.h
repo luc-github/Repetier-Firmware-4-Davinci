@@ -21,7 +21,7 @@
 
 // ################## EDIT THESE SETTINGS MANUALLY ################
 
-#define DAVINCI 4 // "0" if not DAVINCI, "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN, 4 for AiO (WITH NO SCANNER SUPPORT)
+#define DAVINCI 2 // "0" if not DAVINCI, "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN, 4 for AiO (WITH NO SCANNER SUPPORT)
 #define MODEL  0//"0" for first generation (jumper JP1 to reset ) , "1" for new generation   (jumper J37 to reset)
 #define REPURPOSE_FAN_TO_COOL_EXTRUSIONS 0 //Setting this to 1 will repurpose the main Extruder cooling fan to be controlled VIA M106/M107
                                            //Warning: for DaVinci 1.0 need to add a permanent fan with power supply to cool extruder
@@ -31,8 +31,8 @@
 //Version
 #define VERSION_MAJOR "1"
 #define VERSION_MINOR_YEAR "16"
-#define VERSION_MINOR_MONTH "05"
-#define VERSION_MINOR_DAY "26"
+#define VERSION_MINOR_MONTH "06"
+#define VERSION_MINOR_DAY "03"
 #define VERSION_BUILD "1"
 
 //Davinci screen is not standard reprap it is WINSTAR 16x4
@@ -105,17 +105,19 @@
 #if DAVINCI == 4
 #define TURNTABLE_STEP_PER_MM 110
 //table perimeter in mm for angle rotation as not direct drive for turntable
-//#define TURNTABLE_PERIMETER 616 
+#define TURNTABLE_PERIMETER 616 
 //P/360 => 616/360 = 1.711111
 #define TURNTABLE_MM_PER_DEG 1.7111111 
-#define DEFAULT_SPEED 10
+#define TURNTABLE_DEFAULT_SPEED 10
+#define TURNTABLE_MAX_SPEED 50
+#define TURNTABLE_HOME_SPEED 2
 #define TURNTABLE_INVERT_ENABLE 0
 #define TURNTABLE_INVERT_DIR 1
 #define TURNTABLE_STEP_PIN     22
 #define TURNTABLE_DIR_PIN      13
 #define TURNTABLE_ENABLE_PIN   26 
 #define NUM_MOTOR_DRIVERS 1 
-#define MOTOR_DRIVER_1(var) StepperDriver<TURNTABLE_STEP_PIN,TURNTABLE_DIR_PIN,TURNTABLE_ENABLE_PIN,TURNTABLE_INVERT_DIR,TURNTABLE_INVERT_ENABLE> var(TURNTABLE_STEP_PER_MM,DEFAULT_SPEED)
+#define MOTOR_DRIVER_1(var) StepperDriver<TURNTABLE_STEP_PIN,TURNTABLE_DIR_PIN,TURNTABLE_ENABLE_PIN,TURNTABLE_INVERT_DIR,TURNTABLE_INVERT_ENABLE> var(TURNTABLE_STEP_PER_MM,TURNTABLE_DEFAULT_SPEED)
 #endif
 
 /* Some words on units:

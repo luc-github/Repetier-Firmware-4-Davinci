@@ -57,7 +57,8 @@ void commandG201(GCode &code)
     //allow to change speed
     if(code.hasF())
 		{
-		motorDrivers[id]->setdelayUS( 500000 / (code.F * motorDrivers[id]->getstepsPerMM()));
+		if (TURNTABLE_MAX_SPEED > code.F) motorDrivers[id]->setdelayUS( 500000 / (code.F * motorDrivers[id]->getstepsPerMM()));
+		else motorDrivers[id]->setdelayUS( 500000 / (TURNTABLE_MAX_SPEED * motorDrivers[id]->getstepsPerMM()));
 		}
 	//allow to use mm (X) or degres (E)
 	if(!code.hasX() && !code.hasE()) return;

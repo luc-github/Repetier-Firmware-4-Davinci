@@ -25,6 +25,13 @@ ufast8_t Printer::maxExtruderSpeed;            ///< Timer delay for end extruder
 volatile int Printer::extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
 //uint8_t Printer::extruderAccelerateDelay;     ///< delay between 2 speec increases
 #endif
+
+//Davinci specific, for communication between GCODE command and printer menu  
+#if FEATURE_Z_PROBE
+bool Printer::zprobe_ok=true;
+float Printer::Z_probe[3]={-1000,-1000,-1000};
+#endif
+
 uint8_t Printer::unitIsInches = 0; ///< 0 = Units are mm, 1 = units are inches.
 //Stepper Movement Variables
 float Printer::axisStepsPerMM[E_AXIS_ARRAY] = {XAXIS_STEPS_PER_MM, YAXIS_STEPS_PER_MM, ZAXIS_STEPS_PER_MM, 1}; ///< Number of steps per mm needed.
@@ -1931,7 +1938,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
 #endif
     moveToReal(startX, startY, startZ, IGNORE_COORDINATE, homingFeedrate[X_AXIS]);
 	updateCurrentPosition(true);
-    UI_CLEAR_STATUS
+    //UI_CLEAR_STATUS
     Commands::printCurrentPosition(PSTR("homeAxis "));
 }
 #endif  // Not delta printer

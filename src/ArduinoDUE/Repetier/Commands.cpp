@@ -25,6 +25,8 @@ const int8_t sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list fo
 int Commands::lowestRAMValue = MAX_RAM;
 int Commands::lowestRAMValueSend = MAX_RAM;
 
+//Davinci Specific
+extern bool benable_autoreturn;
 //Davinci Specific, specific flag and counter
 uint8_t Commands::delay_flag_change=0;
 uint8_t Commands::delay_flag_change2=0;
@@ -1076,23 +1078,40 @@ void Commands::processGCode(GCode *com) {
 #endif
 #endif
                 bool ok = true;
+                //Davinci Specific
+                Printer::zprobe_ok = true;
                 Printer::startProbing(true);
                 bool oldAutolevel = Printer::isAutolevelActive();
                 Printer::setAutolevelActive(false);
                 float sum = 0, last,oldFeedrate = Printer::feedrate;
                 Printer::moveTo(EEPROM::zProbeX1(), EEPROM::zProbeY1(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
                 sum = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
-                if(sum == ILLEGAL_Z_PROBE) ok = false;
+                if(sum == ILLEGAL_Z_PROBE){
+					ok = false;
+					Printer::Z_probe[0]=-2000;
+					}
+				else Printer::Z_probe[0]=sum;	
+				uid.refreshPage();
                 if(ok) {
                     Printer::moveTo(EEPROM::zProbeX2(), EEPROM::zProbeY2(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
                     last = Printer::runZProbe(false,false);
-                    if(last == ILLEGAL_Z_PROBE) ok = false;
+                    if(last == ILLEGAL_Z_PROBE) {
+						ok = false;
+						Printer::Z_probe[1]=-2000;
+					}
+					else Printer::Z_probe[1]=last;
+					uid.refreshPage();
                     sum+= last;
                 }
                 if(ok) {
                     Printer::moveTo(EEPROM::zProbeX3(), EEPROM::zProbeY3(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
                     last = Printer::runZProbe(false,true);
-                    if(last == ILLEGAL_Z_PROBE) ok = false;
+                    if(last == ILLEGAL_Z_PROBE) {
+						ok = false;
+						Printer::Z_probe[2]=-2000;
+					}
+					else Printer::Z_probe[2]=last;
+					uid.refreshPage();
                     sum += last;
                 }
                 if(ok) {
@@ -1110,9 +1129,11 @@ void Commands::processGCode(GCode *com) {
                         float zup = Printer::runZMaxProbe();
                         if(zup == ILLEGAL_Z_PROBE) {
 							ok = false;
-                        } else
+							}
+						else{
                         Printer::zLength = zup + sum - ENDSTOP_Z_BACK_ON_HOME;
-#endif // DELTA
+						}
+#endif // DELTA         
                         Com::printInfoFLN(Com::tZProbeZReset);
                         Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
 #else
@@ -1130,7 +1151,11 @@ void Commands::processGCode(GCode *com) {
                 Printer::finishProbing();
                 Printer::feedrate = oldFeedrate;
 				if(!ok) {
-					GCode::fatalError(PSTR("G29 leveling failed!"));
+					//Davinci Specific
+					if (!(com->hasI()))GCode::fatalError(PSTR("G29 leveling failed!"));
+					Printer::zprobe_ok = false;
+					PrintLine::moveRelativeDistanceInSteps(0,0,10*Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[0],true,false);
+					Printer::homeAxis(true, true, true);
 					break;
 				}
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
@@ -1153,7 +1178,7 @@ void Commands::processGCode(GCode *com) {
 			{ // G30 single probe set Z0
                 uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
                 if(Printer::runZProbe(p & 1,p & 2) == ILLEGAL_Z_PROBE) {
-					GCode::fatalError(PSTR("G29 leveling failed!"));
+					GCode::fatalError(PSTR("G30 leveling failed!"));
 					break;
 				}
                 Printer::updateCurrentPosition(p & 1);
