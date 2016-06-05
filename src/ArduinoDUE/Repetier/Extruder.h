@@ -167,7 +167,7 @@ extern Extruder extruder[];
         if(extruder[x].jamLastSignal != sig && abs(extruder[x].jamStepsSinceLastSignal - extruder[x].jamLastChangeAt) > JAM_MIN_STEPS) {\
           if(sig) {extruder[x].resetJamSteps();} \
           extruder[x].jamLastSignal = sig;extruder[x].jamLastChangeAt = extruder[x].jamStepsSinceLastSignal;\
-        } else if(abs(extruder[x].jamStepsSinceLastSignal) > JAM_ERROR_STEPS && !Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) \
+        } else if(abs(extruder[x].jamStepsSinceLastSignal) > extruder[x].jamErrorSteps && !Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) \
             extruder[x].tempControl.setJammed(true);\
     }
 #define RESET_EXTRUDER_JAM(x,dir) extruder[x].jamLastDir = dir ? 1 : -1;
@@ -228,12 +228,12 @@ public:
     float maxAcceleration;  ///< Maximum acceleration in mm/s^2.
     float maxStartFeedrate; ///< Maximum start feedrate in mm/s.
     int32_t extrudePosition;   ///< Current extruder position in steps.
-    int16_t watchPeriod;        ///< Time in seconds, a M109 command will wait to stabalize temperature
-    int16_t waitRetractTemperature; ///< Temperature to retract the filament when waiting for heatup
-    int16_t waitRetractUnits;   ///< Units to retract the filament when waiting for heatup
+    int16_t watchPeriod;        ///< Time in seconds, a M109 command will wait to stabilize temperature
+    int16_t waitRetractTemperature; ///< Temperature to retract the filament when waiting for heat up
+    int16_t waitRetractUnits;   ///< Units to retract the filament when waiting for heat up
 #if USE_ADVANCE
 #if ENABLE_QUADRATIC_ADVANCE
-    float advanceK;         ///< Koefficient for advance algorithm. 0 = off
+    float advanceK;         ///< Coefficient for advance algorithm. 0 = off
 #endif
     float advanceL;
     int16_t advanceBacklash;
@@ -256,6 +256,9 @@ public:
     int8_t jamLastDir;
     int16_t jamStepsOnSignal;
     int16_t jamLastChangeAt;
+	int16_t jamSlowdownSteps;
+	int16_t jamErrorSteps;
+	uint8_t jamSlowdownTo;
 #endif
 
     // Methods here

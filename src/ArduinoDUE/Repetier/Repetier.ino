@@ -64,7 +64,8 @@ Davinci AiO codes for Horus usage
 - G201 Ennn : move motor in deg
 - G50       : reset motor origin position
 - M17       : motor_disable
-- M18		: motor_enable
+- M18       : motor_enable
+- M19       : motor home 
 - M70 Tn    : switch off laser n, 0 index based
 - M71 Tn    : switch on laser n, 0 index based 
 - M72 Tn    : switch off white led n, 0 index based
@@ -112,7 +113,9 @@ Custom M Codes
 - M100 T<extruderNum> clean nozzle, no extruder specified clean all available
 - M104 S<temp> T<extruder> P1 F1 - Set temperature without wait. P1 = wait for moves to finish, F1 = beep when temp. reached first time
 - M105 X0 - Get temperatures. If X0 is added, the raw analog values are also written.
+--M110 - Reset line number
 - M112 - Emergency kill
+--M114 - print positions
 - M115- Capabilities string
 - M116 - Wait for all temperatures in a +/- 1 degree range
 - M117 <message> - Write message in status row on lcd
@@ -165,6 +168,8 @@ Custom M Codes
 - M600 Change filament
 - M601 S<1/0> - Pause extruders. Paused extrudes disable heaters and motor. Unpausing reheats extruder to old temp.
 - M602 S<1/0> P<1/0>- Debug jam control (S) Disable jam control (P). If enabled it will log signal changes and will not trigger jam errors!
+- M603 - Simulate a jam
+- M604 X<slowdownSteps> Y<errorSteps> Z<slowdownTo> T<extruderId> - Set jam detection values on a per extruder basis. If not set it uses defaults from Configuration.h
 - M908 P<address> S<value> : Set stepper current for digipot (RAMBO board)
 - M999 - Continue from fatal error. M999 S1 will create a fatal error for testing.
 */

@@ -27,6 +27,36 @@ int Commands::lowestRAMValueSend = MAX_RAM;
 
 //Davinci Specific
 extern bool benable_autoreturn;
+
+#if DAVINCI == 4
+//generic function to home a motor using max speed / max length and sensor pin
+bool Home_motor(int id, float speed, int sensorpin, float maxlength) {
+	//check if need to move
+	bool result = false; 
+	getMotorDriver(id)->enable();
+	if (digitalRead(sensorpin) > 0) return true;
+	//save current speed
+	int32_t tmpspeed = getMotorDriver(id)->getdelayUS();
+	int32_t homespeed = 500000 / (speed * getMotorDriver(id)->getstepsPerMM());
+	getMotorDriver(id)->disable();
+	getMotorDriver(id)->setCurrentAs(0);
+	//precision is 0.5 mm should be ok 
+	for (float pos = 0.5; pos < maxlength;pos=pos+0.5)
+		{
+		getMotorDriver(id)->gotoPosition(pos);
+		if (digitalRead(sensorpin) > 0) { //here we go so exit
+			result = true;
+			break;
+		   }
+		}
+	//lock motor and reverse speed to original and send status
+	getMotorDriver(id)->enable();
+	getMotorDriver(id)->setdelayUS(tmpspeed);
+	getMotorDriver(id)->setCurrentAs(0);
+	return result;
+}
+#endif
+
 //Davinci Specific, specific flag and counter
 uint8_t Commands::delay_flag_change=0;
 uint8_t Commands::delay_flag_change2=0;
@@ -967,7 +997,7 @@ void Commands::processGCode(GCode *com) {
                 // ui can only execute motion commands if we are not waiting inside a move for an
                 // old move to finish. For normal response times, we always leave one free after
                 // sending a line. Drawback: 1 buffer line less for limited time. Since input cache
-                // gets filled while waiting, the lost is neglectible.
+                // gets filled while waiting, the lost is neglectable.
                 PrintLine::waitForXFreeLines(1, true);
 #endif // UI_HAS_KEYS
 #ifdef DEBUG_QUEUE_MOVE
@@ -1040,20 +1070,12 @@ void Commands::processGCode(GCode *com) {
         case 21: // G21 Units to mm
             Printer::unitIsInches = 0;
             break;
-        case 28: { //G28 Home all Axis one at a time
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-				bool oldLaser = LaserDriver::laserOn;
-			    LaserDriver::laserOn = false;
-#endif				
+        case 28: { //G28 Home all Axis one at a time		
                 uint8_t homeAllAxis = (com->hasNoXYZ() && !com->hasE());
                 if(com->hasE())
                     Printer::currentPositionSteps[E_AXIS] = 0;
                 if(homeAllAxis || !com->hasNoXYZ())
                     Printer::homeAxis(homeAllAxis || com->hasX(),homeAllAxis || com->hasY(),homeAllAxis || com->hasZ());
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-			    LaserDriver::laserOn = oldLaser;
-#endif
-                Printer::updateCurrentPosition();
             }
             break;
 #if FEATURE_Z_PROBE
@@ -1129,11 +1151,9 @@ void Commands::processGCode(GCode *com) {
                         float zup = Printer::runZMaxProbe();
                         if(zup == ILLEGAL_Z_PROBE) {
 							ok = false;
-							}
-						else{
+                        } else
                         Printer::zLength = zup + sum - ENDSTOP_Z_BACK_ON_HOME;
-						}
-#endif // DELTA         
+#endif // DELTA
                         Com::printInfoFLN(Com::tZProbeZReset);
                         Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
 #else
@@ -1179,6 +1199,7 @@ void Commands::processGCode(GCode *com) {
                 uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
                 if(Printer::runZProbe(p & 1,p & 2) == ILLEGAL_Z_PROBE) {
 					GCode::fatalError(PSTR("G30 leveling failed!"));
+					printCurrentPosition(PSTR("G30 "));
 					break;
 				}
                 Printer::updateCurrentPosition(p & 1);
@@ -1747,6 +1768,10 @@ void Commands::processMCode(GCode *com) {
 	   case 18:
 			getMotorDriver(0)->enable();
 			break;
+	   case 19:
+			if (Home_motor(0, 2, 5, 617) ) Com::printFLN("Success Home motor ",0);
+			else Com::printFLN("Failed Home motor ",0);
+			break;
 //Davinci AiO Specific
 #if DAVINCI == 4 
 		case 60:
@@ -2174,7 +2199,8 @@ void Commands::processMCode(GCode *com) {
         case 280: // M280
 #if DUAL_X_AXIS
 			Extruder::dittoMode = 0;
-			Extruder::selectExtruderById(0);
+			if(Extruder::current->id != 0)
+				Extruder::selectExtruderById(0);
 			Printer::homeXAxis();
 			if(com->hasS() && com->S > 0) {
 				Extruder::current = &extruder[1];
@@ -2183,6 +2209,7 @@ void Commands::processMCode(GCode *com) {
 				Extruder::current = &extruder[0];
 				Extruder::dittoMode = 1;
 			}
+			Printer::updateCurrentPosition(true);
 #else		
             if(com->hasS()) { // Set ditto mode S: 0 = off, 1 = 1 extra extruder, 2 = 2 extra extruder, 3 = 3 extra extruders
                 Extruder::dittoMode = com->S;
@@ -2458,6 +2485,7 @@ void Commands::processMCode(GCode *com) {
             else
                 Extruder::unpauseExtruders();
             break;
+#if EXTRUDER_JAM_CONTROL && NUM_EXTRUDER > 0
         case 602:
             Commands::waitUntilEndOfAllMoves();
             if(com->hasS()) Printer::setDebugJam(com->S > 0);
@@ -2466,6 +2494,22 @@ void Commands::processMCode(GCode *com) {
         case 603:
             Printer::setInterruptEvent(PRINTER_INTERRUPT_EVENT_JAM_DETECTED, true);
             break;
+		case 604:
+			{
+				uint8_t extId = Extruder::current->id;
+				if(com->hasT()) extId = com->T;
+				if(extId >= NUM_EXTRUDER)
+					break;
+				Extruder &ext = extruder[extId];
+				if(com->hasX())
+					ext.jamSlowdownSteps = static_cast<int16_t>(com->X);
+				if(com->hasY())
+					ext.jamErrorSteps = static_cast<int16_t>(com->Y);
+				if(com->hasZ())
+					ext.jamSlowdownTo = static_cast<uint8_t>(com->Z);
+			}
+			break;
+#endif			
         case 907: { // M907 Set digital trimpot/DAC motor current using axis codes.
 #if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
                 // If "S" is specified, use that as initial default value, then update each axis w/ specific values as found later.

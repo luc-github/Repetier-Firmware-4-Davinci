@@ -30,6 +30,11 @@
   all hardware related code should be packed into the hal files.
 */
 
+// You can set different sizes if you want, but with binary mode it does not get faster
+#ifndef SERIAL_RX_BUFFER_SIZE
+#define SERIAL_RX_BUFFER_SIZE 128
+#endif
+
 #ifndef HAL_H
 #define HAL_H
 
@@ -692,6 +697,7 @@ class HAL
     }
     static inline void serialSetBaudrate(long baud)
     {
+      Serial.setInterruptPriority(1);
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
       BTAdapter.begin(baud);
 #else
@@ -921,9 +927,7 @@ class HAL
     static void servoMicroseconds(uint8_t servo, int ms, uint16_t autoOff);
 #endif
 
-#if ANALOG_INPUTS > 0
     static void analogStart(void);
-#endif
 #if USE_ADVANCE
     static void resetExtruderDirection();
 #endif

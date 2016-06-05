@@ -1053,7 +1053,7 @@ on this endstop.
 // false signals from your endstops. If your endstops don't give false signals, you
 // can set it on for safety.
 //Davinci, specific : Home sensors are easy to get noise an make print to lift, especially on 1.0A/2.0A, so disable it as no need to check home position all the time
-#define ALWAYS_CHECK_ENDSTOPS 0
+#define ALWAYS_CHECK_ENDSTOPS 1
 
 // maximum positions in mm - only fixed numbers!
 // For delta robot Z_MAX_LENGTH is the maximum travel of the towers and should be set to the distance between the hotend
@@ -1282,7 +1282,7 @@ Mega. Used only for nonlinear systems like delta or tuga. */
 
 /* If you have a backlash in both z-directions, you can use this. For most printer, the bed will be pushed down by it's
 own weight, so this is nearly never needed. */
-#define ENABLE_BACKLASH_COMPENSATION 1
+#define ENABLE_BACKLASH_COMPENSATION 0
 #define Z_BACKLASH 0
 #define X_BACKLASH 0
 #define Y_BACKLASH 0
@@ -1591,8 +1591,8 @@ to recalibrate z.
 #define Z_PROBE_Z_OFFSET_MODE 0
 
 #define FEATURE_Z_PROBE true
-#define Z_PROBE_PIN 5
-#define Z_PROBE_PULLUP true
+#define Z_PROBE_PIN 117
+#define Z_PROBE_PULLUP 1
 #define Z_PROBE_ON_HIGH 0
 #define Z_PROBE_X_OFFSET 0
 #define Z_PROBE_Y_OFFSET 0
