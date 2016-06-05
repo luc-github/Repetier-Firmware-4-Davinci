@@ -28,6 +28,10 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #include <inttypes.h>
 #include <ctype.h>
 
+#if DAVINCI == 4
+extern bool Home_motor(int id, float speed, int sensorpin, float maxlength);
+#endif
+
 #if FEATURE_SERVO > 0 && UI_SERVO_CONTROL > 0
 #if   UI_SERVO_CONTROL == 1 && defined(SERVO0_NEUTRAL_POS)
 uint16_t servoPosition = SERVO0_NEUTRAL_POS;
@@ -4572,8 +4576,9 @@ case UI_ACTION_LOAD_FAILSAFE:
         {
 		//Home first
         Printer::homeAxis(true,true,true);
-        //lock motor
-        getMotorDriver(0)->enable();
+        //home motor
+        if (Home_motor(0, TURNTABLE_HOME_SPEED, TABLE_HOME_PIN, TURNTABLE_PERIMETER+1) ) Com::printFLN("Success Home motor ",0);
+			else Com::printFLN("Failed Home motor ",0);
         //power off every led / laser
         WRITE(LASER1_PIN, LOW);
         WRITE(LASER2_PIN, LOW);

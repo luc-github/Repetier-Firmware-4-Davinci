@@ -40,6 +40,7 @@ bool Home_motor(int id, float speed, int sensorpin, float maxlength) {
 	int32_t homespeed = 500000 / (speed * getMotorDriver(id)->getstepsPerMM());
 	getMotorDriver(id)->disable();
 	getMotorDriver(id)->setCurrentAs(0);
+	getMotorDriver(id)->setdelayUS(homespeed);
 	//precision is 0.5 mm should be ok 
 	for (float pos = 0.5; pos < maxlength;pos=pos+0.5)
 		{
@@ -1199,7 +1200,6 @@ void Commands::processGCode(GCode *com) {
                 uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
                 if(Printer::runZProbe(p & 1,p & 2) == ILLEGAL_Z_PROBE) {
 					GCode::fatalError(PSTR("G30 leveling failed!"));
-					printCurrentPosition(PSTR("G30 "));
 					break;
 				}
                 Printer::updateCurrentPosition(p & 1);
@@ -1768,8 +1768,8 @@ void Commands::processMCode(GCode *com) {
 	   case 18:
 			getMotorDriver(0)->enable();
 			break;
-	   case 19:
-			if (Home_motor(0, 2, 5, 617) ) Com::printFLN("Success Home motor ",0);
+	   case 19: //M19 home motor
+			if (Home_motor(0, TURNTABLE_HOME_SPEED, TABLE_HOME_PIN, TURNTABLE_PERIMETER+1) ) Com::printFLN("Success Home motor ",0);
 			else Com::printFLN("Failed Home motor ",0);
 			break;
 //Davinci AiO Specific

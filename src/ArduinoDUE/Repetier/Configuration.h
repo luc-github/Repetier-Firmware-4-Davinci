@@ -21,7 +21,7 @@
 
 // ################## EDIT THESE SETTINGS MANUALLY ################
 
-#define DAVINCI 2 // "0" if not DAVINCI, "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN, 4 for AiO (WITH NO SCANNER SUPPORT)
+#define DAVINCI 4 // "0" if not DAVINCI, "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN, 4 for AiO (WITH NO SCANNER SUPPORT)
 #define MODEL  0//"0" for first generation (jumper JP1 to reset ) , "1" for new generation   (jumper J37 to reset)
 #define REPURPOSE_FAN_TO_COOL_EXTRUSIONS 0 //Setting this to 1 will repurpose the main Extruder cooling fan to be controlled VIA M106/M107
                                            //Warning: for DaVinci 1.0 need to add a permanent fan with power supply to cool extruder
@@ -32,7 +32,7 @@
 #define VERSION_MAJOR "1"
 #define VERSION_MINOR_YEAR "16"
 #define VERSION_MINOR_MONTH "06"
-#define VERSION_MINOR_DAY "03"
+#define VERSION_MINOR_DAY "05"
 #define VERSION_BUILD "1"
 
 //Davinci screen is not standard reprap it is WINSTAR 16x4
@@ -110,7 +110,7 @@
 #define TURNTABLE_MM_PER_DEG 1.7111111 
 #define TURNTABLE_DEFAULT_SPEED 10
 #define TURNTABLE_MAX_SPEED 50
-#define TURNTABLE_HOME_SPEED 2
+#define TURNTABLE_HOME_SPEED 25
 #define TURNTABLE_INVERT_ENABLE 0
 #define TURNTABLE_INVERT_DIR 1
 #define TURNTABLE_STEP_PIN     22
@@ -1053,7 +1053,7 @@ on this endstop.
 // false signals from your endstops. If your endstops don't give false signals, you
 // can set it on for safety.
 //Davinci, specific : Home sensors are easy to get noise an make print to lift, especially on 1.0A/2.0A, so disable it as no need to check home position all the time
-#define ALWAYS_CHECK_ENDSTOPS 1
+#define ALWAYS_CHECK_ENDSTOPS 0
 
 // maximum positions in mm - only fixed numbers!
 // For delta robot Z_MAX_LENGTH is the maximum travel of the towers and should be set to the distance between the hotend
