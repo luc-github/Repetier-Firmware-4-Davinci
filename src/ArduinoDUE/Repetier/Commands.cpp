@@ -34,7 +34,7 @@ bool Home_motor(int id, float speed, int sensorpin, float maxlength) {
 	//check if need to move
 	bool result = false; 
 	getMotorDriver(id)->enable();
-	if (digitalRead(sensorpin) > 0) return true;
+	if (digitalRead(sensorpin) == 0) return true;
 	//save current speed
 	int32_t tmpspeed = getMotorDriver(id)->getdelayUS();
 	int32_t homespeed = 500000 / (speed * getMotorDriver(id)->getstepsPerMM());
@@ -45,7 +45,7 @@ bool Home_motor(int id, float speed, int sensorpin, float maxlength) {
 	for (float pos = 0.5; pos < maxlength;pos=pos+0.5)
 		{
 		getMotorDriver(id)->gotoPosition(pos);
-		if (digitalRead(sensorpin) > 0) { //here we go so exit
+		if (digitalRead(sensorpin) == 0) { //here we go so exit
 			result = true;
 			break;
 		   }
