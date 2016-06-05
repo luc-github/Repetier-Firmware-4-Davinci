@@ -2199,7 +2199,7 @@ void UIDisplay::parse(const char *txt,bool ram)
             else
                 addFloat(-Printer::coordinateOffset[c2-'0'],4,0);
             break;
-
+#if FEATURE_Z_PROBE
 //Davinci Specific, z probe display
          case 'Z':
             if(c2=='1' || c2=='2' || c2=='3')
@@ -2222,6 +2222,7 @@ void UIDisplay::parse(const char *txt,bool ram)
                             }
                     }
             break;
+#endif
         }
     }
     uid.printCols[col] = 0;
@@ -5126,7 +5127,7 @@ case UI_ACTION_LOAD_FAILSAFE:
  #endif
         break;
         }
-#if FEATURE_AUTOLEVEL
+#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
 		case UI_ACTION_AUTOLEVEL:
 			break;
 		case UI_ACTION_ZMIN_CALCULATION:

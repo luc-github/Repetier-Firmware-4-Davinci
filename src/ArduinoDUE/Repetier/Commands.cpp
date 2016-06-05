@@ -1102,8 +1102,10 @@ void Commands::processGCode(GCode *com) {
 #endif
                 bool ok = true;
                 //Davinci Specific
+#if FEATURE_Z_PROBE
                 Printer::zprobe_ok = true;
                 Printer::startProbing(true);
+#endif
                 bool oldAutolevel = Printer::isAutolevelActive();
                 Printer::setAutolevelActive(false);
                 float sum = 0, last,oldFeedrate = Printer::feedrate;

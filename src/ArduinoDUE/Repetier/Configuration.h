@@ -1590,8 +1590,13 @@ to recalibrate z.
 */
 #define Z_PROBE_Z_OFFSET_MODE 0
 
+#if DAVINCI > 0
 #define FEATURE_Z_PROBE true
 #define Z_PROBE_PIN 117
+#else
+#define FEATURE_Z_PROBE false
+#define Z_PROBE_PIN -1
+#endif
 #define Z_PROBE_PULLUP 1
 #define Z_PROBE_ON_HIGH 0
 #define Z_PROBE_X_OFFSET 0
