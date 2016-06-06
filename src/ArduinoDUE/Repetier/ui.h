@@ -2164,7 +2164,7 @@ inline void uiCheckSlowKeys(uint16_t &action) {}
 #endif
 
 //Davinci Specific
-#define UI_VERSION_STRING "Repetier " REPETIER_VERSION "M"
+#define UI_VERSION_STRING "Repetier" REPETIER_VERSION "M"
 
 #ifdef UI_HAS_I2C_KEYS
 #define COMPILE_I2C_DRIVER
