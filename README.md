@@ -3,7 +3,7 @@
 
 [![Join the chat at https://gitter.im/luc-github/Repetier-Firmware-0.92](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/luc-github/Repetier-Firmware-0.92?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)    
 
-Arduino ide 1.6.5 / Due Module 1.6.4: [![Build Status](https://travis-ci.org/luc-github/Repetier-Firmware-0.92.svg?branch=0.92.6-sync)](https://travis-ci.org/luc-github/Repetier-Firmware-0.92)    
+Build Status: [![Build Status](https://travis-ci.org/luc-github/Repetier-Firmware-0.92.svg?branch=0.92.6-sync)](https://travis-ci.org/luc-github/Repetier-Firmware-0.92)    
     
       
 
@@ -14,6 +14,7 @@ YOU MIGHT DAMAGE YOUR PRINTER OR VOID YOUR WARRANTY, DO IT ON YOUR OWN RISK. Whe
 
 ***
 ###Support for 1.0A/2.0A/AiO(no scanner) is implemented and need feedback.
+AiO scanner support is present in FW but scanner software support is currently basic, [horus](https://github.com/bqlabs/horus) is a good candidat, feel free to help [here](https://github.com/luc-github/Repetier-Firmware-0.92/issues/156)  
 
 The board can be easily exposed by removing the back panel of the printer secured by two torx screws.  Supported boards have a jumper labeled JP1, second generation boards have a jumper labeled J37. More info can be found on the [Voltivo forum](http://voltivo.com/forum/davinci-peersupport/340-new-kind-of-mainboard-no-j1-erase-jumper).
 ***
@@ -38,8 +39,8 @@ The previous version (based on repetier v0.91) can be found [here](https://githu
 ##Installation
 1. With the machine off remove the back panel and short the jumper JP1 or J37 depending on model.  Some Boards do not have jumper pins exposed but can still be shorted with a conductive wire.
 2. Turn the machine on and wait a few seconds then turn it off again.  The machine will have been flashed removing the current stock firmware and allowing it to be detected as a normal arduino DUE. NOTE: Windows users may need to install drivers to detect the board.  Consult the Voltivo forums.
-3. Use an arduino IDE supporting arduino DUE, [version 1.5.8+ or  1.6.5](http://arduino.cc/en/Main/OldSoftwareReleases), 1.6.0+ bring several issues, but 1.6.5 seems working well with Due 1.6.4 module for board manager.
-4. Update arduino files (variants.cpp and USBcore.cpp) with the one(s) present in src\ArduinoDUE\AdditionalArduinoFiles\1.5.8. or in src\ArduinoDUE\AdditionalArduinoFiles\1.6.5 according your IDE version   
+3. Use an arduino IDE supporting arduino DUE, [1.6.9](http://arduino.cc/en/Main/OldSoftwareReleases) with Due 1.6.8 module from board manager.
+4. Update arduino files (variants.cpp and USBcore.cpp) with the one(s) present in src\ArduinoDUE\AdditionalArduinoFile according your IDE version   
 NOTE: You do not need to compile arduino from source these files are in the arduino directory structure.  On Mac you will need to right click on the Arduino.app to Show Package Contents.    
 5. Open the project file named repetier.ino located in src\ArduinoDUE\Repetier directory in the arduino IDE. 
 6. Modify the DAVINCI define in Configuration.h file to match your targeted Da Vinci.  See below.
@@ -62,7 +63,7 @@ for basic installation just change :
   1 for DaVinci 1.0 (1Fan, 1 Extruder)   
   2 for DaVinci 2.0 SF (1Fan, 2 Extruders)   
   3 for DaVinci 2.0  (2Fans, 2 Extruders)    
-  4 for DaVinci AiO (no scanner)
+  4 for DaVinci AiO 
 
 Support for 1.0A and 2.0A:  need to change <CODE>#define MODEL 0</CODE>  to  <CODE>#define MODEL 1</CODE>
 
@@ -75,12 +76,17 @@ Or a great video done by Daniel Gonos: https://www.youtube.com/watch?v=rjuCvlnpB
 
 ***
 ##TODO or Questions ?
-[Check issue list](https://github.com/luc-github/Repetier-Firmware-0.92/issues)    
-[FAQ](https://github.com/luc-github/Repetier-Firmware-0.92/issues?utf8=%E2%9C%93&q=is%3Aclosed+label%3AFAQ+)    
+* [Check issue list](https://github.com/luc-github/Repetier-Firmware-0.92/issues)   
+Do not ask help on repetier github they do not support this FW / printer - please use this [github for issues](https://github.com/luc-github/Repetier-Firmware-0.92/issues)
+
+* [FAQ](https://github.com/luc-github/Repetier-Firmware-0.92/issues?utf8=%E2%9C%93&q=is%3Aclosed+label%3AFAQ+)    
+
+* [Documentation](https://github.com/luc-github/Repetier-Firmware-0.92/wiki) TBD - feel free to help 
 
 ***
 ##Implemented
-* Standard GCODE commands
+* 0.92.10 [Repetier](https://github.com/repetier/Repetier-Firmware) based   
+* Standard GCODE commands   
 * Single/Dual extruders support (DaVinci 1.0/2.0 all generations but AiO)
 * Single Fan / Dual fans support according printer configuration
 * Repurpose of second fan usage to be controlled by M106/M107 commands on Da Vinci 2.0
@@ -101,7 +107,8 @@ Or a great video done by Daniel Gonos: https://www.youtube.com/watch?v=rjuCvlnpB
 * Several fixes from original FW   
 * Watchdog   
 * Basic Wifi support for module ESP8266 (https://github.com/luc-github/ESP8266/blob/master/README.md#result-of-esp12e-on-davinci) 
-* Customized thermistor tables for bed and extruder(s) as Davinci board do not follow design of others 3D printer boards so standard tables do not work properly [check here](http://voltivo.com/forum/davinci-firmware/438-repetier-91-e3d-v6-extruder#3631)
+* Customized thermistor tables for bed and extruder(s) as Davinci board do not follow design of others 3D printer boards so standard tables do not work properly [check here](http://voltivo.com/forum/davinci-firmware/438-repetier-91-e3d-v6-extruder#3631)  
+* Multilanguage at runtime (EN/FR/GE/NL/SW) more to come if get help : check [here](https://github.com/luc-github/Repetier-Firmware-0.92/issues/123)   
 * More to come ....
 
 ***
