@@ -1101,8 +1101,9 @@ void Commands::processGCode(GCode *com) {
 #endif
 #endif
                 bool ok = true;
-                //Davinci Specific
+                
 #if FEATURE_Z_PROBE
+				//Davinci Specific
                 Printer::zprobe_ok = true;
                 Printer::startProbing(true);
 #endif
@@ -1113,6 +1114,7 @@ void Commands::processGCode(GCode *com) {
                 sum = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
                 if(sum == ILLEGAL_Z_PROBE){
 					ok = false;
+					//Davinci Specific
 					Printer::Z_probe[0]=-2000;
 					}
 				else Printer::Z_probe[0]=sum;	
@@ -1122,6 +1124,7 @@ void Commands::processGCode(GCode *com) {
                     last = Printer::runZProbe(false,false);
                     if(last == ILLEGAL_Z_PROBE) {
 						ok = false;
+						//Davinci Specific
 						Printer::Z_probe[1]=-2000;
 					}
 					else Printer::Z_probe[1]=last;
@@ -1133,6 +1136,7 @@ void Commands::processGCode(GCode *com) {
                     last = Printer::runZProbe(false,true);
                     if(last == ILLEGAL_Z_PROBE) {
 						ok = false;
+						//Davinci Specific
 						Printer::Z_probe[2]=-2000;
 					}
 					else Printer::Z_probe[2]=last;
@@ -1176,8 +1180,8 @@ void Commands::processGCode(GCode *com) {
 				if(!ok) {
 					//Davinci Specific
 					if (!(com->hasI()))GCode::fatalError(PSTR("G29 leveling failed!"));
+					else PrintLine::moveRelativeDistanceInSteps(0,0,10*Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[0],true,false);
 					Printer::zprobe_ok = false;
-					PrintLine::moveRelativeDistanceInSteps(0,0,10*Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[0],true,false);
 					Printer::homeAxis(true, true, true);
 					break;
 				}
@@ -1201,7 +1205,10 @@ void Commands::processGCode(GCode *com) {
 			{ // G30 single probe set Z0
                 uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
                 if(Printer::runZProbe(p & 1,p & 2) == ILLEGAL_Z_PROBE) {
-					GCode::fatalError(PSTR("G30 leveling failed!"));
+					GCode::fatalError(PSTR("G30 probing failed!"));
+					//Davinci Specific
+					Printer::zprobe_ok = false;
+					Printer::homeAxis(true, true, true);
 					break;
 				}
                 Printer::updateCurrentPosition(p & 1);
@@ -1237,7 +1244,11 @@ void Commands::processGCode(GCode *com) {
 #endif
 #endif
             if(!runBedLeveling(com)) {
-				GCode::fatalError(PSTR("G32 leveling failed!"));
+				//Davinci Specific
+				if (!(com->hasI()))GCode::fatalError(PSTR("G32 leveling failed!"));
+				else PrintLine::moveRelativeDistanceInSteps(0,0,10*Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[0],true,false);
+				Printer::zprobe_ok = false;
+				Printer::homeAxis(true, true, true);
 				break;
 			}
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING

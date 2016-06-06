@@ -166,17 +166,47 @@ bool measureAutolevelPlane(Plane &plane) {
     Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
     h = Printer::runZProbe(false,false);
     if(h == ILLEGAL_Z_PROBE)
+		{
+		//Davinci Specific
+		Printer::Z_probe[0]=-2000; 
+		Printer::zprobe_ok = false;
         return false;
+		}
+	else
+		{
+		Printer::Z_probe[0]=h;	
+		}
+	uid.refreshPage();
     builder.addPoint(EEPROM::zProbeX1(),EEPROM::zProbeY1(),h);
     Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
     h = Printer::runZProbe(false,false);
     if(h == ILLEGAL_Z_PROBE)
+		{
+		//Davinci Specific
+		Printer::Z_probe[1]=-2000; 
+		Printer::zprobe_ok = false;
         return false;
+		}
+	else
+		{
+		Printer::Z_probe[1]=h;	
+		}
+	uid.refreshPage();
     builder.addPoint(EEPROM::zProbeX2(),EEPROM::zProbeY2(),h);
     Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
     h = Printer::runZProbe(false,false);
     if(h == ILLEGAL_Z_PROBE)
+        {
+		//Davinci Specific
+		Printer::Z_probe[2]=-2000; 
+		Printer::zprobe_ok = false;
         return false;
+		}
+	else
+		{
+		Printer::Z_probe[2]=h;	
+		}
+	uid.refreshPage();
     builder.addPoint(EEPROM::zProbeX3(),EEPROM::zProbeY3(),h);
 #elif BED_LEVELING_METHOD == 1 // linear regression
     float delta = 1.0 / (BED_LEVELING_GRID_SIZE - 1);

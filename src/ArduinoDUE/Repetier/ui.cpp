@@ -5129,7 +5129,269 @@ case UI_ACTION_LOAD_FAILSAFE:
         }
 #if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
 		case UI_ACTION_AUTOLEVEL:
-			break;
+        {
+        //be sure no issue
+        if(reportTempsensorError() or Printer::debugDryrun()) break;
+//to be sure no return menu
+#if UI_AUTORETURN_TO_MENU_AFTER!=0
+        bool btmp_autoreturn=benable_autoreturn; //save current value
+        benable_autoreturn=false;//desactivate no need to test if active or not
+#endif
+		int tmpmenu=menuLevel;
+        int tmpmenupos=menuPos[menuLevel];
+        UIMenu *tmpmen = (UIMenu*)menu[menuLevel];
+        //save current target temp
+        float extrudertarget1=extruder[0].tempControl.targetTemperatureC;
+        #if NUM_EXTRUDER>1
+        float extrudertarget2=extruder[1].tempControl.targetTemperatureC;
+        #endif
+        #if HAVE_HEATED_BED==true
+        float bedtarget=heatedBedController.targetTemperatureC;
+        #endif
+        #if ENABLE_CLEAN_NOZZLE==1
+        //ask for user if he wants to clean nozzle and plate
+            if (confirmationDialog(Com::translatedF(UI_TEXT_DO_YOU_ID) ,Com::translatedF(UI_TEXT_CLEAN1_ID),Com::translatedF(UI_TEXT_CLEAN2_ID)))
+                    {
+                    //heat extruders first to keep them hot
+                    if (extruder[0].tempControl.targetTemperatureC<EEPROM::ftemp_ext_abs)
+                   Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,0);
+                   #if NUM_EXTRUDER>1
+                   if (extruder[1].tempControl.targetTemperatureC<EEPROM::ftemp_ext_abs)
+                    Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,1);
+                   #endif
+                    executeAction(UI_ACTION_CLEAN_NOZZLE,true);
+                    }
+
+         #endif
+         if(menuLevel>0) menuLevel--;
+         pushMenu(&ui_menu_autolevel_page,true);
+         UI_STATUS_F(Com::translatedF(UI_TEXT_HEATING_ID));
+         process_it=true;
+         printedTime = HAL::timeInMilliseconds();
+         step=STEP_AUTOLEVEL_HEATING;
+         int status=STATUS_OK;
+
+        while (process_it)
+        {
+        Printer::setMenuMode(MENU_MODE_PRINTING,true);
+        Commands::delay_flag_change=0;
+        Commands::checkForPeriodicalActions(true);
+        currentTime = HAL::timeInMilliseconds();
+        if( (currentTime - printedTime) > 1000 )   //Print Temp Reading every 1 second while heating up.
+            {
+            Commands::printTemperatures();
+            printedTime = currentTime;
+           }
+         switch(step)
+         {
+         case STEP_AUTOLEVEL_HEATING:
+            if (extruder[0].tempControl.targetTemperatureC<EEPROM::ftemp_ext_abs)
+           Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,0);
+           #if NUM_EXTRUDER>1
+           if (extruder[1].tempControl.targetTemperatureC<EEPROM::ftemp_ext_abs)
+            Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,1);
+           #endif
+           #if HAVE_HEATED_BED==true
+           if (heatedBedController.targetTemperatureC<EEPROM::ftemp_bed_abs)
+            Extruder::setHeatedBedTemperature(EEPROM::ftemp_bed_abs);
+           #endif
+           step =  STEP_AUTOLEVEL_WAIT_FOR_TEMPERATURE;
+         break;
+         case STEP_AUTOLEVEL_WAIT_FOR_TEMPERATURE:
+            UI_STATUS_F(Com::translatedF(UI_TEXT_HEATING_ID));
+            //no need to be extremely accurate so no need stable temperature
+            if(abs(extruder[0].tempControl.currentTemperatureC- extruder[0].tempControl.targetTemperatureC)<2)
+                {
+                step = STEP_AUTOLEVEL_START;
+                }
+            #if NUM_EXTRUDER==2
+            if(!((abs(extruder[1].tempControl.currentTemperatureC- extruder[1].tempControl.targetTemperatureC)<2)))
+                {
+                step = STEP_AUTOLEVEL_WAIT_FOR_TEMPERATURE;
+                }
+            #endif
+            #if HAVE_HEATED_BED==true
+            if(!((abs(heatedBedController.currentTemperatureC-heatedBedController.targetTemperatureC)<2)))
+                {
+                step = STEP_AUTOLEVEL_WAIT_FOR_TEMPERATURE;
+                }
+            #endif
+         break;
+         case STEP_AUTOLEVEL_START:
+			// iterate
+            step = STEP_AUTOLEVEL_MOVE;
+            Printer::Z_probe[0]=-1000;
+			Printer::Z_probe[1]=-1000;
+			Printer::Z_probe[2]=-1000;
+#if  BED_LEVELING_METHOD == 0
+            if(menuLevel>0) menuLevel--;
+            pushMenu(&ui_menu_autolevel_results_page,true);
+#endif
+            //Home first
+			Printer::homeAxis(true,true,true);
+            break;
+
+        case STEP_AUTOLEVEL_MOVE:
+            UI_STATUS_F(Com::translatedF(UI_TEXT_ZPOSITION_ID));
+            //put bed down
+		    Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+EEPROM::zProbeBedDistance(),IGNORE_COORDINATE,Printer::homingFeedrate[0]);
+		    //now do the probe
+            step = STEP_AUTOLEVEL_DO_ZPROB;
+            break;
+        case STEP_AUTOLEVEL_DO_ZPROB:
+            {
+            UI_STATUS_F(Com::translatedF(UI_TEXT_ZPROBING_ID));
+            //do autolevel
+            GCode::executeFString(PSTR("G32 S0 I0"));
+            
+            //check results
+            if(Printer::zprobe_ok == false)
+                {
+                Com::printErrorFLN(Com::tZProbeFailed);
+                playsound(3000,240);
+                playsound(5000,240);
+                playsound(3000,240);
+                UI_STATUS_F(Com::translatedF(UI_TEXT_Z_PROBE_FAILED_ID));
+                process_it=false;
+                status=STATUS_FAIL;
+                uid.refreshPage();
+                }
+            else{
+				step = STEP_AUTOLEVEL_RESULTS;
+				UI_STATUS_F(Com::translatedF(UI_TEXT_WAIT_OK_ID));
+				}
+            break;
+            }
+        case STEP_AUTOLEVEL_RESULTS:
+        //just wait Ok is pushed
+        break;
+         case STEP_AUTOLEVEL_SAVE_RESULTS:
+                playsound(3000,240);
+                playsound(4000,240);
+                playsound(5000,240);
+            if (confirmationDialog(Com::translatedF(UI_TEXT_PLEASE_CONFIRM_ID),Com::translatedF(UI_TEXT_SAVE_ID),Com::translatedF(UI_TEXT_AUTOLEVEL_MATRIX_ID)))
+                {
+                //save to eeprom
+                EEPROM::storeDataIntoEEPROM();
+                }
+            if (confirmationDialog(Com::translatedF(UI_TEXT_DO_YOU_ID) ,Com::translatedF(UI_TEXT_REDO_ACTION_ID),Com::translatedF(UI_TEXT_AUTOLEVEL_ID)))
+                    {
+                    if(menuLevel>0) menuLevel--;
+                    pushMenu(&ui_menu_autolevel_page,true);
+                    step=STEP_AUTOLEVEL_START;
+                    }
+            else    process_it=false;
+            break;
+         }
+     #if FEATURE_ENCODER
+         //check encoder 
+        int16_t encodeChange = encoderPos;
+        bool encoder_command=false;
+        if (encodeChange > 0 ) encoder_command=true;
+        encoderPos = 0;
+         //check what key is pressed
+         if (previousaction!=lastButtonAction || encoder_command)
+    #else
+    if (previousaction!=lastButtonAction)
+    #endif
+            {
+            previousaction=lastButtonAction;
+            if(previousaction!=0)BEEP_SHORT;
+             if (lastButtonAction==UI_ACTION_OK  && step==STEP_AUTOLEVEL_RESULTS)
+                {
+                    step=STEP_AUTOLEVEL_SAVE_RESULTS;
+                }
+         #if FEATURE_ENCODER
+             if (lastButtonAction==UI_ACTION_BACK  || encodeChange > 0)//this means user want to cancel current action
+         #else
+         if (lastButtonAction==UI_ACTION_BACK)//this means user want to cancel current action
+         #endif
+                {
+                if (confirmationDialog(Com::translatedF(UI_TEXT_PLEASE_CONFIRM_ID) ,Com::translatedF(UI_TEXT_CANCEL_ACTION_ID),Com::translatedF(UI_TEXT_AUTOLEVEL_ID)))
+                    {
+                    status=STATUS_CANCEL;
+                    PrintLine::moveRelativeDistanceInSteps(0,0,10*Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[0],true,false);
+                    UI_STATUS_F(Com::translatedF(UI_TEXT_CANCELED_ID));
+                    process_it=false;
+                    }
+                else
+                    {//we continue as before
+                    if(menuLevel>0) menuLevel--;
+                    pushMenu(&ui_menu_autolevel_page,true);
+                    }
+                delay(100);
+                }
+             //wake up light if power saving has been launched
+            #if UI_AUTOLIGHTOFF_AFTER!=0
+            if (EEPROM::timepowersaving>0)
+                {
+                UIDisplay::ui_autolightoff_time=HAL::timeInMilliseconds()+EEPROM::timepowersaving;
+                #if CASE_LIGHTS_PIN > 0
+                if (!(READ(CASE_LIGHTS_PIN)) && EEPROM::buselight)
+                    {
+                    TOGGLE(CASE_LIGHTS_PIN);
+                    }
+                #endif
+                #if BADGE_LIGHT_PIN > 0
+                if (!(READ(BADGE_LIGHT_PIN)) && EEPROM::busebadgelight && EEPROM::buselight)
+                    {
+                    TOGGLE(BADGE_LIGHT_PIN);
+                    }
+                #endif
+                #if defined(UI_BACKLIGHT_PIN)
+                if (!(READ(UI_BACKLIGHT_PIN))) WRITE(UI_BACKLIGHT_PIN, HIGH);
+                #endif
+                }
+            #endif
+            }
+        }
+        //cool down if necessary
+        Extruder::setTemperatureForExtruder(extrudertarget1,0);
+        #if NUM_EXTRUDER>1
+        Extruder::setTemperatureForExtruder(extrudertarget2,1);
+        #endif
+        #if HAVE_HEATED_BED==true
+          Extruder::setHeatedBedTemperature(bedtarget);
+        #endif
+        //home again
+        if(status==STATUS_OK)
+            {
+			Printer::homeAxis(true,true,true);
+            UI_STATUS_F(Com::translatedF(UI_TEXT_PRINTER_READY_ID));
+            menuLevel=tmpmenu;
+            menuPos[menuLevel]=tmpmenupos;
+            menu[menuLevel]=tmpmen;
+            refreshPage();
+            }
+        else if (status==STATUS_FAIL)
+            {
+            while (Printer::isMenuMode(MENU_MODE_PRINTING))Commands::checkForPeriodicalActions(true);
+            UI_STATUS_F(Com::translatedF(UI_TEXT_Z_PROBE_FAILED_ID));
+            menuLevel=0;
+            refreshPage();
+            }
+        else if (status==STATUS_CANCEL)
+            {
+            while (Printer::isMenuMode(MENU_MODE_PRINTING))Commands::checkForPeriodicalActions(true);
+            Printer::homeAxis(true,true,true);
+            UI_STATUS_F(Com::translatedF(UI_TEXT_CANCELED_ID));
+            menuLevel=0;
+            refreshPage();
+            }
+//restore autoreturn function
+#if UI_AUTORETURN_TO_MENU_AFTER!=0
+            if (btmp_autoreturn)//if was activated restore it - if not do nothing - stay desactivate
+            {
+            benable_autoreturn=true;//reactivate
+            ui_autoreturn_time=HAL::timeInMilliseconds()+UI_AUTORETURN_TO_MENU_AFTER;//reset counter
+            }
+ #endif
+        refreshPage();
+        break;
+        }
+
+#endif
+#if FEATURE_Z_PROBE
 		case UI_ACTION_ZMIN_CALCULATION:
         {
         //be sure no issue
