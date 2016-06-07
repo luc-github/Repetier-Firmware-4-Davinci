@@ -1,4 +1,4 @@
-##Da Vinci Firmware based on Repetier (0.92)
+##Da Vinci Firmware based on Repetier (0.92.3)
 ============================
 
 [![Join the chat at https://gitter.im/luc-github/Repetier-Firmware-0.92](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/luc-github/Repetier-Firmware-0.92?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)     
