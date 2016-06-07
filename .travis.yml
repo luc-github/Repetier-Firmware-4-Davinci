@@ -1,0 +1,50 @@
+sudo: false
+
+language: bash
+
+os:
+  - linux
+
+before_install:
+  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16"
+env:
+ matrix:
+  - DAVINCI=0 MODEL=0
+  - DAVINCI=1 MODEL=0
+  - DAVINCI=2 MODEL=0
+  - DAVINCI=3 MODEL=0
+  - DAVINCI=1 MODEL=1
+  - DAVINCI=2 MODEL=1
+  - DAVINCI=4 MODEL=1
+  
+before_script:
+  - before_install:
+  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16"
+  - sleep 3
+  - export DISPLAY=:1.0
+  - wget http://downloads.arduino.cc/arduino-1.6.9-linux64.tar.xz
+  - tar xf arduino-1.6.9-linux64.tar.xz
+  - sudo mv arduino-1.6.9 /usr/local/share/arduino
+  - sudo ln -s /usr/local/share/arduino/arduino /usr/local/bin/arduino
+  - arduino --install-boards arduino:sam:1.6.8
+  - arduino --board arduino:sam:arduino_due_x --save-prefs
+  - arduino --pref "compiler.warning_level=all" --save-prefs
+  - cp -f "$TRAVIS_BUILD_DIR/src/ArduinoDUE/AdditionalArduinoFiles/Arduino - 1.6.9 -Due 1.6.8/Arduino15/packages/arduino/hardware/sam/1.6.8/variants/arduino_due_x/variant.cpp" $HOME/.arduino15/packages/arduino/hardware/sam/1.6.8/variants/arduino_due_x/variant.cpp 
+  
+
+script:
+  - cd $TRAVIS_BUILD_DIR
+  - source command.sh
+  - sed -i "s/#define DAVINCI 0 /#define DAVINCI $DAVINCI /g" ./src/ArduinoDUE/Repetier/Configuration.h
+  - sed -i "s/#define DAVINCI 1 /#define DAVINCI $DAVINCI /g" ./src/ArduinoDUE/Repetier/Configuration.h
+  - sed -i "s/#define DAVINCI 2 /#define DAVINCI $DAVINCI /g" ./src/ArduinoDUE/Repetier/Configuration.h
+  - sed -i "s/#define DAVINCI 3 /#define DAVINCI $DAVINCI /g" ./src/ArduinoDUE/Repetier/Configuration.h
+  - sed -i "s/#define DAVINCI 4 /#define DAVINCI $DAVINCI /g" ./src/ArduinoDUE/Repetier/Configuration.h
+  - sed -i "s/#define MODEL  1/#define MODEL  $MODEL/g" ./src/ArduinoDUE/Repetier/Configuration.h
+  - sed -i "s/#define MODEL  0/#define MODEL  $MODEL/g" ./src/ArduinoDUE/Repetier/Configuration.h
+  - build_sketch ./src/ArduinoDUE/Repetier/Repetier.ino
+  
+notifications:
+  email:
+    on_success: change
+    on_failure: change
