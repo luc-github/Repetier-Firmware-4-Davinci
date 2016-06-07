@@ -29,6 +29,20 @@ int Commands::lowestRAMValueSend = MAX_RAM;
 extern bool benable_autoreturn;
 
 #if DAVINCI == 4
+//to avoid conflict between AiO home turn table sensor and Z-probe sensor
+void Check_turntable(){
+	
+	if (digitalRead(TABLE_HOME_PIN) == 0) {
+		getMotorDriver(0)->disable();
+		getMotorDriver(0)->setCurrentAs(0);
+		int32_t tmpspeed = getMotorDriver(0)->getdelayUS();
+		int32_t homespeed = 500000 / (TURNTABLE_HOME_SPEED * getMotorDriver(0)->getstepsPerMM());
+		getMotorDriver(0)->setdelayUS(homespeed);
+		getMotorDriver(0)->gotoPosition(10);
+		getMotorDriver(0)->setdelayUS(tmpspeed);
+	}
+	getMotorDriver(0)->enable();
+}
 //generic function to home a motor using max speed / max length and sensor pin
 bool Home_motor(int id, float speed, int sensorpin, float maxlength) {
 	//check if need to move
@@ -1104,6 +1118,9 @@ void Commands::processGCode(GCode *com) {
                 
 #if FEATURE_Z_PROBE
 				//Davinci Specific
+#if DAVINCI == 4
+				Check_turntable();
+#endif
                 Printer::zprobe_ok = true;
                 Printer::startProbing(true);
 #endif
@@ -1203,6 +1220,9 @@ void Commands::processGCode(GCode *com) {
             break;
         case 30: 
 			{ // G30 single probe set Z0
+#if DAVINCI == 4
+				Check_turntable();
+#endif
                 uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
                 if(Printer::runZProbe(p & 1,p & 2) == ILLEGAL_Z_PROBE) {
 					GCode::fatalError(PSTR("G30 probing failed!"));
@@ -1242,6 +1262,9 @@ void Commands::processGCode(GCode *com) {
             if(extruder[Extruder::current->id].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
                 Extruder::setTemperatureForExtruder(RMath::max(actTemp[Extruder::current->id],static_cast<float>(ZPROBE_MIN_TEMPERATURE)),Extruder::current->id,false,true);
 #endif
+#endif
+#if DAVINCI == 4
+				Check_turntable();
 #endif
             if(!runBedLeveling(com)) {
 				//Davinci Specific
