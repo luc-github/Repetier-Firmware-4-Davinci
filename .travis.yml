@@ -5,8 +5,6 @@ language: bash
 os:
   - linux
 
-before_install:
-  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16"
 env:
  matrix:
   - DAVINCI=0 MODEL=0
@@ -18,7 +16,6 @@ env:
   - DAVINCI=4 MODEL=1
   
 before_script:
-  - before_install:
   - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16"
   - sleep 3
   - export DISPLAY=:1.0
