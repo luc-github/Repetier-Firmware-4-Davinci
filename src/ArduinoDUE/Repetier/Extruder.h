@@ -9,7 +9,7 @@
 //#endif
 
 // Updates the temperature of all extruders and heated bed if it's time.
-// Toggels the heater power if necessary.
+// Toggles the heater power if necessary.
 extern bool reportTempsensorError(); ///< Report defect sensors
 extern uint8_t manageMonitor;
 #define HTR_OFF 0
@@ -18,25 +18,29 @@ extern uint8_t manageMonitor;
 #define HTR_DEADTIME 3
 
 #define TEMPERATURE_CONTROLLER_FLAG_ALARM 1
-#define TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL 2 //< Full heating enabled
+#define TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL 2  //< Full heating enabled
 #define TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD 4  //< Holding target temperature
+#define TEMPERATURE_CONTROLLER_FLAG_SENSDEFECT    8  //< Indicating sensor defect
+#define TEMPERATURE_CONTROLLER_FLAG_SENSDECOUPLED 16 //< Indicating sensor decoupling
+#define TEMPERATURE_CONTROLLER_FLAG_JAM           32 //< Indicates a jammed filament
+#define TEMPERATURE_CONTROLLER_FLAG_SLOWDOWN      64 //< Indicates a slowed down extruder
 
-/** TemperatureController manages one heater-temperature sensore loop. You can have up to
+/** TemperatureController manages one heater-temperature sensor loop. You can have up to
 4 loops allowing pid/bang bang for up to 3 extruder and the heated bed.
 
 */
 class TemperatureController
 {
-    public:
+public:
     uint8_t pwmIndex; ///< pwm index for output control. 0-2 = Extruder, 3 = Fan, 4 = Heated Bed
     uint8_t sensorType; ///< Type of temperature sensor.
     uint8_t sensorPin; ///< Pin to read extruder temperature.
-    int16_t currentTemperature; ///< Currenttemperature value read from sensor.
-    int16_t targetTemperature; ///< Target temperature value in units of sensor.
+    int8_t heatManager; ///< How is temperature controlled. 0 = on/off, 1 = PID-Control, 3 = dead time control
+    int16_t currentTemperature; ///< Current temperature value read from sensor.
+    //int16_t targetTemperature; ///< Target temperature value in units of sensor.
     float currentTemperatureC; ///< Current temperature in degC.
     float targetTemperatureC; ///< Target temperature in degC.
     uint32_t lastTemperatureUpdate; ///< Time in millis of the last temperature update.
-    int8_t heatManager; ///< How is temperature controled. 0 = on/off, 1 = PID-Control, 3 = deat time control
 #if TEMP_PID
     float tempIState; ///< Temp. var. for PID computation.
     uint8_t pidDriveMax; ///< Used for windup in PID calculation.
@@ -53,44 +57,143 @@ class TemperatureController
     float tempArray[4];
 #endif
     uint8_t flags;
+//Davinci Specific, be able to disable decouple test
+#if FEATURE_DECOUPLE_TEST
     millis_t lastDecoupleTest;  ///< Last time of decoupling sensor-heater test
     float  lastDecoupleTemp;  ///< Temperature on last test
     millis_t decoupleTestPeriod; ///< Time between setting and testing decoupling.
-
+#endif //FEATURE_DECOUPLE_TEST
 
     void setTargetTemperature(float target);
     void updateCurrentTemperature();
     void updateTempControlVars();
-    inline bool isAlarm() {return flags & TEMPERATURE_CONTROLLER_FLAG_ALARM;}
-    inline void setAlarm(bool on) {if(on) flags |= TEMPERATURE_CONTROLLER_FLAG_ALARM; else flags &= ~TEMPERATURE_CONTROLLER_FLAG_ALARM;}
-    inline bool isDecoupleFull() {return flags & TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL;}
-    inline bool isDecoupleFullOrHold() {return flags & (TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL | TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD);}
-    inline void setDecoupleFull(bool on) {flags &= ~(TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL | TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD); if(on) flags |= TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL;}
-    inline bool isDecoupleHold() {return flags & TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD;}
-    inline void setDecoupleHold(bool on) {flags &= ~(TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL | TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD); if(on) flags |= TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD;}
-    inline void startFullDecouple(millis_t &t) {
+    inline bool isAlarm()
+    {
+        return flags & TEMPERATURE_CONTROLLER_FLAG_ALARM;
+    }
+    inline void setAlarm(bool on)
+    {
+        if(on) flags |= TEMPERATURE_CONTROLLER_FLAG_ALARM;
+        else flags &= ~TEMPERATURE_CONTROLLER_FLAG_ALARM;
+    }
+//Davinci Specific, be able to disable decouple test
+#if FEATURE_DECOUPLE_TEST
+    inline bool isDecoupleFull()
+    {
+        return flags & TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL;
+    }
+	inline void removeErrorStates() {
+        flags &= ~(TEMPERATURE_CONTROLLER_FLAG_ALARM | TEMPERATURE_CONTROLLER_FLAG_SENSDEFECT | TEMPERATURE_CONTROLLER_FLAG_SENSDECOUPLED);
+	}
+    inline bool isDecoupleFullOrHold()
+    {
+        return flags & (TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL | TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD);
+    }
+    inline void setDecoupleFull(bool on)
+    {
+        flags &= ~(TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL | TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD);
+        if(on) flags |= TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL;
+    }
+    inline bool isDecoupleHold()
+    {
+        return flags & TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD;
+    }
+    inline void setDecoupleHold(bool on)
+    {
+        flags &= ~(TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL | TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD);
+        if(on) flags |= TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD;
+    }
+    inline void startFullDecouple(millis_t &t)
+    {
         if(isDecoupleFull()) return;
         lastDecoupleTest = t;
         lastDecoupleTemp = currentTemperatureC;
         setDecoupleFull(true);
     }
-    inline void startHoldDecouple(millis_t &t) {
+    inline void startHoldDecouple(millis_t &t)
+    {
         if(isDecoupleHold()) return;
         if(fabs(currentTemperatureC - targetTemperatureC) + 1 > DECOUPLING_TEST_MAX_HOLD_VARIANCE) return;
         lastDecoupleTest = t;
         lastDecoupleTemp = targetTemperatureC;
         setDecoupleHold(true);
     }
-    inline void stopDecouple() {
+    inline void stopDecouple()
+    {
         setDecoupleFull(false);
     }
+#endif //FEATURE_DECOUPLE_TEST
+    inline bool isSensorDefect()
+    {
+        return flags & TEMPERATURE_CONTROLLER_FLAG_SENSDEFECT;
+    }
+//Davinci Specific, be able to disable decouple test
+#if FEATURE_DECOUPLE_TEST
+    inline bool isSensorDecoupled()
+    {
+        return flags & TEMPERATURE_CONTROLLER_FLAG_SENSDECOUPLED;
+    }
+#endif //FEATURE_DECOUPLE_TEST
+	static void resetAllErrorStates();
+#if EXTRUDER_JAM_CONTROL
+    inline bool isJammed()
+    {
+        return flags & TEMPERATURE_CONTROLLER_FLAG_JAM;
+    }
+    void setJammed(bool on);
+    inline bool isSlowedDown()
+    {
+        return flags & TEMPERATURE_CONTROLLER_FLAG_SLOWDOWN;
+    }
+    inline void setSlowedDown(bool on)
+    {
+        flags &= ~TEMPERATURE_CONTROLLER_FLAG_SLOWDOWN;
+        if(on) flags |= TEMPERATURE_CONTROLLER_FLAG_SLOWDOWN;
+    }
+
+#endif
+    void waitForTargetTemperature();
 #if TEMP_PID
-    void autotunePID(float temp,uint8_t controllerId,bool storeResult);
+    void autotunePID(float temp,uint8_t controllerId,int maxCycles,bool storeResult);
 #endif
 };
-
 class Extruder;
 extern Extruder extruder[];
+
+#if EXTRUDER_JAM_CONTROL
+#if JAM_METHOD == 1
+#define _TEST_EXTRUDER_JAM(x,pin) {\
+        uint8_t sig = READ(pin);extruder[x].jamStepsSinceLastSignal += extruder[x].jamLastDir;\
+        if(extruder[x].jamLastSignal != sig && abs(extruder[x].jamStepsSinceLastSignal - extruder[x].jamLastChangeAt) > JAM_MIN_STEPS) {\
+          if(sig) {extruder[x].resetJamSteps();} \
+          extruder[x].jamLastSignal = sig;extruder[x].jamLastChangeAt = extruder[x].jamStepsSinceLastSignal;\
+        } else if(abs(extruder[x].jamStepsSinceLastSignal) > extruder[x].jamErrorSteps && !Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) \
+            extruder[x].tempControl.setJammed(true);\
+    }
+#define RESET_EXTRUDER_JAM(x,dir) extruder[x].jamLastDir = dir ? 1 : -1;
+#elif JAM_METHOD == 2
+#define _TEST_EXTRUDER_JAM(x,pin) {\
+        uint8_t sig = READ(pin);\
+          if(sig){extruder[x].tempControl.setJammed(true);} else if(!Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) {extruder[x].resetJamSteps();}}
+#define RESET_EXTRUDER_JAM(x,dir)
+#elif JAM_METHOD == 3
+#define _TEST_EXTRUDER_JAM(x,pin) {\
+        uint8_t sig = !READ(pin);\
+          if(sig){extruder[x].tempControl.setJammed(true);} else if(!Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) {extruder[x].resetJamSteps();}}
+#define RESET_EXTRUDER_JAM(x,dir)
+#else
+#error Unknown value for JAM_METHOD
+#endif
+#define ___TEST_EXTRUDER_JAM(x,y) _TEST_EXTRUDER_JAM(x,y)
+#define __TEST_EXTRUDER_JAM(x) ___TEST_EXTRUDER_JAM(x,EXT ## x ## _JAM_PIN)
+#define TEST_EXTRUDER_JAM(x) __TEST_EXTRUDER_JAM(x)
+#else
+#define TEST_EXTRUDER_JAM(x)
+#define RESET_EXTRUDER_JAM(x,dir)
+#endif
+
+#define EXTRUDER_FLAG_RETRACTED 1
+#define EXTRUDER_FLAG_WAIT_JAM_STARTCOUNT 2 ///< Waiting for the first signal to start counting
 
 /** \brief Data to drive one extruder.
 
@@ -99,7 +202,7 @@ current state variables, like current temperature, feeder position etc.
 */
 class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
 {
-    public:
+public:
     static Extruder *current;
 #if FEATURE_DITTO_PRINTING
     static uint8_t dittoMode;
@@ -107,12 +210,16 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
 #if MIXING_EXTRUDER > 0
     static int mixingS; ///< Sum of all weights
     static uint8_t mixingDir; ///< Direction flag
+    static uint8_t activeMixingExtruder;
+	static void recomputeMixingExtruderSteps();
 #endif
     uint8_t id;
     int32_t xOffset;
     int32_t yOffset;
+    int32_t zOffset;
     float stepsPerMM;        ///< Steps per mm.
-    int16_t enablePin;          ///< Pin to enable extruder stepper motor.
+//Davinci Specific, as Pin is 128 int8 is not enough
+    uint8_t enablePin;          ///< Pin to enable extruder stepper motor.
 //  uint8_t directionPin; ///< Pin number to assign the direction.
 //  uint8_t stepPin; ///< Pin number for a step.
     uint8_t enableOn;
@@ -121,271 +228,107 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
     float maxAcceleration;  ///< Maximum acceleration in mm/s^2.
     float maxStartFeedrate; ///< Maximum start feedrate in mm/s.
     int32_t extrudePosition;   ///< Current extruder position in steps.
-    int16_t watchPeriod;        ///< Time in seconds, a M109 command will wait to stabalize temperature
-    int16_t waitRetractTemperature; ///< Temperature to retract the filament when waiting for heatup
-    int16_t waitRetractUnits;   ///< Units to retract the filament when waiting for heatup
+    int16_t watchPeriod;        ///< Time in seconds, a M109 command will wait to stabilize temperature
+    int16_t waitRetractTemperature; ///< Temperature to retract the filament when waiting for heat up
+    int16_t waitRetractUnits;   ///< Units to retract the filament when waiting for heat up
 #if USE_ADVANCE
 #if ENABLE_QUADRATIC_ADVANCE
-    float advanceK;         ///< Koefficient for advance algorithm. 0 = off
+    float advanceK;         ///< Coefficient for advance algorithm. 0 = off
 #endif
     float advanceL;
     int16_t advanceBacklash;
-#endif
+#endif // USE_ADVANCE
 #if MIXING_EXTRUDER > 0
     int mixingW;   ///< Weight for this extruder when mixing steps
     int mixingE;   ///< Cumulated error for this step.
     int virtualWeights[VIRTUAL_EXTRUDER]; // Virtual extruder weights
-#endif
+#endif // MIXING_EXTRUDER > 0
     TemperatureController tempControl;
     const char * PROGMEM selectCommands;
     const char * PROGMEM deselectCommands;
     uint8_t coolerSpeed; ///< Speed to use when enabled
     uint8_t coolerPWM; ///< current PWM setting
+    float diameter;
+    uint8_t flags;
+#if EXTRUDER_JAM_CONTROL
+    int16_t jamStepsSinceLastSignal; // when was the last signal
+    uint8_t jamLastSignal; // what was the last signal
+    int8_t jamLastDir;
+    int16_t jamStepsOnSignal;
+    int16_t jamLastChangeAt;
+	int16_t jamSlowdownSteps;
+	int16_t jamErrorSteps;
+	uint8_t jamSlowdownTo;
+#endif
 
+    // Methods here
+
+#if EXTRUDER_JAM_CONTROL
+    inline bool isWaitJamStartcount()
+    {
+        return flags & EXTRUDER_FLAG_WAIT_JAM_STARTCOUNT;
+    }
+    inline void setWaitJamStartcount(bool on)
+    {
+        if(on) flags |= EXTRUDER_FLAG_WAIT_JAM_STARTCOUNT;
+        else flags &= ~(EXTRUDER_FLAG_WAIT_JAM_STARTCOUNT);
+    }
+    static void markAllUnjammed();
+    void resetJamSteps();
+#endif
 #if MIXING_EXTRUDER > 0
     static void setMixingWeight(uint8_t extr,int weight);
+#endif
     static void step();
     static void unstep();
     static void setDirection(uint8_t dir);
     static void enable();
-#else
-    /** \brief Sends the high-signal to the stepper for next extruder step.
-    Call this function only, if interrupts are disabled.
-    */
-    static inline void step()
-    {
-#if NUM_EXTRUDER==1
-        WRITE(EXT0_STEP_PIN,HIGH);
-#else
-        switch(Extruder::current->id)
-        {
-        case 0:
-#if NUM_EXTRUDER>0
-            WRITE(EXT0_STEP_PIN,HIGH);
-#if FEATURE_DITTO_PRINTING
-            if(Extruder::dittoMode) {
-                WRITE(EXT1_STEP_PIN,HIGH);
-#if NUM_EXTRUDER > 2
-                if(Extruder::dittoMode > 1) {
-                    WRITE(EXT2_STEP_PIN,HIGH);
-                }
-#endif
-#if NUM_EXTRUDER > 3
-                if(Extruder::dittoMode > 2) {
-                    WRITE(EXT3_STEP_PIN,HIGH);
-                }
-#endif
-            }
-#endif
-#endif
-            break;
-#if defined(EXT1_STEP_PIN) && NUM_EXTRUDER>1
-        case 1:
-            WRITE(EXT1_STEP_PIN,HIGH);
-            break;
-#endif
-#if defined(EXT2_STEP_PIN) && NUM_EXTRUDER>2
-        case 2:
-            WRITE(EXT2_STEP_PIN,HIGH);
-            break;
-#endif
-#if defined(EXT3_STEP_PIN) && NUM_EXTRUDER>3
-        case 3:
-            WRITE(EXT3_STEP_PIN,HIGH);
-            break;
-#endif
-#if defined(EXT4_STEP_PIN) && NUM_EXTRUDER>4
-        case 4:
-            WRITE(EXT4_STEP_PIN,HIGH);
-            break;
-#endif
-#if defined(EXT5_STEP_PIN) && NUM_EXTRUDER>5
-        case 5:
-            WRITE(EXT5_STEP_PIN,HIGH);
-            break;
-#endif
-        }
-#endif
+#if FEATURE_RETRACTION
+    inline bool isRetracted() {return (flags & EXTRUDER_FLAG_RETRACTED) != 0;}
+    inline void setRetracted(bool on) {
+        flags = (flags & (255 - EXTRUDER_FLAG_RETRACTED)) | (on ? EXTRUDER_FLAG_RETRACTED : 0);
     }
-    /** \brief Sets stepper signal to low for current extruder.
-
-    Call this function only, if interrupts are disabled.
-    */
-    static inline void unstep()
-    {
-#if NUM_EXTRUDER==1
-        WRITE(EXT0_STEP_PIN,LOW);
-#else
-        switch(Extruder::current->id)
-        {
-        case 0:
-#if NUM_EXTRUDER>0
-            WRITE(EXT0_STEP_PIN,LOW);
-#if FEATURE_DITTO_PRINTING
-            if(Extruder::dittoMode) {
-                WRITE(EXT1_STEP_PIN,LOW);
-#if NUM_EXTRUDER > 2
-            if(Extruder::dittoMode > 1) {
-                WRITE(EXT2_STEP_PIN,LOW);
-            }
-#endif
-#if NUM_EXTRUDER > 3
-            if(Extruder::dittoMode > 2) {
-                WRITE(EXT3_STEP_PIN,LOW);
-            }
-#endif
-            }
-#endif
-#endif
-            break;
-#if defined(EXT1_STEP_PIN) && NUM_EXTRUDER>1
-        case 1:
-            WRITE(EXT1_STEP_PIN,LOW);
-            break;
-#endif
-#if defined(EXT2_STEP_PIN) && NUM_EXTRUDER>2
-        case 2:
-            WRITE(EXT2_STEP_PIN,LOW);
-            break;
-#endif
-#if defined(EXT3_STEP_PIN) && NUM_EXTRUDER>3
-        case 3:
-            WRITE(EXT3_STEP_PIN,LOW);
-            break;
-#endif
-#if defined(EXT4_STEP_PIN) && NUM_EXTRUDER>4
-        case 4:
-            WRITE(EXT4_STEP_PIN,LOW);
-            break;
-#endif
-#if defined(EXT5_STEP_PIN) && NUM_EXTRUDER>5
-        case 5:
-            WRITE(EXT5_STEP_PIN,LOW);
-            break;
-#endif
-        }
-#endif
-    }
-    /** \brief Activates the extruder stepper and sets the direction. */
-    static inline void setDirection(uint8_t dir)
-    {
-#if NUM_EXTRUDER==1
-        if(dir)
-            WRITE(EXT0_DIR_PIN,!EXT0_INVERSE);
-        else
-            WRITE(EXT0_DIR_PIN,EXT0_INVERSE);
-#else
-        switch(Extruder::current->id)
-        {
-#if NUM_EXTRUDER>0
-        case 0:
-            if(dir)
-                WRITE(EXT0_DIR_PIN,!EXT0_INVERSE);
-            else
-                WRITE(EXT0_DIR_PIN,EXT0_INVERSE);
-#if FEATURE_DITTO_PRINTING
-            if(Extruder::dittoMode) {
-                if(dir)
-                    WRITE(EXT1_DIR_PIN,!EXT1_INVERSE);
-                else
-                    WRITE(EXT1_DIR_PIN,EXT1_INVERSE);
-            }
-#endif
-            break;
-#endif
-#if defined(EXT1_DIR_PIN) && NUM_EXTRUDER>1
-        case 1:
-            if(dir)
-                WRITE(EXT1_DIR_PIN,!EXT1_INVERSE);
-            else
-                WRITE(EXT1_DIR_PIN,EXT1_INVERSE);
-            break;
-#endif
-#if defined(EXT2_DIR_PIN) && NUM_EXTRUDER>2
-        case 2:
-            if(dir)
-                WRITE(EXT2_DIR_PIN,!EXT2_INVERSE);
-            else
-                WRITE(EXT2_DIR_PIN,EXT2_INVERSE);
-            break;
-#endif
-#if defined(EXT3_DIR_PIN) && NUM_EXTRUDER>3
-        case 3:
-            if(dir)
-                WRITE(EXT3_DIR_PIN,!EXT3_INVERSE);
-            else
-                WRITE(EXT3_DIR_PIN,EXT3_INVERSE);
-            break;
-#endif
-#if defined(EXT4_DIR_PIN) && NUM_EXTRUDER>4
-        case 4:
-            if(dir)
-                WRITE(EXT4_DIR_PIN,!EXT4_INVERSE);
-            else
-                WRITE(EXT4_DIR_PIN,EXT4_INVERSE);
-            break;
-#endif
-#if defined(EXT5_DIR_PIN) && NUM_EXTRUDER>5
-        case 5:
-            if(dir)
-                WRITE(EXT5_DIR_PIN,!EXT5_INVERSE);
-            else
-                WRITE(EXT5_DIR_PIN,EXT5_INVERSE);
-            break;
-#endif
-        }
-#endif
-    }
-    static inline void enable()
-    {
-#if NUM_EXTRUDER==1
-#if EXT0_ENABLE_PIN>-1
-        WRITE(EXT0_ENABLE_PIN,EXT0_ENABLE_ON );
-#endif
-#else
-        if(Extruder::current->enablePin > -1)
-            digitalWrite(Extruder::current->enablePin,Extruder::current->enableOn);
-#if FEATURE_DITTO_PRINTING
-        if(Extruder::dittoMode) {
-            if(extruder[1].enablePin > -1)
-                digitalWrite(extruder[1].enablePin,extruder[1].enableOn);
-#if NUM_EXTRUDER > 2
-        if(Extruder::dittoMode > 1 && extruder[2].enablePin > -1)
-                digitalWrite(extruder[2].enablePin,extruder[2].enableOn);
-#endif
-#if NUM_EXTRUDER > 3
-        if(Extruder::dittoMode > 2 && extruder[3].enablePin > -1)
-                digitalWrite(extruder[3].enablePin,extruder[3].enableOn);
-#endif
-        }
-#endif
-#endif
-    }
+    void retract(bool isRetract,bool isLong);
+    void retractDistance(float dist);
 #endif
     static void manageTemperatures();
     static void disableCurrentExtruderMotor();
     static void disableAllExtruderMotors();
+//Davinci Specific, be able to not move extruder if Duo
     static void selectExtruderById(uint8_t extruderId, bool changepos=true);
     static void disableAllHeater();
     static void initExtruder();
     static void initHeatedBed();
     static void setHeatedBedTemperature(float temp_celsius,bool beep = false);
+//Davinci Specific, allow to cool down but not heat for a period
     static  millis_t disableheat_time;
     static float getHeatedBedTemperature();
-    static void setTemperatureForExtruder(float temp_celsius,uint8_t extr,bool beep = false);
+    static void setTemperatureForExtruder(float temp_celsius,uint8_t extr,bool beep = false,bool wait = false);
+    static void pauseExtruders();
+    static void unpauseExtruders();
 };
 
 #if HAVE_HEATED_BED
-#define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER+1
+#define HEATED_BED_INDEX NUM_EXTRUDER
 extern TemperatureController heatedBedController;
 #else
-#define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER
+#define HEATED_BED_INDEX NUM_EXTRUDER-1
 #endif
+#if FAN_THERMO_PIN > -1
+#define THERMO_CONTROLLER_INDEX HEATED_BED_INDEX+1
+extern TemperatureController thermoController;
+#else
+#define THERMO_CONTROLLER_INDEX HEATED_BED_INDEX
+#endif
+#define NUM_TEMPERATURE_LOOPS THERMO_CONTROLLER_INDEX+1
+
 #define TEMP_INT_TO_FLOAT(temp) ((float)(temp)/(float)(1<<CELSIUS_EXTRA_BITS))
 #define TEMP_FLOAT_TO_INT(temp) ((int)((temp)*(1<<CELSIUS_EXTRA_BITS)))
 
 //extern Extruder *Extruder::current;
+#if NUM_TEMPERATURE_LOOPS > 0
 extern TemperatureController *tempController[NUM_TEMPERATURE_LOOPS];
+#endif
 extern uint8_t autotuneIndex;
 
 

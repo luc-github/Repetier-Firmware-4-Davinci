@@ -20,7 +20,7 @@
 #define _EEPROM_H
 
 // Id to distinguish version changes
-#define EEPROM_PROTOCOL_VERSION 10
+#define EEPROM_PROTOCOL_VERSION 16
 
 /** Where to start with our datablock in memory. Can be moved if you
 have problems with other modules using the eeprom */
@@ -105,36 +105,65 @@ have problems with other modules using the eeprom */
 #define EPR_DELTA_DIAGONAL_CORRECTION_A 933
 #define EPR_DELTA_DIAGONAL_CORRECTION_B 937
 #define EPR_DELTA_DIAGONAL_CORRECTION_C 941
-#define EPR_LIGHT_ON 946
-#define EPR_SOUND_ON 947
-#define EPR_POWERSAVE_AFTER_TIME 948
-#define EPR_DISPLAY_MODE 952
-#define EPR_FIL_SENSOR_ON 953
-#define EPR_KEEP_LIGHT_ON 954
-#define EPR_MANUAL_LEVEL_X1 955
-#define EPR_MANUAL_LEVEL_Y1 959
-#define EPR_MANUAL_LEVEL_X2 963
-#define EPR_MANUAL_LEVEL_Y2 971
-#define EPR_MANUAL_LEVEL_X3 975
-#define EPR_MANUAL_LEVEL_Y3 979
-#define EPR_MANUAL_LEVEL_X4 983
-#define EPR_MANUAL_LEVEL_Y4 987
-#define EPR_TEMP_EXT_PLA		 991
-#define EPR_TEMP_EXT_ABS 		 995
-#define EPR_TEMP_BED_PLA		 999
-#define EPR_TEMP_BED_ABS		1003
-#define EPR_TOP_SENSOR_ON     1007
-#define EPR_TOUCHSCREEN           1008 // - 1027 = 30 byte for touchscreen calibration data
+#define EPR_TOUCHSCREEN           946 // - 975 = 30 byte for touchscreen calibration data
 
 // Axis compensation
-#define EPR_AXISCOMP_TANXY          1028
-#define EPR_AXISCOMP_TANYZ          1032
-#define EPR_AXISCOMP_TANXZ          1036
+#define EPR_AXISCOMP_TANXY			976
+#define EPR_AXISCOMP_TANYZ			980
+#define EPR_AXISCOMP_TANXZ			984
+
+#define EPR_DISTORTION_CORRECTION_ENABLED      988
+#define EPR_RETRACTION_LENGTH                  992
+#define EPR_RETRACTION_LONG_LENGTH             996
+#define EPR_RETRACTION_SPEED                  1000
+#define EPR_RETRACTION_Z_LIFT                 1004
+#define EPR_RETRACTION_UNDO_EXTRA_LENGTH      1008
+#define EPR_RETRACTION_UNDO_EXTRA_LONG_LENGTH 1012
+#define EPR_RETRACTION_UNDO_SPEED             1016
+#define EPR_AUTORETRACT_ENABLED               1020
+#define EPR_Z_PROBE_Z_OFFSET			      1024
+#define EPR_SELECTED_LANGUAGE                 1028
+#define EPR_ACCELERATION_FACTOR_TOP           1032
+#define EPR_BENDING_CORRECTION_A              1036
+#define EPR_BENDING_CORRECTION_B              1040
+#define EPR_BENDING_CORRECTION_C              1044
+
+//Davinci Specific
+#define EPR_LIGHT_ON 1119
+#define EPR_SOUND_ON 1120
+#define EPR_POWERSAVE_AFTER_TIME 1121
+#define EPR_DISPLAY_MODE 1125
+#define EPR_FIL_SENSOR_ON 1126
+#define EPR_KEEP_LIGHT_ON 1127
+#define EPR_MANUAL_LEVEL_X1 1128
+#define EPR_MANUAL_LEVEL_Y1 1132
+#define EPR_MANUAL_LEVEL_X2 1136
+#define EPR_MANUAL_LEVEL_Y2 1140
+#define EPR_MANUAL_LEVEL_X3 1144
+#define EPR_MANUAL_LEVEL_Y3 1148
+#define EPR_MANUAL_LEVEL_X4 1152
+#define EPR_MANUAL_LEVEL_Y4 1156
+#define EPR_TEMP_EXT_PLA		 1160
+#define EPR_TEMP_EXT_ABS 		 1164
+#define EPR_TEMP_BED_PLA		 1168
+#define EPR_TEMP_BED_ABS		1172
+#define EPR_TOP_SENSOR_ON     1176
+#define EPR_WIFI_ON     1177
+#define EPR_BADGE_LIGHT_ON 1178
+#define EPR_LOAD_FEED_RATE 1179
+#define EPR_UNLOAD_FEED_RATE 1183
+#define EPR_UNLOAD_LOAD_DISTANCE 1187
 
 #if EEPROM_MODE != 0
 #define EEPROM_FLOAT(x) HAL::eprGetFloat(EPR_##x)
+#define EEPROM_INT32(x) HAL::eprGetInt32(EPR_##x)
+#define EEPROM_BYTE(x) HAL::eprGetByte(EPR_##x)
+#define EEPROM_SET_BYTE(x,val) HAL::eprSetByte(EPR_##x,val)
 #else
-#define EEPROM_FLOAT(x) (x)
+#define EEPROM_FLOAT(x) (float)(x)
+#define EEPROM_INT32(x) (int32_t)(x)
+#define EEPROM_BYTE(x) (uint8_t)(x)
+#define EEPROM_SET_BYTE(x,val)
 #endif
 
 #define EEPROM_EXTRUDER_OFFSET 200
@@ -165,12 +194,14 @@ have problems with other modules using the eeprom */
 #define EPR_EXTRUDER_COOLER_SPEED       54
 // 55-57 free for byte sized parameter
 #define EPR_EXTRUDER_MIXING_RATIOS  58 // 16*2 byte ratios = 32 byte -> end = 89
+#define EPR_EXTRUDER_Z_OFFSET            90
 #ifndef Z_PROBE_BED_DISTANCE
-#define Z_PROBE_BED_DISTANCE 10.0
+#define Z_PROBE_BED_DISTANCE 5.0
 #endif
 
-#define EPR_TYPE_BYTE			0
-#define EPR_TYPE_INT			1
+//Davinci Specific
+#define EPR_TYPE_BYTE		0
+#define EPR_TYPE_INT		1
 #define EPR_TYPE_LONG		2
 #define EPR_TYPE_FLOAT		3
 
@@ -179,7 +210,7 @@ class EEPROM
 {
 #if EEPROM_MODE != 0
     static void writeExtruderPrefix(uint pos);
-    static void writeFloat(uint pos,PGM_P text,uint8_t digits=3);
+    static void writeFloat(uint pos,PGM_P text,uint8_t digits = 3);
     static void writeLong(uint pos,PGM_P text);
     static void writeInt(uint pos,PGM_P text);
     static void writeByte(uint pos,PGM_P text);
@@ -191,7 +222,12 @@ public:
 
     static void init();
     static void initBaudrate();
+    //Davinci Specific
+#if DAVINCI == 4
+	static float rotate_speed;
+#endif
     static bool buselight; 
+    static bool busebadgelight;
     static bool busesensor;
     static bool btopsensor;
     static bool bkeeplighton;
@@ -200,14 +236,37 @@ public:
     static float ftemp_bed_pla;
     static float ftemp_bed_abs;
     static millis_t timepowersaving;
-    static void storeDataIntoEEPROM(uint8_t corrupted=0);
-    static void readDataFromEEPROM();
+    static float loading_feed_rate;
+    static float unloading_feed_rate;
+    static float unloading_loading_distance;
+    static void storeDataIntoEEPROM(uint8_t corrupted = 0);
+    static void readDataFromEEPROM(bool includeExtruder);
     static void restoreEEPROMSettingsFromConfiguration();
     static void writeSettings();
     static void update(GCode *com);
+    //Davinci Specific, for internal update
     static void update(long P,uint8_t T,long S,float X);
     static void updatePrinterUsage();
-
+    static inline void setVersion(uint8_t v) {
+#if EEPROM_MODE != 0
+        HAL::eprSetByte(EPR_VERSION,v);
+        HAL::eprSetByte(EPR_INTEGRITY_BYTE,computeChecksum());
+#endif
+    }
+    static inline uint8_t getStoredLanguage() {
+#if EEPROM_MODE != 0
+        return HAL::eprGetByte(EPR_SELECTED_LANGUAGE);
+#else
+        return 0;
+#endif
+    }
+    static inline float zProbeZOffset() {
+#if EEPROM_MODE != 0
+	    return HAL::eprGetFloat(EPR_Z_PROBE_Z_OFFSET);
+#else
+	    return Z_PROBE_Z_OFFSET;
+#endif
+    }
     static inline float zProbeSpeed() {
 #if EEPROM_MODE != 0
         return HAL::eprGetFloat(EPR_Z_PROBE_SPEED);
@@ -292,6 +351,7 @@ public:
         return Z_PROBE_BED_DISTANCE;
 #endif
     }
+//Davinci Specific, manual leveling
 static inline float ManualProbeX1() {
 #if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_MANUAL_LEVEL_X1);
@@ -370,14 +430,13 @@ static inline float ManualProbeY4() {
         return AXISCOMP_TANYZ;
 #endif
     }
-        static inline float axisCompTanXZ() {
+    static inline float axisCompTanXZ() {
 #if EEPROM_MODE != 0
         return HAL::eprGetFloat(EPR_AXISCOMP_TANXZ);
 #else
         return AXISCOMP_TANXZ;
 #endif
     }
-
 
 #if NONLINEAR_SYSTEM
     static inline int16_t deltaSegmentsPerSecondMove() {
@@ -468,12 +527,12 @@ static inline void setTowerYFloor(float newZ) {
 #if DRIVE_SYSTEM == DELTA
       Printer::yMin = newZ;
       Printer::updateDerivedParameter();
-      Com::printFLN(PSTR("Y (B) tower floor set to: "),Printer::yMin,3);
+      Com::printFLN(PSTR("Y (B) tower floor set to: "), Printer::yMin, 3);
 #if EEPROM_MODE != 0
 
         HAL::eprSetFloat(EPR_Y_HOME_OFFSET,Printer::yMin);
         uint8_t newcheck = computeChecksum();
-        if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
+        if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
             HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
 #endif
 #endif
@@ -482,11 +541,11 @@ static inline void setTowerZFloor(float newZ) {
 #if DRIVE_SYSTEM == DELTA
       Printer::zMin = newZ;
       Printer::updateDerivedParameter();
-      Com::printFLN(PSTR("Z (C) tower floor set to: "),Printer::zMin,3);
+      Com::printFLN(PSTR("Z (C) tower floor set to: "), Printer::zMin, 3);
 #if EEPROM_MODE != 0
       HAL::eprSetFloat(EPR_Z_HOME_OFFSET,Printer::zMin);
       uint8_t newcheck = computeChecksum();
-      if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
+      if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
         HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
 #endif
 #endif
@@ -495,7 +554,7 @@ static inline void setTowerZFloor(float newZ) {
 #if EEPROM_MODE != 0
         HAL::eprSetInt16(EPR_DELTA_TOWERX_OFFSET_STEPS,steps);
         uint8_t newcheck = computeChecksum();
-        if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
+        if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
             HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
 #endif
     }
@@ -503,7 +562,7 @@ static inline void setTowerZFloor(float newZ) {
 #if EEPROM_MODE != 0
         HAL::eprSetInt16(EPR_DELTA_TOWERY_OFFSET_STEPS,steps);
         uint8_t newcheck = computeChecksum();
-        if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
+        if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
             HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
 #endif
     }
@@ -511,7 +570,7 @@ static inline void setTowerZFloor(float newZ) {
 #if EEPROM_MODE != 0
         HAL::eprSetInt16(EPR_DELTA_TOWERZ_OFFSET_STEPS,steps);
         uint8_t newcheck = computeChecksum();
-        if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
+        if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
             HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
 #endif
     }
@@ -577,5 +636,55 @@ static inline void setTowerZFloor(float newZ) {
     static void readMixingRatios();
     static void restoreMixingRatios();
 #endif
+
+    static void setZCorrection(int32_t c,int index);
+    static inline int32_t getZCorrection(int index) {
+        return HAL::eprGetInt32(2048 + (index << 2));
+    }
+    static inline void setZCorrectionEnabled(int8_t on) {
+#if EEPROM_MODE != 0
+        if(isZCorrectionEnabled() == on) return;
+        HAL::eprSetInt16(EPR_DISTORTION_CORRECTION_ENABLED, on);
+        uint8_t newcheck = computeChecksum();
+        if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
+            HAL::eprSetByte(EPR_INTEGRITY_BYTE, newcheck);
+#endif
+    }
+    static inline int8_t isZCorrectionEnabled() {
+#if EEPROM_MODE != 0
+        return HAL::eprGetByte(EPR_DISTORTION_CORRECTION_ENABLED);
+#else
+        return 0;
+#endif
+    }
+    static inline float bendingCorrectionA() {
+#if EEPROM_MODE != 0
+        return HAL::eprGetFloat(EPR_BENDING_CORRECTION_A);
+#else
+        return BENDING_CORRECTION_A;
+#endif
+    }
+    static inline float bendingCorrectionB() {
+#if EEPROM_MODE != 0
+        return HAL::eprGetFloat(EPR_BENDING_CORRECTION_B);
+#else
+        return BENDING_CORRECTION_B;
+#endif
+    }
+    static inline float bendingCorrectionC() {
+#if EEPROM_MODE != 0
+        return HAL::eprGetFloat(EPR_BENDING_CORRECTION_C);
+#else
+        return BENDING_CORRECTION_C;
+#endif
+    }
+    static inline float accelarationFactorTop() {
+#if EEPROM_MODE != 0
+        return HAL::eprGetFloat(EPR_ACCELERATION_FACTOR_TOP);
+#else
+        return ACCELERATION_FACTOR_TOP;
+#endif
+    }
+
 };
 #endif

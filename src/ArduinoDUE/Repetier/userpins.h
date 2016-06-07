@@ -55,7 +55,7 @@
 #if MODEL==0
 #define ORIG_E0_ENABLE_PIN     128
 #else
-#define ORIG_E0_ENABLE_PIN     124 // no idea if it is good value but can avoid conflict with ORIG_Z_MIN_PIN for 2.0A, another value to try is 85
+#define ORIG_E0_ENABLE_PIN     124 
 #endif
 #endif
 
@@ -65,9 +65,6 @@
 #define ORIG_FAN2_PIN       4
 
 //additionnal PINS
-#define X_MAX_PIN -1
-#define Y_MAX_PIN -1
-#define Z_MAX_PIN -1
 #define LED_PIN         -1
 #if MODEL==0
 #define LIGHT_PIN    85
@@ -76,13 +73,28 @@
 #endif
 #define ORIG_PS_ON_PIN      -1
 #define PS_ON_PIN       ORIG_PS_ON_PIN
+#if MODEL==0
 #define TOP_SENSOR_PIN      6
+#else
+#define TOP_SENSOR_PIN      64
+#endif
+#if DAVINCI == 4
+#define BADGE_LIGHT_PIN		6
+#define LASER1_PIN 101 
+#define LED_LASER1_PIN 108
+#define LASER2_PIN   2 
+#define LED_LASER2_PIN 7
+#define TABLE_HOME_PIN      5
+#else
+#define BADGE_LIGHT_PIN		-1
+#endif
+#undef SDSS
 #define SDSS            55
 #define MOSI_PIN        43
 #define MISO_PIN        73
 #define SCK_PIN         42
 #define SDPOWER                 -1
-#define SDCARDDETECT            74
+#define ORIG_SDCARDDETECT            74
 #define SDSUPPORT       true
 #define SDCARDDETECTINVERTED    0
 #define DUE_SOFTWARE_SPI
@@ -90,7 +102,7 @@
 /*
 // LCD PINS - reported in uiconfig.h line 200
  #define UI_DISPLAY_RS_PIN      8       // PINK.1, 88, D_RS
-#define UI_DISPLAY_RW_PIN       -1
+#define UI_DISPLAY_RW_PIN       45 //but do not use it just set state to LOW
 #define UI_DISPLAY_ENABLE_PIN           125     // PINK.3, 86, D_E
 #define UI_DISPLAY_D0_PIN       34      // PINF.5, 92, D_D4
 #define UI_DISPLAY_D1_PIN       35      // PINK.2, 87, D_D5
@@ -103,13 +115,15 @@
 #define UI_DELAYPERCHAR             320
 //back light  PIN - reported in uiconfig.h
 #define UI_BACKLIGHT_PIN                78
+#define BEEPER_PIN 66
  */
-
-
+ 
+//USB Connection 
+#define RFSERIAL SerialUSB  // Native USB Port of the due 
+//EEPROM is on SDCard
+#define EEPROM_AVAILABLE EEPROM_SDCARD
 //EEprom on  SDCard
 #define SDEEPROM
-//Z probe
-#define ZPROBE_ADJUST_ZMIN
 
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 #define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
