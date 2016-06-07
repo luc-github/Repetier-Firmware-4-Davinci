@@ -13,6 +13,11 @@ YOU MIGHT DAMAGE YOUR PRINTER OR VOID YOUR WARRANTY, DO IT ON YOUR OWN RISK. Whe
 ***
 ###Support for 1.0A/2.0A/AiO(no scanner) is implemented and need feedback.
 
+###:boom:New alpha version based on 0.92.10 is ready for test [here](https://github.com/luc-github/Repetier-Firmware-0.92/tree/0.92.6-sync)
+* Multilangue :globe_with_meridians:
+* AiO support for scanner :camera:
+* Better auto leveling :tractor:
+
 The board can be easily exposed by removing the back panel of the printer secured by two torx screws.  Supported boards have a jumper labeled JP1, second generation boards have a jumper labeled J37. More info can be found on the [Voltivo forum](http://voltivo.com/forum/davinci-peersupport/340-new-kind-of-mainboard-no-j1-erase-jumper).
 ***
 
