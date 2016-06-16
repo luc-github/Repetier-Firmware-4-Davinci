@@ -1856,9 +1856,11 @@ is also used for the heater if you have 2 extruders connected. */
 #define FEATURE_FAN_CONTROL 1
 #define FAN_PIN ORIG_FAN_PIN
   #if DAVINCI == 2 || DAVINCI == 3
+      #undef EXT0_EXTRUDER_COOLER_PIN
       #define EXT0_EXTRUDER_COOLER_PIN ORIG_FAN2_PIN
       #define EXT1_EXTRUDER_COOLER_PIN ORIG_FAN2_PIN
   #else //DaVinci 1.0
+        #undef EXT0_EXTRUDER_COOLER_PIN
         #define EXT0_EXTRUDER_COOLER_PIN -1 //Warning need to add a permanent fan with power supply to cool extruder
   #endif
 #else
