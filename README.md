@@ -58,7 +58,7 @@ You can do so by homeing all axis, turning off the printer and manually adjustin
 For information on upgrading from or reverting to stock FW and other procedures please check [Da Vinci Voltivo forum](http://voltivo.com/forum/davinci).    
 <h4>:warning:There is no known way to revert to stock FW on 1.0A/2.0A/AiO until today.</h4>     
 
-Do not forget to modify the configuration.h to match your targeted Da Vinci: 1.0, 2.0 SF or 2.0.   
+Do not forget to modify the Configuration.h to match your targeted Da Vinci: 1.0, 2.0 SF or 2.0.   
 for basic installation just change :   
 '<code>#define DAVINCI 1 // "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FANS, 4 For AiO （no scanner)</code>'    
   0 for not Davinci board (like DUE/RADDS)    
