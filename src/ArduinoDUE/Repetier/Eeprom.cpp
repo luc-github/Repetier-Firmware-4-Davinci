@@ -29,7 +29,7 @@
 void EEPROM:: update(long P,uint8_t T,long S,float X)
 {
 #if EEPROM_MODE!=0
-    if(T>=0 &&T<=3 && P>0 && P<=2048) //SDEEPROM_SIZE =2048 // Minimum size used by Eeprom.cpp
+    if(T>=0 &&T<=3 && P>0 && P<=EEPROM_BYTES) // Minimum size used by Eeprom.cpp
     switch(T)
         {
         case EPR_TYPE_BYTE:
@@ -969,7 +969,7 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
 
 void EEPROM::initBaudrate()
 {
-    // Invariant - baudrate is intitalized with or without eeprom!
+    // Invariant - baudrate is initialized with or without eeprom!
     baudrate = BAUDRATE;
 #if EEPROM_MODE != 0
     if(HAL::eprGetByte(EPR_MAGIC_BYTE) == EEPROM_MODE)

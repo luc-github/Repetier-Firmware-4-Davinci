@@ -272,6 +272,7 @@ void Commands::printCurrentPosition(FSTRINGPARAM(s)) {
 }
 
 void Commands::printTemperatures(bool showRaw) {
+	int error;
 #if NUM_EXTRUDER > 0
     float temp = Extruder::current->tempControl.currentTemperatureC;
 #if HEATED_BED_SENSOR_TYPE == 0
@@ -283,6 +284,9 @@ void Commands::printTemperatures(bool showRaw) {
 #if HAVE_HEATED_BED
     Com::printF(Com::tSpaceBColon,Extruder::getHeatedBedTemperature());
     Com::printF(Com::tSpaceSlash,heatedBedController.targetTemperatureC,0);
+	if((error = heatedBedController.errorState()) > 0) {
+		Com::printF(PSTR(" DB:"),error);
+	}
     if(showRaw) {
         Com::printF(Com::tSpaceRaw,(int)NUM_EXTRUDER);
         Com::printF(Com::tColon,(1023 << (2 - ANALOG_REDUCE_BITS)) - heatedBedController.currentTemperature);
@@ -302,12 +306,19 @@ void Commands::printTemperatures(bool showRaw) {
         Com::printF(Com::tSpaceAt,(int)i);
         Com::printF(Com::tColon,(pwm_pos[extruder[i].tempControl.pwmIndex])); // Show output of autotune when tuning!
 #endif
+		if((error = extruder[i].tempControl.errorState()) > 0) {
+			Com::printF(PSTR(" D"),(int)i);
+			Com::printF(Com::tColon,error);
+		}
         if(showRaw) {
             Com::printF(Com::tSpaceRaw,(int)i);
             Com::printF(Com::tColon,(1023 << (2 - ANALOG_REDUCE_BITS)) - extruder[i].tempControl.currentTemperature);
         }
     }
 #elif NUM_EXTRUDER == 1
+	if((error = extruder[0].tempControl.errorState()) > 0) {
+		Com::printF(PSTR(" D0:"),error);
+	}
     if(showRaw) {
         Com::printF(Com::tSpaceRaw,(int)0);
         Com::printF(Com::tColon,(1023 << (2 - ANALOG_REDUCE_BITS)) - extruder[0].tempControl.currentTemperature);
@@ -1037,19 +1048,7 @@ void Commands::processGCode(GCode *com) {
 #if ARC_SUPPORT
         case 2: // CW Arc
         case 3: // CCW Arc MOTION_MODE_CW_ARC: case MOTION_MODE_CCW_ARC:
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-            {
-                // disable laser for G0 moves
-                bool laserOn = LaserDriver::laserOn;
-                if(com->G == 0 && Printer::mode == PRINTER_MODE_LASER) {
-                    LaserDriver::laserOn = false;
-                }
-#endif // defined
                 processArc(com);
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-                LaserDriver::laserOn = laserOn;
-            }
-#endif // defined
             break;
 #endif
         case 4: // G4 dwell
@@ -1064,7 +1063,7 @@ void Commands::processGCode(GCode *com) {
             }
             break;
 #if FEATURE_RETRACTION && NUM_EXTRUDER > 0
-        case 10: // G10 S<1 = long retract, 0 = short retract = default> retracts filament accoriding to stored setting
+        case 10: // G10 S<1 = long retract, 0 = short retract = default> retracts filament according to stored setting
 #if NUM_EXTRUDER > 1
             Extruder::current->retract(true, com->hasS() && com->S > 0);
 #else
@@ -1369,7 +1368,7 @@ void Commands::processGCode(GCode *com) {
                 if(com->hasZ()) zOff = Printer::convertToMM(com->Z) - Printer::currentPosition[Z_AXIS];
                 Printer::setOrigin(xOff, yOff, zOff);
                 if(com->hasE()) {
-                    Printer::currentPositionSteps[E_AXIS] = Printer::convertToMM(com->E) * Printer::axisStepsPerMM[E_AXIS];
+                    Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS] = Printer::convertToMM(com->E) * Printer::axisStepsPerMM[E_AXIS];
                 }
             }
             break;
@@ -1401,7 +1400,7 @@ void Commands::processGCode(GCode *com) {
                             if(Printer::isLargeMachine()) {
                                 // calculate radius assuming we are at surface
                                 // If Z is greater than 0 it will get calculated out for correct radius
-                                // Use either A or B tower as they acnhor x cartesian axis and always have
+                                // Use either A or B tower as they anchor x Cartesian axis and always have
                                 // Radius distance to center in simplest set up.
                                 float h = Printer::deltaDiagonalStepsSquaredB.f;
                                 unsigned long bSteps = Printer::currentNonlinearPositionSteps[B_TOWER];
@@ -2037,6 +2036,11 @@ void Commands::processMCode(GCode *com) {
             break;
         case 114: // M114
             printCurrentPosition(PSTR("M114 "));
+			if(com->hasS() && com->S) {
+				Com::printF(PSTR("XS:"),Printer::currentPositionSteps[X_AXIS]);
+				Com::printF(PSTR(" YS:"),Printer::currentPositionSteps[Y_AXIS]);
+				Com::printFLN(PSTR(" ZS:"),Printer::currentPositionSteps[Z_AXIS]);
+			}
             break;
         case 117: // M117 message to lcd
             if(com->hasString()) {
@@ -2286,7 +2290,7 @@ void Commands::processMCode(GCode *com) {
             }
             break;
 #endif
-        case 302: // M302 S<0 or 1> - allow cold extrusion. Without S parameter it will allow. S1 will disallow.
+        case 302: // M302 S<0 or 1> - allow cold extrusion. Without S parameter it will allow. S1 will allow, S0 will disallow.
             Printer::setColdExtrusionAllowed(!com->hasS() || (com->hasS() && com->S != 0));
             break;
         case 303: { // M303
@@ -2711,13 +2715,6 @@ void Commands::executeGCode(GCode *com) {
 }
 
 void Commands::emergencyStop() {
-//Davinci Specific, EEPROM is on SD Card
-#if defined(SDEEPROM)
-    if (!HAL::syncSdEeprom())
-    {
-        Com::printFLN(PSTR("SD EEPROM write error"));
-    }
-#endif
 #if defined(KILL_METHOD) && KILL_METHOD == 1
     HAL::resetHardware();
 #else

@@ -80,7 +80,7 @@ M106/M107 work only if repurpose fan is enabled, as by default fan is managed by
 - M106 S<speed> P<fan> - Fan on speed = 0..255, P = 0 or 1, 0 is default and can be omitted
 - M107 P<fan> - Fan off, P = 0 or 1, 0 is default and can be omitted
 - M109 - Wait for extruder current temp to reach target temp.
-- M114 - Display current position
+- M114 S1 - Display current position, S1 = also write position in steps
 
 Custom M Codes
 
@@ -155,7 +155,7 @@ Custom M Codes
 - M360 - show configuration
 - M400 - Wait until move buffers empty.
 - M401 - Store x, y and z position.
-- M402 - Go to stored position. If X, Y or Z is specified, only these coordinates are used. F changes feedrate fo rthat move.
+- M402 - Go to stored position. If X, Y or Z is specified, only these coordinates are used. F changes feedrate for that move.
 - M450 - Reports printer mode
 - M451 - Set printer mode to FFF
 - M452 - Set printer mode to laser

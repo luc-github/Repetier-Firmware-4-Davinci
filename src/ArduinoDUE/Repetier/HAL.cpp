@@ -44,7 +44,7 @@ static int adcCounter = 0, adcSamplePos = 0;
 
 static   uint32_t  adcEnable = 0;
 
-char HAL::virtualEeprom[EEPROM_BYTES];
+char HAL::virtualEeprom[EEPROM_BYTES] = {0,0,0,0,0,0,0};
 bool HAL::wdPinged = true;
 volatile uint8_t HAL::insideTimer1 = 0;
 #ifndef DUE_SOFTWARE_SPI
@@ -68,35 +68,6 @@ bool HAL::enablesound = true;
 #if ENABLE_WIFI
     bool HAL::bwifion=false;
 #endif //wifi feature
-
-#ifdef SDEEPROM
-#if !SDSUPPORT
-#error SDEEPROM requires SDCARSUPPORT
-#endif
-#if EEPROM_MODE == 0
-#error SDEEPROM requires EEPROM_MODE != 0
-#endif
-
-#define SDEEPROM_SIZE 2048 // Minimum size used by Eeprom.cpp
-
-char HAL::sdEepromImage[SDEEPROM_SIZE] = { 0, };
-uint32_t HAL::sdEepromLastChanged = 0; // 0 = never.
-
-void HAL::setupSdEeprom() {
-    sd.setupEeprom(sdEepromImage, SDEEPROM_SIZE);
-}
-
-bool HAL::syncSdEeprom() {
-    uint32_t time = millis();
-
-    if (sdEepromLastChanged && (time - sdEepromLastChanged > 3000)) // Buffer writes for 3 seconds
-    {
-        sdEepromLastChanged = 0;
-        return sd.syncEeprom();
-    }
-    return true;
-}
-#endif
 
 
 
@@ -254,6 +225,58 @@ void HAL::analogStart(void)
 
   // start first conversion
   ADC->ADC_CR = ADC_CR_START;
+}
+
+#endif
+
+#if EEPROM_AVAILABLE == EEPROM_SDCARD
+
+#if !SDSUPPORT
+#error EEPROM using sd card requires SDCARSUPPORT
+#endif
+
+millis_t eprSyncTime = 0; // in sync
+SdFile eepromFile;
+void HAL::syncEEPROM() { // store to disk if changed
+  millis_t time = millis();
+
+  if (eprSyncTime && (time - eprSyncTime > 15000)) // Buffer writes only every 15 seconds to pool writes
+  {
+    eprSyncTime = 0;
+    bool failed = false;
+    if (!sd.sdactive) // not mounted
+	  {
+		  if (eepromFile.isOpen())
+			  eepromFile.close();
+        Com::printErrorF("Could not write eeprom to sd card - no sd card mounted");
+        Com::println();
+		  return;
+	  }
+
+	  if (!eepromFile.seekSet(0))
+		  failed = true;
+
+	  if(!failed && !eepromFile.write(virtualEeprom, EEPROM_BYTES) == EEPROM_BYTES)
+      failed = true; 
+    
+    if(failed) {
+        Com::printErrorF("Could not write eeprom to sd card");
+        Com::println();
+    }
+  }
+}
+
+void HAL::importEEPROM() {
+    if (eepromFile.isOpen())
+			eepromFile.close();
+		if (!eepromFile.open("eeprom.bin", O_RDWR | O_CREAT | O_SYNC) ||
+			eepromFile.read(virtualEeprom, EEPROM_BYTES) != EEPROM_BYTES)
+		{
+			Com::printFLN(Com::tOpenFailedFile, "eeprom.bin");
+		} else {
+      Com::printFLN("EEPROM read from sd card.");
+    }
+    EEPROM::restoreEEPROMSettingsFromConfiguration();
 }
 
 #endif

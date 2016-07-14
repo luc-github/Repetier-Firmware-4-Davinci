@@ -482,7 +482,7 @@ public:
     {
         linesCount = 0;
         linesPos = linesWritePos;
-        //Davinci Specific, no immediate no printing to avoid to many refresh
+        //Davinci Specific, no immediate no printing to avoid too many refresh
         //Printer::setMenuMode(MENU_MODE_PRINTING, false);
     }
     // Only called from bresenham -> inside interrupt handle

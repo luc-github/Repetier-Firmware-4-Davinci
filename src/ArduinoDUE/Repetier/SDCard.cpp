@@ -96,38 +96,10 @@ void SDCard::initsd()
 	HAL::pingWatchdog();
 
     fat.chdir();
-//Davinci Specific,EEPROM is on SD Card
-#ifdef SDEEPROM
-    if (eepromBuffer != NULL && eepromSize > 0)
-    {
-        if (eepromFile.isOpen())
-            eepromFile.close();
-        if (!eepromFile.open(SD_EEPROM_FILENAME, O_RDWR | O_CREAT | O_SYNC) ||
-            eepromFile.read(eepromBuffer, eepromSize) != eepromSize)
-        {
-            Com::printFLN(Com::tOpenFailedFile, SD_EEPROM_FILENAME);
-        }
-    }
-#endif
-}
-
-#ifdef SDEEPROM
-bool SDCard::syncEeprom() {
-    if (!sdactive)
-    {
-        if (eepromFile.isOpen())
-            eepromFile.close();
-        return 0;
-    }
-    if (!eepromFile.seekSet(0))
-        return 0;
-	return eepromFile.write(eepromBuffer, eepromSize) == eepromSize;
-}
-#endif
-
-void SDCard::autoPrint() {
-    if (!sdactive)
-        return;
+	
+#if defined(EEPROM_AVAILABLE) && EEPROM_AVAILABLE == EEPROM_SDCARD
+	HAL::importEEPROM();
+#endif	
     if(selectFile("init.g", true))
     {
         startPrint();
@@ -139,8 +111,6 @@ void SDCard::mount()
 {
     sdmode = 0;
     initsd();
-    //Davinci Specific, Init and autoprint are separated 
-    autoPrint();
 }
 
 void SDCard::unmount()

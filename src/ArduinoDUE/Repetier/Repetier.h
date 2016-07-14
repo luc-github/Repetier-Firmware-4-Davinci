@@ -211,6 +211,16 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define LAZY_DUAL_X_AXIS 0
 #endif
 
+#ifndef MOVE_X_WHEN_HOMED
+#define MOVE_X_WHEN_HOMED 0
+#endif
+#ifndef MOVE_Y_WHEN_HOMED
+#define MOVE_Y_WHEN_HOMED 0
+#endif
+#ifndef MOVE_Z_WHEN_HOMED
+#define MOVE_Z_WHEN_HOMED 0
+#endif
+
 #if SHARED_EXTRUDER_HEATER || MIXING_EXTRUDER
 #undef EXT1_HEATER_PIN
 #undef EXT2_HEATER_PIN
@@ -545,8 +555,8 @@ inline void memcopy4(void *dest,void *source) {
 #define BENDING_CORRECTION_C 0
 #endif
 
-#ifndef Z_ACCELERATION_TOP
-#define Z_ACCELERATION_TOP 0
+#ifndef ACCELERATION_FACTOR_TOP
+#define ACCELERATION_FACTOR_TOP 100
 #endif
 
 #ifndef KEEP_ALIVE_INTERVAL
@@ -953,23 +963,8 @@ public:
     bool savetosd;
     SdBaseFile parentFound;
 
-//Davinci Specific
-#ifdef SDEEPROM
-#define SD_EEPROM_FILENAME "eeprom.bin"
-    char * eepromBuffer;
-    uint32_t eepromSize;
-    SdFile eepromFile;
-    inline void setupEeprom(char * buffer, uint32_t size) {
-      eepromBuffer = buffer;
-      eepromSize = size;
-      };
-    bool syncEeprom();
-#endif
-
     SDCard();
     void initsd();
-    //Davinci Specific, SD Card Initialisation and autoprint are separated
-    void autoPrint();
     void writeCommand(GCode *code);
     bool selectFile(const char *filename,bool silent=false);
     void mount();

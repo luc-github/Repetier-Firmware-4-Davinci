@@ -326,6 +326,10 @@ union eeval_t {
   long        l;
 } PACK;
 
+#if EEPROM_AVAILABLE == EEPROM_SDCARD
+extern millis_t eprSyncTime;
+#endif
+
 class HAL
 {
   public:
@@ -365,11 +369,6 @@ class HAL
       TC_Configure(DELAY_TIMER, DELAY_TIMER_CHANNEL, TC_CMR_WAVSEL_UP |
                    TC_CMR_WAVE | DELAY_TIMER_CLOCK);
       TC_Start(DELAY_TIMER, DELAY_TIMER_CHANNEL);
-    }
- //Davinci Specific
- //EEPROM is on SD Card so need to setup SD Access first
-   static inline void loadVirtualEEPROM(void)
-    {
 #if EEPROM_AVAILABLE && EEPROM_MODE != EEPROM_NONE
       // Copy eeprom to ram for faster access
       int i;
@@ -478,6 +477,11 @@ class HAL
       WRITE_VAR(pin, LOW);
     }
 
+#if EEPROM_AVAILABLE == EEPROM_SDCARD
+    static void syncEEPROM(); // store to disk if changed
+    static void importEEPROM();
+#endif
+
     static inline void eprSetByte(unsigned int pos, uint8_t value)
     {
       eeval_t v;
@@ -544,13 +548,6 @@ class HAL
     // Write any data type to EEPROM
     static inline void eprBurnValue(unsigned int pos, int size, union eeval_t newvalue)
     {
-//Davinci Specific
-#if EEPROM_MODE!=0
-#ifdef SDEEPROM
-      for (int i = 0; i < size; i++)
-          HAL::sdEepromImage[pos++] = newvalue.b[i];
-      HAL::sdEepromLastChanged = millis() | 1; // Make sure it's not zero.
-#else
 #if EEPROM_AVAILABLE == EEPROM_SPI_ALLIGATOR
       uint8_t eeprom_temp[3];
 
@@ -611,24 +608,14 @@ class HAL
       }
       i2cStop();          // signal end of transaction
       delayMilliseconds(EEPROM_PAGE_WRITE_TIME);   // wait for page write to complete
-#endif//(MOTHERBOARD==500) || (MOTHERBOARD==501)
-//Davinci Specific
-#endif //SDEEPROM
-#endif //EEPROM_MODE!=0
+#elif EEPROM_AVAILABLE == EEPROM_SDCARD
+      eprSyncTime = HAL::timeInMilliseconds() | 1UL; 
+#endif
     }
 
     // Read any data type from EEPROM that was previously written by eprBurnValue
     static inline union eeval_t eprGetValue(unsigned int pos, int size)
     {
-//Davinci Specific
-#if EEPROM_MODE!=0
-#ifdef SDEEPROM
-        int i;
-        eeval_t v;
-        for (int i = 0; i < size; i++)
-            v.b[i] = HAL::sdEepromImage[pos++];
-        return v;
-#else
 #if EEPROM_AVAILABLE == EEPROM_SPI_ALLIGATOR
       int i = 0;
       eeval_t v;
@@ -674,9 +661,6 @@ class HAL
      }
      return v;       
 #endif //(MOTHERBOARD==500) || (MOTHERBOARD==501)
-//Davinci Specific
-#endif //SDEEPROM
-#endif //EEPROM_MODE!=0
     }
 
     static inline void allowInterrupts()
@@ -932,15 +916,6 @@ class HAL
     static void resetExtruderDirection();
 #endif
     static volatile uint8_t insideTimer1;
- 
-//Davinci Specific       
-#ifdef SDEEPROM
-    static void setupSdEeprom();
-    static bool syncSdEeprom();
-    static char sdEepromImage[];
-    static uint32_t sdEepromLastChanged; // millis
-#endif
-
 };
 
 #endif // HAL_H

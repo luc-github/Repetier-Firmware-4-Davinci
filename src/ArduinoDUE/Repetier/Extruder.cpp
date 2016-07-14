@@ -296,13 +296,13 @@ void Extruder::manageTemperatures()
 #if FEATURE_DECOUPLE_TEST
                 act->startHoldDecouple(time);
 #endif
-                float raising = 3.333 * (act->currentTemperatureC - act->tempArray[act->tempPointer]); // raising dT/dt, 3.33 = reciproke of time interval (300 ms)
+                float raising = 3.333 * (act->currentTemperatureC - act->tempArray[act->tempPointer]); // raising dT/dt, 3.33 = reciprocal of time interval (300 ms)
                 act->tempIState = 0.25 * (3.0 * act->tempIState + raising); // damp raising
                 output = (act->currentTemperatureC + act->tempIState * act->deadTime > act->targetTemperatureC ? 0 : act->pidDriveMax);
             }
             else // bang bang and slow bang bang
 #endif // TEMP_PID
-                if(act->heatManager == HTR_SLOWBANG)    // Bang-bang with reduced change frequency to save relais life
+                if(act->heatManager == HTR_SLOWBANG)    // Bang-bang with reduced change frequency to save relays life
                 {
 //Davinci Specific, be able to disable decouple test
 #if !FEATURE_DECOUPLE_TEST 
@@ -403,6 +403,26 @@ void TemperatureController::waitForTargetTemperature()
     }
 }
 
+fast8_t TemperatureController::errorState() {
+	if(isSensorDefect())
+		return 1;
+	if(isSensorDecoupled())
+		return 2;
+#if EXTRUDER_JAM_CONTROL
+	if(isFilamentChange())
+		return 6;
+#if JAM_METHOD == 1
+	if(isJammed())
+		return 5; // jammed or out of filament
+	if(isSlowedDown())
+		return 3; // slipping				
+#else // only a simple switch to pause on end of filament
+	if(isJammed())
+		return 6; // out of filament	
+#endif
+#endif
+	return 0;
+}
 /* For pausing we negate target temperature, so negative value means paused extruder.
 Since temp. is negative no heating will occur. */
 void Extruder::pauseExtruders()
@@ -433,6 +453,7 @@ void TemperatureController::resetAllErrorStates() {
 		tempController[i]->removeErrorStates();
 	}
 #endif	
+	Printer::unsetAnyTempsensorDefect();
 }
 
 #if EXTRUDER_JAM_CONTROL
@@ -465,7 +486,11 @@ void Extruder::resetJamSteps()
 {
     jamStepsOnSignal = jamStepsSinceLastSignal;
     jamStepsSinceLastSignal = 0;
-    Printer::setInterruptEvent(PRINTER_INTERRUPT_EVENT_JAM_SIGNAL0 + id, false);
+	if(tempControl.isFilamentChange()) {
+		tempControl.setFilamentChange(false);
+	} else {
+		Printer::setInterruptEvent(PRINTER_INTERRUPT_EVENT_JAM_SIGNAL0 + id, false);
+	}
 }
 #endif
 
@@ -670,7 +695,7 @@ void Extruder::selectExtruderById(uint8_t extruderId, bool changepos)
 #if !MIXING_EXTRUDER
 	Com::printFLN(PSTR("SelectExtruder:"), static_cast<int>(extruderId));
 #endif
-    if(Printer::isHomedAll() && extruder[extruderId].zOffset < Extruder::current->zOffset) { // prevent extruder from hitting bed
+    if(Printer::isHomedAll() && extruder[extruderId].zOffset < Extruder::current->zOffset) { // prevent extruder from hitting bed - move bed down a bit
 		Printer::offsetZ = -extruder[extruderId].zOffset * Printer::invAxisStepsPerMM[Z_AXIS];
 	    Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
 	    Commands::waitUntilEndOfAllMoves();
@@ -754,7 +779,7 @@ void Extruder::selectExtruderById(uint8_t extruderId, bool changepos)
     Printer::offsetY = -Extruder::current->yOffset * Printer::invAxisStepsPerMM[Y_AXIS];
     Printer::offsetZ = -Extruder::current->zOffset * Printer::invAxisStepsPerMM[Z_AXIS];
     Commands::changeFlowrateMultiply(Printer::extrudeMultiply); // needed to adjust extrusionFactor to possibly different diameter
-#if DUAL_X_AXIS == 0 || LAZY_DUAL_X_AXIS == 0
+#if DUAL_X_AXIS == 0 || LAZY_DUAL_X_AXIS == 0	
     //Davinci Specific, check if move extruder for DUO
     if(Printer::isHomedAll() && changepos) {
         Printer::moveToReal(cx, cy, cz, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
@@ -858,6 +883,7 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
         uint8_t retracted = 0;
 #endif
         millis_t currentTime;
+		millis_t maxWaitUntil = 0;
         do
         {
             previousMillisCmd = currentTime = HAL::timeInMilliseconds();
@@ -878,16 +904,23 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
                 retracted = 1;
             }
 #endif
+			if(maxWaitUntil == 0) {
+				if(dirRising ? actExtruder->tempControl.currentTemperatureC >= actExtruder->tempControl.targetTemperatureC - 5 : actExtruder->tempControl.currentTemperatureC <= actExtruder->tempControl.targetTemperatureC + 5) {
+					maxWaitUntil = currentTime + 120000L;
+				}
+			} else if((millis_t)(maxWaitUntil - currentTime) < 2000000000UL) {
+				break;
+			}
             if((waituntil == 0 &&
                     (dirRising ? actExtruder->tempControl.currentTemperatureC >= actExtruder->tempControl.targetTemperatureC - 1
                      : actExtruder->tempControl.currentTemperatureC <= actExtruder->tempControl.targetTemperatureC + 1))
-#if defined(TEMP_HYSTERESIS) && TEMP_HYSTERESIS>=1
+#if defined(TEMP_HYSTERESIS) && TEMP_HYSTERESIS >= 1
                     || (waituntil != 0 && (abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC)) > TEMP_HYSTERESIS)
 #endif
               )
             {
                 waituntil = currentTime + 1000UL*(millis_t)actExtruder->watchPeriod; // now wait for temp. to stabilize
-            }
+            }			
         }
         while(waituntil == 0 || (waituntil != 0 && (millis_t)(waituntil - currentTime) < 2000000000UL));
 #if RETRACT_DURING_HEATUP
@@ -951,10 +984,15 @@ void Extruder::setMixingWeight(uint8_t extr,int weight)
     uint8_t i;
     mixingS = 0;
     extruder[extr].mixingW = weight;
+	float sum = 0;
+	for(fast8_t i = 0; i < NUM_EXTRUDER; i++) {
+	    sum += extruder[i].stepsPerMM * extruder[i].mixingW;                   // steps of virtual axis with original weights
+	}
     for(i=0; i<NUM_EXTRUDER; i++)
     {
-        extruder[i].mixingE = extruder[i].mixingW;
-        mixingS += extruder[i].mixingW;
+		extruder[i].mixingWB = static_cast<int>(10000.0*extruder[i].stepsPerMM*extruder[i].mixingW / sum);
+        extruder[i].mixingE = extruder[i].mixingWB;
+        mixingS += extruder[i].mixingWB;
     }
 }
 void Extruder::step()
@@ -1020,32 +1058,32 @@ void Extruder::step()
     int bestError;
     if(mixingDir)
     {
-        bestError = -10000;
+        bestError = -20000;
         for(i = 0; i < NUM_EXTRUDER; i++)
         {
-            if(extruder[i].mixingW == 0) continue;
+            if(extruder[i].mixingWB == 0) continue;
             if(extruder[i].mixingE > bestError)
             {
                 bestError = extruder[i].mixingE;
                 best = i;
             }
-            extruder[i].mixingE += extruder[i].mixingW;
+            extruder[i].mixingE += extruder[i].mixingWB;
         }
         if(best == 255) return; // no extruder has weight!
         extruder[best].mixingE -= mixingS;
     }
     else
     {
-        bestError = 10000;
+        bestError = 20000;
         for(i = 0; i < NUM_EXTRUDER; i++)
         {
-            if(extruder[i].mixingW == 0) continue;
+            if(extruder[i].mixingWB == 0) continue;
             if(extruder[i].mixingE < bestError)
             {
                 bestError = extruder[i].mixingE;
                 best = i;
             }
-            extruder[i].mixingE -= extruder[i].mixingW;
+            extruder[i].mixingE -= extruder[i].mixingWB;
         }
         if(best == 255) return; // no extruder has weight!
         extruder[best].mixingE += mixingS;
@@ -2428,10 +2466,11 @@ bool reportTempsensorError()
     if(!Printer::isAnyTempsensorDefect()) return false;
     for(uint8_t i = 0; i < NUM_TEMPERATURE_LOOPS; i++)
     {
-        if(i == NUM_EXTRUDER) Com::printF(Com::tHeatedBed);
-#if HAVE_HEATED_BED		
-        else if(i == HEATED_BED_INDEX) Com::printF(Com::tExtruderSpace,i);
-#endif		
+#if HAVE_HEATED_BED
+        if(i == HEATED_BED_INDEX) Com::printF(Com::tHeatedBed);
+        else 
+#endif
+		if(i < NUM_EXTRUDER) Com::printF(Com::tExtruderSpace,i);
 		else Com::printF(PSTR("Other:"));
 		TemperatureController *act = tempController[i];
         int temp = act->currentTemperatureC;
@@ -2607,7 +2646,7 @@ Extruder extruder[NUM_EXTRUDER] =
         ,EXT0_ADVANCE_L,EXT0_ADVANCE_BACKLASH_STEPS
 #endif
 #if MIXING_EXTRUDER > 0
-        ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
+        ,10,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
 #endif
         ,{
             0,EXT0_TEMPSENSOR_TYPE,EXT0_SENSOR_INDEX,EXT0_HEAT_MANAGER,0,0,0,0
@@ -2637,7 +2676,7 @@ Extruder extruder[NUM_EXTRUDER] =
         ,EXT1_ADVANCE_L,EXT1_ADVANCE_BACKLASH_STEPS
 #endif
 #if MIXING_EXTRUDER > 0
-        ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
+        ,10,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
 #endif
         ,{
             1,EXT1_TEMPSENSOR_TYPE,EXT1_SENSOR_INDEX,EXT1_HEAT_MANAGER,0,0,0,0
@@ -2667,7 +2706,7 @@ Extruder extruder[NUM_EXTRUDER] =
         ,EXT2_ADVANCE_L,EXT2_ADVANCE_BACKLASH_STEPS
 #endif
 #if MIXING_EXTRUDER > 0
-        ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
+        ,10,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
 #endif
         ,{
             2,EXT2_TEMPSENSOR_TYPE,EXT2_SENSOR_INDEX,EXT2_HEAT_MANAGER,0,0,0,0
@@ -2697,7 +2736,7 @@ Extruder extruder[NUM_EXTRUDER] =
         ,EXT3_ADVANCE_L,EXT3_ADVANCE_BACKLASH_STEPS
 #endif
 #if MIXING_EXTRUDER > 0
-        ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
+        ,10,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
 #endif
         ,{
             3,EXT3_TEMPSENSOR_TYPE,EXT3_SENSOR_INDEX,EXT3_HEAT_MANAGER,0,0,0,0
@@ -2727,7 +2766,7 @@ Extruder extruder[NUM_EXTRUDER] =
         ,EXT4_ADVANCE_L,EXT4_ADVANCE_BACKLASH_STEPS
 #endif
 #if MIXING_EXTRUDER > 0
-        ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
+        ,10,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
 #endif
         ,{
             4,EXT4_TEMPSENSOR_TYPE,EXT4_SENSOR_INDEX,EXT4_HEAT_MANAGER,0,0,0,0
@@ -2757,7 +2796,7 @@ Extruder extruder[NUM_EXTRUDER] =
         ,EXT5_ADVANCE_L,EXT5_ADVANCE_BACKLASH_STEPS
 #endif
 #if MIXING_EXTRUDER > 0
-        ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
+        ,10,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
 #endif
         ,{
             5,EXT5_TEMPSENSOR_TYPE,EXT5_SENSOR_INDEX,EXT5_HEAT_MANAGER,0,0,0,0

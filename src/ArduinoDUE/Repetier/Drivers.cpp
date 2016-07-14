@@ -44,7 +44,7 @@ MotorDriverInterface *getMotorDriver(int idx)
 }
 
 /**
-Run motor P until it is at position X at speed F
+Run motor P until it is at position X
 */
 void commandG201(GCode &code)
 {
