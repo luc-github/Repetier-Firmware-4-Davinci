@@ -1395,7 +1395,8 @@ PULLUP(Z2_MINMAX_PIN, HIGH);
     Extruder::initExtruder();
     // sets auto leveling in eeprom init
     EEPROM::init(); // Read settings from eeprom if wanted
-    UI_INITIALIZE;
+    //Davinci Specific, too early
+    //UI_INITIALIZE;
     for(uint8_t i = 0; i < E_AXIS_ARRAY; i++)
     {
         currentPositionSteps[i] = 0;
@@ -1413,6 +1414,8 @@ PULLUP(Z2_MINMAX_PIN, HIGH);
 #if SDSUPPORT
     sd.mount();
 #endif
+    //Davinci Specific, need read SD EEPROM first
+    UI_INITIALIZE;
 #if NONLINEAR_SYSTEM
 	transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentNonlinearPositionSteps);
 
