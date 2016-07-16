@@ -1,4 +1,4 @@
-##Da Vinci Firmware based on Repetier (0.92.10) Alpha   
+##Da Vinci Firmware based on Repetier (0.92.10) - this branch is now outdated please go here : https://github.com/luc-github/Repetier-Firmware-0.92/tree/devt
 ============================
 
 [![Join the chat at https://gitter.im/luc-github/Repetier-Firmware-0.92](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/luc-github/Repetier-Firmware-0.92?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)    
