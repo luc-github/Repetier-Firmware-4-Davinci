@@ -13,13 +13,12 @@ If you change the board, currently DUE based are supported with RADDS, as well a
 YOU MIGHT DAMAGE YOUR PRINTER OR VOID YOUR WARRANTY, DO IT ON YOUR OWN RISK. When it is possible on 1.0/2.0, currently on 1.0A/2.0A and AiO there is no way to revert to stock fw so be sure of what you are doing.
 
 ***
-###Support for 1.0A/2.0A/AiO(no scanner) is implemented and need feedback.
 AiO scanner support is present in FW but scanner software support is currently basic, [horus](https://github.com/bqlabs/horus) is a good candidat, feel free to help [here](https://github.com/luc-github/Repetier-Firmware-0.92/issues/156)  
 
 The board can be easily exposed by removing the back panel of the printer secured by two torx screws.  Supported boards have a jumper labeled JP1, second generation boards have a jumper labeled J37. More info can be found on the [Voltivo forum](http://voltivo.com/forum/davinci-peersupport/340-new-kind-of-mainboard-no-j1-erase-jumper).
 ***
 
-Here are just a few of the benifits of using this firmware:
+Here are just a few of the benefits of using this firmware:
 
 * It works with host software such as [repetier host](http://repetier.com) and [OctoPrint](http://octoprint.org/) giving you full control of your hardware.
 * It works stand alone if you use a WIFI SD Card. 
@@ -107,7 +106,7 @@ Do not ask help on repetier github they do not support this FW / printer - pleas
 * Several fixes from original FW   
 * Watchdog   
 * Basic Wifi support for module ESP8266 (https://github.com/luc-github/ESP8266/blob/master/README.md#result-of-esp12e-on-davinci) 
-* Customized thermistor tables for bed and extruder(s) as Davinci board do not follow design of others 3D printer boards so standard tables do not work properly [check here](http://voltivo.com/forum/davinci-firmware/438-repetier-91-e3d-v6-extruder#3631)  
+* Customized thermistor tables for bed and extruder(s) as Davinci boards do not follow design of others 3D printer boards so standard tables do not work properly [check here](http://voltivo.com/forum/davinci-firmware/438-repetier-91-e3d-v6-extruder#3631)  
 * Multilanguage at runtime (EN/FR/GE/NL/SW) more to come if get help : check [here](https://github.com/luc-github/Repetier-Firmware-0.92/issues/123)   
 * More to come ....
 
