@@ -49,8 +49,7 @@ NOTE: You do not need to compile arduino from source these files are in the ardu
 If done correctly you will see the arduino sketch compile successfully and output in the log showing the upload status.
 9. Once flash is done : restart printer   
 10. After printer restarted <B>do not forget to send G-Code M502 then M500 </B>from repetier's Print Panel tab <B>or from the printer menu "Settings/Load Fail-Safe"</B> and accept to save the new eeprom settings. 
-11. When update is complete <B>you must calibrate your bed height!</B>  
-You can do so by homeing all axis, turning off the printer and manually adjusting the bed leveling screws until the glass bed is just under the nozzle at each end of the bed.  While the printer is powered off you can move the print head by hand and slide a piece of paper over the glass bed and under the nozzle with a slight pull on the paper from the nozzle.
+11. When update is complete <B>you must calibrate your bed height!</B>Use manual bed leveling in menu
 12. Next you can calibrate your filament as usual, and second extruder offset if you have.
 
 For information on upgrading from or reverting to stock FW and other procedures please check [Da Vinci Voltivo forum](http://voltivo.com/forum/davinci).    
