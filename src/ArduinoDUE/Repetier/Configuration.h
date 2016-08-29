@@ -1952,10 +1952,10 @@ the language can be switched any time. */
 #define LANGUAGE_DE_ACTIVE 1 // German
 #define LANGUAGE_NL_ACTIVE 1 // Dutch
 #define LANGUAGE_PT_ACTIVE 0 // Brazilian portuguese
-#define LANGUAGE_IT_ACTIVE 0 // Italian
+#define LANGUAGE_IT_ACTIVE 1 // Italian
 #define LANGUAGE_ES_ACTIVE 0 // Spanish
 #define LANGUAGE_FI_ACTIVE 0 // Finnish
-#define LANGUAGE_SE_ACTIVE 1 // Swedish
+#define LANGUAGE_SE_ACTIVE 0 // Swedish
 #define LANGUAGE_FR_ACTIVE 1 // French
 #define LANGUAGE_CZ_ACTIVE 0 // Czech
 #define LANGUAGE_PL_ACTIVE 0 // Polish
