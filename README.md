@@ -107,7 +107,7 @@ Do not ask help on repetier github they do not support this FW / printer - pleas
 * Watchdog   
 * Basic Wifi support for module ESP8266 (https://github.com/luc-github/ESP8266/blob/master/README.md#result-of-esp12e-on-davinci) 
 * Customized thermistor tables for bed and extruder(s) as Davinci boards do not follow design of others 3D printer boards so standard tables do not work properly [check here](http://voltivo.com/forum/davinci-firmware/438-repetier-91-e3d-v6-extruder#3631)  
-* Multilanguage at runtime (EN/FR/GE/NL/SW) more to come if get help : check [here](https://github.com/luc-github/Repetier-Firmware-0.92/issues/123)   
+* Multilanguage at runtime (EN/FR/GE/IT/NL/SW) more to come if get help : check [here](https://github.com/luc-github/Repetier-Firmware-0.92/issues/123)   
 * More to come ....
 
 ***
