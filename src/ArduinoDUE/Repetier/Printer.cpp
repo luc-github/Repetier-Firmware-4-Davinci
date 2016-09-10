@@ -310,6 +310,7 @@ void Printer::cleanNozzle(bool restoreposition, int8_t extT)
         }
 #endif
     Commands::waitUntilEndOfAllMoves();
+    updateCurrentPosition(true);
     UI_STATUS_F(Com::translatedF(UI_TEXT_IDLE_ID));
     }
 #endif
