@@ -1389,6 +1389,11 @@ PULLUP(Z2_MINMAX_PIN, HIGH);
 #if USE_ADVANCE
     extruderStepsNeeded = 0;
 #endif
+    //Davinci Specific, need read SD EEPROM first
+    HAL::setupTimer();
+#if SDSUPPORT
+    sd.mount();
+#endif
     EEPROM::initBaudrate();
     HAL::serialSetBaudrate(baudrate);
     Com::printFLN(Com::tStart);
@@ -1396,8 +1401,7 @@ PULLUP(Z2_MINMAX_PIN, HIGH);
     Extruder::initExtruder();
     // sets auto leveling in eeprom init
     EEPROM::init(); // Read settings from eeprom if wanted
-    //Davinci Specific, too early
-    //UI_INITIALIZE;
+    UI_INITIALIZE;
     for(uint8_t i = 0; i < E_AXIS_ARRAY; i++)
     {
         currentPositionSteps[i] = 0;
@@ -1411,12 +1415,6 @@ PULLUP(Z2_MINMAX_PIN, HIGH);
     updateDerivedParameter();
     Commands::checkFreeMemory();
     Commands::writeLowestFreeRAM();
-    HAL::setupTimer();
-#if SDSUPPORT
-    sd.mount();
-#endif
-    //Davinci Specific, need read SD EEPROM first
-    UI_INITIALIZE;
 #if NONLINEAR_SYSTEM
 	transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentNonlinearPositionSteps);
 
