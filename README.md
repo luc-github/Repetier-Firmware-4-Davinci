@@ -1,4 +1,4 @@
-##Da Vinci Firmware based on Repetier (0.92.10) Alpha   
+##Da Vinci Firmware based on Repetier (0.92.10) Beta   
 ============================
 
 [![Join the chat at https://gitter.im/luc-github/Repetier-Firmware-0.92](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/luc-github/Repetier-Firmware-0.92?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)    
@@ -7,7 +7,7 @@ Build Status: [![Build Status](https://travis-ci.org/luc-github/Repetier-Firmwar
     
       
 
-This firmware is based on the popular repetier firmware and modified to work with first generation Da Vinci 1.0, 2.0 single fan, 2.0 dual fans and also AiO (NB:scanner function is not supported so AiO will work like an 1.0A)   
+This firmware is based on the popular repetier firmware Da Vinci 1.0/A, 2.0 single fan, 2.0/A dual fans and also AiO (NB:scanner function is not supported so AiO will work like an 1.0A)   
 If you change the board, currently DUE based are supported with RADDS, as well as Graphical screen and LCD with encoder, there are some sample configuration files provided for RADDS/DUE/GLCD using 1/128 step drivers.
 
 YOU MIGHT DAMAGE YOUR PRINTER OR VOID YOUR WARRANTY, DO IT ON YOUR OWN RISK. When it is possible on 1.0/2.0, currently on 1.0A/2.0A and AiO there is no way to revert to stock fw so be sure of what you are doing.
@@ -32,7 +32,7 @@ The previous version (based on repetier v0.91) can be found [here](https://githu
 
 ***
 ##Current Status
-####Alpha - so far so good
+####Beta - so far so good
 
 ***
 ##Installation
@@ -87,14 +87,14 @@ Do not ask help on repetier github they do not support this FW / printer - pleas
 ##Implemented
 * 0.92.10 [Repetier](https://github.com/repetier/Repetier-Firmware) based   
 * Standard GCODE commands   
-* Single/Dual extruders support (DaVinci 1.0/2.0 all generations but AiO)
+* Single/Dual extruders support DaVinci 1.0/A, 2.0/A all generations, AiO but no scanner support because no application
 * Single Fan / Dual fans support according printer configuration
-* Repurpose of second fan usage to be controlled by M106/M107 commands on Da Vinci 2.0
+* Repurpose of second fan usage to be controlled by M106/M107 commands on Da Vinci 2.0/A, 1.0/A need additional fan
 * Sound and Lights management, including powersaving function (light can be managed remotely by GCODE)
 * Cleaning Nozzle(s) by menu and by GCODE for 1.0, 2.0 and AiO
 * Load / Unload filament by menu
 * Filament Sensor support (auto loading / alert if no filament when printing)
-* Auto Z-probe 
+* Auto Z-probe / average Z position calculation
 * Manual Leveling
 * Dripbox cleaning for 1.0/2.0
 * Customized Menu UI with Advanced/Easy mode (switch in "Settings/Mode" or using Up key/Right key/ Ok key in same time)
