@@ -406,8 +406,10 @@ void TemperatureController::waitForTargetTemperature()
 fast8_t TemperatureController::errorState() {
 	if(isSensorDefect())
 		return 1;
+#if FEATURE_DECOUPLE_TEST
 	if(isSensorDecoupled())
 		return 2;
+#endif
 #if EXTRUDER_JAM_CONTROL
 	if(isFilamentChange())
 		return 6;
