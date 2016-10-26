@@ -40,9 +40,9 @@ The previous version (based on repetier v0.91) can be found [here](https://githu
 2. Turn the machine on and wait a few seconds then turn it off again.  The machine will have been flashed removing the current stock firmware and allowing it to be detected as a normal arduino DUE. NOTE: Windows users may need to install drivers to detect the board.  Consult the Voltivo forums.   
 Note : points 1 and 2 are only needed to wipe the stock fw or a corrupted fw, for update they are not necessary.
 Note 2: remove the jumper before flashing if still there
-3. Use an arduino IDE supporting arduino DUE, [1.6.9](http://arduino.cc/en/Main/OldSoftwareReleases) with Due 1.6.8 module from board manager.
+3. Use an arduino IDE supporting arduino DUE, [1.6.9](http://arduino.cc/en/Main/OldSoftwareReleases) with Due 1.6.8 module from board manager [FAQ#166](https://github.com/luc-github/Repetier-Firmware-0.92/issues/166).
 4. Update variants.cpp arduino file with the one present in src\ArduinoDUE\AdditionalArduinoFile according your IDE version   
-NOTE: You do not need to compile arduino from source these files are in the arduino directory structure (click on preferences.txt in Files/Preferences dialog box).    
+NOTE: You do not need to compile arduino from source these files are in the arduino directory structure [FAQ#114](https://github.com/luc-github/Repetier-Firmware-0.92/issues/114).    
 5. Open the project file named repetier.ino located in src\ArduinoDUE\Repetier directory in the arduino IDE. 
 6. Modify the DAVINCI define in Configuration.h file to match your targeted Da Vinci.  See below.
 7. Under the tools menu select the board type as Arduino DUE (Native USB Port) and the proper port you have connected to the printer.  NOTE: You can usually find this out by looking at the tools -> port menu both before and after plugging in the printer to your computer's USB.
