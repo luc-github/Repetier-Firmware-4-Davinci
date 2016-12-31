@@ -19,9 +19,9 @@ before_script:
   - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16"
   - sleep 3
   - export DISPLAY=:1.0
-  - wget http://downloads.arduino.cc/arduino-1.6.9-linux64.tar.xz
-  - tar xf arduino-1.6.9-linux64.tar.xz
-  - mv arduino-1.6.9 $HOME/arduino_ide
+  - wget http://downloads.arduino.cc/arduino-1.8.0-linux64.tar.xz
+  - tar xf arduino-1.8.0-linux64.tar.xz
+  - mv arduino-1.8.0 $HOME/arduino_ide
   - export PATH="$HOME/arduino_ide:$PATH"
   - arduino --install-boards arduino:sam:1.6.8
   - arduino --board arduino:sam:arduino_due_x --save-prefs
