@@ -67,7 +67,7 @@ for basic installation just change :
 
 Support for 1.0A and 2.0A:  need to change <CODE>#define MODEL 0</CODE>  to  <CODE>#define MODEL 1</CODE>
 
-To repurpose the main Extruder cooling fan to be controlled VIA G-Code instructions M106/M107:   
+To repurpose the main Extruder cooling fan to be controlled VIA G-Code instructions M106/M107 as by default fan is automaticaly controled by temperature and not by commands:   
 Set REPURPOSE_FAN_TO_COOL_EXTRUSIONS to 1, do not forget to add a fan with power source to cool extruder permanently if you use this option.     
 
 Another excellent tutorial for flashing and installation is here from Jake : http://voltivo.com/forum/davinci-peersupport/501-da-vinci-setup-guide-from-installation-to-wireless-printing but Arduino ide version described is not correct for latest firmware version, use the one mentioned above.   
