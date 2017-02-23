@@ -41,6 +41,7 @@ The previous version (based on repetier v0.91) can be found [here](https://githu
 Note : points 1 and 2 are only needed to wipe the stock fw or a corrupted fw, for update they are not necessary.
 Note 2: remove the jumper before flashing if still there
 3. Use an arduino IDE supporting arduino DUE, [1.8.0](https://www.arduino.cc/en/Main/Software) with Due 1.6.8 module from board manager [FAQ#166](https://github.com/luc-github/Repetier-Firmware-0.92/issues/166).
+<H3 style="color:red">Do not use 1.5.8 it is not supported and will give compilation [error: FAQ#201](https://github.com/luc-github/Repetier-Firmware-0.92/issues/201)</H3>
 4. Update variants.cpp arduino file with the one present in src\ArduinoDUE\AdditionalArduinoFile according your IDE version   
 NOTE: You do not need to compile arduino from source these files are in the arduino directory structure [FAQ#114](https://github.com/luc-github/Repetier-Firmware-0.92/issues/114).    
 5. Open the project file named repetier.ino located in src\ArduinoDUE\Repetier directory in the arduino IDE. 
@@ -49,6 +50,7 @@ NOTE: You do not need to compile arduino from source these files are in the ardu
 8. Press the usual arduino compile and upload button.
 If done correctly you will see the arduino sketch compile successfully and output in the log showing the upload status.
 9. Once flash is done : restart printer   
+<H3> If you have black bars and printer is not detected properly, it means you did not do the point 4 properly [check: FAQ#171](https://github.com/luc-github/Repetier-Firmware-0.92/issues/201)</H3> so go back to point 4.
 10. After printer restarted <B>do not forget to send G-Code M502 then M500 </B>from repetier's Print Panel tab <B>or from the printer menu "Settings/Load Fail-Safe"</B> and accept to save the new eeprom settings. 
 11. When update is complete <B>you must calibrate your bed height!</B>Use manual bed leveling in menu
 12. Next you can calibrate your filament as usual, and second extruder offset if you have.
