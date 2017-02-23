@@ -76,6 +76,8 @@ Another excellent tutorial for flashing and installation is here from Jake : htt
 
 Or a great video done by Daniel Gonos: https://www.youtube.com/watch?v=rjuCvlnpB7M but Arduino ide version described is not correct for latest firmware version, use the one mentioned above.   
 
+Any installation issue ? check the <H3>[Frequent Asked Questions](https://github.com/luc-github/Repetier-Firmware-0.92/issues?utf8=%E2%9C%93&q=is%3Aclosed+label%3AFAQ+)</H3> the answer is in there.
+
 ***
 ##TODO or Questions ?
 * [Check issue list](https://github.com/luc-github/Repetier-Firmware-0.92/issues)   
