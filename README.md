@@ -50,7 +50,7 @@ NOTE: You do not need to compile arduino from source these files are in the ardu
 8. Press the usual arduino compile and upload button.
 If done correctly you will see the arduino sketch compile successfully and output in the log showing the upload status.
 9. Once flash is done : restart printer   
-<H3> If you have black bars and printer is not detected properly, it means you did not do the point 4 properly [check: FAQ#171](https://github.com/luc-github/Repetier-Firmware-0.92/issues/201)</H3> so go back to point 4.
+<H3> If you have black bars and printer is not detected properly, it means you did not do the point 4 properly [check: FAQ#172](https://github.com/luc-github/Repetier-Firmware-0.92/issues/172)</H3> so go back to point 4.
 10. After printer restarted <B>do not forget to send G-Code M502 then M500 </B>from repetier's Print Panel tab <B>or from the printer menu "Settings/Load Fail-Safe"</B> and accept to save the new eeprom settings. 
 11. When update is complete <B>you must calibrate your bed height!</B>Use manual bed leveling in menu
 12. Next you can calibrate your filament as usual, and second extruder offset if you have.
