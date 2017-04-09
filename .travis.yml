@@ -35,9 +35,11 @@ script:
 - cd $TRAVIS_BUILD_DIR
 - source command.sh
 - sed -i "s/#define DAVINCI /#define DAVINCI $DAVINCI \n\/\//g" ./src/ArduinoDUE/Repetier/Configuration.h
+- sed '24!d' ./src/ArduinoDUE/Repetier/Configuration.h
 - sed -i "s/#define MODEL /#define MODEL $MODEL\n\/\//g" ./src/ArduinoDUE/Repetier/Configuration.h
+- sed '26!d' ./src/ArduinoDUE/Repetier/Configuration.h
 - build_sketch ./src/ArduinoDUE/Repetier/Repetier.ino $TRAVIS_BUILD_DIR/releases/$DAVINCI/$MODEL
-- cp $TRAVIS_BUILD_DIR/releases/$DAVINCI/$MODEL/Repetier.ino.bin $TRAVIS_BUILD_DIR/releases/Reptier-D$DAVINCI_M$MODEL.bin
+- cp $TRAVIS_BUILD_DIR/releases/$DAVINCI/$MODEL/Repetier.ino.bin $TRAVIS_BUILD_DIR/releases/Repetier-D$DAVINCI-M$MODEL.bin
 after_script:
 - zip -r $TRAVIS_BUILD_DIR/repetier.zip $TRAVIS_BUILD_DIR/releases/*.bin
 - ls -al $TRAVIS_BUILD_DIR/releases/

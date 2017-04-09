@@ -7,6 +7,7 @@ function build_sketch()
      mkdir -p binpath
 	# buld sketch with arudino ide
 	echo -e "\n Build $sketch \n"
+	echo -e "\n in $binpath \n"
 	arduino --verbose --verify --pref build.path=$binpath  $sketch
 
 	# get build result from arduino
