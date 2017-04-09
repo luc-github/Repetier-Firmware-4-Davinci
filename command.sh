@@ -3,10 +3,11 @@
 function build_sketch()
 {
 	local sketch=$1
-
+	local binpath=$2
+     mkdir -p binpath
 	# buld sketch with arudino ide
 	echo -e "\n Build $sketch \n"
-	arduino --verbose --verify $sketch
+	arduino --verbose --verify --pref build.path=$binpath  $sketch
 
 	# get build result from arduino
 	local re=$?
