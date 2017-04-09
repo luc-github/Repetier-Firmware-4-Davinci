@@ -2,15 +2,7 @@ sudo: false
 language: bash
 os:
 - linux
-env:
-  matrix:
-  - DAVINCI=0 MODEL=0
-  - DAVINCI=1 MODEL=0
-  - DAVINCI=2 MODEL=0
-  - DAVINCI=3 MODEL=0
-  - DAVINCI=1 MODEL=1
-  - DAVINCI=2 MODEL=1
-  - DAVINCI=4 MODEL=1
+
 before_script:
 - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile
   --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16"
@@ -34,6 +26,56 @@ before_script:
 script:
 - cd $TRAVIS_BUILD_DIR
 - source command.sh
+- export MODEL=0
+- export DAVINCI=0
+- sed -i "s/#define DAVINCI /#define DAVINCI $DAVINCI \n\/\//g" ./src/ArduinoDUE/Repetier/Configuration.h
+- sed '24!d' ./src/ArduinoDUE/Repetier/Configuration.h
+- sed -i "s/#define MODEL /#define MODEL $MODEL\n\/\//g" ./src/ArduinoDUE/Repetier/Configuration.h
+- sed '26!d' ./src/ArduinoDUE/Repetier/Configuration.h
+- build_sketch ./src/ArduinoDUE/Repetier/Repetier.ino $TRAVIS_BUILD_DIR/releases/$DAVINCI/$MODEL
+- cp $TRAVIS_BUILD_DIR/releases/$DAVINCI/$MODEL/Repetier.ino.bin $TRAVIS_BUILD_DIR/releases/Repetier-D$DAVINCI-M$MODEL.bin
+- export MODEL=0
+- export DAVINCI=1
+- sed -i "s/#define DAVINCI /#define DAVINCI $DAVINCI \n\/\//g" ./src/ArduinoDUE/Repetier/Configuration.h
+- sed '24!d' ./src/ArduinoDUE/Repetier/Configuration.h
+- sed -i "s/#define MODEL /#define MODEL $MODEL\n\/\//g" ./src/ArduinoDUE/Repetier/Configuration.h
+- sed '27!d' ./src/ArduinoDUE/Repetier/Configuration.h
+- build_sketch ./src/ArduinoDUE/Repetier/Repetier.ino $TRAVIS_BUILD_DIR/releases/$DAVINCI/$MODEL
+- cp $TRAVIS_BUILD_DIR/releases/$DAVINCI/$MODEL/Repetier.ino.bin $TRAVIS_BUILD_DIR/releases/Repetier-D$DAVINCI-M$MODEL.bin
+- export MODEL=0
+- export DAVINCI=2
+- sed -i "s/#define DAVINCI /#define DAVINCI $DAVINCI \n\/\//g" ./src/ArduinoDUE/Repetier/Configuration.h
+- sed '24!d' ./src/ArduinoDUE/Repetier/Configuration.h
+- sed -i "s/#define MODEL /#define MODEL $MODEL\n\/\//g" ./src/ArduinoDUE/Repetier/Configuration.h
+- sed '28!d' ./src/ArduinoDUE/Repetier/Configuration.h
+- build_sketch ./src/ArduinoDUE/Repetier/Repetier.ino $TRAVIS_BUILD_DIR/releases/$DAVINCI/$MODEL
+- cp $TRAVIS_BUILD_DIR/releases/$DAVINCI/$MODEL/Repetier.ino.bin $TRAVIS_BUILD_DIR/releases/Repetier-D$DAVINCI-M$MODEL.bin
+- export MODEL=0
+- export DAVINCI=3
+- sed -i "s/#define DAVINCI /#define DAVINCI $DAVINCI \n\/\//g" ./src/ArduinoDUE/Repetier/Configuration.h
+- sed '24!d' ./src/ArduinoDUE/Repetier/Configuration.h
+- sed -i "s/#define MODEL /#define MODEL $MODEL\n\/\//g" ./src/ArduinoDUE/Repetier/Configuration.h
+- sed '29!d' ./src/ArduinoDUE/Repetier/Configuration.h
+- build_sketch ./src/ArduinoDUE/Repetier/Repetier.ino $TRAVIS_BUILD_DIR/releases/$DAVINCI/$MODEL
+- cp $TRAVIS_BUILD_DIR/releases/$DAVINCI/$MODEL/Repetier.ino.bin $TRAVIS_BUILD_DIR/releases/Repetier-D$DAVINCI-M$MODEL.bin
+- export MODEL=1
+- export DAVINCI=0
+- sed -i "s/#define DAVINCI /#define DAVINCI $DAVINCI \n\/\//g" ./src/ArduinoDUE/Repetier/Configuration.h
+- sed '24!d' ./src/ArduinoDUE/Repetier/Configuration.h
+- sed -i "s/#define MODEL /#define MODEL $MODEL\n\/\//g" ./src/ArduinoDUE/Repetier/Configuration.h
+- sed '30!d' ./src/ArduinoDUE/Repetier/Configuration.h
+- build_sketch ./src/ArduinoDUE/Repetier/Repetier.ino $TRAVIS_BUILD_DIR/releases/$DAVINCI/$MODEL
+- cp $TRAVIS_BUILD_DIR/releases/$DAVINCI/$MODEL/Repetier.ino.bin $TRAVIS_BUILD_DIR/releases/Repetier-D$DAVINCI-M$MODEL.bin
+- export MODEL=1
+- export DAVINCI=3
+- sed -i "s/#define DAVINCI /#define DAVINCI $DAVINCI \n\/\//g" ./src/ArduinoDUE/Repetier/Configuration.h
+- sed '24!d' ./src/ArduinoDUE/Repetier/Configuration.h
+- sed -i "s/#define MODEL /#define MODEL $MODEL\n\/\//g" ./src/ArduinoDUE/Repetier/Configuration.h
+- sed '31!d' ./src/ArduinoDUE/Repetier/Configuration.h
+- build_sketch ./src/ArduinoDUE/Repetier/Repetier.ino $TRAVIS_BUILD_DIR/releases/$DAVINCI/$MODEL
+- cp $TRAVIS_BUILD_DIR/releases/$DAVINCI/$MODEL/Repetier.ino.bin $TRAVIS_BUILD_DIR/releases/Repetier-D$DAVINCI-M$MODEL.bin
+- export MODEL=1
+- export DAVINCI=4
 - sed -i "s/#define DAVINCI /#define DAVINCI $DAVINCI \n\/\//g" ./src/ArduinoDUE/Repetier/Configuration.h
 - sed '24!d' ./src/ArduinoDUE/Repetier/Configuration.h
 - sed -i "s/#define MODEL /#define MODEL $MODEL\n\/\//g" ./src/ArduinoDUE/Repetier/Configuration.h
