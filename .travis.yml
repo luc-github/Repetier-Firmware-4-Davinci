@@ -85,6 +85,15 @@ script:
 after_script:
 - zip -r $TRAVIS_BUILD_DIR/repetier.zip $TRAVIS_BUILD_DIR/releases/*.bin
 - ls -al $TRAVIS_BUILD_DIR/releases/
+- cd $TRAVIS_BUILD_DIR/releases
+- rm Repetier-D0-M0.bin
+- mv Repetier-D1-M0.bin Davinci-1.0-$TRAVIS_TAG.bin
+- mv Repetier-D2-M0.bin Davinci-2.0-1F-$TRAVIS_TAG.bin
+- mv Repetier-D3-M0.bin Davinci-2.0-2F-$TRAVIS_TAG.bin
+- mv Repetier-D1-M1.bin Davinci-1.0A-$TRAVIS_TAG.bin
+- mv Repetier-D3-M1.bin Davinci-2.0A-$TRAVIS_TAG.bin
+- mv Repetier-D4-M1.bin Davinci-AiO-$TRAVIS_TAG.bin
+- ls -al $TRAVIS_BUILD_DIR/releases/
 - ls -al $TRAVIS_BUILD_DIR/*.zip
 notifications:
   email:
