@@ -103,7 +103,7 @@ deploy:
   api_key:
     secure: BXxqgVqETLBqEuOT4xb8h7CzY703g+opzXFbI/jekB7Fn0Zgf9T/aiH+N4ijmjmQAvNqcSlS0GzGeuGKDfLoZ61dBVQC6xO1V6MmXFj63wTKsWWQKr8blw2EZ/V6fZ1w1YypX9OoZedI9TWyLKZAarJ6dvvb8Om5dXyJWzmgyqWLd/w5bU0Oxq8CK3a2Axf61wIEukage6OiqyLpvYgcu8O73T6Z+BHScXdWFenmpT1Y6bAIpQkkEgOWR/Vlw2kBwmffwD7CjedsR71MhDpyUNng9Irigek6ywDsU0QIFBQLiUgIF7/otuCep3pili5zpOsQI72zYC1sjauS9EZBCk1fJHOMyODyeAx52uV2TGEGEVHF4a1ppq2NOtEfJofd9fLYzM4LfKOhmz5DdkCfzCMD5/74tpUnfh2BUOzZntQSy3uMNi2sS7uQcN2SKHYtUGa77QDgUoluFhglQVBqiBI5omk+TtqTF35yzigmD18MOWo1Al83sVWYxsXPJ8+G2dxkVSOaUkR1Vej+aBxqefgJkgoyMr7CAVIxyhF82WI88LMvlJ9xukWylh2OJd8ooaUypWEGvRmAcFk4il/ybUNujYupcQvt1ae+b5tXLNwxgJrkBn60fgZd+Pu33LcaSTr8O1x8fhz4VQxIsYRSAz88+mOgd9nLPIHHdCo5HCc=
   skip_cleanup: true
-  file: repetier.zip
+  file: $TRAVIS_BUILD_DIR/Davinci-$TRAVIS_TAG.zip
   on:
     repo: luc-github/Repetier-Firmware-0.92
     tags: true
