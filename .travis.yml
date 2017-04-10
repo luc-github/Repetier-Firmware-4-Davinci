@@ -92,7 +92,7 @@ script:
 - mv Repetier-D3-M1.bin Davinci-2.0A-$TRAVIS_TAG.bin
 - mv Repetier-D4-M1.bin Davinci-AiO-$TRAVIS_TAG.bin
 - ls -al
-- zip -r $TRAVIS_BUILD_DIR/Davinci-$TRAVIS_TAG.zip $TRAVIS_BUILD_DIR/releases/*.bin
+- zip -r $TRAVIS_BUILD_DIR/Davinci-$TRAVIS_TAG.zip *.bin
 - ls -al $TRAVIS_BUILD_DIR/*.zip
 notifications:
   email:
