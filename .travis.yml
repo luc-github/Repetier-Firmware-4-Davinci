@@ -59,7 +59,7 @@ script:
 - build_sketch ./src/ArduinoDUE/Repetier/Repetier.ino $TRAVIS_BUILD_DIR/releases/$DAVINCI/$MODEL
 - cp $TRAVIS_BUILD_DIR/releases/$DAVINCI/$MODEL/Repetier.ino.bin $TRAVIS_BUILD_DIR/releases/Repetier-D$DAVINCI-M$MODEL.bin
 - export MODEL=1
-- export DAVINCI=0
+- export DAVINCI=1
 - sed -i "s/#define DAVINCI /#define DAVINCI $DAVINCI \n\/\//g" ./src/ArduinoDUE/Repetier/Configuration.h
 - sed '24!d' ./src/ArduinoDUE/Repetier/Configuration.h
 - sed -i "s/#define MODEL /#define MODEL $MODEL\n\/\//g" ./src/ArduinoDUE/Repetier/Configuration.h
