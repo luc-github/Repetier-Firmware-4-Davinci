@@ -4852,6 +4852,12 @@ case UI_ACTION_LOAD_FAILSAFE:
         tmpextruderid=Extruder::current->id;
 #endif
         //check if homed and home if not
+        //do not home Z flag in case of people use M84 which reset Z home flag and still have a model on bed
+        //so just move + 10 if necessary
+        if (Printer::currentPosition[Z_AXIS] < (Printer::zMin+10)) {
+            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+10,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+            Commands::waitUntilEndOfAllMoves();
+        }
         if (!Printer::isXHomed())executeAction(UI_ACTION_HOME_X,true);
         if (!Printer::isYHomed())executeAction(UI_ACTION_HOME_Y,true);
         if (action== UI_ACTION_LOAD_EXTRUDER_0)
