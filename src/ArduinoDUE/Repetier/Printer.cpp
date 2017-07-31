@@ -488,41 +488,38 @@ void Printer::toggleNoMoves() {
 void Printer::toggleEndStop() {
   setDebugLevel(debugLevel ^ 64);
 }
-	
-bool Printer::isPositionAllowed(float x,float y,float z)
-{
+
+bool Printer::isPositionAllowed(float x, float y, float z) {
     if(isNoDestinationCheck()) return true;
     bool allowed = true;
 #if DRIVE_SYSTEM == DELTA
-	if(!isHoming()) {
-	    allowed = allowed && (z >= 0) && (z <= zLength + 0.05 + ENDSTOP_Z_BACK_ON_HOME);
-		allowed = allowed && (x * x + y * y <= deltaMaxRadiusSquared);
-	}
-#else	// DRIVE_SYSTEM
-	if(!isHoming()) {
-		allowed = allowed && x >= xMin;
-		allowed = allowed && x <= xMin + xLength;
-		allowed = allowed && y >= yMin;
-		allowed = allowed && y <= yMin + yLength;
-		allowed = allowed && z >= zMin;
-		allowed = allowed && z <= zMin + zLength + ENDSTOP_Z_BACK_ON_HOME;	
-	}
-#endif 
-#if DUAL_X_AXIS
-	// Prevent carriage hit by disallowing moves inside other parking direction.
-	if(Extruder::current->id == 0) {
-		if(x > xMin + xLength)
-			allowed = false;
-	} else {
-		if(x < xMin)
-			allowed = false;
-	}
+    if(!isHoming()) {
+        allowed = allowed && (z >= 0) && (z <= zLength + 0.05 + ENDSTOP_Z_BACK_ON_HOME);
+        allowed = allowed && (x * x + y * y <= deltaMaxRadiusSquared);
+    }
+#else   // DRIVE_SYSTEM
+    if(!isHoming()) {
+        allowed = allowed && x >= xMin - 0.01;
+        allowed = allowed && x <= xMin + xLength + 0.01;
+        allowed = allowed && y >= yMin - 0.01;
+        allowed = allowed && y <= yMin + yLength + 0.01;
+        allowed = allowed && z >= zMin - 0.01;
+        allowed = allowed && z <= zMin + zLength + ENDSTOP_Z_BACK_ON_HOME + 0.01;
+    }
 #endif
-    if(!allowed)
-    {
-	Com::printFLN(PSTR("x3"));
+    /*#if DUAL_X_AXIS
+        // Prevent carriage hit by disallowing moves inside other parking direction.
+        if(Extruder::current->id == 0) {
+            if(x > xMin + xLength + 0.01)
+                allowed = false;
+        } else {
+            if(x < xMin - 0.01)
+                allowed = false;
+        }
+    #endif*/
+    if(!allowed) {
         Printer::updateCurrentPosition(true);
-        Commands::printCurrentPosition(PSTR("isPositionAllowed "));
+        Commands::printCurrentPosition();
     }
     return allowed;
 }
@@ -1407,7 +1404,7 @@ PULLUP(Z2_MINMAX_PIN, HIGH);
         currentPositionSteps[i] = 0;
     }
     currentPosition[X_AXIS] = currentPosition[Y_AXIS]= currentPosition[Z_AXIS] =  0.0;
-    //Commands::printCurrentPosition(PSTR("Printer::setup 0 "));
+    //Commands::printCurrentPosition();
 #if DISTORTION_CORRECTION
     distortion.init();
 #endif // DISTORTION_CORRECTION
@@ -1422,7 +1419,7 @@ PULLUP(Z2_MINMAX_PIN, HIGH);
 	homeAxis(true,true,true);
 #endif
 	setAutoretract(EEPROM_BYTE(AUTORETRACT_ENABLED));
-	Commands::printCurrentPosition(PSTR("Printer::setup "));
+	Commands::printCurrentPosition();
 #endif // DRIVE_SYSTEM
 	Extruder::selectExtruderById(0);
 
@@ -1655,7 +1652,7 @@ LaserDriver::laserOn = false;
     updateCurrentPosition(true);
 	updateHomedAll();
     UI_CLEAR_STATUS
-    Commands::printCurrentPosition(PSTR("homeAxis "));
+    Commands::printCurrentPosition();
     setAutolevelActive(autoLevel);
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
 	LaserDriver::laserOn = oldLaser;
@@ -2089,7 +2086,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
 	updateHomedAll();
 	//Davinci Specific
     //UI_CLEAR_STATUS
-    Commands::printCurrentPosition(PSTR("homeAxis "));
+    Commands::printCurrentPosition();
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
 	LaserDriver::laserOn = oldLaser;
 #endif
