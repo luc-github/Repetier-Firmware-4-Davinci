@@ -2064,6 +2064,19 @@ void Commands::processMCode(GCode *com) {
                 beep(com->S, com->P); // Beep test
             break;
 #endif
+ //Davinci specific   
+        case 121: //M121
+            Com::printF(PSTR("Sensors: "));
+            Com::printF(PSTR("Door  "));
+            Com::printF(READ(TOP_SENSOR_PIN) ? Com::tHSpace : Com::tLSpace);
+            Com::printF(PSTR(" E0  "));
+            Com::printF(READ(FIL_SENSOR1_PIN) ? Com::tHSpace : Com::tLSpace);
+            #if NUM_EXTRUDER == 2
+            Com::printF(PSTR(" E1  "));
+            Com::printF(READ(FIL_SENSOR2_PIN) ? Com::tHSpace : Com::tLSpace);
+            #endif
+            Com::println();
+            break;
 #if MIXING_EXTRUDER > 0
         case 163: // M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive
             if(com->hasS() && com->hasP() && com->S < NUM_EXTRUDER && com->S >= 0)
