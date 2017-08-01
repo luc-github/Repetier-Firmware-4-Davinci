@@ -62,6 +62,8 @@ static TemperatureController *currHeaterForSetup;    // pointer to extruder or h
 millis_t ui_autoreturn_time = 0;
 //Davinci Specific, to block auto return when in sub menu
 bool benable_autoreturn=true;
+#else
+bool benable_autoreturn=false;
 #endif
 #if FEATURE_BABYSTEPPING
 int zBabySteps = 0;
@@ -1943,6 +1945,16 @@ void UIDisplay::parse(const char *txt,bool ram)
         Endstops::update();
         Endstops::update(); // double test to get right signal. Needed for crosstalk protection.
             //Davinci Specific, sound and sensor
+        if(c2=='1') {
+            #if defined(FIL_SENSOR1_PIN)
+            addStringP(READ(FIL_SENSOR1_PIN)?"\004":"\003");
+            #endif
+        }
+        if(c2=='2') {
+            #if defined(FIL_SENSOR2_PIN)
+            addStringP(READ(FIL_SENSOR2_PIN)?"\004":"\003");
+            #endif
+        }
         #if FEATURE_BEEPER
             if(c2=='o')addStringOnOff(HAL::enablesound);        // sound on/off
             #endif

@@ -1341,7 +1341,7 @@ UI_MENU_ACTION4_T(ui_no_filament_box,UI_ACTION_DUMMY,UI_TEXT_ALERT_NO_FILAMENTA_
         UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_unload1,UI_TEXT_UNLOAD_RIGHT_FILAMENT_ID,UI_ACTION_UNLOAD_EXTRUDER_1, ALL_MODE)
         #define LOADCNT 4
         #define UIMENULOAD &ui_menu_ext_load0,&ui_menu_ext_unload0,&ui_menu_ext_load1,&ui_menu_ext_unload1,
-        #define UI_PAGE_HEATEXTRUDER "Left \005:%e0/%E0\002","Right \005:%e1/%E1\002","","%os"
+        #define UI_PAGE_HEATEXTRUDER "Left \005%s1:%e0/%E0\002","Right\005%s2:%e1/%E1\002","","%os"
 #endif
 
 UI_MENU_ACTION4C(ui_menu_heatextruder_page,UI_ACTION_DUMMY,UI_PAGE_HEATEXTRUDER, ALL_MODE)
