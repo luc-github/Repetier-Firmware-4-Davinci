@@ -133,12 +133,12 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
                   #if HAVE_HEATED_BED==true
                         if(heatedBedController.targetTemperatureC!=0)bheating=true;
                    #endif
-                   #if NUM_EXTRUDER>1
+                   #if NUM_EXTRUDER > 0
+                        if(extruder[0].tempControl.targetTemperatureC!=0)bheating=true;
+                       #if NUM_EXTRUDER == 2
                         if(extruder[1].tempControl.targetTemperatureC!=0)bheating=true;
-                        #endif
-                       #if NUM_EXTRUDER>2
-                        if(extruder[2].tempControl.targetTemperatureC!=0)bheating=true;
-                        #endif
+                        #endif 
+                  #endif
                 if (bheating)
                     {
                     countersensor++;
