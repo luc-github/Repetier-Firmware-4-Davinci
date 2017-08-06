@@ -383,7 +383,7 @@ bool runBedLeveling(GCode *com) {
         EEPROM::storeDataIntoEEPROM();
     }
     Printer::updateCurrentPosition(true);
-    Commands::printCurrentPosition(PSTR("G32 "));
+    Commands::printCurrentPosition();
 #if DISTORTION_CORRECTION
     if(distEnabled)
         Printer::distortion.enable(false); // if level has changed, distortion is also invalid

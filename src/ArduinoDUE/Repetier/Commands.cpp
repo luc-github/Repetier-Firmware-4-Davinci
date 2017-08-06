@@ -133,12 +133,12 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
                   #if HAVE_HEATED_BED==true
                         if(heatedBedController.targetTemperatureC!=0)bheating=true;
                    #endif
-                   #if NUM_EXTRUDER>1
+                   #if NUM_EXTRUDER > 0
+                        if(extruder[0].tempControl.targetTemperatureC!=0)bheating=true;
+                       #if NUM_EXTRUDER == 2
                         if(extruder[1].tempControl.targetTemperatureC!=0)bheating=true;
-                        #endif
-                       #if NUM_EXTRUDER>2
-                        if(extruder[2].tempControl.targetTemperatureC!=0)bheating=true;
-                        #endif
+                        #endif 
+                  #endif
                 if (bheating)
                     {
                     countersensor++;
@@ -254,12 +254,9 @@ void Commands::waitUntilEndOfAllBuffers() {
     }
 }
 
-void Commands::printCurrentPosition(FSTRINGPARAM(s)) {
+void Commands::printCurrentPosition() {
     float x, y, z;
     Printer::realPosition(x, y, z);
-    if (isnan(x) || isinf(x) || isnan(y) || isinf(y) || isnan(z) || isinf(z)) {
-        Com::printErrorFLN(s); // flag where the error condition came from
-    }
     x += Printer::coordinateOffset[X_AXIS];
     y += Printer::coordinateOffset[Y_AXIS];
     z += Printer::coordinateOffset[Z_AXIS];
@@ -267,8 +264,16 @@ void Commands::printCurrentPosition(FSTRINGPARAM(s)) {
     Com::printF(Com::tSpaceYColon, y * (Printer::unitIsInches ? 0.03937 : 1), 2);
     Com::printF(Com::tSpaceZColon, z * (Printer::unitIsInches ? 0.03937 : 1), 3);
     Com::printFLN(Com::tSpaceEColon, Printer::currentPositionSteps[E_AXIS] * Printer::invAxisStepsPerMM[E_AXIS] * (Printer::unitIsInches ? 0.03937 : 1), 4);
-    //Com::printF(PSTR("OffX:"),Printer::offsetX); // to debug offset handling
-    //Com::printFLN(PSTR(" OffY:"),Printer::offsetY);
+#ifdef DEBUG_POS
+    Com::printF(PSTR("OffX:"), Printer::offsetX); // to debug offset handling
+    Com::printF(PSTR(" OffY:"), Printer::offsetY);
+    Com::printF(PSTR(" OffZ:"), Printer::offsetZ);
+    Com::printF(PSTR(" OffZ2:"), Printer::offsetZ2);
+    Com::printF(PSTR(" XS:"), Printer::currentPositionSteps[X_AXIS]);
+    Com::printF(PSTR(" YS:"), Printer::currentPositionSteps[Y_AXIS]);
+    Com::printFLN(PSTR(" ZS:"), Printer::currentPositionSteps[Z_AXIS]);
+
+#endif
 }
 
 void Commands::printTemperatures(bool showRaw) {
@@ -1190,7 +1195,7 @@ void Commands::processGCode(GCode *com) {
                         EEPROM::storeDataIntoEEPROM();
                 }
                 Printer::updateCurrentPosition(true);
-                printCurrentPosition(PSTR("G29 "));
+                printCurrentPosition();
                 Printer::finishProbing();
                 Printer::feedrate = oldFeedrate;
 				if(!ok) {
@@ -1532,7 +1537,7 @@ void Commands::processGCode(GCode *com) {
 #endif
             Printer::updateCurrentPosition();
             Com::printF(PSTR("PosFromSteps:"));
-            printCurrentPosition(PSTR("G134 "));
+            printCurrentPosition();
             break;
 
 #endif // DRIVE_SYSTEM
@@ -2035,7 +2040,7 @@ void Commands::processMCode(GCode *com) {
             Printer::reportPrinterMode();
             break;
         case 114: // M114
-            printCurrentPosition(PSTR("M114 "));
+            printCurrentPosition();
 			if(com->hasS() && com->S) {
 				Com::printF(PSTR("XS:"),Printer::currentPositionSteps[X_AXIS]);
 				Com::printF(PSTR(" YS:"),Printer::currentPositionSteps[Y_AXIS]);
@@ -2059,6 +2064,25 @@ void Commands::processMCode(GCode *com) {
                 beep(com->S, com->P); // Beep test
             break;
 #endif
+ //Davinci specific   
+        case 121: //M121
+            Com::printF(PSTR("Sensors: "));
+#if defined(TOP_SENSOR_PIN)
+            Com::printF(PSTR("Door  "));
+            Com::printF(READ(TOP_SENSOR_PIN) ? Com::tHSpace : Com::tLSpace);
+#endif
+#if defined(FIL_SENSOR1_PIN)
+            Com::printF(PSTR(" E0  "));
+            Com::printF(READ(FIL_SENSOR1_PIN) ? Com::tHSpace : Com::tLSpace);
+#endif
+            #if NUM_EXTRUDER == 2
+#if defined(FIL_SENSOR1_PIN)
+            Com::printF(PSTR(" E1  "));
+            Com::printF(READ(FIL_SENSOR2_PIN) ? Com::tHSpace : Com::tLSpace);
+#endif
+            #endif
+            Com::println();
+            break;
 #if MIXING_EXTRUDER > 0
         case 163: // M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive
             if(com->hasS() && com->hasP() && com->S < NUM_EXTRUDER && com->S >= 0)
@@ -2232,7 +2256,7 @@ void Commands::processMCode(GCode *com) {
             EEPROM::storeDataIntoEEPROM(false);
             Com::printFLN(Com::tEEPROMUpdated);
 #endif
-            Commands::printCurrentPosition(PSTR("M251 "));
+            Commands::printCurrentPosition();
             break;
 #endif
 #if FEATURE_DITTO_PRINTING

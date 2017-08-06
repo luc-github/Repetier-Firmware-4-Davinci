@@ -62,6 +62,8 @@ static TemperatureController *currHeaterForSetup;    // pointer to extruder or h
 millis_t ui_autoreturn_time = 0;
 //Davinci Specific, to block auto return when in sub menu
 bool benable_autoreturn=true;
+#else
+bool benable_autoreturn=false;
 #endif
 #if FEATURE_BABYSTEPPING
 int zBabySteps = 0;
@@ -1943,6 +1945,16 @@ void UIDisplay::parse(const char *txt,bool ram)
         Endstops::update();
         Endstops::update(); // double test to get right signal. Needed for crosstalk protection.
             //Davinci Specific, sound and sensor
+        if(c2=='1') {
+            #if defined(FIL_SENSOR1_PIN)
+            addStringP(READ(FIL_SENSOR1_PIN)?"\004":"\003");
+            #endif
+        }
+        if(c2=='2') {
+            #if defined(FIL_SENSOR2_PIN)
+            addStringP(READ(FIL_SENSOR2_PIN)?"\004":"\003");
+            #endif
+        }
         #if FEATURE_BEEPER
             if(c2=='o')addStringOnOff(HAL::enablesound);        // sound on/off
             #endif
@@ -3281,7 +3293,7 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
 #else
         PrintLine::moveRelativeDistanceInStepsReal(increment,0,0,0,Printer::homingFeedrate[X_AXIS],false,false);
 #endif
-        Commands::printCurrentPosition(PSTR("UI_ACTION_XPOSITION "));
+        Commands::printCurrentPosition();
         break;
     case UI_ACTION_YPOSITION:
         if(!allowMoves) return false;
@@ -3297,7 +3309,7 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
 #else
         PrintLine::moveRelativeDistanceInStepsReal(0,increment,0,0,Printer::homingFeedrate[Y_AXIS],false,false);
 #endif
-        Commands::printCurrentPosition(PSTR("UI_ACTION_YPOSITION "));
+        Commands::printCurrentPosition();
         break;
     case UI_ACTION_ZPOSITION_NOTEST:
         if(!allowMoves) return false;
@@ -3319,17 +3331,17 @@ ZPOS1:
         PrintLine::moveRelativeDistanceInStepsReal(0, 0, ((long)increment * Printer::axisStepsPerMM[Z_AXIS]) / 100, 0, Printer::homingFeedrate[Z_AXIS],false,false);
 #endif
         Printer::setNoDestinationCheck(false);
-        Commands::printCurrentPosition(PSTR("UI_ACTION_ZPOSITION "));
+        Commands::printCurrentPosition();
         break;
     case UI_ACTION_XPOSITION_FAST:
         if(!allowMoves) return false;
         PrintLine::moveRelativeDistanceInStepsReal(Printer::axisStepsPerMM[X_AXIS] * increment,0,0,0,Printer::homingFeedrate[X_AXIS],true,false);
-        Commands::printCurrentPosition(PSTR("UI_ACTION_XPOSITION_FAST "));
+        Commands::printCurrentPosition();
         break;
     case UI_ACTION_YPOSITION_FAST:
         if(!allowMoves) return false;
         PrintLine::moveRelativeDistanceInStepsReal(0,Printer::axisStepsPerMM[Y_AXIS] * increment,0,0,Printer::homingFeedrate[Y_AXIS],true,false);
-        Commands::printCurrentPosition(PSTR("UI_ACTION_YPOSITION_FAST "));
+        Commands::printCurrentPosition();
         break;
     case UI_ACTION_ZPOSITION_FAST_NOTEST:
         if(!allowMoves) return false;
@@ -3340,12 +3352,12 @@ ZPOS1:
 ZPOS2:
         PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS] * increment,0,Printer::homingFeedrate[Z_AXIS],true,false);
         Printer::setNoDestinationCheck(false);
-        Commands::printCurrentPosition(PSTR("UI_ACTION_ZPOSITION_FAST "));
+        Commands::printCurrentPosition();
         break;
     case UI_ACTION_EPOSITION:
         if(!allowMoves) return false;
         PrintLine::moveRelativeDistanceInSteps(0,0,0,Printer::axisStepsPerMM[E_AXIS]*increment / Printer::extrusionFactor,UI_SET_EXTRUDER_FEEDRATE,true,false,false);
-        Commands::printCurrentPosition(PSTR("UI_ACTION_EPOSITION "));
+        Commands::printCurrentPosition();
         break;
 #if FEATURE_RETRACTION
     case UI_ACTION_WIZARD_FILAMENTCHANGE: // filament change is finished
@@ -3463,7 +3475,7 @@ ZPOS2:
         }
         //we move under control range or not homed
         PrintLine::moveRelativeDistanceInStepsReal(Printer::axisStepsPerMM[X_AXIS]*increment*istep,0,0,0,Printer::homingFeedrate[X_AXIS],true);
-        Commands::printCurrentPosition(PSTR("UI_ACTION_XPOSITION "));
+        Commands::printCurrentPosition();
     break;
     }
 
@@ -3496,7 +3508,7 @@ ZPOS2:
         }
         //we move under control range or not homed
         PrintLine::moveRelativeDistanceInStepsReal(0,Printer::axisStepsPerMM[Y_AXIS]*increment*istep,0,0,Printer::homingFeedrate[Y_AXIS],true);
-        Commands::printCurrentPosition(PSTR("UI_ACTION_YPOSITION "));
+        Commands::printCurrentPosition();
     break;
     }
 
@@ -3528,7 +3540,7 @@ ZPOS2:
         }
         //we move under control range or not homed
         PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS]*increment*istep,0,Printer::homingFeedrate[Z_AXIS],true);
-        Commands::printCurrentPosition(PSTR("UI_ACTION_ZPOSITION "));
+        Commands::printCurrentPosition();
     break;
     }
     case UI_ACTION_E_1:
@@ -3564,7 +3576,7 @@ ZPOS2:
 #endif
         //we move
         PrintLine::moveRelativeDistanceInSteps(0,0,0,Printer::axisStepsPerMM[E_AXIS]*increment*istep,UI_SET_EXTRUDER_FEEDRATE,true,false);
-        Commands::printCurrentPosition(PSTR("UI_ACTION_EPOSITION "));
+        Commands::printCurrentPosition();
 //restore autoreturn function
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
             if (btmp_autoreturn)//if was activated restore it - if not do nothing - stay desactivate
@@ -3894,7 +3906,7 @@ void UIDisplay::menuAdjustHeight(const UIMenu *men,float offset)
     pushMenu(men, false);
     BEEP_SHORT;
     Printer::homeAxis(true, true, true);
-    Commands::printCurrentPosition(PSTR("UI_ACTION_HOMEALL "));
+    Commands::printCurrentPosition();
     menuLevel = 0;
     activeAction = 0;
     UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_PRINTER_READY_ID));
@@ -4153,7 +4165,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             menuPos[0] = 0;
             refreshPage();
             Printer::homeAxis(true, true, true);
-            Commands::printCurrentPosition(PSTR("UI_ACTION_HOMEALL "));
+            Commands::printCurrentPosition();
             menuLevel=tmpmenu;
             menuPos[menuLevel]=tmpmenupos;
             menu[menuLevel]=tmpmen;
@@ -4171,7 +4183,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             menuPos[0] = 0;
             refreshPage();
             Printer::homeAxis(true, false, false);
-            Commands::printCurrentPosition(PSTR("UI_ACTION_HOME_X "));
+            Commands::printCurrentPosition();
             menuLevel=tmpmenu;
             menuPos[menuLevel]=tmpmenupos;
             menu[menuLevel]=tmpmen;
@@ -4189,7 +4201,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             menuPos[0] = 0;
             refreshPage();
             Printer::homeAxis(false, true, false);
-            Commands::printCurrentPosition(PSTR("UI_ACTION_HOME_Y "));
+            Commands::printCurrentPosition();
             menuLevel=tmpmenu;
             menuPos[menuLevel]=tmpmenupos;
             menu[menuLevel]=tmpmen;
@@ -4207,7 +4219,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             menuPos[0] = 0;
             refreshPage();
             Printer::homeAxis(false, false, true);
-            Commands::printCurrentPosition(PSTR("UI_ACTION_HOME_Z "));
+            Commands::printCurrentPosition();
             menuLevel=tmpmenu;
             menuPos[menuLevel]=tmpmenupos;
             menu[menuLevel]=tmpmen;
@@ -4381,7 +4393,7 @@ case UI_ACTION_LOAD_FAILSAFE:
             Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+Printer::zMin+Printer::zLength,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
             Printer::updateCurrentPosition();
             Commands::waitUntilEndOfAllMoves();
-            Commands::printCurrentPosition(PSTR("UI_ACTION_ZPOSITION "));
+            Commands::printCurrentPosition();
             UI_STATUS_F(Com::translatedF(UI_TEXT_BED_DOWN_ID));
             }
         Printer::setMenuMode(MENU_MODE_PRINTING,false);
@@ -4852,6 +4864,12 @@ case UI_ACTION_LOAD_FAILSAFE:
         tmpextruderid=Extruder::current->id;
 #endif
         //check if homed and home if not
+        //do not home Z flag in case of people use M84 which reset Z home flag and still have a model on bed
+        //so just move + 10 if necessary
+        if (Printer::currentPosition[Z_AXIS] < (Printer::zMin+10)) {
+            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::zMin+10,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+            Commands::waitUntilEndOfAllMoves();
+        }
         if (!Printer::isXHomed())executeAction(UI_ACTION_HOME_X,true);
         if (!Printer::isYHomed())executeAction(UI_ACTION_HOME_Y,true);
         if (action== UI_ACTION_LOAD_EXTRUDER_0)
@@ -6542,7 +6560,7 @@ case UI_ACTION_LOAD_FAILSAFE:
             EEPROM::storeDataIntoEEPROM(false);
             Com::printFLN(Com::tEEPROMUpdated);
 #endif
-            Commands::printCurrentPosition(PSTR("UI_ACTION_SET_MEASURED_ORIGIN "));
+            Commands::printCurrentPosition();
         }
         break;
 #endif

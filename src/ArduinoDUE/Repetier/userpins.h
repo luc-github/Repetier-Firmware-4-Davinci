@@ -18,7 +18,7 @@
 #if MODEL==0
 #define ORIG_Z_MIN_PIN      124
 #else
-#define ORIG_Z_MIN_PIN      128
+#define ORIG_Z_MIN_PIN      92
 #endif
 #define ORIG_Z_MAX_PIN      -1
 #define ORIG_Z_ENABLE_PIN   120
@@ -45,7 +45,7 @@
 #define TEMP_2_PIN      13//    TEMP_0_PIN  //switch pin value
 #define HEATER_0_PIN            20
 #define TEMP_0_PIN               9 // ADC channel #, not a PIN #
-#define FIL_SENSOR1_PIN          129
+#define FIL_SENSOR1_PIN          93
 #define FIL_SENSOR2_PIN          24
 #define ORIG_E1_ENABLE_PIN  123//ORIG_E0_ENABLE_PIN //switch pin value
 #define ORIG_E1_STEP_PIN    122//ORIG_E0_STEP_PIN   //switch pin value
@@ -53,7 +53,7 @@
 #define ORIG_E0_STEP_PIN        53
 #define ORIG_E0_DIR_PIN          3
 #if MODEL==0
-#define ORIG_E0_ENABLE_PIN     128
+#define ORIG_E0_ENABLE_PIN     92
 #else
 #define ORIG_E0_ENABLE_PIN     124 
 #endif
