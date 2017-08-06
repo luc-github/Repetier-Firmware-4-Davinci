@@ -2067,13 +2067,19 @@ void Commands::processMCode(GCode *com) {
  //Davinci specific   
         case 121: //M121
             Com::printF(PSTR("Sensors: "));
+#if defined(TOP_SENSOR_PIN)
             Com::printF(PSTR("Door  "));
             Com::printF(READ(TOP_SENSOR_PIN) ? Com::tHSpace : Com::tLSpace);
+#endif
+#if defined(FIL_SENSOR1_PIN)
             Com::printF(PSTR(" E0  "));
             Com::printF(READ(FIL_SENSOR1_PIN) ? Com::tHSpace : Com::tLSpace);
+#endif
             #if NUM_EXTRUDER == 2
+#if defined(FIL_SENSOR1_PIN)
             Com::printF(PSTR(" E1  "));
             Com::printF(READ(FIL_SENSOR2_PIN) ? Com::tHSpace : Com::tLSpace);
+#endif
             #endif
             Com::println();
             break;

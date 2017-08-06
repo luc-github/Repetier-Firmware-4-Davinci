@@ -1310,7 +1310,9 @@ STEPPER_CURRENT_CONTROL
 #undef E1_PINS
 #define E1_PINS
 //Davinci Specific, second extruder pins are in sensitive pins
+#undef HEATER_2_PIN
 #define HEATER_2_PIN -1
+#undef TEMP_2_PIN
 #define TEMP_2_PIN -1
 #endif
 
