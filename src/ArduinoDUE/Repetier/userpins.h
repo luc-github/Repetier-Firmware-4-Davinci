@@ -99,6 +99,9 @@
 #define SDCARDDETECTINVERTED    0
 #define DUE_SOFTWARE_SPI
 
+#define SDA_PIN 	-1  // i2c not used
+#define SCL_PIN 	-1  // i2c not used
+
 /*
 // LCD PINS - reported in uiconfig.h line 200
  #define UI_DISPLAY_RS_PIN      8       // PINK.1, 88, D_RS

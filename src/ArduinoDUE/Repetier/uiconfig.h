@@ -62,6 +62,7 @@ Currently supported hardware:
 #define FLAG_BACK				8
 #define FLAG_RIGHT 			16
 #define FLAG_TOPMENU 	32 
+#define UI_ANIMATION false  // Animations are too slow
 
 /** While the ascii chars are all the same, the driver have different charsets
 for special chars used in different countries. The charset allows to fix for
@@ -127,6 +128,7 @@ What display type do you use?
 // SH1106 with software SPI
 // U8GLIB_SH1106_SW_SPI
 // SSD1306 over I2C using hardware I2C pins
+// #define U8GLIB_MINI12864_2X_SW_SPI
 //#define U8GLIB_SSD1306_I2C
 // For the 8 bit ks0108 display you need to set these pins
 // UI_DISPLAY_D0_PIN,UI_DISPLAY_D1_PIN,UI_DISPLAY_D2_PIN,UI_DISPLAY_D3_PIN,UI_DISPLAY_D4_PIN,UI_DISPLAY_D5_PIN,UI_DISPLAY_D6_PIN,UI_DISPLAY_D7_PIN
@@ -150,12 +152,12 @@ What display type do you use?
 #define UI_FONT_DEFAULT repetier_6x10
 #define UI_FONT_SMALL repetier_5x7
 #define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
-#define UI_ANIMATION false  // Animations are too slow
 #endif
 
 //calculate rows and cols available with current font
 #define UI_COLS (UI_LCD_WIDTH/UI_FONT_WIDTH)
 #define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)
+#undef UI_DISPLAY_CHARSET
 #define UI_DISPLAY_CHARSET 3
 #else
 /** Number of columns per row
@@ -259,6 +261,7 @@ Define the pin
 0 = No keys attached - disables also menu
 1 = Some keys attached
 */
+#undef UI_HAS_KEYS
 //Davinci Specific, there is a key pad (6 keys: left, right,up, down, Ok, Menu)
 #define UI_HAS_KEYS 1
 
@@ -377,7 +380,7 @@ Type 3: Show menu action. These actions have a _MENU_ in their name. If they are
 // Define your matrix actions
 #define UI_MATRIX_ACTIONS {UI_ACTION_HOME_ALL, UI_ACTION_TOP_MENU,       UI_ACTION_SET_ORIGIN,      UI_ACTION_NEXT,\
                            UI_ACTION_HOME_Z,   UI_ACTION_MENU_ZPOS,      UI_ACTION_COOLDOWN,        UI_ACTION_OK,\
-                           UI_ACTION_HOME_Y,   UI_ACTION_MENU_YPOSFAST,  UI_ACTION_PREHEAT_ABS,     UI_ACTION_PREVIOUS,\
+                           UI_ACTION_HOME_Y,   UI_ACTION_MENU_YPOSFAST,  UI_ACTION_PREHEAT_ALL,     UI_ACTION_PREVIOUS,\
                            UI_ACTION_HOME_X,   UI_ACTION_MENU_XPOSFAST,  UI_ACTION_DISABLE_STEPPER, UI_ACTION_BACK}
 #ifdef UI_MATRIX_ACTIONS
 const int matrixActions[] PROGMEM = UI_MATRIX_ACTIONS;

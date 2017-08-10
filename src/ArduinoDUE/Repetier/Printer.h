@@ -98,6 +98,10 @@ union wizardVar
 #define PRINTER_FLAG3_X_HOMED               1
 #define PRINTER_FLAG3_Y_HOMED               2
 #define PRINTER_FLAG3_Z_HOMED               4
+#define PRINTER_FLAG3_PRINTING              8 // set explicitly with M530
+#define PRINTER_FLAG3_AUTOREPORT_TEMP       16
+#define PRINTER_FLAG3_SUPPORTS_STARTSTOP    32
+#define PRINTER_FLAG3_DOOR_OPEN             64
 
 // List of possible interrupt events (1-255 allowed)
 #define PRINTER_INTERRUPT_EVENT_JAM_DETECTED 1
@@ -107,7 +111,7 @@ union wizardVar
 #define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL3 5
 #define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL4 6
 #define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL5 7
-// define an integer number of steps more than large enough to get to endstop from anywhere
+// define an integer number of steps more than large enough to get to end stop from anywhere
 #define HOME_DISTANCE_STEPS (Printer::zMaxSteps-Printer::zMinSteps+1000)
 #define HOME_DISTANCE_MM (HOME_DISTANCE_STEPS * invAxisStepsPerMM[Z_AXIS])
 // Some defines to make clearer reading, as we overload these Cartesian memory locations for delta
@@ -209,6 +213,13 @@ public:
 	    return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Y_MAX_ID|ENDSTOP_Z_MAX_ID|ENDSTOP_X_MIN_ID|ENDSTOP_Y_MIN_ID|ENDSTOP_Z_MIN_ID|ENDSTOP_Z2_MIN_ID)) != 0;
 #endif
     }
+	static INLINE bool anyEndstopHit() {
+#ifdef EXTENDED_ENDSTOPS
+		return lastState != 0 || lastState2 != 0;
+#else
+		return lastState != 0;
+#endif
+	}
     static INLINE void resetAccumulator() {
         accumulator = 0;
 #ifdef EXTENDED_ENDSTOPS
@@ -291,6 +302,8 @@ public:
 #endif
 #endif
 
+extern bool runBedLeveling(int save); // save = S parameter in gcode
+
 class Printer
 {
     static uint8_t debugLevel;
@@ -304,6 +317,11 @@ public:
     static long advanceExecuted;             ///< Executed advance steps
 #endif
 #endif
+    static uint16_t menuMode;
+#if DUAL_X_RESOLUTION
+    static float axisX1StepsPerMM;
+    static float axisX2StepsPerMM;
+#endif    
     //Davinci Specific, sensor for Top Cover       
     static bool btop_Cover_open;
     //Davinci Specific, extra modes
@@ -317,7 +335,6 @@ public:
 	static bool zprobe_ok;
 	static float Z_probe[3];
 #endif
-    static uint8_t menuMode;
     static float axisStepsPerMM[];
     static float invAxisStepsPerMM[];
     static float maxFeedrate[];
@@ -345,6 +362,7 @@ public:
     static float currentPosition[Z_AXIS_ARRAY];
     static float lastCmdPos[Z_AXIS_ARRAY]; ///< Last coordinates send by gcodes
     static int32_t destinationSteps[E_AXIS_ARRAY];         ///< Target position in steps.
+    static millis_t lastTempReport;
     static float extrudeMultiplyError; ///< Accumulated error during extrusion
     static float extrusionFactor; ///< Extrusion multiply factor
 #if NONLINEAR_SYSTEM
@@ -365,7 +383,8 @@ public:
     static int16_t travelMovesPerSecond;
     static int16_t printMovesPerSecond;
     static float radius0;
-#else
+#endif
+#if !NONLINEAR_SYSTEM || defined(FAST_COREXYZ)
 	static int32_t xMinStepsAdj,yMinStepsAdj,zMinStepsAdj;	// adjusted to cover extruder/probe offsets
 	static int32_t xMaxStepsAdj,yMaxStepsAdj,zMaxStepsAdj;
 #endif
@@ -379,7 +398,7 @@ public:
     static int32_t stepsRemainingAtXHit;
     static int32_t stepsRemainingAtYHit;
 #endif
-#ifdef SOFTWARE_LEVELING
+#if SOFTWARE_LEVELING
     static int32_t levelingP1[3];
     static int32_t levelingP2[3];
     static int32_t levelingP3[3];
@@ -391,7 +410,13 @@ public:
 	static float thermoMinTemp;
 	static float thermoMaxTemp;
 #endif
+#if LAZY_DUAL_X_AXIS
+    static bool sledParked;
+#endif
+#if FEATURE_BABYSTEPPING
     static int16_t zBabystepsMissing;
+    static int16_t zBabysteps;
+#endif    
     //static float minimumSpeed;               ///< lowest allowed speed to keep integration error small
     //static float minimumZSpeed;              ///< lowest allowed speed to keep integration error small
     static int32_t xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
@@ -416,7 +441,8 @@ public:
 #endif
     static float offsetX;                     ///< X-offset for different extruder positions.
     static float offsetY;                     ///< Y-offset for different extruder positions.
-    static float offsetZ;                     ///< Y-offset for different extruder positions.
+    static float offsetZ;                     ///< Z-offset for different extruder positions.
+    static float offsetZ2;                    ///< Z-offset without rotation correction. Required for z probe corrections
     static speed_t vMaxReached;               ///< Maximum reached speed
     static uint32_t msecondsPrinting;         ///< Milliseconds of printing time (means time with heated extruder)
     static float filamentPrinted;             ///< mm of filament printed since counting started
@@ -444,6 +470,11 @@ public:
 #ifdef DEBUG_REAL_JERK
     static float maxRealJerk;
 #endif
+    // Print status related
+    static int currentLayer;
+    static int maxLayer; // -1 = unknown
+    static char printName[21]; // max. 20 chars + 0
+    static float progress;
     static fast8_t wizardStackPos;
     static wizardVar wizardStack[WIZARD_STACK_SIZE];
 
@@ -455,7 +486,7 @@ public:
             interruptEvent = evt;
     }
     static void reportPrinterMode();
-    static INLINE void setMenuMode(uint8_t mode,bool on)
+    static INLINE void setMenuMode(uint16_t mode,bool on)
     {
         if(on)
             menuMode |= mode;
@@ -573,6 +604,9 @@ public:
 #if FEATURE_THREE_ZSTEPPER && (Z3_ENABLE_PIN > -1)
         WRITE(Z3_ENABLE_PIN, !Z_ENABLE_ON);
 #endif
+#if FEATURE_FOUR_ZSTEPPER && (Z4_ENABLE_PIN > -1)
+	WRITE(Z4_ENABLE_PIN, !Z_ENABLE_ON);
+#endif
     }
 
     /** \brief Enable stepper motor for x direction. */
@@ -607,6 +641,9 @@ public:
 #endif
 #if FEATURE_THREE_ZSTEPPER && (Z3_ENABLE_PIN > -1)
         WRITE(Z3_ENABLE_PIN, Z_ENABLE_ON);
+#endif
+#if FEATURE_FOUR_ZSTEPPER && (Z4_ENABLE_PIN > -1)
+	WRITE(Z4_ENABLE_PIN, Z_ENABLE_ON);
 #endif
     }
 
@@ -656,6 +693,9 @@ public:
 #if FEATURE_THREE_ZSTEPPER
             WRITE(Z3_DIR_PIN, !INVERT_Z_DIR);
 #endif
+#if FEATURE_FOUR_ZSTEPPER
+			WRITE(Z4_DIR_PIN, !INVERT_Z_DIR);
+#endif
         }
         else
         {
@@ -665,6 +705,9 @@ public:
 #endif
 #if FEATURE_THREE_ZSTEPPER
             WRITE(Z3_DIR_PIN, INVERT_Z_DIR);
+#endif
+#if FEATURE_FOUR_ZSTEPPER
+			WRITE(Z4_DIR_PIN, INVERT_Z_DIR);
 #endif
         }
     }
@@ -709,6 +752,11 @@ public:
         return flag1 & PRINTER_FLAG1_HOMED_ALL;
     }
 
+	static INLINE void unsetHomedAll() {
+		flag1 &= ~PRINTER_FLAG1_HOMED_ALL;
+		flag3 &= ~(PRINTER_FLAG3_X_HOMED | PRINTER_FLAG3_Y_HOMED | PRINTER_FLAG3_Z_HOMED);
+	}
+
     static INLINE void updateHomedAll()
     {
 		bool b = isXHomed() && isYHomed() && isZHomed();
@@ -743,6 +791,15 @@ public:
     static INLINE void setZHomed(uint8_t b)
     {
 	    flag3 = (b ? flag3 | PRINTER_FLAG3_Z_HOMED : flag3 & ~PRINTER_FLAG3_Z_HOMED);
+    }
+    static INLINE uint8_t isAutoreportTemp()
+    {
+        return flag3 & PRINTER_FLAG3_AUTOREPORT_TEMP;
+    }
+
+    static INLINE void setAutoreportTemp(uint8_t b)
+    {
+        flag3 = (b ? flag3 | PRINTER_FLAG3_AUTOREPORT_TEMP : flag3 & ~PRINTER_FLAG3_AUTOREPORT_TEMP);
     }
 
     static INLINE uint8_t isAllKilled()
@@ -840,6 +897,35 @@ public:
         flag2 = (b ? flag2 | PRINTER_FLAG2_AUTORETRACT : flag2 & ~PRINTER_FLAG2_AUTORETRACT);
         Com::printFLN(PSTR("Autoretract:"),b);
     }
+
+    static INLINE uint8_t isPrinting()
+    {
+        return flag3 & PRINTER_FLAG3_PRINTING;
+    }
+
+    static INLINE void setPrinting(uint8_t b)
+    {
+        flag3 = (b ? flag3 | PRINTER_FLAG3_PRINTING : flag3 & ~PRINTER_FLAG3_PRINTING);
+        Printer::setMenuMode(MENU_MODE_PRINTING, b);
+    }
+
+    static INLINE uint8_t isStartStopSupported()
+    {
+        return flag3 & PRINTER_FLAG3_SUPPORTS_STARTSTOP;
+    }
+
+    static INLINE void setSupportStartStop(uint8_t b)
+    {
+        flag3 = (b ? flag3 | PRINTER_FLAG3_SUPPORTS_STARTSTOP : flag3 & ~PRINTER_FLAG3_SUPPORTS_STARTSTOP);
+    }
+
+    static INLINE uint8_t isDoorOpen()
+    {
+        return (flag3 & PRINTER_FLAG3_DOOR_OPEN) != 0;
+    }
+
+    static bool updateDoorOpen();
+    
     static INLINE uint8_t isHoming()
     {
         return flag2 & PRINTER_FLAG2_HOMING;
@@ -882,6 +968,10 @@ public:
 
     static INLINE void setJamcontrolDisabled(uint8_t b)
     {
+	#if EXTRUDER_JAM_CONTROL
+		if(b)
+			Extruder::markAllUnjammed();
+	#endif
         flag2 = (b ? flag2 | PRINTER_FLAG2_JAMCONTROL_DISABLED : flag2 & ~PRINTER_FLAG2_JAMCONTROL_DISABLED);
         Com::printFLN(PSTR("Jam control disabled:"),b);
     }
@@ -1008,6 +1098,9 @@ public:
 #if FEATURE_THREE_ZSTEPPER
             WRITE(Z3_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
+#if FEATURE_FOUR_ZSTEPPER
+			WRITE(Z4_STEP_PIN,START_STEP_WITH_HIGH);
+#endif
             motorYorZ += 2;
         }
         else if(motorYorZ >= 2)
@@ -1018,6 +1111,9 @@ public:
 #endif
 #if FEATURE_THREE_ZSTEPPER
             WRITE(Z3_STEP_PIN,START_STEP_WITH_HIGH);
+#endif
+#if FEATURE_FOUR_ZSTEPPER
+			WRITE(Z4_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
             motorYorZ -= 2;
         }
@@ -1068,6 +1164,11 @@ public:
         WRITE(Z3_STEP_PIN,START_STEP_WITH_HIGH);
 	}
 #endif
+#if FEATURE_FOUR_ZSTEPPER
+	if(Printer::multiZHomeFlags & 8) {
+		WRITE(Z4_STEP_PIN,START_STEP_WITH_HIGH);
+	}
+#endif
 #else		
         WRITE(Z_STEP_PIN,START_STEP_WITH_HIGH);
 #if FEATURE_TWO_ZSTEPPER
@@ -1075,6 +1176,9 @@ public:
 #endif
 #if FEATURE_THREE_ZSTEPPER
         WRITE(Z3_STEP_PIN,START_STEP_WITH_HIGH);
+#endif
+#if FEATURE_FOUR_ZSTEPPER
+		WRITE(Z4_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
 #endif
     }
@@ -1094,6 +1198,9 @@ public:
 #endif
 #if FEATURE_THREE_ZSTEPPER
         WRITE(Z3_STEP_PIN,!START_STEP_WITH_HIGH);
+#endif
+#if FEATURE_FOUR_ZSTEPPER
+		WRITE(Z4_STEP_PIN,!START_STEP_WITH_HIGH);
 #endif
     }
     static INLINE speed_t updateStepsPerTimerCall(speed_t vbase)
@@ -1209,9 +1316,10 @@ public:
     static float runZMaxProbe();
 #endif
 #if FEATURE_Z_PROBE
-	static void startProbing(bool runScript);
+	static bool startProbing(bool runScript);
 	static void finishProbing();
     static float runZProbe(bool first,bool last,uint8_t repeat = Z_PROBE_REPETITIONS,bool runStartScript = true);
+    static void measureZProbeHeight(float curHeight);
     static void waitForZProbeStart();
     static float bendingCorrectionAt(float x,float y);
 #endif
@@ -1225,7 +1333,7 @@ public:
     static void buildTransformationMatrix(Plane &plane);
 #endif
 #if DISTORTION_CORRECTION
-    static bool measureDistortion(void);
+    static void measureDistortion(void);
     static Distortion distortion;
 #endif
     static void MemoryPosition();
@@ -1253,6 +1361,12 @@ public:
     static void homeXAxis();
     static void homeYAxis();
     static void homeZAxis();
+    static void pausePrint();
+    static void continuePrint();
+    static void stopPrint();
+#if FEATURE_Z_PROBE
+	static void prepareForProbing();
+#endif
 };
 
 #endif // PRINTER_H_INCLUDED

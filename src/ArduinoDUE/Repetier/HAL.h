@@ -56,7 +56,9 @@
 #define SPR1    1
 
 // force SdFat to use HAL (whether or not using SW spi)
+#if MOTHERBOARD != 409 // special case ultratronics
 #undef  SOFTWARE_SPI
+#endif
 #define TIMER0_PRESCALE 128
 
 // Some structures assume no padding, need to add this attribute on ARM
@@ -147,7 +149,7 @@ typedef char prog_char;
 #define ADC_ISR_EOC(channel)    (0x1u << channel)
 #define ENABLED_ADC_CHANNELS    {TEMP_0_PIN, TEMP_1_PIN, TEMP_2_PIN}
 
-#define PULLUP(IO,v)            {pinMode(IO, (v!=LOW ? INPUT_PULLUP : INPUT)); }
+#define PULLUP(IO,v)            {::pinMode(IO, (v!=LOW ? INPUT_PULLUP : INPUT)); }
 
 // INTERVAL / (32Khz/128)  = seconds
 #define WATCHDOG_INTERVAL       1024u  // 8sec  (~16 seconds max)
@@ -170,10 +172,12 @@ typedef char prog_char;
 #define		_WRITE(port, v)			do { if (v) {DIO ##  port ## _PORT -> PIO_SODR = DIO ## port ## _PIN; } else {DIO ##  port ## _PORT->PIO_CODR = DIO ## port ## _PIN; }; } while (0)
 #define WRITE(pin,v) _WRITE(pin,v)
 
-#define	SET_INPUT(pin) pmc_enable_periph_clk(g_APinDescription[pin].ulPeripheralId); \
-  PIO_Configure(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin, 0)
-#define	SET_OUTPUT(pin) PIO_Configure(g_APinDescription[pin].pPort, PIO_OUTPUT_1, \
-                                      g_APinDescription[pin].ulPin, g_APinDescription[pin].ulPinConfiguration)
+#define	SET_INPUT(pin) ::pinMode(pin,INPUT); 
+// pmc_enable_periph_clk(g_APinDescription[pin].ulPeripheralId); 
+//  PIO_Configure(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin, 0)
+#define	SET_OUTPUT(pin) ::pinMode(pin,OUTPUT);
+//PIO_Configure(g_APinDescription[pin].pPort, PIO_OUTPUT_1, 
+//                                      g_APinDescription[pin].ulPin, g_APinDescription[pin].ulPinConfiguration)
 #define TOGGLE(pin) WRITE(pin,!READ(pin))
 #define TOGGLE_VAR(pin) HAL::digitalWrite(pin,!HAL::digitalRead(pin))
 #undef LOW
@@ -284,6 +288,7 @@ typedef unsigned int ufast8_t;
 #elif BLUETOOTH_SERIAL == 101
 #define BT_SERIAL SerialUSB
 #endif
+#define RFSERIAL2 BT_SERIAL
 
 class RFDoubleSerial : public Print
 {
@@ -301,22 +306,6 @@ class RFDoubleSerial : public Print
 extern RFDoubleSerial BTAdapter;
 
 #endif
-
-
-#define OUT_P_I(p,i) //Com::printF(PSTR(p),(int)(i))
-#define OUT_P_I_LN(p,i) //Com::printFLN(PSTR(p),(int)(i))
-#define OUT_P_L(p,i) //Com::printF(PSTR(p),(long)(i))
-#define OUT_P_L_LN(p,i) //Com::printFLN(PSTR(p),(long)(i))
-#define OUT_P_F(p,i) //Com::printF(PSTR(p),(float)(i))
-#define OUT_P_F_LN(p,i) //Com::printFLN(PSTR(p),(float)(i))
-#define OUT_P_FX(p,i,x) //Com::printF(PSTR(p),(float)(i),x)
-#define OUT_P_FX_LN(p,i,x) //Com::printFLN(PSTR(p),(float)(i),x)
-#define OUT_P(p) //Com::printF(PSTR(p))
-#define OUT_P_LN(p) //Com::printFLN(PSTR(p))
-#define OUT_ERROR_P(p) //Com::printErrorF(PSTR(p))
-#define OUT_ERROR_P_LN(p) {//Com::printErrorF(PSTR(p));//Com::println();}
-#define OUT(v) //Com::print(v)
-#define OUT_LN //Com::println()
 
 union eeval_t {
   uint8_t     b[4];
@@ -660,7 +649,7 @@ class HAL
         v.b[i] = 0;
      }
      return v;       
-#endif //(MOTHERBOARD==500) || (MOTHERBOARD==501)
+#endif //(MOTHERBOARD==500) || (MOTHERBOARD==501) || (MOTHERBOARD==502)
     }
 
     static inline void allowInterrupts()
@@ -679,16 +668,17 @@ class HAL
     {
       return pgm_read_byte(ptr);
     }
+    static inline int16_t readFlashWord(PGM_P ptr)
+    {
+        return pgm_read_word(ptr);
+    }
+
     static inline void serialSetBaudrate(long baud)
     {
       Serial.setInterruptPriority(1);
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
       BTAdapter.begin(baud);
 #else
-//ESP8266 Specific
-#if ENABLE_WIFI
-      WIFI_SERIAL.begin(baud);
-#endif
       RFSERIAL.begin(baud);
 #endif
     }
@@ -697,11 +687,6 @@ class HAL
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
       return BTAdapter.available();
 #else
-//ESP8266 Specific
-#if ENABLE_WIFI
-      if(HAL::bwifion) return WIFI_SERIAL.available();
-      else
-#endif
       return RFSERIAL.available();
 #endif
     }
@@ -710,11 +695,6 @@ class HAL
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
       return BTAdapter.read();
 #else
-//ESP8266 Specific
-#if ENABLE_WIFI
-      if(HAL::bwifion) return WIFI_SERIAL.read();
-      else
-#endif
       return RFSERIAL.read();
 #endif
     }
@@ -723,18 +703,6 @@ class HAL
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
       BTAdapter.write(b);
 #else
-//ESP8266 Specific
-#if ENABLE_WIFI
-      if (HAL::bwifion) 
-        {
-        WIFI_SERIAL.write(b);
-        if (b=='\n') 
-          {
-          HAL::delayMilliseconds(DELAY_BY_LINE);
-          }
-        }
-      else
-#endif
       RFSERIAL.write(b);
 #endif
     }
@@ -743,11 +711,6 @@ class HAL
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
       BTAdapter.flush();
 #else
-//ESP8266 Specific
-#if ENABLE_WIFI
-      if(HAL::bwifion) WIFI_SERIAL.flush();
-      else 
-#endif
       RFSERIAL.flush();
 #endif
     }
@@ -854,7 +817,7 @@ class HAL
     // Write single byte to SPI
     static void spiSend(byte b);
     static void spiSend(const uint8_t* buf , size_t n);
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || MOTHERBOARD==502
     static void spiSend(uint32_t chan , const uint8_t* buf , size_t n);
     static void spiSend(uint32_t chan, byte b);
     static uint8_t spiReceive(uint32_t chan);

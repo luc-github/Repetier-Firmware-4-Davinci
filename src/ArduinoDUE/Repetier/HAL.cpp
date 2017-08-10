@@ -172,7 +172,7 @@ void HAL::setupTimer() {
 void HAL::analogStart(void)
 {
 
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || MOTHERBOARD==502
   PIO_Configure(
     g_APinDescription[58].pPort,
     g_APinDescription[58].ulPinType,
@@ -183,7 +183,7 @@ void HAL::analogStart(void)
     g_APinDescription[59].ulPinType,
     g_APinDescription[59].ulPin,
     g_APinDescription[59].ulPinConfiguration);
-#endif // (MOTHERBOARD==500) || (MOTHERBOARD==501)
+#endif // (MOTHERBOARD==500) || (MOTHERBOARD==501) || (MOTHERBOARD==502)
 
   // ensure we can write to ADC registers
   ADC->ADC_WPMR = 0x41444300u; //ADC_WPMR_WPKEY(0);
@@ -347,12 +347,12 @@ uint32_t HAL::integer64Sqrt(uint64_t a_nInput) {
 
 #ifndef DUE_SOFTWARE_SPI
 // hardware SPI
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
 bool spiInitMaded = false;
 #endif
 void HAL::spiBegin()
 {
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
   if (spiInitMaded == false)
   {
 #endif        // Configre SPI pins
@@ -376,7 +376,7 @@ void HAL::spiBegin()
     SPI_Configure(SPI0, ID_SPI0, SPI_MR_MSTR |
                   SPI_MR_MODFDIS | SPI_MR_PS);
     SPI_Enable(SPI0);
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
     SET_OUTPUT(DAC0_SYNC);
 #if NUM_EXTRUDER > 1
     SET_OUTPUT(DAC1_SYNC);
@@ -390,14 +390,14 @@ void HAL::spiBegin()
     WRITE(SPI_EEPROM2_CS, HIGH );
     WRITE(SPI_FLASH_CS, HIGH );
     WRITE(SDSS , HIGH );
-#endif// MOTHERBOARD == 500 || MOTHERBOARD == 501
+#endif// MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
     PIO_Configure(
       g_APinDescription[SPI_PIN].pPort,
       g_APinDescription[SPI_PIN].ulPinType,
       g_APinDescription[SPI_PIN].ulPin,
       g_APinDescription[SPI_PIN].ulPinConfiguration);
     spiInit(1);
-#if (MOTHERBOARD==500) || (MOTHERBOARD==501)
+#if (MOTHERBOARD==500) || (MOTHERBOARD==501) || (MOTHERBOARD==502)
     spiInitMaded = true;
   }
 #endif
@@ -406,12 +406,12 @@ void HAL::spiBegin()
 // Due can only go as slow as AVR divider 32 -- slowest Due clock is 329,412 Hz
 void HAL::spiInit(uint8_t spiClock)
 {
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
   if (spiInitMaded == false)
   {
 #endif
     if (spiClock > 4) spiClock = 1;
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
     // Set SPI mode 1, clock, select not active after transfer, with delay between transfers
     SPI_ConfigureNPCS(SPI0, SPI_CHAN_DAC,
                       SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) |
@@ -420,13 +420,13 @@ void HAL::spiInit(uint8_t spiClock)
     SPI_ConfigureNPCS(SPI0, SPI_CHAN_EEPROM1, SPI_CSR_NCPHA |
                       SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) |
                       SPI_CSR_DLYBCT(1));
-#endif// MOTHERBOARD==500 || MOTHERBOARD==501
+#endif// MOTHERBOARD==500 || MOTHERBOARD==501 || (MOTHERBOARD==502)
     // Set SPI mode 0, clock, select not active after transfer, with delay between transfers
     SPI_ConfigureNPCS(SPI0, SPI_CHAN, SPI_CSR_NCPHA |
                       SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) |
                       SPI_CSR_DLYBCT(1));
     SPI_Enable(SPI0);
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
     spiInitMaded = true;
   }
 #endif
@@ -471,7 +471,7 @@ uint8_t HAL::spiReceive()
   //delayMicroseconds(1);
   return SPI0->SPI_RDR;
 }
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
 
 void HAL::spiSend(uint32_t chan, byte b)
 {
@@ -556,8 +556,6 @@ void HAL::spiSendBlock(uint8_t token, const uint8_t* buf)
 }
 #endif
 
-//Davinci Specific
-#ifdef TWI_CLOCK_FREQ
 /****************************************************************************************
  Setting for I2C Clock speed. needed to change  clock speed for different peripherals
 ****************************************************************************************/
@@ -744,7 +742,6 @@ uint8_t HAL::i2cReadNak(void)
   while (!((TWI_INTERFACE->TWI_SR & TWI_SR_TXCOMP) == TWI_SR_TXCOMP));// wait for i2cCompleted ;
   return data;
 }
-#endif //TWI_CLOCK_FREQ
 
 
 #if FEATURE_SERVO
@@ -877,10 +874,13 @@ void TIMER1_COMPA_VECTOR ()
   {
     delay = PrintLine::bresenhamStep();
   }
+#if FEATURE_BABYSTEPPING  
   else if (Printer::zBabystepsMissing != 0) {
     Printer::zBabystep();
     delay = Printer::interval;
-  } else {
+  } 
+#endif
+  else {
     if (waitRelax == 0)
     {
 #if USE_ADVANCE
@@ -921,8 +921,8 @@ void TIMER1_COMPA_VECTOR ()
 #if HEATER_PWM_SPEED < 0
 #define HEATER_PWM_SPEED 0
 #endif
-#if HEATER_PWM_SPEED > 2
-#define HEATER_PWM_SPEED 2
+#if HEATER_PWM_SPEED > 4
+#define HEATER_PWM_SPEED 4
 #endif
 
 #if HEATER_PWM_SPEED == 0
@@ -931,9 +931,15 @@ void TIMER1_COMPA_VECTOR ()
 #elif HEATER_PWM_SPEED == 1
 #define HEATER_PWM_STEP 2
 #define HEATER_PWM_MASK 254
-#else
+#elif HEATER_PWM_SPEED == 2
 #define HEATER_PWM_STEP 4
 #define HEATER_PWM_MASK 252
+#elif HEATER_PWM_SPEED == 3
+#define HEATER_PWM_STEP 8
+#define HEATER_PWM_MASK 248
+#elif HEATER_PWM_SPEED == 4
+#define HEATER_PWM_STEP 16
+#define HEATER_PWM_MASK 240
 #endif
 
 #if !defined(COOLER_PWM_SPEED)
@@ -942,8 +948,8 @@ void TIMER1_COMPA_VECTOR ()
 #if COOLER_PWM_SPEED < 0
 #define COOLER_PWM_SPEED 0
 #endif
-#if COOLER_PWM_SPEED > 2
-#define COOLER_PWM_SPEED 2
+#if COOLER_PWM_SPEED > 4
+#define COOLER_PWM_SPEED 4
 #endif
 
 #if COOLER_PWM_SPEED == 0
@@ -952,10 +958,17 @@ void TIMER1_COMPA_VECTOR ()
 #elif COOLER_PWM_SPEED == 1
 #define COOLER_PWM_STEP 2
 #define COOLER_PWM_MASK 254
-#else
+#elif COOLER_PWM_SPEED == 2
 #define COOLER_PWM_STEP 4
 #define COOLER_PWM_MASK 252
+#elif COOLER_PWM_SPEED == 3
+#define COOLER_PWM_STEP 8
+#define COOLER_PWM_MASK 248
+#elif COOLER_PWM_SPEED == 4
+#define COOLER_PWM_STEP 16
+#define COOLER_PWM_MASK 240
 #endif
+
 
 #define pulseDensityModulate( pin, density,error,invert) {uint8_t carry;carry = error + (invert ? 255 - density : density); WRITE(pin, (carry < error)); error = carry;}
 
@@ -1166,7 +1179,6 @@ if(fan2Kickstart == 0)
   if (pwm_pos_set[NUM_EXTRUDER] == pwm_count_heater && pwm_pos_set[NUM_EXTRUDER] != HEATER_PWM_MASK) WRITE(HEATED_BED_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
 #endif
-  //noInt.unprotect();
   counterPeriodical++; // Appxoimate a 100ms timer
   if (counterPeriodical >= 390) //  (int)(F_CPU/40960))
   {
@@ -1198,7 +1210,9 @@ if(fan2Kickstart == 0)
         adcSamplesMax[i] = 0;
         osAnalogSamplesSum[i] -= osAnalogSamples[i][adcSamplePos];
         osAnalogSamplesSum[i] += (osAnalogSamples[i][adcSamplePos] = osAnalogInputBuildup[i] >> ANALOG_INPUT_SAMPLE);
-        osAnalogInputValues[i] = osAnalogSamplesSum[i] / ANALOG_INPUT_MEDIAN;
+        if(executePeriodical == 0 || i >= NUM_ANALOG_TEMP_SENSORS) {
+          osAnalogInputValues[i] = osAnalogSamplesSum[i] / ANALOG_INPUT_MEDIAN;
+        }
         osAnalogInputBuildup[i] = 0;
       } // adcCounter >= NUM_ADC_SAMPLES
     } // for i
@@ -1316,17 +1330,23 @@ void RFDoubleSerial::end() {
 int RFDoubleSerial::available(void) {
   int x = RFSERIAL.available();
   if (x > 0) return x;
-  return BT_SERIAL.available();
+//Davinci Specific to be able to disable wifi
+  if (HAL::bwifion)return BT_SERIAL.available();
+  else return 0;
 }
 int RFDoubleSerial::peek(void) {
   if(RFSERIAL.available())
     return RFSERIAL.peek();
-  return BT_SERIAL.peek();
+  //Davinci Specific to be able to disable wifi
+  if (HAL::bwifion)return BT_SERIAL.peek();
+  else return RFSERIAL.peek();
 }
 int RFDoubleSerial::read(void) {
   if(RFSERIAL.available())
     return RFSERIAL.read();
-  return BT_SERIAL.read();
+  //Davinci Specific to be able to disable wifi
+  if (HAL::bwifion) return BT_SERIAL.read();
+  else return RFSERIAL.read();
 }
 void RFDoubleSerial::flush(void) {
   RFSERIAL.flush();
@@ -1334,7 +1354,8 @@ void RFDoubleSerial::flush(void) {
 }
 size_t RFDoubleSerial::write(uint8_t c) {
   size_t r = RFSERIAL.write(c);
-  BT_SERIAL.write(c);
+  //Davinci Specific to be able to disable wifi
+  if (HAL::bwifion) BT_SERIAL.write(c);
   return r;
 }
 RFDoubleSerial BTAdapter;

@@ -21,7 +21,7 @@
 
 // ################## EDIT THESE SETTINGS MANUALLY ################
 
-#define DAVINCI 1// "0" if not DAVINCI, "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN, 4 for AiO (WITH NO SCANNER SUPPORT)
+#define DAVINCI 2// "0" if not DAVINCI, "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN, 4 for AiO (WITH NO SCANNER SUPPORT)
 #define MODEL  0//"0" for first generation (jumper JP1 to reset ) , "1" for new generation   (jumper J37 to reset)
 #define REPURPOSE_FAN_TO_COOL_EXTRUSIONS 0 //Setting this to 1 will repurpose the main Extruder cooling fan to be controlled VIA M106/M107
                                            //Warning: for DaVinci 1.0 need to add a permanent fan with power supply to cool extruder
@@ -61,18 +61,8 @@
 #undef MODEL
 #define MODEL 1
 #endif
-//to enable communication using wifi module set to 1
-#define ENABLE_WIFI 0
-//define the wifi serial output
-//on Davinci use Serial
-//on RADDS use Serial1
-#if ENABLE_WIFI
-#if DAVINCI == 0
-#define WIFI_SERIAL Serial1
-#else
-#define WIFI_SERIAL Serial
-#endif
-#endif
+//to enable communication using wifi module set to 1 using repetier BT port
+#define ENABLE_WIFI 1
 //if wifi is enabled serial need to slow down a little, this is a delay in ms after a '\n' so normaly after a command or a message
 #define DELAY_BY_LINE 50
 #if ENABLE_CLEAN_NOZZLE
@@ -126,7 +116,7 @@ From 0.80 onwards the units used are unified for easier configuration, watch out
 
 Speed is in mm/s
 Acceleration in mm/s^2
-Temperature is in degrees celsius
+Temperature is in degrees Celsius
 
 
 ##########################################################################################
@@ -136,7 +126,7 @@ Temperature is in degrees celsius
 For easy configuration, the default settings enable parameter storage in EEPROM.
 This means, after the first upload many variables can only be changed using the special
 M commands as described in the documentation. Changing these values in the configuration.h
-file has no effect. Parameters overriden by EEPROM settings are calibration values, extruder
+file has no effect. Parameters overridden by EEPROM settings are calibration values, extruder
 values except thermistor tables and some other parameter likely to change during usage
 like advance steps or ops mode.
 To override EEPROM settings with config settings, set EEPROM_MODE 0
@@ -169,12 +159,15 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Felix Printers for arm       = 405
 // DAM&DICE DUE                 = 406
 // Smart RAMPS for Due          = 408
+// Smart RAMPS for Due with EEPROM = 413
 // Ultratronics Board           = 409
 // DUE3DOM                      = 410
 // DUE3DOM MINI                 = 411
+// STACKER 3D Superboard        = 412
 // Alligator Board rev1         = 500
 // Alligator Board rev2         = 501
-//DaVinci                              = 999
+// Alligator Board rev3         = 502
+//DaVinci                       = 999
 
 #if DAVINCI==0
 #define MOTHERBOARD 402
@@ -197,8 +190,10 @@ gets used, or you will get problems with checksums etc.
 - 100 is programming port on due
 - 101 is native port on due. Us eit to support both ports at the same time!
 */
-#define BLUETOOTH_SERIAL   -1                      // Port number (1..3) - For RADDS use 1
-#define BLUETOOTH_BAUD     115200                 // communication speed
+//Davinci Specific
+//ESP8266 can be added on Serial Programming port
+#define BLUETOOTH_SERIAL   100                      // Port number (1..3) - For RADDS use 1
+#define BLUETOOTH_BAUD     230400                 // communication speed
 
 
 // Uncomment the following line if you are using Arduino compatible firmware made for Arduino version earlier then 1.0
@@ -220,6 +215,16 @@ Cases 1, 2, 8 and 9 cover all needed xy and xz H gantry systems. If you get resu
 If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 */
 #define DRIVE_SYSTEM CARTESIAN
+/*
+  Normal core xy implementation needs 2 virtual steps for a motor step to guarantee
+  that every tiny move gets maximum one step regardless of direction. This can cost
+  some speed, so alternatively you can activate the FAST_COREXYZ by uncommenting
+  the define. This solves the core movements as nonlinear movements like done for
+  deltas but without the complicated transformations. Since transformations are still
+  linear you can reduce delta computations per second to 10 and also use 10 
+  subsegments instead of 20 to reduce memory usage.
+*/
+//#define FAST_COREXYZ
 
 /* You can write some GCODE to be executed on startup. Use this e.g. to set some 
 pins. Separate multiple GCODEs with \n
@@ -295,6 +300,7 @@ Overridden if EEPROM activated.*/
 // the cleaner signal. The only advantage of PWM is giving signals at a fixed rate and never more
 // then PWM.
 #define PDM_FOR_EXTRUDER 1
+//DaVinci to fix issue with repurpose fan feature bringing noise
 #if REPURPOSE_FAN_TO_COOL_EXTRUSIONS
 #define PDM_FOR_COOLER 0
 #else
@@ -306,7 +312,6 @@ Overridden if EEPROM activated.*/
 // As an additional barrier to your smoke detectors (I hope you have one above your printer) we now
 // do some more checks to detect if something got wrong.
 
-#if FEATURE_DECOUPLE_TEST
 // If the temp. is on hold target, it may not sway more then this degrees celsius, or we mark
 // sensor as defect.
 #define DECOUPLING_TEST_MAX_HOLD_VARIANCE 15
@@ -318,7 +323,6 @@ Overridden if EEPROM activated.*/
 // Set to 1 if you want firmware to kill print on decouple
 #define KILL_IF_SENSOR_DEFECT 1
 
-#endif
 // for each extruder, fan will stay on until extruder temperature is below this value
 #define EXTRUDER_FAN_COOL_TEMP 50
 // Retraction for sd pause over lcd
@@ -351,6 +355,8 @@ controlled by settings in extruder 0 definition. */
 // 12 is 100k RS thermistor 198-961
 // 13 is PT100 for E3D/Ultimaker
 // 14 is 100K NTC 3950
+// 15 DYZE DESIGN 500°C Thermistor
+// 16 is B3 innovations 500°C sensor
 // 50 is userdefined thermistor table 0 for PTC thermistors
 // 51 is userdefined thermistor table 0 for PTC thermistors
 // 52 is userdefined thermistor table 0 for PTC thermistors
@@ -406,7 +412,7 @@ controlled by settings in extruder 0 definition. */
 - 3 = Dead-time control. PID_P becomes dead-time in seconds.
  Overridden if EEPROM activated.
 */
-#define EXT0_HEAT_MANAGER 3
+#define EXT0_HEAT_MANAGER 1
 /** Wait x seconds, after reaching target temperature. Only used for M109.  Overridden if EEPROM activated. */
 #define EXT0_WATCHPERIOD 1
 
@@ -472,12 +478,17 @@ The codes are only executed for multiple extruder when changing the extruder. */
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT0_EXTRUDER_COOLER_SPEED 255
 /** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
+//Davinci Specific, be able to disable decouple test
+#if FEATURE_DECOUPLE_TEST
 #define EXT0_DECOUPLE_TEST_PERIOD 30000
+#else
+#define EXT0_DECOUPLE_TEST_PERIOD 0
+#endif
 /** Pin which toggles regualrly during extrusion allowing jam control. -1 = disabled */
 #define EXT0_JAM_PIN -1
 /** Pullup resistor for jam pin? */
 #define EXT0_JAM_PULLUP false
-
+#define EXT0_PREHEAT_TEMP 190
 
 // =========================== Configuration for second extruder ========================
 #define EXT1_X_OFFSET -2852
@@ -538,7 +549,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 - 1 = PID Temperature control. Is better but needs good PID values. Defaults are a good start for most extruder.
  Overridden if EEPROM activated.
 */
-#define EXT1_HEAT_MANAGER 3
+#define EXT1_HEAT_MANAGER 1
 /** Wait x seconds, after reaching target temperature. Only used for M109.  Overridden if EEPROM activated. */
 #define EXT1_WATCHPERIOD 1
 
@@ -603,11 +614,17 @@ cog. Direct drive extruder need 0. */
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT1_EXTRUDER_COOLER_SPEED 255
 /** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
+//Davinci Specific, be able to disable decouple test
+#if FEATURE_DECOUPLE_TEST
 #define EXT1_DECOUPLE_TEST_PERIOD 30000
+#else
+#define EXT1_DECOUPLE_TEST_PERIOD 0
+#endif
 /** Pin which toggles regularly during extrusion allowing jam control. -1 = disabled */
 #define EXT1_JAM_PIN -1
 /** Pull-up resistor for jam pin? */
 #define EXT1_JAM_PULLUP false
+#define EXT1_PREHEAT_TEMP 190
 
 /** If enabled you can select the distance your filament gets retracted during a
 M140 command, after a given temperature is reached. */
@@ -873,15 +890,29 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 #define HEATED_BED_PID_MAX 255
 // Time to see a temp. change when fully heating. Consider that beds at higher temp. need longer to rise and cold
 // beds need some time to get the temp. to the sensor. Time is in milliseconds!
+//Davinci Specific, be able to disable decouple test
+#if FEATURE_DECOUPLE_TEST
 #define HEATED_BED_DECOUPLE_TEST_PERIOD 300000
+#else
+#define HEATED_BED_DECOUPLE_TEST_PERIOD 0
+#endif
 
 // When temperature exceeds max temp, your heater will be switched off.
 // This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
 #define MAXTEMP 270
 
+#define HEATED_BED_PREHEAT_TEMP 55
+
 /** Extreme values to detect defect thermistors. */
 #define MIN_DEFECT_TEMPERATURE -10
 #define MAX_DEFECT_TEMPERATURE 290
+
+//How many milliseconds a hot end will preheat before starting to check the
+//temperature. This value should NOT be set to the time it takes the
+//hot end to reach the target temperature, but should be set to the time it 
+//takes to reach the minimum temperature your thermistor can read. The lower
+//the better/safer, and shouldn't need to be more than 30 seconds (30000) 
+#define MILLISECONDS_PREHEAT_TIME 30000
 
 // ##########################################################################################
 // ##                             Laser configuration                                      ##
@@ -911,6 +942,9 @@ automatically disabled.
 #define SUPPORT_LASER 0 // set 1 to enable laser support
 #define LASER_PIN -1    // set to pin enabling laser
 #define LASER_ON_HIGH 1 // Set 0 if low signal enables laser
+#define LASER_WARMUP_TIME 0// wait x milliseconds to start material burning before move
+#define LASER_PWM_MAX 255 //255 8-bit PWM 4095 for 12Bit PWM
+#define LASER_WATT 1.6  // Laser diode power
 
 // ##########################################################################################
 // ##                              CNC configuration                                       ##
@@ -930,6 +964,9 @@ It also can add a delay to wait for spindle to run on full speed.
 #define CNC_ENABLE_WITH 1 // Set 0 if low enables spindle
 #define CNC_DIRECTION_PIN -1 // Set to pin if direction control is possible
 #define CNC_DIRECTION_CW 1 // Set signal required for clockwise rotation
+#define CNC_PWM_MAX 255  //255 8-bit PWM 4095 for 12Bit PWM
+#define CNC_RPM_MAX 25000   //max spindle RPM
+#define CNC_SAFE_Z 150  // Safe Z height so tool is outside object, used for pause
 
 
 /* Select the default mode when the printer gets enables. Possible values are
@@ -1022,6 +1059,9 @@ on this endstop.
 #define ENDSTOP_X_BACK_MOVE 5
 #define ENDSTOP_Y_BACK_MOVE 5
 #define ENDSTOP_Z_BACK_MOVE 2
+// If you do z min homing, you might want to rise extruder a bit after homing so it does not heat
+// touching your bed.
+#define Z_UP_AFTER_HOME 0
 
 // For higher precision you can reduce the speed for the second test on the endstop
 // during homing operation. The homing speed is divided by the value. 1 = same speed, 2 = half speed
@@ -1131,7 +1171,7 @@ on this endstop.
 #elif MOTHERBOARD==12
 //#define MOTOR_CURRENT {35713,35713,35713,35713,35713} // Values 0-65535 (3D Master 35713 = ~1A)
 #define MOTOR_CURRENT_PERCENT {55,55,55,55,55}
-#elif (MOTHERBOARD==500) || (MOTHERBOARD==501) // Alligator boards
+#elif (MOTHERBOARD==500) || (MOTHERBOARD==501) || (MOTHERBOARD==502) // Alligator boards
 //#define MOTOR_CURRENT {130,130,130,110,110,110,110} // expired method
 #define MOTOR_CURRENT_PERCENT {51,51,51,44,44,44,44}
 #endif
@@ -1271,6 +1311,25 @@ Mega. Used only for nonlinear systems like delta or tuga. */
  * heating to minimum ZHOME_MIN_TEMPERATURE will z home again for correct height.   
  * */
 #define HOMING_ORDER HOME_ORDER_XYZ
+/*
+  Raise Z befor ehoming z axis
+  0 = no
+  1 = if z min is triggered
+  2 = always
+  This is for printers with z probe used as z min. For homing the probe must be
+  at a minimum height for some endstop types, so raising it before will help
+  to make sure this is guaranteed. 
+*/
+#define ZHOME_PRE_RAISE 0
+// Distance in mm to raise if required
+#define ZHOME_PRE_RAISE_DISTANCE 10
+
+/*
+ Raises Z before swapping extruder (tool change) and lowers it afterwards
+ Unit is mm (INTEGER NUMBERS ONLY)
+ */
+#define RAISE_Z_ON_TOOLCHANGE 0
+
 // Used for homing order HOME_ORDER_ZXYTZ
 #define ZHOME_MIN_TEMPERATURE 0
 // needs to heat all extruders (1) or only current extruder (0)
@@ -1387,7 +1446,7 @@ Overridden if EEPROM activated.
 
 /** \brief Number of moves we can cache in advance.
 
-This number of moves can be cached in advance. If you wan't to cache more, increase this. Especially on
+This number of moves can be cached in advance. If you want to cache more, increase this. Especially on
 many very short moves the cache may go empty. The minimum value is 5.
 */
 #define PRINTLINE_CACHE_SIZE 32
@@ -1444,7 +1503,7 @@ to activate the quadratic term. Only adds lots of computations and storage usage
 
 /** \brief Communication speed.
 
-- 250000 : Fastes with errorrate of 0% with 16 or 32 MHz - update wiring_serial.c in your board files. See boards/readme.txt
+- 250000 : Fastest with error rate of 0% with 16 or 32 MHz - update wiring_serial.c in your board files. See boards/readme.txt
 - 115200 : Fast, but may produce communication errors on quite regular basis, Error rate -3,5%
 - 76800 : Best setting for Arduino with 16 MHz, Error rate 0,2% page 198 AVR1284 Manual. Result: Faster communication then 115200
 - 57600 : Should produce nearly no errors, on my gen 6 it's faster than 115200 because there are no errors slowing down the connection
@@ -1477,7 +1536,7 @@ boards you might need to make it inverting.
 #define ACK_WITH_LINENUMBER 1       
 /** Communication errors can swallow part of the ok, which tells the host software to send
 the next command. Not receiving it will cause your printer to stop. Sending this string every
-second, if our queue is empty should prevent this. Comment it, if you don't wan't this feature. */
+second, if our queue is empty should prevent this. Comment it, if you don't want this feature. */
 #define WAITING_IDENTIFIER "wait"
 //Davinci Specific
 #define RESET_IDENTIFIER "start"
@@ -1518,6 +1577,13 @@ instead of driving both with a single stepper. The same works for the other axis
 #define X2_DIR_PIN    E1_DIR_PIN
 #define X2_ENABLE_PIN E1_ENABLE_PIN
 
+/* Dual x axis mean having a printer with x motors and each controls one
+extruder position. In that case you can also have different resolutions for the
+2 motors. */
+#define DUAL_X_AXIS 0
+#define DUAL_X_RESOLUTION 0
+#define X2AXIS_STEPS_PER_MM 100
+
 #define FEATURE_TWO_YSTEPPER 0
 #define Y2_STEP_PIN   E1_STEP_PIN
 #define Y2_DIR_PIN    E1_DIR_PIN
@@ -1532,6 +1598,11 @@ instead of driving both with a single stepper. The same works for the other axis
 #define Z3_STEP_PIN   E2_STEP_PIN
 #define Z3_DIR_PIN    E2_DIR_PIN
 #define Z3_ENABLE_PIN E2_ENABLE_PIN
+
+#define FEATURE_FOUR_ZSTEPPER 0
+#define Z4_STEP_PIN   E2_STEP_PIN
+#define Z4_DIR_PIN    E2_DIR_PIN
+#define Z4_ENABLE_PIN E2_ENABLE_PIN
 
 /* Ditto printing allows 2 extruders to do the same action. This effectively allows
 to print an object two times at the speed of one. Works only with dual extruder setup.
@@ -1594,6 +1665,10 @@ to recalibrate z.
 */
 #define Z_PROBE_Z_OFFSET_MODE 0
 
+// Especially if you have more then 1 extruder acting as z probe this is important!
+#define EXTRUDER_IS_Z_PROBE 0
+// Disable all heaters before probing - required for inductive sensors
+#define Z_PROBE_DISABLE_HEATERS 0
 #if DAVINCI > 0
 #define FEATURE_Z_PROBE true
 #define Z_PROBE_PIN 117
@@ -1612,6 +1687,8 @@ to recalibrate z.
 #define Z_PROBE_WAIT_BEFORE_TEST 0
 /** Speed of z-axis in mm/s when probing */
 #define Z_PROBE_SPEED 1
+/** Delay before going down. Needed for piezo endstops to reload safely. */
+#define Z_PROBE_DELAY 0
 #define Z_PROBE_XY_SPEED 30
 #define Z_PROBE_SWITCHING_DISTANCE 5 // Distance to safely switch off probe after it was activated
 #define Z_PROBE_REPETITIONS 1 // Repetitions for probing at one point. 
@@ -1772,6 +1849,8 @@ motorized bed leveling */
 
 #define DISTORTION_CORRECTION         0
 #define DISTORTION_CORRECTION_POINTS  5
+/** Max. distortion value to enter. Used to prevent dangerous errors with big values. */
+#define DISTORTION_LIMIT_TO 2
 /* For delta printers you simply define the measured radius around origin */
 #define DISTORTION_CORRECTION_R       80
 /* For all others you define the correction rectangle by setting the min/max coordinates. Make sure the the probe can reach all points! */
@@ -1803,7 +1882,7 @@ best bonding with surface. */
 
 /* If your printer is not exactly square but is more like a parallelogram, you can
 use this to compensate the effect of printing squares like parallelograms. Set the
-parameter to then tangens of the deviation from 90° when you print a square object.
+parameter to then tangents of the deviation from 90° when you print a square object.
 E.g. if you angle is 91° enter tan(1) = 0.017. If error doubles you have the wrong sign.
 Always hard to say since the other angle is 89° in this case!
 */
@@ -1882,6 +1961,9 @@ goes on as soon as moves occur. Mainly to prevent overheating of stepper drivers
 //#define FAN_BOARD_PIN ORIG_FAN_PIN
 /** Speed of board fan when on. 0 = off, 255 = max */
 #define BOARD_FAN_SPEED 255
+/* Speed when no cooling is required. Normally 0 but if you need slightly cooling
+it can be set here */
+#define BOARD_FAN_MIN_SPEED 0
 
 /* You can have one additional fan controlled by a temperature. You can set
    set at which temperature it should turn on and at which it should reach max. speed.
@@ -1895,6 +1977,15 @@ goes on as soon as moves occur. Mainly to prevent overheating of stepper drivers
 #define FAN_THERMO_THERMISTOR_PIN -1
 #define FAN_THERMO_THERMISTOR_TYPE 1
 
+/** The door pin is to detect a door opening. This will prevent new command
+ from serial or sd card getting executed. It will not stop immediately. Instead
+ it lets the move buffer run empty so closing the door allows continuing the print.
+ The exact behavior might change in the future.
+  */
+ 
+#define DOOR_PIN -1
+#define DOOR_PULLUP 1
+#define DOOR_INVERTING 1
 
 /** Adds support for ESP8266 Duet web interface, PanelDue and probably some other things. 
  * This essentially adds command M36/M408 and extends M20.
@@ -1929,9 +2020,13 @@ The following settings override uiconfig.h!
 18 or CONTROLLER_GATE_3NOVATICA Gate Controller from 3Novatica
 19 or CONTROLLER_SPARKLCD Sparkcube LCD on RADDS
 20 or CONTROLLER_BAM_DICE_DUE  DAM&DICE Due LCD Display
-21 or CONTROLLER_VIKI2 Panucatt Viki2 graphic lcd 
+21 or CONTROLLER_VIKI2 Panucatt Viki2 graphic lcd
+23 or CONTROLLER_SPARKLCD_ADAPTER  Sparkcube LCD on RADDS with adapter 
 24 or CONTROLLER_ZONESTAR = Zonestar P802M with LCD 20x4 and 5 ADC button keypad
+25 or CONTROLLER_ORCABOTXXLPRO2 
+26 or CONTROLLER_AZSMZ_12864 
 405 or CONTROLLER_FELIX_DUE Felix LCD für due based board
+27 or CONTROLLER_REPRAPWORLD_GLCD = ReprapWorld Graphical LCD
 */
 #if DAVINCI==0
 #define FEATURE_CONTROLLER CONTROLLER_RADDS
@@ -1951,7 +2046,7 @@ the language can be switched any time. */
 #define LANGUAGE_EN_ACTIVE 1 // English
 #define LANGUAGE_DE_ACTIVE 1 // German
 #define LANGUAGE_NL_ACTIVE 1 // Dutch
-#define LANGUAGE_PT_ACTIVE 0 // Brazilian portuguese
+#define LANGUAGE_PT_ACTIVE 0 // Brazilian Portuguese
 #define LANGUAGE_IT_ACTIVE 1 // Italian
 #define LANGUAGE_ES_ACTIVE 0 // Spanish
 #define LANGUAGE_FI_ACTIVE 0 // Finnish
@@ -1998,8 +2093,9 @@ computations, so do not enable it if your display works stable!
 #define MODEL_TYPE  "A"
 #endif
 
-/** Animate switches between menus etc. */
-#define UI_ANIMATION 0
+/** For graphic displays you can have a fixed top line. It can also contain
+ * dynamic modifiers. Do not define it if you want full 6 rows of data */
+//#define UI_HEAD "E1:%e0/%E0 E2:%e1/%E1 B:%eb/%Eb"
 
 /** How many ms should a single page be shown, until it is switched to the next one.*/
 #define UI_PAGES_DURATION 4000
@@ -2058,12 +2154,6 @@ Values must be in range 1..255
 // ###############################################################################
 // ##                         Values for menu settings                          ##
 // ###############################################################################
-
-// Values used for preheat
-#define UI_SET_PRESET_HEATED_BED_TEMP_PLA 60
-#define UI_SET_PRESET_EXTRUDER_TEMP_PLA   180
-#define UI_SET_PRESET_HEATED_BED_TEMP_ABS 90
-#define UI_SET_PRESET_EXTRUDER_TEMP_ABS   230
 
 //Davinci specific
 // Loading / Unloading Filament value

@@ -86,7 +86,7 @@ void commandG203(GCode &code)
     if(id < 0) id = 0;
     if(id >= NUM_MOTOR_DRIVERS) id = 0;
     Com::printF(PSTR("Motor"),id);
-    Com::printFLN(PSTR("Pos:"),motorDrivers[id]->getPosition());
+    Com::printFLN(PSTR(" Pos:"),motorDrivers[id]->getPosition());
 }
 //G204 P<motorId> S<0/1>     - Enable/disable motor
 void commandG204(GCode &code)
@@ -101,6 +101,16 @@ void commandG204(GCode &code)
         motorDrivers[id]->enable();
     else
         motorDrivers[id]->disable();
+}
+// G205 P<motorId> S<0/1> E<0/1> - Home motor, S1 = go back to stored position, E1 = home only if endstop was never met, meaning it was never homed with motor.
+void commandG205(GCode &code)
+{
+	int id = 0;
+	if(code.hasP())
+		id = code.P;
+	if(id < 0) id = 0;
+	if(id >= NUM_MOTOR_DRIVERS) id = 0;
+	motorDrivers[id]->home(code.hasS() && code.S != 0, code.hasE() && code.E != 0);
 }
 
 void disableAllMotorDrivers()
@@ -117,11 +127,16 @@ void initializeAllMotorDrivers()
 #endif // NUM_MOTOR_DRIVERS
 
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
-uint8_t LaserDriver::intensity = 255; // Intensity to use for next move queued if we want lasers. This is NOT the current value!
+
+secondspeed_t LaserDriver::intensity = LASER_PWM_MAX; // Intensity to use for next move queued if we want lasers. This is NOT the current value!
+secondspeed_t LaserDriver::intens = 0;
+
 bool LaserDriver::laserOn = false;
+bool LaserDriver::firstMove = true;
+
 void LaserDriver::initialize()
 {
-    if(EVENT_INITALIZE_LASER)
+    if(EVENT_INITIALIZE_LASER)
     {
 #if LASER_PIN > -1
         SET_OUTPUT(LASER_PIN);
@@ -129,8 +144,14 @@ void LaserDriver::initialize()
     }
     changeIntensity(0);
 }
-void LaserDriver::changeIntensity(uint8_t newIntensity)
+
+void LaserDriver::changeIntensity(secondspeed_t newIntensity)
 {
+#if defined(DOOR_PIN) && DOOR_PIN > -1
+    if(Printer::isDoorOpen()) {
+        newIntensity = 0; // force laser off if door is open
+    }
+#endif
     if(EVENT_SET_LASER(newIntensity))
     {
         // Default implementation
@@ -138,6 +159,7 @@ void LaserDriver::changeIntensity(uint8_t newIntensity)
         WRITE(LASER_PIN,(LASER_ON_HIGH ? newIntensity > 199 : newIntensity < 200));
 #endif
     }
+    intens=newIntensity;//for "Transfer" Status Page
 }
 #endif // SUPPORT_LASER
 
@@ -149,10 +171,14 @@ the motor. It then waits CNC_WAIT_ON_ENABLE milliseconds for the spindle to reac
 */
 
 int8_t CNCDriver::direction = 0;
-/** Initialize cnc pins. EVENT_INITALIZE_CNC should return false to prevent default initalization.*/
+secondspeed_t CNCDriver::spindleSpeed= 0;
+uint16_t CNCDriver::spindleRpm= 0;
+
+
+/** Initialize cnc pins. EVENT_INITIALIZE_CNC should return false to prevent default initialization.*/
 void CNCDriver::initialize()
 {
-    if(EVENT_INITALIZE_CNC)
+    if(EVENT_INITIALIZE_CNC)
     {
 #if CNC_ENABLE_PIN > -1
         SET_OUTPUT(CNC_ENABLE_PIN);
@@ -169,6 +195,7 @@ returning false.
 */
 void CNCDriver::spindleOff()
 {
+    spindleRpm=0;
     if(direction == 0) return; // already off
     if(EVENT_SPINDLE_OFF)
     {
@@ -186,9 +213,13 @@ EVENT_SPINDLE_CW(rpm)
 */
 void CNCDriver::spindleOnCW(int32_t rpm)
 {
+  spindleSpeed=map(rpm,0,CNC_RPM_MAX,0,CNC_PWM_MAX);// linear interpolation
+
+  
     if(direction == 1)
         return;
     spindleOff();
+    spindleRpm=rpm;// for display
     direction = 1;
     if(EVENT_SPINDLE_CW(rpm)) {
 #if CNC_DIRECTION_PIN > -1
@@ -207,11 +238,14 @@ EVENT_SPINDLE_CCW(rpm)
 */
 void CNCDriver::spindleOnCCW(int32_t rpm)
 {
+        spindleSpeed=map(rpm,0,CNC_RPM_MAX,0,CNC_PWM_MAX);// linear interpolation
+   
     if(direction == -1)
         return;
     spindleOff();
+    spindleRpm=rpm;// for display
     direction = -1;
-    if(EVENT_SPINDLE_CW(rpm)) {
+    if(EVENT_SPINDLE_CCW(rpm)) {
 #if CNC_DIRECTION_PIN > -1
         WRITE(CNC_DIRECTION_PIN, !CNC_DIRECTION_CW);
 #endif

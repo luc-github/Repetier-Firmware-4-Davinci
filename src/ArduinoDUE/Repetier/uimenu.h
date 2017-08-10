@@ -753,8 +753,8 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_toggle_light, UI_TEXT_LIGHTS_ONOFF_ID, UI_ACTION
 #define UI_TOOGLE_LIGHT_ENTRY
 #define UI_TOGGLE_LIGHT_COUNT 0
 #endif
-UI_MENU_ACTIONCOMMAND_T(ui_menu_quick_preheat_pla, UI_TEXT_PREHEAT_PLA_ID, UI_ACTION_PREHEAT_PLA)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_quick_preheat_abs, UI_TEXT_PREHEAT_ABS_ID, UI_ACTION_PREHEAT_ABS)
+UI_MENU_ACTIONCOMMAND_T(ui_menu_quick_preheat_pla, UI_TEXT_PREHEAT_PLA_ID, UI_ACTION_PREHEAT_ALL)
+UI_MENU_ACTIONCOMMAND_T(ui_menu_quick_preheat_abs, UI_TEXT_PREHEAT_ABS_ID, UI_ACTION_PREHEAT_ALL)
 UI_MENU_ACTIONCOMMAND_T(ui_menu_quick_cooldown, UI_TEXT_COOLDOWN_ID, UI_ACTION_COOLDOWN)
 UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_quick_origin, UI_TEXT_SET_TO_ORIGIN_ID, UI_ACTION_SET_ORIGIN, 0, MENU_MODE_PRINTING)
 UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_quick_stopstepper, UI_TEXT_DISABLE_STEPPER_ID, UI_ACTION_DISABLE_STEPPER, 0, MENU_MODE_PRINTING)
@@ -850,8 +850,8 @@ UI_MENU(ui_menu_sd_askstop, UI_MENU_SD_ASKSTOP, 3)
 #define UI_MENU_SD_FILESELECTOR {&ui_menu_back}
 UI_MENU_FILESELECT(ui_menu_sd_fileselector, UI_MENU_SD_FILESELECTOR, 1)
 UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_printfile, UI_TEXT_PRINT_FILE_ID,     UI_ACTION_SD_PRINT,    MENU_MODE_SD_MOUNTED,  MENU_MODE_SD_PRINTING)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_pause,     UI_TEXT_PAUSE_PRINT_ID,    UI_ACTION_SD_PAUSE,    MENU_MODE_SD_PRINTING, MENU_MODE_SD_PAUSED)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_continue,  UI_TEXT_CONTINUE_PRINT_ID, UI_ACTION_SD_CONTINUE, MENU_MODE_SD_PAUSED,   0)
+UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_pause,     UI_TEXT_PAUSE_PRINT_ID,    UI_ACTION_SD_PAUSE,    MENU_MODE_SD_PRINTING, MENU_MODE_PAUSED)
+UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_continue,  UI_TEXT_CONTINUE_PRINT_ID, UI_ACTION_SD_CONTINUE, MENU_MODE_PAUSED,   0)
 // two versions of stop. Second is with security question since pausing can trigger stop with bad luck!
 //UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_stop,      UI_TEXT_STOP_PRINT_ID,     UI_ACTION_SD_STOP,     MENU_MODE_SD_PRINTING, 0)
 UI_MENU_SUBMENU_FILTER_T(ui_menu_sd_stop, UI_TEXT_STOP_PRINT_ID, ui_menu_sd_askstop, MENU_MODE_SD_PRINTING, 0 )
@@ -1479,9 +1479,9 @@ UI_MENU_ACTION4_T(ui_menu_clean_dripbox_page,UI_ACTION_DUMMY,UI_TEXT_CLEAN_DRIPB
 #define STEP_CLEAN_DRIPBOX 1
 #define STEP_CLEAN_DRIPBOX_WAIT_FOR_OK 2
 //preheat PLA
-UI_MENU_ACTIONCOMMAND_T(ui_menu_quick_preheat_pla,UI_TEXT_PREHEAT_PLA_ID,UI_ACTION_PREHEAT_PLA, ADVANCED_MODE)
+UI_MENU_ACTIONCOMMAND_T(ui_menu_quick_preheat_pla,UI_TEXT_PREHEAT_PLA_ID,UI_ACTION_PREHEAT_ALL, ADVANCED_MODE)
 //preheat ABS
-UI_MENU_ACTIONCOMMAND_T(ui_menu_quick_preheat_abs,UI_TEXT_PREHEAT_ABS_ID,UI_ACTION_PREHEAT_ABS, ADVANCED_MODE)
+UI_MENU_ACTIONCOMMAND_T(ui_menu_quick_preheat_abs,UI_TEXT_PREHEAT_ABS_ID,UI_ACTION_PREHEAT_ALL, ADVANCED_MODE)
 //cool down
 UI_MENU_ACTIONCOMMAND_T(ui_menu_quick_cooldown,UI_TEXT_COOLDOWN_MENU_ID,UI_ACTION_COOLDOWN, ADVANCED_MODE)
 //disable steppers
@@ -1847,18 +1847,18 @@ UI_MENU_CHANGEACTION_T(ui_menu_cext_yoffset, UI_TEXT_EXTR_YOFF_ID, UI_ACTION_Y_O
 #define UI_MENU_CONFEXTCOND
 #define UI_MENU_CONFEXTCNT 0
 #endif
-UI_MENU_CHANGEACTION_T(ui_menu_ext_temp_abs, UI_TEXT_EXT_TEMP_ABS_ID, UI_ACTION_EXT_TEMP_ABS, ADVANCED_MODE)
-UI_MENU_CHANGEACTION_T(ui_menu_ext_temp_pla, UI_TEXT_EXT_TEMP_PLA_ID, UI_ACTION_EXT_TEMP_PLA, ADVANCED_MODE)
-#define UI_MENU_CEXTR {UI_MENU_ADDCONDBACK UI_MENU_CONFEXTCOND &ui_menu_ext_temp_abs,&ui_menu_ext_temp_pla, &ui_menu_cext_steps,&ui_menu_cext_start_feedrate,&ui_menu_cext_max_feedrate,&ui_menu_cext_acceleration,&ui_menu_cext_watch_period,&ui_menu_ext_wait_units,&ui_menu_ext_wait_temp UI_MENU_ADVANCE UI_MENU_PIDCOND}
+UI_MENU_CHANGEACTION_T(ui_menu_ext_temp_0, UI_TEXT_EXT_TEMP_ABS_ID, UI_ACTION_EXT_TEMP_0, ADVANCED_MODE)
+UI_MENU_CHANGEACTION_T(ui_menu_ext_temp_1, UI_TEXT_EXT_TEMP_PLA_ID, UI_ACTION_EXT_TEMP_1, ADVANCED_MODE)
+#define UI_MENU_CEXTR {UI_MENU_ADDCONDBACK UI_MENU_CONFEXTCOND &ui_menu_ext_temp_0,&ui_menu_ext_temp_1, &ui_menu_cext_steps,&ui_menu_cext_start_feedrate,&ui_menu_cext_max_feedrate,&ui_menu_cext_acceleration,&ui_menu_cext_watch_period,&ui_menu_ext_wait_units,&ui_menu_ext_wait_temp UI_MENU_ADVANCE UI_MENU_PIDCOND}
 UI_MENU(ui_menu_cextr,UI_MENU_CEXTR,9+UI_MENU_BACKCNT+UI_MENU_PIDCNT+UI_MENU_CONFEXTCNT+UI_MENU_ADV_CNT);//BUG without this ; compilation crash
 UI_MENU_SUBMENU_T(ui_menu_conf_extr, UI_TEXT_EXTRUDER_ID, ui_menu_cextr, ADVANCED_MODE)
 
 // **** bed configuration
 #if HAVE_HEATED_BED
-UI_MENU_CHANGEACTION_T(ui_menu_bed_temp_abs, UI_TEXT_BED_TEMP_ABS_ID, UI_ACTION_BED_TEMP_ABS, ADVANCED_MODE)
-UI_MENU_CHANGEACTION_T(ui_menu_bed_temp_pla, UI_TEXT_BED_TEMP_PLA_ID, UI_ACTION_BED_TEMP_PLA, ADVANCED_MODE)
+UI_MENU_CHANGEACTION_T(ui_menu_bed_temp_abs, UI_TEXT_BED_TEMP_ABS_ID, UI_ACTION_BED_TEMP, ADVANCED_MODE)
+UI_MENU_CHANGEACTION_T(ui_menu_bed_temp_pla, UI_TEXT_BED_TEMP_PLA_ID, UI_ACTION_BED_TEMP, ADVANCED_MODE)
  #if TEMP_PID
-  #define UI_MENU_BEDCONF {UI_MENU_ADDCONDBACK &ui_menu_bed_temp_abs, &ui_menu_bed_temp_pla, &ui_menu_cext_manager,&ui_menu_cext_pgain,&ui_menu_cext_igain,&ui_menu_cext_dgain,&ui_menu_cext_dmin,&ui_menu_cext_dmax,&ui_menu_cext_pmax}
+  #define UI_MENU_BEDCONF {UI_MENU_ADDCONDBACK &ui_menu_bed_temp, &ui_menu_bed_temp_pla, &ui_menu_cext_manager,&ui_menu_cext_pgain,&ui_menu_cext_igain,&ui_menu_cext_dgain,&ui_menu_cext_dmin,&ui_menu_cext_dmax,&ui_menu_cext_pmax}
   UI_MENU(ui_menu_bedconf, UI_MENU_BEDCONF, 9+UI_MENU_BACKCNT);//BUG without this ; compilation crash
  #else
   #define UI_MENU_BEDCONF {UI_MENU_ADDCONDBACK  &ui_menu_bed_temp_abs, &ui_menu_bed_temp_pla, &ui_menu_cext_manager, &ui_menu_cext_pmax}
@@ -2012,8 +2012,8 @@ UI_MENU_SUBMENU_T(ui_menu_fan_sub, UI_TEXT_FANSPEED_ID, ui_menu_fan, ADVANCED_MO
 #define UI_MENU_SD_FILESELECTOR {&ui_menu_back}
 UI_MENU_FILESELECT(ui_menu_sd_fileselector,UI_MENU_SD_FILESELECTOR,1);//BUG without this ; compilation crash
 UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_printfile, UI_TEXT_PRINT_FILE_ID, UI_ACTION_SD_PRINT, MENU_MODE_SD_MOUNTED,  MENU_MODE_SD_PRINTING|MENU_MODE_PRINTING, ALL_MODE)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_pause, UI_TEXT_PAUSE_PRINT_ID, UI_ACTION_SD_PAUSE, MENU_MODE_SD_PRINTING, MENU_MODE_SD_PAUSED, ALL_MODE)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_continue, UI_TEXT_CONTINUE_PRINT_ID, UI_ACTION_SD_CONTINUE, MENU_MODE_SD_PAUSED,   0, ALL_MODE)
+UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_pause, UI_TEXT_PAUSE_PRINT_ID, UI_ACTION_SD_PAUSE, MENU_MODE_SD_PRINTING, MENU_MODE_PAUSED, ALL_MODE)
+UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_continue, UI_TEXT_CONTINUE_PRINT_ID, UI_ACTION_SD_CONTINUE, MENU_MODE_PAUSED,   0, ALL_MODE)
 UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_stop, UI_TEXT_STOP_PRINT_ID, UI_ACTION_STOP_PRINT_FROM_MENU, MENU_MODE_SD_PRINTING|MENU_MODE_PRINTING, 0, ALL_MODE)
 //UI_MENU_SUBMENU_FILTER(ui_menu_sd_stop, UI_TEXT_STOP_PRINT,ui_menu_sd_askstop, MENU_MODE_SD_PRINTING, 0, ALL_MODE)
 #define SD_PRINTFILE_ENTRY &ui_menu_sd_printfile,

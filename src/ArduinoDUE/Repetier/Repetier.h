@@ -24,8 +24,10 @@
 
 #include <math.h>
 #include <stdint.h>
-#define REPETIER_VERSION "0.92.10"
+#define REPETIER_VERSION "0.92.10M"
 
+// Use new communication model for multiple channels - only until stable, then old version gets deleted
+#define NEW_COMMUNICATION 1
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
 // ##########################################################################################
@@ -71,6 +73,11 @@ usage or for searching for memory induced errors. Switch it off for production, 
 //#define DEBUG_SD_ERROR
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
 //#define DEBUG
+
+#define DEBUG_MSG(x) {if(Printer::debugEcho()) { Com::printFLN(PSTR(x));HAL::delayMilliseconds(20);}}
+#define DEBUG_MSG2(x,y) {if(Printer::debugEcho()) {Com::printFLN(PSTR(x),y);HAL::delayMilliseconds(20);}}
+#define DEBUG_MSG_FAST(x) {if(Printer::debugEcho()) {Com::printFLN(PSTR(x));}}
+#define DEBUG_MSG2_FAST(x,y) {if(Printer::debugEcho()) {Com::printFLN(PSTR(x),y);}}
 
 #define CARTESIAN 0
 #define XY_GANTRY 1
@@ -163,6 +170,9 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define CONTROLLER_SPARKLCD_ADAPTER 23
 #define CONTROLLER_ZONESTAR 24
 #define CONTROLLER_FELIX_DUE 405
+#define CONTROLLER_ORCABOTXXLPRO2 25
+#define CONTROLLER_AZSMZ_12864 26
+#define CONTROLLER_REPRAPWORLD_GLCD 27
 
 //direction flags
 #define X_DIRPOS 1
@@ -184,9 +194,6 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define X_STEP_DIRPOS 17
 #define Z_STEP_DIRPOS 68
 
-// add pid control
-#define TEMP_PID 1
-
 #define PRINTER_MODE_FFF 0
 #define PRINTER_MODE_LASER 1
 #define PRINTER_MODE_CNC 2
@@ -198,6 +205,12 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
 #include "Configuration.h"
+
+#if (LASER_PWM_MAX > 255 && SUPPORT_LASER) || (CNC_PWM_MAX > 255 && SUPPORT_CNC)
+typedef uint16_t secondspeed_t;
+#else
+typedef uint8_t secondspeed_t;
+#endif
 
 #ifndef SHARED_EXTRUDER_HEATER
 #define SHARED_EXTRUDER_HEATER 0
@@ -241,22 +254,16 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #ifndef MAX_JERK_DISTANCE
 #define MAX_JERK_DISTANCE 0.6
 #endif
-#define XY_GANTRY 1
-#define YX_GANTRY 2
-#define DELTA 3
-#define TUGA 4
-#define BIPOD 5
-#define XZ_GANTRY 8
-#define ZX_GANTRY 9
+
 #if defined(FAST_COREXYZ) && !(DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY || DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY || DRIVE_SYSTEM==GANTRY_FAKE)
 #undef FAST_COREXYZ
 #endif
 #ifdef FAST_COREXYZ
-#if DELTA_SEGMENTS_PER_SECOND_PRINT < 30
+#if DELTA_SEGMENTS_PER_SECOND_PRINT > 30
 #undef DELTA_SEGMENTS_PER_SECOND_PRINT
 #define DELTA_SEGMENTS_PER_SECOND_PRINT 30 // core is linear, no subsegments needed
 #endif
-#if DELTA_SEGMENTS_PER_SECOND_MOVE < 30
+#if DELTA_SEGMENTS_PER_SECOND_MOVE > 30
 #undef DELTA_SEGMENTS_PER_SECOND_MOVE
 #define DELTA_SEGMENTS_PER_SECOND_MOVE 30
 #endif
@@ -302,7 +309,7 @@ inline void memcopy4(void *dest,void *source) {
 #define MICROSTEP2 HIGH,LOW
 #define MICROSTEP4 LOW,HIGH
 #define MICROSTEP8 HIGH,HIGH
-#if (MOTHERBOARD == 501)
+#if (MOTHERBOARD == 501) || MOTHERBOARD==502
 #define MICROSTEP16 LOW,LOW
 #else
 #define MICROSTEP16 HIGH,HIGH
@@ -326,7 +333,8 @@ inline void memcopy4(void *dest,void *source) {
 #define Z2_MINMAX_PIN -1
 #endif
 
-#if MINMAX_HARDWARE_ENDSTOP_Z2 && Z2_MINMAX_PIN > -1 
+#if MINMAX_HARDWARE_ENDSTOP_Z2 && Z2_MINMAX_PIN > -1
+#undef MULTI_ZENDSTOP_HOMING 
 #define MULTI_ZENDSTOP_HOMING 1
 #define MULTI_ZENDSTOP_ALL 3
 #else
@@ -337,7 +345,7 @@ inline void memcopy4(void *dest,void *source) {
 #define SPEED_MAX_MILLIS 60
 #define SPEED_MAGNIFICATION 100.0f
 
-#define SOFTWARE_LEVELING (defined(FEATURE_SOFTWARE_LEVELING) && (DRIVE_SYSTEM==DELTA))
+#define SOFTWARE_LEVELING ((FEATURE_SOFTWARE_LEVELING) && (DRIVE_SYSTEM==DELTA))
 /**  \brief Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
 */
 #if !defined(ROD_RADIUS) && DRIVE_SYSTEM == DELTA
@@ -345,7 +353,7 @@ inline void memcopy4(void *dest,void *source) {
 #endif
 
 #ifndef UI_SPEEDDEPENDENT_POSITIONING
-#define UI_SPEEDDEPENDENT_POSITIONING true
+#define UI_SPEEDDEPENDENT_POSITIONING 1
 #endif
 
 #if DRIVE_SYSTEM==DELTA || DRIVE_SYSTEM==TUGA || DRIVE_SYSTEM==BIPOD || defined(FAST_COREXYZ)
@@ -528,6 +536,7 @@ inline void memcopy4(void *dest,void *source) {
 #define DEBUG_MEMORY Commands::checkFreeMemory();
 #endif
 
+#define NUM_ANALOG_TEMP_SENSORS EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS+BED_ANALOG_INPUTS+THERMO_ANALOG_INPUTS
 /** \brief number of analog input signals. Normally 1 for each temperature sensor */
 #define ANALOG_INPUTS (EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS+BED_ANALOG_INPUTS+THERMO_ANALOG_INPUTS+KEYPAD_ANALOG_INPUTS)
 #if ANALOG_INPUTS > 0
@@ -537,11 +546,14 @@ inline void memcopy4(void *dest,void *source) {
 
 #define MENU_MODE_SD_MOUNTED 1
 #define MENU_MODE_SD_PRINTING 2
-#define MENU_MODE_SD_PAUSED 4
+#define MENU_MODE_PAUSED 4
 #define MENU_MODE_FAN_RUNNING 8
 #define MENU_MODE_PRINTING 16
 #define MENU_MODE_FULL_PID 32
 #define MENU_MODE_DEADTIME 64
+#define MENU_MODE_FDM 128
+#define MENU_MODE_LASER 256
+#define MENU_MODE_CNC 512
 
 #ifndef BENDING_CORRECTION_A
 #define BENDING_CORRECTION_A 0
@@ -570,7 +582,6 @@ inline void memcopy4(void *dest,void *source) {
 #define MENU_MODE_WIZARD  8
 
 #include "HAL.h"
-#include "gcode.h"
 #define MAX_VFAT_ENTRIES (2)
 /** Total size of the buffer used to store the long filenames */
 #define LONG_FILENAME_LENGTH (13*MAX_VFAT_ENTRIES+1)
@@ -590,14 +601,18 @@ inline void memcopy4(void *dest,void *source) {
 #ifndef SDCARDDETECT
 #define SDCARDDETECT       -1
 #endif
+
 #ifndef SDSUPPORT
 #define SDSUPPORT 0
 #endif
+
 #if SDSUPPORT
 #include "SdFat.h"
 #endif
 
-#if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM != CARTESIAN
+#include "gcode.h"
+
+#if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM != CARTESIAN && !defined(ENFORCE_BACKLASH)
 #undef ENABLE_BACKLASH_COMPENSATION
 #define ENABLE_BACKLASH_COMPENSATION false
 #endif
@@ -957,7 +972,7 @@ public:
     //char fullName[13*SD_MAX_FOLDER_DEPTH+13]; // Fill name
     char *shortname; // Pointer to start of filename itself
     char *pathend; // File to char where pathname in fullname ends
-    uint8_t sdmode;  // true if we are printing from sd card, 2 = stop accepting new commands
+    uint8_t sdmode;  // 1 if we are printing from sd card, 2 = stop accepting new commands
     bool sdactive;
     //int16_t n;
     bool savetosd;
@@ -1038,11 +1053,47 @@ extern int debugWaitLoop;
 #define SQRT(x) sqrt(x)
 #endif
 
+class PlaneBuilder {
+	float sum_xx,sum_xy,sum_yy,sum_x,sum_y,sum_xz,sum_yz,sum_z,n;
+	public:
+	PlaneBuilder() {
+		reset();
+	}
+	void reset() {
+		sum_xx = sum_xy = sum_yy = sum_x = sum_y = sum_xz = sum_yz = sum_z = n = 0;
+	}
+	void addPoint(float x,float y,float z) {
+		n++;
+		sum_xx += x * x;
+		sum_xy += x * y;
+		sum_yy += y * y;
+		sum_x  += x;
+		sum_y  += y;
+		sum_xz += x * z;
+		sum_yz += y * z;
+		sum_z  += z;
+	}
+	void createPlane(Plane &plane,bool silent=false) {
+		float det = (sum_x * (sum_xy * sum_y - sum_x * sum_yy) + sum_xx * (n * sum_yy - sum_y * sum_y) + sum_xy * (sum_x * sum_y - n * sum_xy));
+		plane.a = ((sum_xy * sum_y  - sum_x * sum_yy)  * sum_z + (sum_x * sum_y  - n      * sum_xy) * sum_yz + sum_xz * (n      * sum_yy - sum_y * sum_y))  / det;
+		plane.b = ((sum_x  * sum_xy - sum_xx * sum_y)  * sum_z + (n     * sum_xx - sum_x  * sum_x)  * sum_yz + sum_xz * (sum_x  * sum_y  - n     * sum_xy)) / det;
+		plane.c = ((sum_xx * sum_yy - sum_xy * sum_xy) * sum_z + (sum_x * sum_xy - sum_xx * sum_y)  * sum_yz + sum_xz * (sum_xy * sum_y  - sum_x * sum_yy)) / det;
+		if(!silent) {
+			Com::printF(PSTR("plane: a = "),plane.a,4);
+			Com::printF(PSTR(" b = "),plane.b,4);
+			Com::printFLN(PSTR(" c = "),plane.c,4);
+		}
+	}
+};
+
 #include "Drivers.h"
 
 #include "Events.h"
 #if defined(CUSTOM_EVENTS)
 #include "CustomEvents.h"
 #endif
+
+// must be after CustomEvents as it might include definitions from there
+#include "DisplayList.h"
 
 #endif

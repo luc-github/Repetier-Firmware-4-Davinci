@@ -18,6 +18,17 @@
 
 #define UI_MAIN 1
 #include "Repetier.h"
+
+#define UI_ROWS_EXTRA 0
+#if UI_DISPLAY_TYPE == DISPLAY_U8G
+#if defined(UI_HEAD)
+#undef UI_ROWS
+#define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)-1
+#undef UI_ROWS_EXTRA
+#define UI_ROWS_EXTRA 1
+#endif
+#endif
+
 // The uimenu.h declares static variables of menus, which must be declared only once.
 // It does not define interfaces for other modules, so should never be included elsewhere
 #include "uimenu.h"
@@ -94,7 +105,7 @@ HAL::delayMilliseconds(duration);
 HAL::noTone(BEEPER_PIN);
 #endif
 }
-void beep(uint8_t duration,uint8_t count)
+void beep(uint8_t duration, uint8_t count)
 {
 #if FEATURE_BEEPER
 //Davinci Specific, to be able to disable sound from menu
@@ -104,18 +115,17 @@ if (!HAL::enablesound)return;
     SET_OUTPUT(BEEPER_PIN);
 #endif
 #if BEEPER_TYPE==2
-    HAL::i2cStartWait(BEEPER_ADDRESS+I2C_WRITE);
+    HAL::i2cStartWait(BEEPER_ADDRESS + I2C_WRITE);
 #if UI_DISPLAY_I2C_CHIPTYPE==1
     HAL::i2cWrite( 0x14); // Start at port a
 #endif
 #endif
-    for(uint8_t i=0; i < count; i++)
-    {
+    for(uint8_t i = 0; i < count; i++) {
 #if BEEPER_TYPE==1 && defined(BEEPER_PIN) && BEEPER_PIN>=0
 #if defined(BEEPER_TYPE_INVERTING) && BEEPER_TYPE_INVERTING
-        WRITE(BEEPER_PIN,LOW);
+        WRITE(BEEPER_PIN, LOW);
 #else
-        WRITE(BEEPER_PIN,HIGH);
+        WRITE(BEEPER_PIN, HIGH);
 #endif
 #else
 #if UI_DISPLAY_I2C_CHIPTYPE==0
@@ -127,15 +137,15 @@ if (!HAL::enablesound)return;
 #endif
 #if UI_DISPLAY_I2C_CHIPTYPE==1
         HAL::i2cWrite((BEEPER_PIN) | uid.outputMask);
-        HAL::i2cWrite(((BEEPER_PIN) | uid.outputMask)>>8);
+        HAL::i2cWrite(((BEEPER_PIN) | uid.outputMask) >> 8);
 #endif
 #endif
         HAL::delayMilliseconds(duration);
 #if BEEPER_TYPE==1 && defined(BEEPER_PIN) && BEEPER_PIN>=0
 #if defined(BEEPER_TYPE_INVERTING) && BEEPER_TYPE_INVERTING
-        WRITE(BEEPER_PIN,HIGH);
+        WRITE(BEEPER_PIN, HIGH);
 #else
-        WRITE(BEEPER_PIN,LOW);
+        WRITE(BEEPER_PIN, LOW);
 #endif
 #else
 #if UI_DISPLAY_I2C_CHIPTYPE==0
@@ -148,7 +158,7 @@ if (!HAL::enablesound)return;
 #endif
 #if UI_DISPLAY_I2C_CHIPTYPE==1
         HAL::i2cWrite( uid.outputMask);
-        HAL::i2cWrite(uid.outputMask>>8);
+        HAL::i2cWrite(uid.outputMask >> 8);
 #endif
 #endif
         HAL::delayMilliseconds(duration);
@@ -160,19 +170,18 @@ if (!HAL::enablesound)return;
 #endif
 }
 
-bool UIMenuEntry::showEntry() const
-{
+bool UIMenuEntry::showEntry() const {
     bool ret = true;
 //Davinci Specific, filter fr UI : Easy/Advanced
-    uint8_t f,f2,f3;
+    uint16_t f, f2, f3;
     //check what mode is targeted
     f3 = HAL::readFlashByte((PGM_P)&display_mode);
     //if not for current mode not need to continue
     if (!(f3 & UIDisplay::display_mode) ) return false;
     f = HAL::readFlashByte((PGM_P)&filter);
     if(f != 0)
-        ret = (f & Printer::menuMode) != 0;
-    if(ret && (f2 = HAL::readFlashByte((PGM_P)&nofilter)) != 0)
+        ret = (f & Printer::menuMode) == f;
+    if(ret && (f2 = HAL::readFlashWord((PGM_P)&nofilter)) != 0)
         ret = (f2 & Printer::menuMode) == 0;
     return ret;
 }
@@ -1552,18 +1561,16 @@ void UIDisplay::parse(const char *txt,bool ram)
         if(c2=='1') //heat PLA
                 {
                         bool allheat=true;
-                        if(extruder[0].tempControl.targetTemperatureC!=EEPROM::ftemp_ext_pla)allheat=false;
+                        if(extruder[0].tempControl.targetTemperatureC!=EEPROM::ftemp_ext0) allheat=false;
                        #if NUM_EXTRUDER>1
-                        if(extruder[1].tempControl.targetTemperatureC!=EEPROM::ftemp_ext_pla)allheat=false;
-                        #endif
-                       #if NUM_EXTRUDER>2
-                        if(extruder[2].tempControl.targetTemperatureC!=EEPROM::ftemp_ext_pla)allheat=false;
+                        if(extruder[1].tempControl.targetTemperatureC!=EEPROM::ftemp_ext1) allheat=false;
                         #endif
                         #if HAVE_HEATED_BED==true
-                        if(heatedBedController.targetTemperatureC!=EEPROM::ftemp_bed_pla)allheat=false;
+                        if(heatedBedController.targetTemperatureC!=EEPROM::ftemp_bed) allheat=false;
                         #endif
                         addStringP(allheat?"\003":"\004");
                 }
+     /*           
         else if(c2=='2') //heat ABS
                 {
                     bool allheat=true;
@@ -1578,7 +1585,7 @@ void UIDisplay::parse(const char *txt,bool ram)
                     if(heatedBedController.targetTemperatureC!=EEPROM::ftemp_bed_abs)allheat=false;
                     #endif
                     addStringP(allheat?"\003":"\004");
-                }
+                }*/
           else if(c2=='3') //Cooldown
                 {
                      bool alloff=true;
@@ -2025,13 +2032,12 @@ void UIDisplay::parse(const char *txt,bool ram)
             else
                 addFloat(-Printer::coordinateOffset[c2-'0'],4,0);
             break;
-//Davinci Specific, Temperature for Extruder/bed ABS and PLA
+//Davinci Specific, Temperature for Extruder 0 /1 /bed
         case 't':
-            if(c2=='1')addFloat(EEPROM::ftemp_ext_abs,3,0 );
-            else if(c2=='2')addFloat(EEPROM::ftemp_ext_pla,3,0 );
+            if(c2=='1')addFloat(EEPROM::ftemp_ext0,3,0 );
+            else if(c2=='2')addFloat(EEPROM::ftemp_ext1,3,0 );
              #if HAVE_HEATED_BED==true
-             else if(c2=='3')addFloat(EEPROM::ftemp_bed_abs,3,0 );
-             else if(c2=='4')addFloat(EEPROM::ftemp_bed_pla,3,0 );
+             else if(c2=='3')addFloat(EEPROM::ftemp_bed,3,0 );
              #endif
         break;
 
@@ -2899,10 +2905,27 @@ void UIDisplay::popMenu(bool refresh)
     if(refresh)
         refreshPage();
 }
-int UIDisplay::okAction(bool allowMoves)
-{
-    if(Printer::isUIErrorMessage())
-    {
+//Davinci TODO Fixme
+void UIDisplay::showMessage(int id) {
+    uid.menuLevel = 0;
+    switch(id) {
+    case 1:
+        //uid.pushMenu(&ui_msg_leveling_error, true);
+        break;
+    case 2:
+       // uid.pushMenu(&ui_msg_defectsensor, true);
+        break;
+    case 3:
+        //uid.pushMenu(&ui_msg_decoupled, true);
+        break;
+    case 4:
+        //uid.pushMenu(&ui_msg_slipping, true);
+        break;
+    }
+}
+
+int UIDisplay::okAction(bool allowMoves) {
+    if(Printer::isUIErrorMessage()) {
         Printer::setUIErrorMessage(false);
         return 0;
     }
@@ -3550,6 +3573,8 @@ ZPOS2:
         int istep=1;
         if (action==UI_ACTION_E_10)istep=10;
         if (action==UI_ACTION_E_100)istep=100;
+        int tmp = EEPROM::ftemp_ext0;
+        if (Extruder::current->id == 1 )  tmp = EEPROM::ftemp_ext1;
     #if !FEATURE_ENCODER
         increment=-increment; //upside down increment to allow keys to follow  filament movement, Up Key make filament going up, down key make filament going down
     #endif
@@ -3560,7 +3585,7 @@ ZPOS2:
                 if (confirmationDialog(Com::translatedF(UI_TEXT_WARNING_ID) ,Com::translatedF(UI_TEXT_EXTRUDER_COLD_ID),Com::translatedF(UI_TEXT_HEAT_EXTRUDER_ID),UI_CONFIRMATION_TYPE_YES_NO,true))
                     {
                     UI_STATUS_F(Com::translatedF(UI_TEXT_HEATING_EXTRUDER_ID));
-                    Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,Extruder::current->id);
+                    Extruder::setTemperatureForExtruder(tmp,Extruder::current->id);
                     }
                 else
                     {
@@ -3589,40 +3614,40 @@ ZPOS2:
     }
 
  //Davinci Specific, 
-    case UI_ACTION_EXT_TEMP_ABS :
+    case UI_ACTION_EXT_TEMP_0 :
     {
-         int tmp = EEPROM::ftemp_ext_abs;
+        int tmp = EEPROM::ftemp_ext0;
         if(tmp<UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
         tmp+=increment;
         if(tmp==1) tmp = UI_SET_MIN_EXTRUDER_TEMP;
         if(tmp<UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
         else if(tmp>UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
-        EEPROM::ftemp_ext_abs=tmp;
+        EEPROM::ftemp_ext0=tmp;
     }
     break;
-    case UI_ACTION_EXT_TEMP_PLA :
+    case UI_ACTION_EXT_TEMP_1 :
     {
-         int tmp = EEPROM::ftemp_ext_pla;
+         int tmp = EEPROM::ftemp_ext1;
         if(tmp<UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
         tmp+=increment;
         if(tmp==1) tmp = UI_SET_MIN_EXTRUDER_TEMP;
         if(tmp<UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
         else if(tmp>UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
-        EEPROM::ftemp_ext_pla=tmp;
+        EEPROM::ftemp_ext1=tmp;
     }
     break;
-    case UI_ACTION_BED_TEMP_ABS :
+    case UI_ACTION_BED_TEMP:
     {
-         int tmp = EEPROM::ftemp_bed_abs;
+         int tmp = EEPROM::ftemp_bed;
         if(tmp<UI_SET_MIN_HEATED_BED_TEMP) tmp = 0;
         tmp+=increment;
         if(tmp==1) tmp = UI_SET_MIN_HEATED_BED_TEMP;
         if(tmp<UI_SET_MIN_HEATED_BED_TEMP) tmp = 0;
         else if(tmp>UI_SET_MAX_HEATED_BED_TEMP) tmp = UI_SET_MAX_HEATED_BED_TEMP;
-        EEPROM::ftemp_bed_abs=tmp;
+        EEPROM::ftemp_bed=tmp;
     }
     break;
-case UI_ACTION_BED_TEMP_PLA :
+/*case UI_ACTION_BED_TEMP_PLA :
     {
          int tmp = EEPROM::ftemp_bed_pla;
         if(tmp<UI_SET_MIN_HEATED_BED_TEMP) tmp = 0;
@@ -3633,7 +3658,7 @@ case UI_ACTION_BED_TEMP_PLA :
         EEPROM::ftemp_bed_pla=tmp;
     }
     break;
-   
+*/   
     case UI_ACTION_FEEDRATE_MULTIPLY:
     {
         int fr = Printer::feedrateMultiply;
@@ -4443,11 +4468,11 @@ case UI_ACTION_LOAD_FAILSAFE:
          switch(step)
          {
          case  STEP_HEATING:
-            if (extruder[0].tempControl.targetTemperatureC<EEPROM::ftemp_ext_abs)
-           Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,0);
+            if (extruder[0].tempControl.targetTemperatureC<EEPROM::ftemp_ext0)
+           Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext0,0);
            #if NUM_EXTRUDER>1
-           if (extruder[1].tempControl.targetTemperatureC<EEPROM::ftemp_ext_abs)
-            Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,1);
+           if (extruder[1].tempControl.targetTemperatureC<EEPROM::ftemp_ext1)
+            Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext1,1);
            #endif
             step =  STEP_WAIT_FOR_TEMPERATURE;
          break;
@@ -4913,11 +4938,11 @@ case UI_ACTION_LOAD_FAILSAFE:
             }
         #endif
 #if NUM_EXTRUDER > 1
-        Extruder::selectExtruderById(0,true);
+        Extruder::selectExtruderById(0);
 #endif
         Printer::moveToReal(xpos,ypos,IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::homingFeedrate[0]);
 #if NUM_EXTRUDER > 1
-        Extruder::selectExtruderById(extruderid,false);
+        Extruder::selectExtruderById(extruderid);
 #endif
          //save current target temp
         float extrudertarget=extruder[extruderid].tempControl.targetTemperatureC;
@@ -4945,8 +4970,14 @@ case UI_ACTION_LOAD_FAILSAFE:
          switch(step)
          {
          case STEP_EXT_HEATING:
-           if (extruder[extruderid].tempControl.targetTemperatureC<EEPROM::ftemp_ext_abs)
-                   Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,extruderid);
+            if (extruderid == 0) {
+                if (extruder[extruderid].tempControl.targetTemperatureC<EEPROM::ftemp_ext0)
+                   Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext0,extruderid);
+               }
+            else {
+                  if (extruder[extruderid].tempControl.targetTemperatureC<EEPROM::ftemp_ext1)
+                   Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext1,extruderid);
+            }
             step =  STEP_EXT_WAIT_FOR_TEMPERATURE;
          break;
          case STEP_EXT_WAIT_FOR_TEMPERATURE:
@@ -5171,11 +5202,11 @@ case UI_ACTION_LOAD_FAILSAFE:
             if (confirmationDialog(Com::translatedF(UI_TEXT_DO_YOU_ID) ,Com::translatedF(UI_TEXT_CLEAN1_ID),Com::translatedF(UI_TEXT_CLEAN2_ID)))
                     {
                     //heat extruders first to keep them hot
-                    if (extruder[0].tempControl.targetTemperatureC<EEPROM::ftemp_ext_abs)
-                   Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,0);
+                    if (extruder[0].tempControl.targetTemperatureC<EEPROM::ftemp_ext0)
+                   Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext0,0);
                    #if NUM_EXTRUDER>1
-                   if (extruder[1].tempControl.targetTemperatureC<EEPROM::ftemp_ext_abs)
-                    Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,1);
+                   if (extruder[1].tempControl.targetTemperatureC<EEPROM::ftemp_ext1)
+                    Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext1,1);
                    #endif
                     executeAction(UI_ACTION_CLEAN_NOZZLE,true);
                     }
@@ -5203,15 +5234,15 @@ case UI_ACTION_LOAD_FAILSAFE:
          switch(step)
          {
          case STEP_AUTOLEVEL_HEATING:
-            if (extruder[0].tempControl.targetTemperatureC<EEPROM::ftemp_ext_abs)
-           Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,0);
+            if (extruder[0].tempControl.targetTemperatureC<EEPROM::ftemp_ext0)
+           Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext0,0);
            #if NUM_EXTRUDER>1
-           if (extruder[1].tempControl.targetTemperatureC<EEPROM::ftemp_ext_abs)
-            Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,1);
+           if (extruder[1].tempControl.targetTemperatureC<EEPROM::ftemp_ext1)
+            Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext1,1);
            #endif
            #if HAVE_HEATED_BED==true
-           if (heatedBedController.targetTemperatureC<EEPROM::ftemp_bed_abs)
-            Extruder::setHeatedBedTemperature(EEPROM::ftemp_bed_abs);
+           if (heatedBedController.targetTemperatureC<EEPROM::ftemp_bed)
+            Extruder::setHeatedBedTemperature(EEPROM::ftemp_bed);
            #endif
            step =  STEP_AUTOLEVEL_WAIT_FOR_TEMPERATURE;
          break;
@@ -5435,11 +5466,11 @@ case UI_ACTION_LOAD_FAILSAFE:
             if (confirmationDialog(Com::translatedF(UI_TEXT_DO_YOU_ID) ,Com::translatedF(UI_TEXT_CLEAN1_ID),Com::translatedF(UI_TEXT_CLEAN2_ID)))
                     {
                     //heat extruders first to keep them hot
-                    if (extruder[0].tempControl.targetTemperatureC<EEPROM::ftemp_ext_abs)
-                   Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,0);
+                    if (extruder[0].tempControl.targetTemperatureC < EEPROM::ftemp_ext0)
+                   Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext0,0);
                    #if NUM_EXTRUDER>1
-                   if (extruder[1].tempControl.targetTemperatureC<EEPROM::ftemp_ext_abs)
-                    Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,1);
+                   if (extruder[1].tempControl.targetTemperatureC < EEPROM::ftemp_ext1)
+                    Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext1,1);
                    #endif
                     executeAction(UI_ACTION_CLEAN_NOZZLE,true);
                     }
@@ -5468,15 +5499,15 @@ case UI_ACTION_LOAD_FAILSAFE:
          switch(step)
          {
          case STEP_AUTOLEVEL_HEATING:
-            if (extruder[0].tempControl.targetTemperatureC<EEPROM::ftemp_ext_abs)
-           Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,0);
+            if (extruder[0].tempControl.targetTemperatureC < EEPROM::ftemp_ext0)
+           Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext0,0);
            #if NUM_EXTRUDER>1
-           if (extruder[1].tempControl.targetTemperatureC<EEPROM::ftemp_ext_abs)
-            Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,1);
+           if (extruder[1].tempControl.targetTemperatureC < EEPROM::ftemp_ext1)
+            Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext1,1);
            #endif
-           #if HAVE_HEATED_BED==true
-           if (heatedBedController.targetTemperatureC<EEPROM::ftemp_bed_abs)
-            Extruder::setHeatedBedTemperature(EEPROM::ftemp_bed_abs);
+           #if HAVE_HEATED_BED == true
+           if (heatedBedController.targetTemperatureC < EEPROM::ftemp_bed)
+            Extruder::setHeatedBedTemperature(EEPROM::ftemp_bed);
            #endif
            step =  STEP_AUTOLEVEL_WAIT_FOR_TEMPERATURE;
          break;
@@ -5704,11 +5735,11 @@ case UI_ACTION_LOAD_FAILSAFE:
             if (confirmationDialog(Com::translatedF(UI_TEXT_DO_YOU_ID) ,Com::translatedF(UI_TEXT_CLEAN1_ID),Com::translatedF(UI_TEXT_CLEAN2_ID)))
                     {
                       //heat extruders first to keep them hot
-                    if (extruder[0].tempControl.targetTemperatureC<EEPROM::ftemp_ext_abs)
-                   Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,0);
-                   #if NUM_EXTRUDER>1
-                   if (extruder[1].tempControl.targetTemperatureC<EEPROM::ftemp_ext_abs)
-                    Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,1);
+                    if (extruder[0].tempControl.targetTemperatureC < EEPROM::ftemp_ext0)
+                    Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext0,0);
+                    #if NUM_EXTRUDER>1
+                    if (extruder[1].tempControl.targetTemperatureC < EEPROM::ftemp_ext1)
+                    Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext1,1);
                    #endif
                     executeAction(UI_ACTION_CLEAN_NOZZLE,true);
                     }
@@ -5740,22 +5771,22 @@ case UI_ACTION_LOAD_FAILSAFE:
          switch(step)
          {
          case STEP_MANUAL_LEVEL_HEATING:
-           if (extruder[0].tempControl.targetTemperatureC<EEPROM::ftemp_ext_abs)
-           Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,0);
+           if (extruder[0].tempControl.targetTemperatureC < EEPROM::ftemp_ext0)
+           Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext0,0);
            #if NUM_EXTRUDER>1
-           if (extruder[1].tempControl.targetTemperatureC<EEPROM::ftemp_ext_abs)
-            Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,1);
+           if (extruder[1].tempControl.targetTemperatureC < EEPROM::ftemp_ext1)
+            Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext1,1);
            #endif
            #if HAVE_HEATED_BED==true
-           if (heatedBedController.targetTemperatureC<EEPROM::ftemp_bed_abs)
-            Extruder::setHeatedBedTemperature(EEPROM::ftemp_bed_abs);
+           if (heatedBedController.targetTemperatureC < EEPROM::ftemp_bed)
+            Extruder::setHeatedBedTemperature(EEPROM::ftemp_bed);
            #endif
            step =  STEP_MANUAL_LEVEL_WAIT_FOR_TEMPERATURE;
          break;
          case STEP_MANUAL_LEVEL_WAIT_FOR_TEMPERATURE:
             UI_STATUS_F(Com::translatedF(UI_TEXT_HEATING_ID));
             //no need to be extremely accurate so no need stable temperature
-            if(abs(extruder[0].tempControl.currentTemperatureC- extruder[0].tempControl.targetTemperatureC)<2)
+            if(abs(extruder[0].tempControl.currentTemperatureC- extruder[0].tempControl.targetTemperatureC) < 2)
                 {
                 step = STEP_MANUAL_LEVEL_PAGE0;
                 }
@@ -6036,19 +6067,15 @@ case UI_ACTION_LOAD_FAILSAFE:
 //read temperature in EEPROM as more easy to change
             UI_STATUS_F(Com::translatedF(UI_TEXT_PREHEAT_PLA_ID));
             bool allheat=true;
-            if(extruder[0].tempControl.targetTemperatureC!=EEPROM::ftemp_ext_pla)allheat=false;
-            Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_pla,0);
+            if(extruder[0].tempControl.targetTemperatureC != EEPROM::ftemp_ext0)allheat=false;
+            Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext0,0);
 #if NUM_EXTRUDER > 1
-            if(extruder[1].tempControl.targetTemperatureC!=EEPROM::ftemp_ext_pla)allheat=false;
-            Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_pla,1);
-#endif
-#if NUM_EXTRUDER > 2
-            if(extruder[2].tempControl.targetTemperatureC!=EEPROM::ftemp_ext_pla)allheat=false;
-            Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_pla,2);
+            if(extruder[1].tempControl.targetTemperatureC != EEPROM::ftemp_ext1)allheat=false;
+            Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext1,1);
 #endif
 #if HAVE_HEATED_BED
-            if(heatedBedController.targetTemperatureC!=EEPROM::ftemp_bed_pla)allheat=false;
-            Extruder::setHeatedBedTemperature(EEPROM::ftemp_bed_pla);
+            if(heatedBedController.targetTemperatureC != EEPROM::ftemp_bed)allheat=false;
+            Extruder::setHeatedBedTemperature(EEPROM::ftemp_bed);
 #endif
             if (allheat)
                 {
@@ -6062,25 +6089,21 @@ case UI_ACTION_LOAD_FAILSAFE:
                 }
             break;
         }
-        case UI_ACTION_PREHEAT_ABS:
+        case UI_ACTION_PREHEAT_ALL:
         {
 //Davinci Specific, preheat menu with feedback need or not,
 //read temperature in EEPROM as more easy to change
             UI_STATUS_F(Com::translatedF(UI_TEXT_PREHEAT_ABS_ID));
             bool allheat=true;
-            if(extruder[0].tempControl.targetTemperatureC!=EEPROM::ftemp_ext_abs)allheat=false;
-            Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,0);
+            if(extruder[0].tempControl.targetTemperatureC!=EEPROM::ftemp_ext0)allheat=false;
+            Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext0,0);
 #if NUM_EXTRUDER > 1
-            if(extruder[1].tempControl.targetTemperatureC!=EEPROM::ftemp_ext_abs)allheat=false;
-            Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,1);
-#endif
-#if NUM_EXTRUDER > 2
-            if(extruder[2].tempControl.targetTemperatureC!=EEPROM::ftemp_ext_abs)allheat=false;
-            Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext_abs,2);
+            if(extruder[1].tempControl.targetTemperatureC!=EEPROM::ftemp_ext1)allheat=false;
+            Extruder::setTemperatureForExtruder(EEPROM::ftemp_ext1,1);
 #endif
 #if HAVE_HEATED_BED
-            if(heatedBedController.targetTemperatureC!=EEPROM::ftemp_bed_abs)allheat=false;
-            Extruder::setHeatedBedTemperature(EEPROM::ftemp_bed_abs);
+            if(heatedBedController.targetTemperatureC!=EEPROM::ftemp_bed)allheat=false;
+            Extruder::setHeatedBedTemperature(EEPROM::ftemp_bed);
 #endif
            //Davinci Specific, fancy sound if no need or to confirm it is done
            if (allheat)
@@ -6271,14 +6294,13 @@ case UI_ACTION_LOAD_FAILSAFE:
             break;
         case UI_ACTION_SD_PRI_PAU_CONT:
             if(!allowMoves) ret = UI_ACTION_SD_PRI_PAU_CONT;
-            else
-            {
-                if(Printer::isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_SD_PAUSED))
-                    sd.continuePrint();
+            else {
+                if(Printer::isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_PAUSED))
+                    sd.continuePrint(true);
                 else if(Printer::isMenuMode(MENU_MODE_SD_PRINTING))
                     sd.pausePrint(true);
                 else if(sd.sdactive)
-                    pushMenu(&ui_menu_sd_fileselector,false);
+                    pushMenu(&ui_menu_sd_fileselector, false);
             }
             break;
 //Davinci Specific
@@ -6286,38 +6308,8 @@ case UI_ACTION_LOAD_FAILSAFE:
             //ask for confirmation
             if (!confirmationDialog(Com::translatedF(UI_TEXT_PLEASE_CONFIRM_ID) ,Com::translatedF(UI_TEXT_STOP_PRINT_ID),Com::translatedF(UI_TEXT_EMPTY_ID),UI_CONFIRMATION_TYPE_YES_NO,false))break;
         case UI_ACTION_SD_STOP:
-            {
-           //Davinci Specific, Immediate stop
-             playsound(400,400);
-             //reset connect with host if any
-            Com::printFLN(Com::tReset);
-            //we are printing from sdcard or from host ?
-            if(Printer::isMenuMode(MENU_MODE_SD_PAUSED) || sd.sdmode )sd.stopPrint();
-            else Com::printFLN(PSTR("Host Print stopped by user."));
-            menuLevel=0;
-            menuPos[0]=0;
-            refreshPage();
-             Printer::setMenuModeEx(MENU_MODE_STOP_REQUESTED,true);
-             Printer::setMenuModeEx(MENU_MODE_STOP_DONE,false);
-             Printer::setMenuMode(MENU_MODE_SD_PAUSED,false);
-             //to be sure no moving  by dummy movement
-              Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
-             GCode::bufferReadIndex=0; ///< Read position in gcode_buffer.
-             GCode::bufferWriteIndex=0; ///< Write position in gcode_buffer.
-             GCode::commandsReceivingWritePosition=0; ///< Writing position in gcode_transbuffer
-             GCode::lastLineNumber=0; ///< Last line number received.
-             GCode::bufferLength=0; ///< Number of commands stored in gcode_buffer
-             PrintLine::nlFlag = false;
-             PrintLine::linesCount=0;
-             PrintLine::linesWritePos = 0;            ///< Position where we write the next cached line move.
-             PrintLine::linesPos = 0;                 ///< Position for executing line movement
-             PrintLine::lines[0].block();
-            #if SD_STOP_HEATER_AND_MOTORS_ON_STOP
-            executeAction(UI_ACTION_COOLDOWN,true);
-            #endif
-            Printer::setMenuModeEx(MENU_MODE_STOP_DONE,true);
-            UI_STATUS_F(Com::translatedF(UI_TEXT_CANCELED_ID));
-            }
+            if(!allowMoves) ret = UI_ACTION_SD_STOP;
+            else sd.stopPrint();
             break;
         case UI_ACTION_SD_UNMOUNT:
             sd.unmount();
@@ -6329,6 +6321,16 @@ case UI_ACTION_LOAD_FAILSAFE:
             pushMenu(&ui_menu_sd, false);
             break;
 #endif
+// Davinci TODO
+        case UI_ACTION_STOP:
+//            pushMenu(&ui_menu_askstop, true);
+            break;
+        case UI_ACTION_STOP_CONFIRMED:
+            Printer::stopPrint();
+            break;
+        case UI_ACTION_CONTINUE:
+            Printer::continuePrint();
+            break;
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
         case UI_ACTION_FAN_OFF:
         case UI_ACTION_FAN_25:
@@ -6339,13 +6341,11 @@ case UI_ACTION_LOAD_FAILSAFE:
         case UI_ACTION_FAN_FULL:
             Commands::setFanSpeed(255, true);
             break;
-        case UI_ACTION_FAN_SUSPEND:
-        {
+        case UI_ACTION_FAN_SUSPEND: {
             static uint8_t lastFanSpeed = 255;
-            if(Printer::getFanSpeed()==0)
+            if(Printer::getFanSpeed() == 0)
                 Commands::setFanSpeed(lastFanSpeed, true);
-            else
-            {
+            else {
                 lastFanSpeed = Printer::getFanSpeed();
                 Commands::setFanSpeed(0, true);
             }
@@ -6875,7 +6875,7 @@ void UIDisplay::slowAction(bool allowMoves)
 if (ui_autolightoff_time==-1) ui_autolightoff_time=HAL::timeInMilliseconds()+EEPROM::timepowersaving;
 if ((ui_autolightoff_time<time) && (EEPROM::timepowersaving>0) )
     {//if printing and keep light on do not swich off
-    if(!(EEPROM::bkeeplighton  &&((Printer::menuMode&MENU_MODE_SD_PRINTING)||(Printer::menuMode&MENU_MODE_PRINTING)||(Printer::menuMode&MENU_MODE_SD_PAUSED))))
+    if(!(EEPROM::bkeeplighton  &&((Printer::menuMode&MENU_MODE_SD_PRINTING)||(Printer::menuMode&MENU_MODE_PRINTING)||(Printer::menuMode&MENU_MODE_PAUSED))))
     {
         #if CASE_LIGHTS_PIN > 0
         if ((READ(CASE_LIGHTS_PIN)) && EEPROM::buselight)
@@ -6893,7 +6893,7 @@ if ((ui_autolightoff_time<time) && (EEPROM::timepowersaving>0) )
         WRITE(UI_BACKLIGHT_PIN, LOW);
         #endif
         }
-    if((EEPROM::bkeeplighton  &&((Printer::menuMode&MENU_MODE_SD_PRINTING)||(Printer::menuMode&MENU_MODE_PRINTING)||(Printer::menuMode&MENU_MODE_SD_PAUSED))))ui_autolightoff_time=HAL::timeInMilliseconds()+EEPROM::timepowersaving+10000;
+    if((EEPROM::bkeeplighton  &&((Printer::menuMode&MENU_MODE_SD_PRINTING)||(Printer::menuMode&MENU_MODE_PRINTING)||(Printer::menuMode&MENU_MODE_PAUSED))))ui_autolightoff_time=HAL::timeInMilliseconds()+EEPROM::timepowersaving+10000;
     }
 #endif
     if(menuLevel == 0 && time > 4000) // Top menu refresh/switch
