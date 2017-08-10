@@ -118,6 +118,12 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     EEPROM::btopsensor = bool(CASE_TOP_SENSOR_DEFAULT_ON);
     #if ENABLE_WIFI
     HAL::bwifion = bool(CASE_WIFI_DEFAULT_ON);
+     if (HAL::bwifion) {
+            GCodeSource::registerSource(&serial1Source);
+            }
+        else {
+            GCodeSource::removeSource(&serial1Source);
+            }
     #endif
     EEPROM::ftemp_ext0 = EXT0_PREHEAT_TEMP ;
     EEPROM::ftemp_ext1 = EXT1_PREHEAT_TEMP ;
@@ -750,6 +756,12 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
 #endif
 #if ENABLE_WIFI
     HAL::bwifion = HAL::eprGetByte(EPR_WIFI_ON);
+    if (HAL::bwifion) {
+            GCodeSource::registerSource(&serial1Source);
+            }
+        else {
+            GCodeSource::removeSource(&serial1Source);
+            }
 #endif
 #if FEATURE_BEEPER
     HAL::enablesound = HAL::eprGetByte(EPR_SOUND_ON);

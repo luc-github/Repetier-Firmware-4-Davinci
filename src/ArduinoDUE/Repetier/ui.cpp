@@ -4338,6 +4338,12 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
  #if ENABLE_WIFI
      case UI_ACTION_WIFI_ONOFF:
          HAL::bwifion=!HAL::bwifion;
+         if (HAL::bwifion) {
+            GCodeSource::registerSource(&serial1Source);
+            }
+        else {
+            GCodeSource::removeSource(&serial1Source);
+            }
          //save directly to eeprom
         EEPROM:: update(EPR_WIFI_ON,EPR_TYPE_BYTE,HAL::bwifion,0);
         UI_STATUS_F(Com::translatedF(UI_TEXT_WIFI_ONOFF_ID));

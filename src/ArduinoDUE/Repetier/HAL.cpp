@@ -1350,12 +1350,18 @@ int RFDoubleSerial::read(void) {
 }
 void RFDoubleSerial::flush(void) {
   RFSERIAL.flush();
-  BT_SERIAL.flush();
+  if (HAL::bwifion)BT_SERIAL.flush();
 }
 size_t RFDoubleSerial::write(uint8_t c) {
   size_t r = RFSERIAL.write(c);
   //Davinci Specific to be able to disable wifi
-  if (HAL::bwifion) BT_SERIAL.write(c);
+  if (HAL::bwifion) {
+      BT_SERIAL.write(c);
+       if (c=='\n') 
+              {
+              HAL::delayMilliseconds(DELAY_BY_LINE);
+              }
+        }
   return r;
 }
 RFDoubleSerial BTAdapter;
