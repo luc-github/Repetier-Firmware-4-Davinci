@@ -26,6 +26,7 @@ before_script:
 script:
 - cd $TRAVIS_BUILD_DIR
 - source command.sh
+- if [ -z "$TRAVIS_TAG" ]; then export TRAVIS_TAG=NO_GIT_TAG;fi
 - export MODEL=0
 - export DAVINCI=0
 - sed -i "s/#define DAVINCI /#define DAVINCI $DAVINCI \n\/\//g" ./src/ArduinoDUE/Repetier/Configuration.h
