@@ -132,7 +132,10 @@ typedef char prog_char;
 
 
 #define EXTRUDER_CLOCK_FREQ     60000 // extruder stepper interrupt frequency
-#define PWM_CLOCK_FREQ          3906
+// #define PWM_CLOCK_FREQ          3906
+// #define PWM_COUNTER_100MS       390
+#define PWM_CLOCK_FREQ          10000
+#define PWM_COUNTER_100MS       1000
 #define TIMER1_CLOCK_FREQ       244
 #define TIMER1_PRESCALE         2
 
@@ -330,13 +333,13 @@ class HAL
     HAL();
     virtual ~HAL();
 
-//Davinci Specific
-#if FEATURE_BEEPER
-    static bool enablesound;
-#endif //FEATURE_BEEPER
-#if ENABLE_WIFI
-    static bool bwifion;
-#endif //wifi feature
+    // Try to initialize pinNumber as hardware PWM. Returns internal
+    // id if it succeeds or -1 if it fails. Typical reasons to fail
+    // are no pwm support for that pin or an other pin uses same PWM
+    // channel.
+    static int initHardwarePWM(int pinNumber, uint32_t frequency);
+    // Set pwm output to value. id is id from initHardwarePWM.
+    static void setHardwarePWM(int id, int value);
 
     // do any hardware-specific initialization here
     static inline void hwSetup(void)
@@ -441,10 +444,6 @@ class HAL
     static inline void tone(uint8_t pin, int frequency) {
       // set up timer counter 1 channel 0 to generate interrupts for
       // toggling output pin.
-      //Davinci Specific
-#if FEATURE_BEEPER
-      if (!enablesound)return;
-#endif
       SET_OUTPUT(pin);
       tone_pin = pin;
       pmc_set_writeprotect(false);
@@ -745,10 +744,14 @@ class HAL
       }
       return b;
     }
-    static inline void spiBegin()
+    static inline void spiBegin(uint8_t ssPin = 0)
     {
-      SET_OUTPUT(SDSS);
-      WRITE(SDSS, HIGH);
+     	if (ssPin) {
+			   HAL::digitalWrite(ssPin, 0);
+		  } else {
+        SET_OUTPUT(SDSS);
+        WRITE(SDSS, HIGH);
+      }
       SET_OUTPUT(SCK_PIN);
       SET_INPUT(MISO_PIN);
       SET_OUTPUT(MOSI_PIN);
@@ -760,57 +763,57 @@ class HAL
       WRITE(MOSI_PIN, HIGH);
       WRITE(SCK_PIN, LOW);
     }
-    static inline uint8_t spiReceive()
+    static inline uint8_t spiReceive(uint8_t send=0xff)
     {
-      WRITE(SDSS, LOW);
-      uint8_t b = spiTransfer(0xff);
-      WRITE(SDSS, HIGH);
+      // WRITE(SDSS, LOW);
+      uint8_t b = spiTransfer(send);
+      // WRITE(SDSS, HIGH);
       return b;
     }
     static inline void spiReadBlock(uint8_t*buf, uint16_t nbyte)
     {
       if (nbyte == 0) return;
-      WRITE(SDSS, LOW);
+      // WRITE(SDSS, LOW);
       for (int i = 0; i < nbyte; i++)
       {
         buf[i] = spiTransfer(0xff);
       }
-      WRITE(SDSS, HIGH);
+      // WRITE(SDSS, HIGH);
 
     }
     static inline void spiSend(uint8_t b) {
-      WRITE(SDSS, LOW);
+      // WRITE(SDSS, LOW);
       uint8_t response = spiTransfer(b);
-      WRITE(SDSS, HIGH);
+      // WRITE(SDSS, HIGH);
     }
 
     static inline void spiSend(const uint8_t* buf , size_t n)
     {
       if (n == 0) return;
-      WRITE(SDSS, LOW);
+      // WRITE(SDSS, LOW);
       for (uint16_t i = 0; i < n; i++) {
         spiTransfer(buf[i]);
       }
-      WRITE(SDSS, HIGH);
+      // WRITE(SDSS, HIGH);
     }
 
     inline __attribute__((always_inline))
     static void spiSendBlock(uint8_t token, const uint8_t* buf)
     {
-      WRITE(SDSS, LOW);
+      // WRITE(SDSS, LOW);
       spiTransfer(token);
 
       for (uint16_t i = 0; i < 512; i++)
       {
         spiTransfer(buf[i]);
       }
-      WRITE(SDSS, HIGH);
+      // WRITE(SDSS, HIGH);
     }
 
 #else
 
     // hardware SPI
-    static void spiBegin();
+    static void spiBegin(uint8_t ssPin = 0);
     // spiClock is 0 to 6, relecting AVR clock dividers 2,4,8,16,32,64,128
     // Due can only go as slow as AVR divider 32 -- slowest Due clock is 329,412 Hz
     static void spiInit(uint8_t spiClock);
@@ -849,17 +852,15 @@ class HAL
 
     // Watchdog support
     inline static void startWatchdog() {
-//Davinci Specific
-#if FEATURE_WATCHDOG
-       uint32_t timeout = 8000 * 256 / 1000; //8000ms = 8s
-       if (timeout == 0) timeout = 1;
-       else if (timeout > 0xFFF) timeout = 0xFFF;
-       timeout = WDT_MR_WDRSTEN | WDT_MR_WDV(timeout) | WDT_MR_WDD(timeout);
-       WDT_Enable (WDT, timeout);
-#endif
-    }
-    inline static void stopWatchdog() {WDT_Disable (WDT);}
-
+      //WDT->WDT_MR = WDT_MR_WDRSTEN | WATCHDOG_INTERVAL | 0x0fff0000; //(WATCHDOG_INTERVAL << 16);
+      //WDT->WDT_CR = 0xA5000001;      
+      WDT->WDT_CR = 0xA5000001; //reset clock before updating WDD
+      delayMicroseconds(92); //must wait a minimum of 3 slow clocks before updating WDT_MR after writing WDT_CR
+      WDT->WDT_MR = WDT_MR_WDRSTEN | WATCHDOG_INTERVAL | (WATCHDOG_INTERVAL << 16);
+      WDT->WDT_CR = 0xA5000001;
+      
+    };
+    inline static void stopWatchdog() {}
     inline static void pingWatchdog() {
 #if FEATURE_WATCHDOG
       wdPinged = true;

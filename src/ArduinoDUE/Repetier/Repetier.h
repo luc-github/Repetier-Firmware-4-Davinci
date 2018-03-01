@@ -24,7 +24,8 @@
 
 #include <math.h>
 #include <stdint.h>
-#define REPETIER_VERSION "0.92.10M"
+//#define REPETIER_VERSION "0.92.10"
+#define REPETIER_VERSION "1.0.1"
 
 // Use new communication model for multiple channels - only until stable, then old version gets deleted
 #define NEW_COMMUNICATION 1
@@ -91,6 +92,10 @@ usage or for searching for memory induced errors. Switch it off for production, 
 
 #define WIZARD_STACK_SIZE 8
 #define IGNORE_COORDINATE 999999
+
+#define IS_MAC_TRUE(x) (x!=0)
+#define IS_MAC_FALSE(x) (x==0)
+#define HAS_PIN(x) (defined( x ## _PIN) && x > -1)
 
 // Uncomment if no analyzer is connected
 //#define ANALYZER
@@ -341,6 +346,20 @@ inline void memcopy4(void *dest,void *source) {
 #define MULTI_ZENDSTOP_HOMING 0
 #endif
 
+#if (X_HOME_DIR < 0 && HAS_PIN(X2_MIN) && MIN_HARDWARE_ENDSTOP_X2) || (X_HOME_DIR > 0 && HAS_PIN(X2_MAX) && MAX_HARDWARE_ENDSTOP_X2)
+#define MULTI_XENDSTOP_HOMING 1
+#define MULTI_XENDSTOP_ALL 3
+#else
+#define MULTI_XENDSTOP_HOMING 0
+#endif
+
+#if (Y_HOME_DIR < 0 && HAS_PIN(Y2_MIN) && MIN_HARDWARE_ENDSTOP_Y2) || (Y_HOME_DIR > 0 && HAS_PIN(Y2_MAX) && MAX_HARDWARE_ENDSTOP_Y2)
+#define MULTI_YENDSTOP_HOMING 1
+#define MULTI_YENDSTOP_ALL 3
+#else
+#define MULTI_YENDSTOP_HOMING 0
+#endif
+
 #define SPEED_MIN_MILLIS 400
 #define SPEED_MAX_MILLIS 60
 #define SPEED_MAGNIFICATION 100.0f
@@ -574,12 +593,6 @@ inline void memcopy4(void *dest,void *source) {
 #ifndef KEEP_ALIVE_INTERVAL
 #define KEEP_ALIVE_INTERVAL 2000
 #endif
-
-//Davinci Specific
-#define MENU_MODE_STOP_REQUESTED 1
-#define MENU_MODE_STOP_DONE  2
-#define MENU_MODE_GCODE_PROCESSING  4
-#define MENU_MODE_WIZARD  8
 
 #include "HAL.h"
 #define MAX_VFAT_ENTRIES (2)
@@ -878,6 +891,15 @@ public:
     inline RVector3 operator*(float lhs,const RVector3 &rhs) {
         return rhs.scale(lhs);
     }
+
+#if !defined(MAX_FAN_PWM) || MAX_FAN_PWM == 255
+#define TRIM_FAN_PWM(x) x
+#undef MAX_FAN_PWM
+#define MAX_FAN_PWM 255
+#else
+#define TRIM_FAN_PWM(x) static_cast<uint8_t>(static_cast<unsigned int>(x) * MAX_FAN_PWM / 255)
+#endif
+
 extern const uint8 osAnalogInputChannels[] PROGMEM;
 //extern uint8 osAnalogInputCounter[ANALOG_INPUTS];
 //extern uint osAnalogInputBuildup[ANALOG_INPUTS];
@@ -885,12 +907,12 @@ extern const uint8 osAnalogInputChannels[] PROGMEM;
 #if ANALOG_INPUTS > 0
 extern volatile uint osAnalogInputValues[ANALOG_INPUTS];
 #endif
-#define PWM_HEATED_BED NUM_EXTRUDER
-#define PWM_BOARD_FAN PWM_HEATED_BED+1
-#define PWM_FAN1 PWM_BOARD_FAN+1
-#define PWM_FAN2 PWM_FAN1+1
-#define PWM_FAN_THERMO PWM_FAN2+1
-#define NUM_PWM PWM_FAN_THERMO+1
+#define PWM_HEATED_BED    NUM_EXTRUDER
+#define PWM_BOARD_FAN     PWM_HEATED_BED + 1
+#define PWM_FAN1          PWM_BOARD_FAN + 1
+#define PWM_FAN2          PWM_FAN1 + 1
+#define PWM_FAN_THERMO    PWM_FAN2 + 1
+#define NUM_PWM           PWM_FAN_THERMO + 1
 extern uint8_t pwm_pos[NUM_PWM]; // 0-NUM_EXTRUDER = Heater 0-NUM_EXTRUDER of extruder, NUM_EXTRUDER = Heated bed, NUM_EXTRUDER+1 Board fan, NUM_EXTRUDER+2 = Fan
 #if USE_ADVANCE
 #if ENABLE_QUADRATIC_ADVANCE
@@ -1007,10 +1029,6 @@ public:
     char *createFilename(char *buffer,const dir_t &p);
     void makeDirectory(char *filename);
     bool showFilename(const uint8_t *name);
-    //Davinci Specific, to have clean list and avoid user to delete EEPROM
-    #if HIDE_BINARY_ON_SD
-    static bool showFilename( dir_t*p,const char *filename);
-    #endif
     void automount();
 #ifdef GLENN_DEBUG
     void writeToFile();

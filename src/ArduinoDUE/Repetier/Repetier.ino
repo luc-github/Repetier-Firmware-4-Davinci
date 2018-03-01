@@ -45,9 +45,10 @@ Implemented Codes
 - G11 S<1 = long retract, 0 = short retract = default> = Undo retraction according to stored setting
 - G20 - Units for G0/G1 are inches.
 - G21 - Units for G0/G1 are mm.
-- G28 - Home all axis or named axis like G28 X Y 
+- G28 - Home all axis or named axis.
 - G29 S<0..2> - Z-Probe at the 3 defined probe points. S = 1 measure avg. zHeight, S = 2 store avg zHeight
 - G30 P<0..3> - Single z-probe at current position P = 1 first measurement, P = 2 Last measurement P = 0 or 3 first and last measurement
+- G30 H<height> R<offset> Make probe define new Z and z offset (R) at trigger point assuming z-probe measured an object of H height.
 - G31 - Write signal of probe sensor
 - G32 S<0..2> P<0..1> - Autolevel print bed. S = 1 measure zLength, S = 2 Measure and store new zLength
 - G33 - Measure distortion map
@@ -61,33 +62,16 @@ Implemented Codes
 - G132 - calibrate endstop positions. Call this, after calling G131 and after centering the extruder holder.
 - G133 - measure steps until max endstops for deltas. Can be used to detect lost steps within tolerances of endstops.
 - G134 Px Sx Zx - Calibrate nozzle height difference (need z probe in nozzle!) Px = reference extruder, Sx = only measure extrude x against reference, Zx = add to measured z distance for Sx for correction.
-- G201 P<motorId> X<pos> F<feedrate>     - Go to position X with motor X at feedrate F, F is saved so can be used once and alone
+- G201 P<motorId> X<pos>     - Go to position X with motor X
 - G202 P<motorId> X<setpos>  - Mark current position as X
 - G203 P<motorId>            - Report current motor position
 - G204 P<motorId> S<0/1>     - Enable/disable motor
-
-- T0 - select extruder 1
-- T1 - select extruder 2
-
-Davinci AiO codes for Horus usage
-- G201 Fnnn : motor speed
-- G201 Xnnn : move motor in mm
-- G201 Ennn : move motor in deg
-- G50       : reset motor origin position
-- M17       : motor_disable
-- M18       : motor_enable
-- M19       : motor home 
-- M70 Tn    : switch off laser n, 0 index based
-- M71 Tn    : switch on laser n, 0 index based 
-- M72 Tn    : switch off white led n, 0 index based
-- M73 Tn    : switch on white led n, 0 index based
-- M60 Tn    : read ldr sensor, actually fake as always return 500
+- G205 P<motorId> S<0/1> E<0/1> - Home motor, S1 = go back to stored position, E1 = home only if endstop was never met, meaning it was never homed with motor.
 
 RepRap M Codes
 
 - M104 - Set extruder target temp
 - M105 - Read current temp
-M106/M107 work only if repurpose fan is enabled, as by default fan is managed by temperature
 - M106 S<speed> P<fan> I<ignore> - Fan on speed = 0..255, P = 0 or 1, 0 is default and can be omitted, I1 = Ignore M106/M107 from now on, I0 = disable ignore
 - M107 P<fan> - Fan off, P = 0 or 1, 0 is default and can be omitted
 - M109 - Wait for extruder current temp to reach target temp. Same params as M104
@@ -110,8 +94,7 @@ Custom M Codes
 - M29  - Stop SD write
 - M30 <filename> - Delete file on sd card
 - M32 <dirname> create subdirectory
-- M42 P<pin number> S<value 0..255> - Change output of pin P to S. Does not work on most important pins, if no S: read value of pin
-- M50  - Stop print from host or SD Card 
+- M42 P<pin number> S<value 0..255> - Change output of pin P to S. Does not work on most important pins.
 - M80  - Turn on power supply
 - M81  - Turn off power supply
 - M82  - Set E codes absolute (default)
@@ -121,22 +104,16 @@ Custom M Codes
 - M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
 - M92  - Set axisStepsPerMM - same syntax as G92
 - M99 S<delayInSec> X0 Y0 Z0 - Disable motors for S seconds (default 10) for given axis.
-- M100 T<extruderNum> clean nozzle, no extruder specified clean all available
 - M104 S<temp> T<extruder> P1 F1 H1 O<offset>- Set temperature without wait. P1 = wait for moves to finish, F1 = beep when temp. reached first time
                 O add offset to temperature in S, H1 use preheat temperature instead of S value.
 - M105 X0 - Get temperatures. If X0 is added, the raw analog values are also written.
---M110 - Reset line number
 - M111 S<debugflags> - Set debugging option. Add values for wanted options:
             1 = echo commands, 2 = info, 4 = errors, 8 = dry run mode, 16 = only communication, no actions 
-
 - M112 - Emergency kill
---M114 - print positions
 - M115- Capabilities string
 - M116 - Wait for all temperatures in a +/- 1 degree range
 - M117 <message> - Write message in status row on lcd
 - M119 - Report endstop status
-- M120 - Report beeper status
-- M121 - Report sensors status
 - M140 S<temp> H1 O<offset> F1 - Set bed target temp, F1 makes a beep when temperature is reached the first time
 - M155 S<1/0> Enable/disable auto report temperatures. When enabled firmware will emit temperatures every second.
 - M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive
@@ -163,16 +140,16 @@ Custom M Codes
 - M281 Test if watchdog is running and working. Use M281 X0 to disable watchdog on AVR boards. Sometimes needed for boards with old bootloaders to allow reflashing.
 - M290 Z<babysteps> - Correct by adding baby steps for Z mm
 - M300 S<Frequency> P<DurationMillis> play frequency
-- M302 S<0 or 1> - allow cold extrusion. Without S parameter it will allow. S1 will disallow.
+- M302 S<0 or 1> - allow cold extrusion. Without S parameter it will allow. S1 will allow, S0 will disallow.
 - M303 P<extruder/bed> S<printTemerature> X0 R<Repetitions> C<method>- Auto detect pid values. Use P<NUM_EXTRUDER> for heated bed. X0 saves result in EEPROM. R is number of cycles.
-				method 0 = classic, 1 = some overshoot, 2 = no overshoot
+				method 0 = classic, 1 = some overshoot, 2 = no overshoot, 3 = pessen, 4 = Tyreus-Lyben
 - M320 S<0/1> - Activate auto level, S1 stores it in eeprom
 - M321 S<0/1> - Deactivate auto level, S1 stores it in eeprom
 - M322 - Reset auto level matrix
 - M323 S0/S1 enable disable distortion correction P0 = not permanent, P1 = permanent = default
 - M340 P<servoId> S<pulseInUS> R<autoOffIn ms>: servoID = 0..3, Servos are controlled by a pulse with normally between 500 and 2500 with 1500ms in center position. 0 turns servo off. R allows automatic disabling after a while.
 - M350 S<mstepsAll> X<mstepsX> Y<mstepsY> Z<mstepsZ> E<mstepsE0> P<mstespE1> : Set micro stepping on RAMBO board
-- M355 S<0/1> - Turn case light on/off, no S = report status (no eeprom saving) and reset autoturn off time if activated
+- M355 S<0/1> - Turn case light on/off, no S = report status
 - M360 - show configuration
 - M400 - Wait until move buffers empty.
 - M401 - Store x, y and z position.
@@ -200,6 +177,8 @@ Custom M Codes
 - M670 S<version> - Set eeprom version to a value for testing eeprom upgrade path.
 - M908 P<address> S<value> : Set stepper current for digipot (RAMBO board)
 - M999 - Continue from fatal error. M999 S1 will create a fatal error for testing.
+- M914 X<sg_value> Y<sg_value> Z<sg_value> Stall detection sensitivity for Trinamic stepper drivers.
+- M915 X<0/1> Y<0/1> Z<0/1> Turn StealthChop mode ON or OFF on Trinamic stepper drivers.
 */
 
 #include "Repetier.h"

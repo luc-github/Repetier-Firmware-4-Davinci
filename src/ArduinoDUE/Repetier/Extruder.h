@@ -321,13 +321,11 @@ public:
     static void manageTemperatures();
     static void disableCurrentExtruderMotor();
     static void disableAllExtruderMotors();
-    static void selectExtruderById(uint8_t extruderId, bool move = true);
+    static void selectExtruderById(uint8_t extruderId);
     static void disableAllHeater();
     static void initExtruder();
     static void initHeatedBed();
     static void setHeatedBedTemperature(float temp_celsius,bool beep = false);
-//Davinci Specific, allow to cool down but not heat for a period
-    static  millis_t disableheat_time;
     static float getHeatedBedTemperature();
     static void setTemperatureForExtruder(float temp_celsius,uint8_t extr,bool beep = false,bool wait = false);
     static void pauseExtruders(bool bed = false);

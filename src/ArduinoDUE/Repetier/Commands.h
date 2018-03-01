@@ -27,10 +27,6 @@
 class Commands
 {
 public:
-    //Davinci Specific, specific flags and counter
-    static uint8_t delay_flag_change;
-    static uint8_t delay_flag_change2;
-    static uint8_t countersensor;
     static void commandLoop();
     static void checkForPeriodicalActions(bool allowNewMoves);
     static void processArc(GCode *com);

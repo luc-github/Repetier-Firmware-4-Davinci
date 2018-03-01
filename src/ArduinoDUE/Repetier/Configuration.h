@@ -21,7 +21,7 @@
 
 // ################## EDIT THESE SETTINGS MANUALLY ################
 
-#define DAVINCI 2// "0" if not DAVINCI, "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN, 4 for AiO (WITH NO SCANNER SUPPORT)
+#define DAVINCI 1// "0" if not DAVINCI, "1" For DAVINCI 1.0, "2" For DAVINCI 2.0 with 1 FAN, "3" For DAVINCI 2.0 with 2 FAN, 4 for AiO (WITH NO SCANNER SUPPORT)
 #define MODEL  0//"0" for first generation (jumper JP1 to reset ) , "1" for new generation   (jumper J37 to reset)
 #define REPURPOSE_FAN_TO_COOL_EXTRUSIONS 0 //Setting this to 1 will repurpose the main Extruder cooling fan to be controlled VIA M106/M107
                                            //Warning: for DaVinci 1.0 need to add a permanent fan with power supply to cool extruder
@@ -30,8 +30,8 @@
 
 //Version
 #define VERSION_MAJOR "1"
-#define VERSION_MINOR_YEAR "17"
-#define VERSION_MINOR_MONTH "08"
+#define VERSION_MINOR_YEAR "18"
+#define VERSION_MINOR_MONTH "03"
 #define VERSION_MINOR_DAY "01"
 #define VERSION_BUILD "1"
 
@@ -42,10 +42,6 @@
 #define WINSTAR_SCREEN 1
 #endif
 
-//Decouple Test feature, do not disable it unless you know what you are doing!!!
-//if you have decouple issue it means you have hardware issue or bad air flow management!!!
-//this feature is a safety feature, if you disable it is dangerous!!!
-#define FEATURE_DECOUPLE_TEST 1
 //this will hide on sd card no extension files and bin/hex/dat files to make navigation and selection easier
 #define HIDE_BINARY_ON_SD 1
 #define UI_AUTOLIGHTOFF_AFTER 1
@@ -61,8 +57,18 @@
 #undef MODEL
 #define MODEL 1
 #endif
-//to enable communication using wifi module set to 1 using repetier BT port
-#define ENABLE_WIFI 1
+//to enable communication using wifi module set to 1
+#define ENABLE_WIFI 0
+//define the wifi serial output
+//on Davinci use Serial
+//on RADDS use Serial1
+#if ENABLE_WIFI
+#if DAVINCI == 0
+#define WIFI_SERIAL Serial1
+#else
+#define WIFI_SERIAL Serial
+#endif
+#endif
 //if wifi is enabled serial need to slow down a little, this is a delay in ms after a '\n' so normaly after a command or a message
 #define DELAY_BY_LINE 50
 #if ENABLE_CLEAN_NOZZLE
@@ -164,6 +170,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // DUE3DOM                      = 410
 // DUE3DOM MINI                 = 411
 // STACKER 3D Superboard        = 412
+// RURAMPS4D                    = 414
 // Alligator Board rev1         = 500
 // Alligator Board rev2         = 501
 // Alligator Board rev3         = 502
@@ -190,10 +197,8 @@ gets used, or you will get problems with checksums etc.
 - 100 is programming port on due
 - 101 is native port on due. Us eit to support both ports at the same time!
 */
-//Davinci Specific
-//ESP8266 can be added on Serial Programming port
-#define BLUETOOTH_SERIAL   100                      // Port number (1..3) - For RADDS use 1
-#define BLUETOOTH_BAUD     230400                 // communication speed
+#define BLUETOOTH_SERIAL   -1                      // Port number (1..3) - For RADDS use 1
+#define BLUETOOTH_BAUD     115200                 // communication speed
 
 
 // Uncomment the following line if you are using Arduino compatible firmware made for Arduino version earlier then 1.0
@@ -300,7 +305,6 @@ Overridden if EEPROM activated.*/
 // the cleaner signal. The only advantage of PWM is giving signals at a fixed rate and never more
 // then PWM.
 #define PDM_FOR_EXTRUDER 1
-//DaVinci to fix issue with repurpose fan feature bringing noise
 #if REPURPOSE_FAN_TO_COOL_EXTRUSIONS
 #define PDM_FOR_COOLER 0
 #else
@@ -321,7 +325,7 @@ Overridden if EEPROM activated.*/
 // then you have 3 seconds of increased heating to reach 1°„C.
 #define DECOUPLING_TEST_MIN_TEMP_RISE 1
 // Set to 1 if you want firmware to kill print on decouple
-#define KILL_IF_SENSOR_DEFECT 1
+#define KILL_IF_SENSOR_DEFECT 0
 
 // for each extruder, fan will stay on until extruder temperature is below this value
 #define EXTRUDER_FAN_COOL_TEMP 50
@@ -412,7 +416,7 @@ controlled by settings in extruder 0 definition. */
 - 3 = Dead-time control. PID_P becomes dead-time in seconds.
  Overridden if EEPROM activated.
 */
-#define EXT0_HEAT_MANAGER 1
+#define EXT0_HEAT_MANAGER 3
 /** Wait x seconds, after reaching target temperature. Only used for M109.  Overridden if EEPROM activated. */
 #define EXT0_WATCHPERIOD 1
 
@@ -478,17 +482,12 @@ The codes are only executed for multiple extruder when changing the extruder. */
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT0_EXTRUDER_COOLER_SPEED 255
 /** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
-//Davinci Specific, be able to disable decouple test
-#if FEATURE_DECOUPLE_TEST
 #define EXT0_DECOUPLE_TEST_PERIOD 30000
-#else
-#define EXT0_DECOUPLE_TEST_PERIOD 0
-#endif
 /** Pin which toggles regualrly during extrusion allowing jam control. -1 = disabled */
 #define EXT0_JAM_PIN -1
 /** Pullup resistor for jam pin? */
 #define EXT0_JAM_PULLUP false
-#define EXT0_PREHEAT_TEMP 190
+#define EXT0_PREHEAT_TEMP 220
 
 // =========================== Configuration for second extruder ========================
 #define EXT1_X_OFFSET -2852
@@ -549,7 +548,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 - 1 = PID Temperature control. Is better but needs good PID values. Defaults are a good start for most extruder.
  Overridden if EEPROM activated.
 */
-#define EXT1_HEAT_MANAGER 1
+#define EXT1_HEAT_MANAGER 3
 /** Wait x seconds, after reaching target temperature. Only used for M109.  Overridden if EEPROM activated. */
 #define EXT1_WATCHPERIOD 1
 
@@ -614,17 +613,12 @@ cog. Direct drive extruder need 0. */
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT1_EXTRUDER_COOLER_SPEED 255
 /** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
-//Davinci Specific, be able to disable decouple test
-#if FEATURE_DECOUPLE_TEST
 #define EXT1_DECOUPLE_TEST_PERIOD 30000
-#else
-#define EXT1_DECOUPLE_TEST_PERIOD 0
-#endif
 /** Pin which toggles regularly during extrusion allowing jam control. -1 = disabled */
 #define EXT1_JAM_PIN -1
 /** Pull-up resistor for jam pin? */
 #define EXT1_JAM_PULLUP false
-#define EXT1_PREHEAT_TEMP 190
+#define EXT1_PREHEAT_TEMP 220
 
 /** If enabled you can select the distance your filament gets retracted during a
 M140 command, after a given temperature is reached. */
@@ -890,12 +884,7 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 #define HEATED_BED_PID_MAX 255
 // Time to see a temp. change when fully heating. Consider that beds at higher temp. need longer to rise and cold
 // beds need some time to get the temp. to the sensor. Time is in milliseconds!
-//Davinci Specific, be able to disable decouple test
-#if FEATURE_DECOUPLE_TEST
 #define HEATED_BED_DECOUPLE_TEST_PERIOD 300000
-#else
-#define HEATED_BED_DECOUPLE_TEST_PERIOD 0
-#endif
 
 // When temperature exceeds max temp, your heater will be switched off.
 // This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
@@ -1008,6 +997,37 @@ on this endstop.
 #define MAX_HARDWARE_ENDSTOP_Y false
 #define MAX_HARDWARE_ENDSTOP_Z false
 
+
+// If you have a mirrored motor you can put a second endstop to that motor.
+// On homing you would then need to trigge rboth endstops. Each endstop only 
+// stopps one motor, so they are aligned after homing. After homing only the 
+// first endstop gets used.
+
+#define ENDSTOP_PULLUP_X2_MIN false
+#define ENDSTOP_PULLUP_Y2_MIN false
+#define ENDSTOP_PULLUP_Z2_MINMAX false
+#define ENDSTOP_PULLUP_X2_MAX true
+#define ENDSTOP_PULLUP_Y2_MAX true
+
+#define ENDSTOP_X2_MIN_INVERTING true
+#define ENDSTOP_Y2_MIN_INVERTING true
+#define ENDSTOP_X2_MAX_INVERTING true
+#define ENDSTOP_Y2_MAX_INVERTING true
+
+#define MIN_HARDWARE_ENDSTOP_X2 false
+#define MIN_HARDWARE_ENDSTOP_Y2 false
+#define MAX_HARDWARE_ENDSTOP_X2 false
+#define MAX_HARDWARE_ENDSTOP_Y2 false
+#define MINMAX_HARDWARE_ENDSTOP_Z2 false
+
+#define X2_MIN_PIN -1
+#define X2_MAX_PIN -1
+#define Y2_MIN_PIN -1
+#define Y2_MAX_PIN -1
+#define Z2_MINMAX_PIN -1
+
+
+
 //If your axes are only moving in one direction, make sure the endstops are connected properly.
 //If your axes move in one direction ONLY when the endstops are triggered, set ENDSTOPS_INVERTING to true here
 
@@ -1032,9 +1052,14 @@ on this endstop.
 //#define PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT
 
 // Inverting axis direction
-#define INVERT_X_DIR true
-#define INVERT_Y_DIR false
-#define INVERT_Z_DIR true
+#define INVERT_X_DIR 1
+#define INVERT_X2_DIR 1
+#define INVERT_Y_DIR 0
+#define INVERT_Y2_DIR 1
+#define INVERT_Z_DIR 1
+#define INVERT_Z2_DIR 1
+#define INVERT_Z3_DIR 1
+#define INVERT_Z4_DIR 1
 
 //// ENDSTOP SETTINGS:
 // Sets direction of endstops when homing; 1=MAX, -1=MIN
@@ -1096,7 +1121,6 @@ on this endstop.
 // You can disable endstop checking for print moves. This is needed, if you get sometimes
 // false signals from your endstops. If your endstops don't give false signals, you
 // can set it on for safety.
-//Davinci, specific : Home sensors are easy to get noise an make print to lift, especially on 1.0A/2.0A, so disable it as no need to check home position all the time
 #define ALWAYS_CHECK_ENDSTOPS 0
 
 // maximum positions in mm - only fixed numbers!
@@ -1526,6 +1550,11 @@ If you use an ATX power supply you need the power pin to work non inverting. For
 boards you might need to make it inverting.
 */
 #define POWER_INVERTING 0
+
+/** Automatically enable power when temperatures or moves/homing is used. Set only to 1 if
+ *you have a power unit controlled by PS_ON_PIN! */
+#define AUTOMATIC_POWERUP 0
+
 /** What shall the printer do, when it receives an M112 emergency stop signal?
  0 = Disable heaters/motors, wait forever until someone presses reset.
  1 = restart by resetting the AVR controller. The USB connection will not reset if managed by a different chip!
@@ -1608,6 +1637,70 @@ extruder position. In that case you can also have different resolutions for the
 to print an object two times at the speed of one. Works only with dual extruder setup.
 */
 #define FEATURE_DITTO_PRINTING 0
+// ##########################################################################################
+// ##                        Trinamic TMC2130 driver configuration                         ##
+// ##########################################################################################
+
+/* If you want to use TMC2130 specific features uncomment next line and make sure all
+following settings are correct. 
+You need this library to compile:
+https://github.com/teemuatlut/TMC2130Stepper
+
+*/
+
+// #define DRV_TMC2130
+
+// Uncomment if you use the stall guard for homing. Only for cartesian printers and xy direction
+// #define SENSORLESS_HOMING
+
+// The drivers with set CS pin will be used, all others are normal step/dir/enable drivers
+#define TMC2130_X_CS_PIN -1
+#define TMC2130_Y_CS_PIN -1
+#define TMC2130_Z_CS_PIN -1
+#define TMC2130_EXT0_CS_PIN -1
+#define TMC2130_EXT1_CS_PIN -1
+#define TMC2130_EXT2_CS_PIN -1
+
+// Per-axis current setting in mA { X, Y, Z, E0, E1, E2}
+#define MOTOR_CURRENT {1000,1000,1000,1000,1000,1000}
+
+/**  Global settings - these apply to all configured drivers
+     Per-axis values will override these
+*/
+#define TMC2130_STEALTHCHOP         1  // Enable extremely quiet stepping
+#define TMC2130_INTERPOLATE_256  true  // Enable internal driver microstep interpolation
+#define TMC2130_STALLGUARD          0  // Sensorless homing sensitivity (between -63 and +64)
+
+/** PWM values for chopper tuning
+    only change if you know what you're doing
+*/
+#define TMC2130_PWM_AMPL          255
+#define TMC2130_PWM_GRAD            1
+#define TMC2130_PWM_AUTOSCALE    true
+#define TMC2130_PWM_FREQ            2
+
+/**  Per-axis parameters
+
+  To define different values for certain parameters on each axis,
+  append either _X, _Y, _Z, _EXT0, _EXT1 or _EXT2 
+  to the name of the global parameter.
+
+  Examples for the X axis:
+
+  #define TMC2130_STEALTHCHOP_X         1
+  #define TMC2130_INTERPOLATE_256_X  true
+*/
+
+/** Minimum speeds for stall detection.
+
+  These values may need to be adjusted if SENSORLESS_HOMING is enabled,
+  but endstops trigger prematurely or don't trigger at all. 
+  The exact value is dependent on the duration of one microstep,
+  but good approximations can be determined by experimentation.
+*/
+#define TMC2130_TCOOLTHRS_X 300
+#define TMC2130_TCOOLTHRS_Y 300
+#define TMC2130_TCOOLTHRS_Z 300
 
 /* Servos
 
@@ -1636,7 +1729,10 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 /** Some fans won't start for low values, but would run if started with higher power at the beginning.
 This defines the full power duration before returning to set value. Time is in milliseconds */
 #define FAN_KICKSTART_TIME  200
-
+/** Defines the max. fan speed for M106 controlled fans. Normally 255 to use full range, but for
+ 12V fans on 24V this might help preventing a defect. For all other fans there is a explicit maximum PWM value
+ you can set, so this is not used for other fans! */
+#define MAX_FAN_PWM 255
 
 
 /* A watchdog resets the printer, if a signal is not send within predefined time limits. That way we can be sure that the board
@@ -1665,17 +1761,12 @@ to recalibrate z.
 */
 #define Z_PROBE_Z_OFFSET_MODE 0
 
+#define FEATURE_Z_PROBE 0
 // Especially if you have more then 1 extruder acting as z probe this is important!
-#define EXTRUDER_IS_Z_PROBE 0
+#define EXTRUDER_IS_Z_PROBE 1
 // Disable all heaters before probing - required for inductive sensors
 #define Z_PROBE_DISABLE_HEATERS 0
-#if DAVINCI > 0
-#define FEATURE_Z_PROBE true
-#define Z_PROBE_PIN 117
-#else
-#define FEATURE_Z_PROBE false
-#define Z_PROBE_PIN -1
-#endif
+#define Z_PROBE_PIN 117  // 63
 #define Z_PROBE_PULLUP 1
 #define Z_PROBE_ON_HIGH 0
 #define Z_PROBE_X_OFFSET 0
@@ -1690,7 +1781,7 @@ to recalibrate z.
 /** Delay before going down. Needed for piezo endstops to reload safely. */
 #define Z_PROBE_DELAY 0
 #define Z_PROBE_XY_SPEED 30
-#define Z_PROBE_SWITCHING_DISTANCE 5 // Distance to safely switch off probe after it was activated
+#define Z_PROBE_SWITCHING_DISTANCE 5.0 // Distance to safely switch off probe after it was activated
 #define Z_PROBE_REPETITIONS 1 // Repetitions for probing at one point. 
 /** The height is the difference between activated probe position and nozzle height. */
 #if MODEL==0
@@ -1841,7 +1932,7 @@ motorized bed leveling */
  *     and that it is perpendicular to the towers
  *     and that the (0,0) is in center
  * requires z-probe
- * G29 measures the Z offset in matrix NxN points (due to nature of the delta printer, the corners are extrapolated instead of measured)
+ * G33 measures the Z offset in matrix NxN points (due to nature of the delta printer, the corners are extrapolated instead of measured)
  * and compensate the distortion
  * more points means better compensation, but consumes more memory and takes more time
  * DISTORTION_CORRECTION_R is the distance of last row or column from center
@@ -2046,15 +2137,15 @@ the language can be switched any time. */
 #define LANGUAGE_EN_ACTIVE 1 // English
 #define LANGUAGE_DE_ACTIVE 1 // German
 #define LANGUAGE_NL_ACTIVE 1 // Dutch
-#define LANGUAGE_PT_ACTIVE 0 // Brazilian Portuguese
+#define LANGUAGE_PT_ACTIVE 1 // Brazilian Portuguese
 #define LANGUAGE_IT_ACTIVE 1 // Italian
-#define LANGUAGE_ES_ACTIVE 0 // Spanish
-#define LANGUAGE_FI_ACTIVE 0 // Finnish
-#define LANGUAGE_SE_ACTIVE 0 // Swedish
+#define LANGUAGE_ES_ACTIVE 1 // Spanish
+#define LANGUAGE_FI_ACTIVE 1 // Finnish
+#define LANGUAGE_SE_ACTIVE 1 // Swedish
 #define LANGUAGE_FR_ACTIVE 1 // French
-#define LANGUAGE_CZ_ACTIVE 0 // Czech
-#define LANGUAGE_PL_ACTIVE 0 // Polish
-#define LANGUAGE_TR_ACTIVE 0 // Turkish
+#define LANGUAGE_CZ_ACTIVE 1 // Czech
+#define LANGUAGE_PL_ACTIVE 1 // Polish
+#define LANGUAGE_TR_ACTIVE 1 // Turkish
 
 /* Some displays loose their settings from time to time. Try uncommenting the 
 auto-repair function if this is the case. It is not supported for all display
@@ -2155,19 +2246,19 @@ Values must be in range 1..255
 // ##                         Values for menu settings                          ##
 // ###############################################################################
 
-//Davinci specific
-// Loading / Unloading Filament value
-#define UI_SET_PRESET_LOADING_FEEDRATE  2 
-#define UI_SET_PRESET_UNLOADING_FEEDRATE  4
-#define UI_SET_PRESET_UNLOAD_LOAD_DISTANCE  60 
-
 // Extreme values
-#define UI_SET_MIN_HEATED_BED_TEMP  30
+#define UI_SET_MIN_HEATED_BED_TEMP  40
 #define UI_SET_MAX_HEATED_BED_TEMP 130
 #define UI_SET_MIN_EXTRUDER_TEMP   160
 #define UI_SET_MAX_EXTRUDER_TEMP   270
 #define UI_SET_EXTRUDER_FEEDRATE 2 // mm/sec
 #define UI_SET_EXTRUDER_RETRACT_DISTANCE 3 // mm
+
+//Davinci specific
+// Loading / Unloading Filament value
+#define UI_SET_PRESET_LOADING_FEEDRATE  2 
+#define UI_SET_PRESET_UNLOADING_FEEDRATE  4
+#define UI_SET_PRESET_UNLOAD_LOAD_DISTANCE  60 
 
 /*
 #define USER_KEY1_PIN     UI_DISPLAY_D5_PIN      // D5 to display (not used for graphics controller), change to other pin if you use character LCD !

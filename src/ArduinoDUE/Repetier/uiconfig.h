@@ -62,7 +62,6 @@ Currently supported hardware:
 #define FLAG_BACK				8
 #define FLAG_RIGHT 			16
 #define FLAG_TOPMENU 	32 
-#define UI_ANIMATION false  // Animations are too slow
 
 /** While the ascii chars are all the same, the driver have different charsets
 for special chars used in different countries. The charset allows to fix for
@@ -74,7 +73,6 @@ works, use the ascii charset 0 as fallback. Not the nicest for everything but wo
 2 = Alternative charset with more european chars
 
 */
-//Davinci Specific, but not sure it is used
 #define UI_DISPLAY_CHARSET 1
 
 /** Select type of beeper
@@ -261,8 +259,8 @@ Define the pin
 0 = No keys attached - disables also menu
 1 = Some keys attached
 */
-#undef UI_HAS_KEYS
 //Davinci Specific, there is a key pad (6 keys: left, right,up, down, Ok, Menu)
+#undef UI_HAS_KEYS
 #define UI_HAS_KEYS 1
 
 

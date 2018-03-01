@@ -20,8 +20,6 @@
 */
 
 #include "Repetier.h"
-//Davinci Specific
-#include <string.h>
 
 #if FEATURE_CONTROLLER != NO_CONTROLLER
 uint8_t Com::selectedLanguage;
@@ -31,17 +29,16 @@ uint8_t Com::selectedLanguage;
 #if DRIVE_SYSTEM == DELTA
 #define MACHINE_TYPE "Delta"
 #elif DRIVE_SYSTEM == CARTESIAN
-//Davinci Specific
-#define MACHINE_TYPE "DaVinci"
+#define MACHINE_TYPE "Mendel"
 #else
 #define MACHINE_TYPE "Core_XY"
 #endif
 #endif
 #ifndef FIRMWARE_URL
-//Davinci Specific
-#define FIRMWARE_URL "https://github.com/luc-github/Repetier-Firmware-0.92/"
+#define FIRMWARE_URL "https://github.com/repetier/Repetier-Firmware/"
 #endif // FIRMWARE_URL
-FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:" FIRMWARE_URL " PROTOCOL_VERSION:1.0 MACHINE_TYPE:" MACHINE_TYPE " EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:3")
+
+FSTRINGVALUE(Com::tFirmware, "FIRMWARE_NAME:Repetier_" REPETIER_VERSION " COMPILED:" __DATE__ " FIRMWARE_URL:" FIRMWARE_URL " PROTOCOL_VERSION:1.0 MACHINE_TYPE:" MACHINE_TYPE " EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:3")
 FSTRINGVALUE(Com::tDebug, "Debug:")
 FSTRINGVALUE(Com::tOk, "ok")
 FSTRINGVALUE(Com::tNewline, "\r\n")
@@ -49,28 +46,6 @@ FSTRINGVALUE(Com::tNAN, "NAN")
 FSTRINGVALUE(Com::tINF, "INF")
 FSTRINGVALUE(Com::tError, "Error:")
 FSTRINGVALUE(Com::tInfo, "Info:")
-//ESP8266 SPecific
-FSTRINGVALUE(Com::tStatus, "Status:")
-//Davinci Specific
-FSTRINGVALUE(Com::tReadInput,"Read input: ")
-FSTRINGVALUE(Com::tReset,RESET_IDENTIFIER)
-FSTRINGVALUE(Com::tTempExt0,"Temp Ext0:")
-FSTRINGVALUE(Com::tTempExt1,"Temp Ext1:")
-//FSTRINGVALUE(Com::tTempExtPLA,"Temp Ext PLA:")
-FSTRINGVALUE(Com::tTempBed,"Temp Bed:")
-//FSTRINGVALUE(Com::tTempBedPLA,"Temp Bed PLA:")
-FSTRINGVALUE(Com::tLoadFeedRate,"Load Feed Rate:")
-FSTRINGVALUE(Com::tUnloadFeedRate,"Unload Feed Rate:")
-FSTRINGVALUE(Com::tUnloadLoadDistance,"Unload/Load Distance:")
-FSTRINGVALUE(Com::tKeepLightOn,"Keep Light On:")
-FSTRINGVALUE(Com::tSensorOn,"Filament Sensor On:")
-FSTRINGVALUE(Com::tTopsensorOn,"Top Sensor On:")
-FSTRINGVALUE(Com::tLightOn,"Light On:")
-FSTRINGVALUE(Com::tBadgeLightOn,"Badge On:")
-FSTRINGVALUE(Com::tSoundOn,"Sound On:")
-FSTRINGVALUE(Com::tWifiOn,"Wifi On:")
-FSTRINGVALUE(Com::tPowerSave,"Powersave after [ms,0=off]:")
-FSTRINGVALUE(Com::tDisplayMode,"Display Mode:")
 FSTRINGVALUE(Com::tWarning, "Warning:")
 FSTRINGVALUE(Com::tResend, "Resend:")
 FSTRINGVALUE(Com::tEcho, "Echo:")
@@ -230,9 +205,10 @@ FSTRINGVALUE(Com::tAPIDMax, " max: ")
 FSTRINGVALUE(Com::tAPIDKu, " Ku: ")
 FSTRINGVALUE(Com::tAPIDTu, " Tu: ")
 FSTRINGVALUE(Com::tAPIDClassic, " Classic PID")
-FSTRINGVALUE(Com::tAPIDSome, " Some Overshoot")
-FSTRINGVALUE(Com::tAPIDNone, " No Overshoot")
-FSTRINGVALUE(Com::tAPIDPessen, " Pessen Integral Rule")
+FSTRINGVALUE(Com::tAPIDSome, " Some Overshoot PID")
+FSTRINGVALUE(Com::tAPIDNone, " No Overshoot PID")
+FSTRINGVALUE(Com::tAPIDPessen, " Pessen Integral Rule PID")
+FSTRINGVALUE(Com::tAPIDTyreusLyben," Tyreus-Lyben PID")
 FSTRINGVALUE(Com::tAPIDKp, " Kp: ")
 FSTRINGVALUE(Com::tAPIDKi, " Ki: ")
 FSTRINGVALUE(Com::tAPIDKd, " Kd: ")
@@ -305,15 +281,6 @@ FSTRINGVALUE(Com::tWait, WAITING_IDENTIFIER)
 #if EEPROM_MODE == 0
 FSTRINGVALUE(Com::tNoEEPROMSupport, "No EEPROM support compiled.\r\n")
 #else
-//Davinci Specific, manual leveling positions
-FSTRINGVALUE(Com::tManualProbeX1,"Manual-probe X1 [mm]")
-FSTRINGVALUE(Com::tManualProbeY1,"Manual-probe Y1 [mm]")
-FSTRINGVALUE(Com::tManualProbeX2,"Manual-probe X2 [mm]")
-FSTRINGVALUE(Com::tManualProbeY2,"Manual-probe Y2 [mm]")
-FSTRINGVALUE(Com::tManualProbeX3,"Manual-probe X3 [mm]")
-FSTRINGVALUE(Com::tManualProbeY3,"Manual-probe Y3 [mm]")
-FSTRINGVALUE(Com::tManualProbeX4,"Manual-probe X4 [mm]")
-FSTRINGVALUE(Com::tManualProbeY4,"Manual-probe Y4 [mm]")
 FSTRINGVALUE(Com::tZProbeOffsetZ, "Coating thickness [mm]")
 #if FEATURE_Z_PROBE
 FSTRINGVALUE(Com::tZProbeHeight, "Z-probe height [mm]")
@@ -444,8 +411,8 @@ FSTRINGVALUE(Com::tEPRDistanceRetractHeating, "distance to retract when heating 
 FSTRINGVALUE(Com::tEPRExtruderCoolerSpeed, "extruder cooler speed [0-255]")
 FSTRINGVALUE(Com::tEPRAdvanceK, "advance K [0=off]")
 FSTRINGVALUE(Com::tEPRAdvanceL, "advance L [0=off]")
-FSTRINGVALUE(Com::tEPRPreheatTemp, "Preheat temp. [Â°C]")
-FSTRINGVALUE(Com::tEPRPreheatBedTemp, "Bed Preheat temp. [Â°C]")
+FSTRINGVALUE(Com::tEPRPreheatTemp, "Preheat temp. [°C]")
+FSTRINGVALUE(Com::tEPRPreheatBedTemp, "Bed Preheat temp. [°C]")
 
 #endif
 #if SDSUPPORT
@@ -499,7 +466,10 @@ FSTRINGVALUE(Com::tPrinterModeCNC, "PrinterMode:CNC")
 #ifdef STARTUP_GCODE
 FSTRINGVALUE(Com::tStartupGCode, STARTUP_GCODE)
 #endif
-
+#ifdef DRV_TMC2130
+FSTRINGVALUE(Com::tTrinamicMotorCurrent,  "Trinamic motor current:")
+FSTRINGVALUE(Com::tTrinamicMicrostepMode, "Trinamic microstep mode:")
+#endif
 bool Com::writeToAll = true; // transmit start messages to all devices!
 
 void Com::cap(FSTRINGPARAM(text)) {
@@ -662,10 +632,6 @@ void Com::printFloat(float number, uint8_t digits) {
         return;
     }
     // Handle negative numbers
-  //Davinci Specific
-  //better rounding
-  print(String(number,digits).c_str());
-  /*
     if (number < 0.0) {
         print('-');
         number = -number;
@@ -693,6 +659,5 @@ void Com::printFloat(float number, uint8_t digits) {
         print(toPrint);
         remainder -= toPrint;
     }
-*/
 }
 

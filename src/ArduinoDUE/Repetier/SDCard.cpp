@@ -121,8 +121,6 @@ void SDCard::unmount()
     sdactive = false;
     savetosd = false;
     Printer::setAutomount(false);
-    if(Printer::isMenuMode(MENU_MODE_SD_PRINTING))
-        Printer::setMenuMode(MENU_MODE_PAUSED + MENU_MODE_SD_PRINTING, false);
     Printer::setMenuMode(MENU_MODE_SD_MOUNTED + MENU_MODE_PAUSED + MENU_MODE_SD_PRINTING, false);
 #if UI_DISPLAY_TYPE != NO_DISPLAY && SDSUPPORT
     uid.cwd[0] = '/';
@@ -170,22 +168,14 @@ void SDCard::pausePrint(bool intern)
 			Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE,  CNC_SAFE_Z - Printer::coordinateOffset[Z_AXIS], IGNORE_COORDINATE, Printer::maxFeedrate[Z_AXIS]);
 		}
 #endif
-        //Davinci Specific, save extruder ID for DUO
-        #if NUM_EXTRUDER>1
-        Printer::lastextruderID=Extruder::current->id;
-        Extruder::selectExtruderById(0);
-        #endif
+#if DRIVE_SYSTEM == DELTA
+			Printer::moveToReal(0, 0.9 * EEPROM::deltaMaxRadius(), IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::maxFeedrate[X_AXIS]);
+#else
+			Printer::moveToReal(Printer::xMin, Printer::yMin + Printer::yLength, IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::maxFeedrate[X_AXIS]);
+#endif
         Printer::lastCmdPos[X_AXIS] = Printer::currentPosition[X_AXIS];
         Printer::lastCmdPos[Y_AXIS] = Printer::currentPosition[Y_AXIS];
         Printer::lastCmdPos[Z_AXIS] = Printer::currentPosition[Z_AXIS];
-#if DRIVE_SYSTEM == DELTA
-        Printer::moveToReal(0, 0.9 * EEPROM::deltaMaxRadius(), IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::maxFeedrate[X_AXIS]);
-#else
-        //Davinci Specific, down bed and pause on Drip Box instead of front
-        if (Printer::lastCmdPos[Z_AXIS]+10<Printer::zMin+Printer::zLength)
-          Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::lastCmdPos[Z_AXIS]+10,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
-        Printer::moveToReal(Printer::xMin,Printer::yMin,IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
-#endif
         GCode::executeFString(PSTR(PAUSE_START_COMMANDS));
     }
 	}
@@ -197,10 +187,6 @@ void SDCard::continuePrint(bool intern)
     if(!sd.sdactive) return;
 	if(EVENT_SD_CONTINUE_START(intern)) {
     if(intern) {
-        //Davinci Specific, restore extruder for DUO
-        #if NUM_EXTRUDER>1
-        Extruder::selectExtruderById(Printer::lastextruderID);
-        #endif
         GCode::executeFString(PSTR(PAUSE_END_COMMANDS));
         Printer::GoToMemoryPosition(true, true, false, false, Printer::maxFeedrate[X_AXIS]);
         Printer::GoToMemoryPosition(false, false, true, false, Printer::maxFeedrate[Z_AXIS] / 2.0f);
@@ -456,28 +442,6 @@ bool SDCard::showFilename(const uint8_t *name)
     if (*name == DIR_NAME_DELETED || *name == '.') return false;
     return true;
 }
-//Davinci Specific, Hide some extension for easy reading and avoid to delete EEPROM
- #if HIDE_BINARY_ON_SD
-bool SDCard::showFilename(dir_t *p,const char *filename)
-{
-	int slen;
-    char file_extension[4];
-    file_extension[0]=0;
-	if(DIR_IS_FILE(p)&& filename!=NULL)
-            {
-            slen=strlen(filename);
-            if (slen>3)strcpy(file_extension,&filename[slen-3]);
-            else
-              file_extension[0]=0;
-            //check extension 
-            if ((strcasecmp(file_extension,"bin")==0) //all .bin
-            || (strcasecmp(file_extension,"dat")==0)  //all .dat
-            || (strcasecmp(file_extension,"hex")==0)  //all .hex
-            ||  (strchr(filename,'.')==NULL)) return false; //all file without extension
-            }
-    return true;
-}
-#endif
 
 int8_t RFstricmp(const char* s1, const char* s2)
 {

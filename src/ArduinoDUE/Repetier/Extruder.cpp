@@ -37,7 +37,7 @@ uint8_t Extruder::activeMixingExtruder = 0;
 extern int16_t read_max6675(uint8_t ss_pin, fast8_t idx);
 #endif
 #ifdef SUPPORT_MAX31855
-extern int16_t read_max31855(uint8_t ss_pin);
+extern int16_t read_max31855(uint8_t ss_pin, fast8_t idx);
 #endif
 
 #if ANALOG_INPUTS > 0
@@ -135,7 +135,7 @@ void Extruder::manageTemperatures() {
 
         // Check for obvious sensor errors
         if((act->currentTemperatureC < MIN_DEFECT_TEMPERATURE || act->currentTemperatureC > MAX_DEFECT_TEMPERATURE) &&
-                act->targetTemperatureC > MIN_DEFECT_TEMPERATURE /*is heating*/ &&
+                act->targetTemperatureC > 0 /*is heating*/ &&
                 (act->preheatTime() == 0 || act->preheatTime() >= MILLISECONDS_PREHEAT_TIME /*preheating time is over*/)) { // no temp sensor or short in sensor, disable heater
             errorDetected = 1;
             if(extruderTempErrors < 10)    // Ignore short temporary failures
@@ -163,6 +163,7 @@ void Extruder::manageTemperatures() {
                     newDefectFound = true;
                     Printer::setAnyTempsensorDefect();
                     reportTempsensorError();
+                    UI_MESSAGE(2);
                 }
                 EVENT_HEATER_DEFECT(controller);
             }
@@ -332,14 +333,12 @@ void Extruder::manageTemperatures() {
         }
 #if defined(KILL_IF_SENSOR_DEFECT) && KILL_IF_SENSOR_DEFECT > 0
         if(!Printer::debugDryrun() && PrintLine::linesCount > 0) {  // kill printer if actually printing
-#if SDSUPPORT
-            sd.stopPrint();
-#endif // SDSUPPORT
-            Printer::kill(0);
+			Printer::stopPrint();
+            Printer::kill(false);
         }
 #endif // KILL_IF_SENSOR_DEFECT
         Printer::debugSet(8); // Go into dry mode
-        GCode::fatalError(PSTR("Heater/sensor failure"));
+        GCode::fatalError(PSTR("Heater/sensor error"));
     } // any sensor defect
 #endif // NUM_TEMPERATURE_LOOPS
 
@@ -350,7 +349,6 @@ void Extruder::manageTemperatures() {
             Printer::lastTempReport = now;
             Commands::printTemperatures();
         }
-
     }
 }
 
@@ -361,11 +359,6 @@ void TemperatureController::waitForTargetTemperature() {
     Printer::setAutoreportTemp(true);
     //millis_t time = HAL::timeInMilliseconds();
     while(true) {
-        //Davinci Specific, STOP request
-        if (Printer::isMenuModeEx(MENU_MODE_STOP_REQUESTED)) {
-           Printer::setAutoreportTemp(oldReport);
-           return;
-           }
         /*if( (HAL::timeInMilliseconds() - time) > 1000 )   //Print Temp Reading every 1 second while heating up.
         {
             Commands::printTemperatures();
@@ -430,7 +423,7 @@ void Extruder::unpauseExtruders(bool wait) {
 #endif
 #if HAVE_HEATED_BED
     bool waitBed = false;
-    if(heatedBedController.targetTemperatureC) {
+    if(heatedBedController.targetTemperatureC < 0) {
         heatedBedController.targetTemperatureC = -heatedBedController.targetTemperatureC;
         waitBed = true;
     }
@@ -667,8 +660,7 @@ void TemperatureController::updateTempControlVars() {
 
 This function changes and initializes a new extruder. This is also called, after the eeprom values are changed.
 */
-//Davinci Specific
-void Extruder::selectExtruderById(uint8_t extruderId, bool move) {
+void Extruder::selectExtruderById(uint8_t extruderId) {
     float cx, cy, cz;
     Printer::realPosition(cx, cy, cz);
 #if DUAL_X_AXIS && FEATURE_DITTO_PRINTING
@@ -786,8 +778,6 @@ void Extruder::selectExtruderById(uint8_t extruderId, bool move) {
 #else
     if(Printer::maxExtruderSpeed > 15) Printer::maxExtruderSpeed = 15;
 #endif
-    float maxdist = Extruder::current->maxFeedrate * Extruder::current->maxFeedrate * 0.00013888 / next->maxAcceleration;
-    maxdist -= Extruder::current->maxStartFeedrate * Extruder::current->maxStartFeedrate * 0.5 / next->maxAcceleration;
     float fmax = ((float)HAL::maxExtruderTimerFrequency() / ((float)Printer::maxExtruderSpeed * Printer::axisStepsPerMM[E_AXIS])); // Limit feedrate to interrupt speed
     if(fmax < Printer::maxFeedrate[E_AXIS]) Printer::maxFeedrate[E_AXIS] = fmax;
 #endif // USE_ADVANCE
@@ -848,7 +838,7 @@ void Extruder::selectExtruderById(uint8_t extruderId, bool move) {
     }
 #endif
     Printer::feedrate = oldfeedrate;
-    Printer::updateCurrentPosition(false);
+    Printer::updateCurrentPosition(true);
 #if USE_ADVANCE
     HAL::resetExtruderDirection();
 #endif // USE_ADVANCE
@@ -891,8 +881,6 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
     if(temperatureInCelsius > MAXTEMP) temperatureInCelsius = MAXTEMP;
 #endif
     if(temperatureInCelsius < 0) temperatureInCelsius = 0;
-//Davinci Specific, cannot heat during timer but can cooldown
-    if ((temperatureInCelsius > 0)  && (Extruder::disableheat_time >HAL::timeInMilliseconds() )) return;
 #if SHARED_EXTRUDER_HEATER
     for(fast8_t eid = 0; eid < NUM_EXTRUDER; eid++) {
         TemperatureController *tc = tempController[eid];
@@ -968,8 +956,6 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
             }*/
             Commands::checkForPeriodicalActions(true);
             GCode::keepAlive(WaitHeater);
-            //Davinci Specific, STOP management
-            if (Printer::isMenuModeEx(MENU_MODE_STOP_REQUESTED))break;
             //gcode_read_serial();
 #if RETRACT_DURING_HEATUP
             if (actExtruder == Extruder::current && actExtruder->waitRetractUnits > 0 && !retracted && dirRising && actExtruder->tempControl.currentTemperatureC > actExtruder->waitRetractTemperature) {
@@ -1023,8 +1009,6 @@ void Extruder::setHeatedBedTemperature(float temperatureInCelsius, bool beep) {
 #if HAVE_HEATED_BED
     if(temperatureInCelsius > HEATED_BED_MAX_TEMP) temperatureInCelsius = HEATED_BED_MAX_TEMP;
     if(temperatureInCelsius < 0) temperatureInCelsius = 0;
-    //Davinci Specific, cannot heat during timer but can cooldown
-    if ((temperatureInCelsius > 0)  && (Extruder::disableheat_time >HAL::timeInMilliseconds() )) return;
     if(heatedBedController.targetTemperatureC == temperatureInCelsius) return; // don't flood log with messages if killed
     heatedBedController.setTargetTemperature(temperatureInCelsius);
     if(beep && temperatureInCelsius > 30) heatedBedController.setAlarm(true);
@@ -1984,7 +1968,7 @@ const short temptable_4[NUMTEMPS_4][2] PROGMEM = {
 // ATC 104GT
 #define NUMTEMPS_8 34
 const short temptable_8[NUMTEMPS_8][2] PROGMEM = {
-    {0, 8000}, {69, 2400}, {79, 2320}, {92, 2240}, {107, 2160}, {125, 2080}, {146, 2000}, {172, 1920}, {204, 1840}, {222, 1760}, {291, 1680}, {350, 1600},
+    {0, 8000}, {69, 2400}, {79, 2320}, {92, 2240}, {107, 2160}, {125, 2080}, {146, 2000}, {172, 1920}, {204, 1840}, {244, 1760}, {291, 1680}, {350, 1600},
     {422, 1520}, {511, 1440}, {621, 1360}, {755, 1280}, {918, 1200}, {1114, 1120}, {1344, 1040}, {1608, 960}, {1902, 880}, {2216, 800}, {2539, 720},
     {2851, 640}, {3137, 560}, {3385, 480}, {3588, 400}, {3746, 320}, {3863, 240}, {3945, 160}, {4002, 80}, {4038, 0}, {4061, -80}, {4075, -160}
 };
@@ -2180,13 +2164,22 @@ void TemperatureController::updateCurrentTemperature() {
 #endif
 #ifdef SUPPORT_MAX6675
     case 101: // MAX6675
-        currentTemperature = read_max6675(sensorPin, pwmIndex);
+		{
+			int newTemp = read_max6675(sensorPin, pwmIndex);
+			if(newTemp != 2000) {
+				currentTemperature = newTemp;
+			}
+		}
         break;
 #endif
 #ifdef SUPPORT_MAX31855
-    case 102: // MAX31855
-        currentTemperature = read_max31855(sensorPin);
-        break;
+    case 102: { // MAX31855
+        int16_t newTemp = read_max31855(sensorPin, pwmIndex);
+        if(newTemp != 20000) { // don't use error read
+            currentTemperature = newTemp;
+        }
+    }
+    break;
 #endif
     default:
         currentTemperature = 4095; // unknown method, return high value to switch heater off for safety
@@ -2345,6 +2338,7 @@ void TemperatureController::updateCurrentTemperature() {
 }
 
 void TemperatureController::setTargetTemperature(float target) {
+    ENSURE_POWER
     targetTemperatureC = target;
     stopDecouple();
 }
@@ -2457,6 +2451,12 @@ void TemperatureController::autotunePID(float temp, uint8_t controllerId, int ma
                             Kd = Kp * Tu * 3.0 / 20.0;
                             Com::printFLN(Com::tAPIDPessen);
                         }
+						if(method == 4) { //Tyreus-Lyben
+						   Kp = 0.4545f*Ku;      //1/2.2 KRkrit
+			               Ki = Kp/Tu/2.2f;        //2.2 Tkrit
+	                       Kd = Kp*Tu/6.3f;      //1/6.3 Tkrit[/code]
+	                       Com::printFLN(Com::tAPIDTyreusLyben);
+						}
                         Com::printFLN(Com::tAPIDKp, Kp);
                         Com::printFLN(Com::tAPIDKi, Ki);
                         Com::printFLN(Com::tAPIDKd, Kd);
@@ -2498,7 +2498,7 @@ void TemperatureController::autotunePID(float temp, uint8_t controllerId, int ma
         }
         UI_MEDIUM;
         UI_SLOW(true);
-    }
+    } // loop
 }
 
 /** \brief Writes monitored temperatures.
@@ -2565,7 +2565,19 @@ int16_t read_max6675(uint8_t ss_pin, fast8_t idx) {
 }
 #endif
 #ifdef SUPPORT_MAX31855
-int16_t read_max31855(uint8_t ss_pin) {
+/*
+Thermocouple with spi interface
+https://datasheets.maximintegrated.com/en/ds/MAX31855.pdf
+*/
+int16_t read_max31855(uint8_t ss_pin, fast8_t idx) {
+    static bool firstRun = true;
+    static int8_t max31855_errors[NUM_PWM];
+    if(firstRun) {
+	    for(fast8_t i = 0; i < NUM_PWM; i++) {
+		    max31855_errors[i] = 0;
+	    }
+	    firstRun = false;
+    }
     uint32_t data = 0;
     int16_t temperature;
     HAL::spiInit(2);
@@ -2580,9 +2592,12 @@ int16_t read_max31855(uint8_t ss_pin) {
     HAL::digitalWrite(ss_pin, 1);  // disable TT_MAX31855
 
     //Process temp
-    if (data & 0x00010000)
+    if (data & 65536 /* 0x00010000 */) { // test error flag
+		if( max31855_errors[idx] > 5)
+			return -396; // will trigger defect when heating, -99°C so it fits into display
+		max31855_errors[idx]++;
         return 20000; //Some form of error.
-    else {
+    } else {
         data = data >> 18;
         temperature = data & 0x00001FFF;
 
@@ -2590,6 +2605,7 @@ int16_t read_max31855(uint8_t ss_pin) {
             data = ~data;
             temperature = -1 * ((data & 0x00001FFF) + 1);
         }
+		max31855_errors[idx] = 0;
     }
     return temperature;
 }
@@ -2678,8 +2694,6 @@ const char ext5_select_cmd[] PROGMEM = EXT5_SELECT_COMMANDS;
 const char ext5_deselect_cmd[] PROGMEM = EXT5_DESELECT_COMMANDS;
 #endif
 
-//Davinci Specific, allow cooling but not heating for a period
-millis_t Extruder::disableheat_time =0;
 #if NUM_EXTRUDER == 0
 Extruder extruder[1];
 #else

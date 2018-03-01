@@ -51,7 +51,7 @@
 /** Wait for the extruder to finish it's down movement */
 #define FLAG_JOIN_WAIT_EXTRUDER_DOWN 128
 // Printing related data
-#if NONLINEAR_SYSTEM
+#if NONLINEAR_SYSTEM || defined(DOXYGEN)
 // Allow the delta cache to store segments for every line in line cache. Beware this gets big ... fast.
 
 class PrintLine;
@@ -165,7 +165,7 @@ private:
     float endSpeed;                 ///< Exit speed in mm/s
     float minSpeed;
     float distance;
-#if NONLINEAR_SYSTEM
+#if NONLINEAR_SYSTEM || defined(DOXYGEN)
     uint8_t numNonlinearSegments;       ///< Number of delta segments left in line. Decremented by stepper timer.
     uint8_t moveID;                 ///< ID used to identify moves which are all part of the same line
     int32_t numPrimaryStepPerSegment;   ///< Number of primary Bresenham axis steps in each delta segment
@@ -256,14 +256,72 @@ public:
         if(isCheckEndstops()) {
             Endstops::update();
             if(Endstops::anyEndstopHit()) {
+#if MULTI_XENDSTOP_HOMING
+                {
+                    if(Printer::isHoming()) {
+                        if(isXNegativeMove()) {
+                            if(Endstops::xMin())
+                                Printer::multiXHomeFlags &= ~1;
+                            if(Endstops::x2Min())
+                                Printer::multiXHomeFlags &= ~2;
+                            if(Printer::multiXHomeFlags == 0)
+                                setXMoveFinished();
+                        } else if(isXPositiveMove()) {
+                            if(Endstops::xMax())
+                                Printer::multiXHomeFlags &= ~1;
+                            if(Endstops::x2Max())
+                                Printer::multiXHomeFlags &= ~2;
+                            if(Printer::multiXHomeFlags == 0) {
+                                setXMoveFinished();
+                            }
+                        }
+                    } else {
+                        if(isXNegativeMove() && Endstops::xMin()) {
+                            setXMoveFinished();
+                        } else if(isXPositiveMove() && Endstops::xMax()) {
+                            setXMoveFinished();
+                        }
+                    }
+                }
+#else  // Multi endstop homing
                 if(isXNegativeMove() && Endstops::xMin())
                     setXMoveFinished();
                 else if(isXPositiveMove() && Endstops::xMax())
                     setXMoveFinished();
+#endif
+#if MULTI_YENDSTOP_HOMING
+                {
+                    if(Printer::isHoming()) {
+                        if(isYNegativeMove()) {
+                            if(Endstops::yMin())
+                                Printer::multiYHomeFlags &= ~1;
+                            if(Endstops::y2Min())
+                                Printer::multiYHomeFlags &= ~2;
+                            if(Printer::multiYHomeFlags == 0)
+                                setYMoveFinished();
+                        } else if(isYPositiveMove()) {
+                            if(Endstops::yMax())
+                                Printer::multiYHomeFlags &= ~1;
+                            if(Endstops::y2Max())
+                                Printer::multiYHomeFlags &= ~2;
+                            if(Printer::multiYHomeFlags == 0) {
+                                setYMoveFinished();
+                            }
+                        }
+                    } else {
+                        if(isYNegativeMove() && Endstops::yMin()) {
+                            setYMoveFinished();
+                        } else if(isYPositiveMove() && Endstops::yMax()) {
+                            setYMoveFinished();
+                        }
+                    }
+                }
+#else  // Multi endstop homing
                 if(isYNegativeMove() && Endstops::yMin())
                     setYMoveFinished();
                 else if(isYPositiveMove() && Endstops::yMax())
                     setYMoveFinished();
+#endif
 #if FEATURE_Z_PROBE
                 if(Printer::isZProbingActive() && isZNegativeMove() && Endstops::zProbe()) {
                     setZMoveFinished();
@@ -293,9 +351,13 @@ public:
                             }
                         }
                     } else {
+#if !(Z_MIN_PIN == Z_PROBE_PIN && FEATURE_Z_PROBE)
                         if(isZNegativeMove() && Endstops::zMin()) {
                             setZMoveFinished();
-                        } else if(isZPositiveMove() && Endstops::zMax()) {
+                        } else
+#endif
+						
+						if(isZPositiveMove() && Endstops::zMax()) {
 #if MAX_HARDWARE_ENDSTOP_Z
                             Printer::stepsRemainingAtZHit = stepsRemaining;
 #endif
@@ -303,8 +365,12 @@ public:
                         }
                     }
                 }
-#else
-                    if(isZNegativeMove() && Endstops::zMin()) {
+#else  // Multi endstop homing
+                    if(isZNegativeMove() && Endstops::zMin()
+#if Z_MIN_PIN == Z_PROBE_PIN && FEATURE_Z_PROBE
+						&& Printer::isHoming()
+#endif
+					) {
                         setZMoveFinished();
                     } else if(isZPositiveMove() && Endstops::zMax()) {
 #if MAX_HARDWARE_ENDSTOP_Z
@@ -386,7 +452,7 @@ public:
         return dir & XY_STEP;
     }
     inline bool isXOrZMove() {
-        return dir & (XSTEP | YSTEP);
+        return dir & (XSTEP | ZSTEP);
     }
     inline bool isZMove() {
         return (dir & ZSTEP);
@@ -572,8 +638,7 @@ public:
     }
     // Only called from within interrupts
     static INLINE void removeCurrentLineForbidInterrupt() {
-        linesPos++;
-        if(linesPos >= PRINTLINE_CACHE_SIZE) linesPos = 0;
+        nextPlannerIndex(linesPos);
         cur = NULL;
 #if CPU_ARCH == ARCH_ARM
         nlFlag = false;
@@ -584,8 +649,7 @@ public:
             Printer::setMenuMode(MENU_MODE_PRINTING, Printer::isPrinting());
     }
     static INLINE void pushLine() {
-        linesWritePos++;
-        if(linesWritePos >= PRINTLINE_CACHE_SIZE) linesWritePos = 0;
+        nextPlannerIndex(linesWritePos);
         Printer::setMenuMode(MENU_MODE_PRINTING, true);
         InterruptProtectedBlock noInts;
         linesCount++;
@@ -605,30 +669,30 @@ public:
     static void updateTrapezoids();
     static uint8_t insertWaitMovesIfNeeded(uint8_t pathOptimize, uint8_t waitExtraLines);
     static void LaserWarmUp(uint32_t wait);
-#if !NONLINEAR_SYSTEM
+#if !NONLINEAR_SYSTEM || defined(DOXYGEN)
     static void queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize);
-#if DISTORTION_CORRECTION
+#if DISTORTION_CORRECTION || defined(DOXYGEN)
     static void queueCartesianSegmentTo(uint8_t check_endstops, uint8_t pathOptimize);
 #endif
 #endif
     static void moveRelativeDistanceInSteps(int32_t x, int32_t y, int32_t z, int32_t e, float feedrate, bool waitEnd, bool check_endstop, bool pathOptimize = true);
     static void moveRelativeDistanceInStepsReal(int32_t x, int32_t y, int32_t z, int32_t e, float feedrate, bool waitEnd, bool pathOptimize = true);
-#if ARC_SUPPORT
+#if ARC_SUPPORT || defined(DOXYGEN)
     static void arc(float *position, float *target, float *offset, float radius, uint8_t isclockwise);
 #endif
     static INLINE void previousPlannerIndex(ufast8_t &p) {
         p = (p ? p - 1 : PRINTLINE_CACHE_SIZE - 1);
     }
     static INLINE void nextPlannerIndex(ufast8_t& p) {
-        p = (p == PRINTLINE_CACHE_SIZE - 1 ? 0 : p + 1);
+        p = (p >= PRINTLINE_CACHE_SIZE - 1 ? 0 : p + 1);
     }
-#if NONLINEAR_SYSTEM
+#if NONLINEAR_SYSTEM || defined(DOXYGEN)
     static uint8_t queueNonlinearMove(uint8_t check_endstops, uint8_t pathOptimize, uint8_t softEndstop);
     static inline void queueEMove(int32_t e_diff, uint8_t check_endstops, uint8_t pathOptimize);
     inline uint16_t calculateNonlinearSubSegments(uint8_t softEndstop);
     static inline void calculateDirectionAndDelta(int32_t difference[], ufast8_t *dir, int32_t delta[]);
     static inline uint8_t calculateDistance(float axis_diff[], uint8_t dir, float *distance);
-#if SOFTWARE_LEVELING && DRIVE_SYSTEM == DELTA
+#if (SOFTWARE_LEVELING && DRIVE_SYSTEM == DELTA) || defined(DOXYGEN)
     static void calculatePlane(int32_t factors[], int32_t p1[], int32_t p2[], int32_t p3[]);
     static float calcZOffset(int32_t factors[], int32_t pointX, int32_t pointY);
 #endif

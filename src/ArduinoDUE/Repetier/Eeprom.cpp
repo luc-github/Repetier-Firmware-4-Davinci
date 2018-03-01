@@ -24,34 +24,6 @@
 #include "Repetier.h"
 
 
-//Davinci Specific
-//internal usage of update value
-void EEPROM:: update(long P,uint8_t T,long S,float X)
-{
-#if EEPROM_MODE!=0
-    if(T>=0 &&T<=3 && P>0 && P<=EEPROM_BYTES) // Minimum size used by Eeprom.cpp
-    switch(T)
-        {
-        case EPR_TYPE_BYTE:
-            HAL::eprSetByte(P,(uint8_t)S);
-            break;
-        case EPR_TYPE_INT:
-           HAL::eprSetInt16(P,(int)S);
-            break;
-        case EPR_TYPE_LONG:
-            HAL::eprSetInt32(P,(int32_t)S);
-            break;
-        case EPR_TYPE_FLOAT:
-           HAL::eprSetFloat(P,X);
-            break;
-        }
-    updateChecksum();
-    readDataFromEEPROM(true);
-    //Extruder::selectExtruderById(Extruder::current->id);
-#else
-    Com::printErrorF(Com::tNoEEPROMSupport);
-#endif
-}
 void EEPROM::update(GCode *com)
 {
 #if EEPROM_MODE != 0
@@ -99,48 +71,6 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 		HAL::eprSetByte(EPR_INTEGRITY_BYTE, newcheck);	
     baudrate = BAUDRATE;
     maxInactiveTime = MAX_INACTIVE_TIME * 1000L;
-    //Davinci Specific
-#if CASE_LIGHTS_PIN > 0
-    EEPROM::buselight = bool(CASE_LIGHT_DEFAULT_ON);
-#endif
-#if DAVINCI == 4
-	EEPROM::rotate_speed = TURNTABLE_DEFAULT_SPEED;
-#endif
-#if BADGE_LIGHT_PIN > -1
-    EEPROM::busebadgelight = bool(CASE_BADGE_LIGHT_DEFAULT_ON);
-#endif
-    EEPROM::bkeeplighton = bool(CASE_KEEP_LIGHT_DEFAULT_ON);
-    UIDisplay::display_mode = CASE_DISPLAY_MODE_DEFAULT;
-    #if FEATURE_BEEPER
-    HAL::enablesound = bool(CASE_SOUND_DEFAULT_ON);
-    #endif
-    EEPROM::busesensor = bool(CASE_FILAMENT_SENSOR_DEFAULT_ON);
-    EEPROM::btopsensor = bool(CASE_TOP_SENSOR_DEFAULT_ON);
-    #if ENABLE_WIFI
-    HAL::bwifion = bool(CASE_WIFI_DEFAULT_ON);
-     if (HAL::bwifion) {
-            GCodeSource::registerSource(&serial1Source);
-            }
-        else {
-            GCodeSource::removeSource(&serial1Source);
-            }
-    #endif
-    EEPROM::ftemp_ext0 = EXT0_PREHEAT_TEMP ;
-    EEPROM::ftemp_ext1 = EXT1_PREHEAT_TEMP ;
-    EEPROM::ftemp_bed = HEATED_BED_PREHEAT_TEMP;
-    //EEPROM::ftemp_ext_pla = UI_SET_PRESET_EXTRUDER_TEMP_PLA;
-    //EEPROM::ftemp_ext_abs = UI_SET_PRESET_EXTRUDER_TEMP_ABS;
-    //EEPROM::ftemp_bed_pla = UI_SET_PRESET_HEATED_BED_TEMP_PLA;
-    //EEPROM::ftemp_bed_abs = UI_SET_PRESET_HEATED_BED_TEMP_ABS;
-    EEPROM::loading_feed_rate = UI_SET_PRESET_LOADING_FEEDRATE;
-    EEPROM::unloading_feed_rate = UI_SET_PRESET_UNLOADING_FEEDRATE;
-    EEPROM::unloading_loading_distance = UI_SET_PRESET_UNLOAD_LOAD_DISTANCE;
-    #if CASE_LIGHTS_PIN >= 0
-    WRITE(CASE_LIGHTS_PIN, byte(EEPROM::buselight)); 
-    #endif // CASE_LIGHTS_PIN
-    #if BADGE_LIGHT_PIN >= 0
-    WRITE(BADGE_LIGHT_PIN, byte(EEPROM::busebadgelight & EEPROM::buselight)); 
-    #endif // BADGE_LIGHT_PIN
     stepperInactiveTime = STEPPER_INACTIVE_TIME * 1000L;
     Printer::axisStepsPerMM[X_AXIS] = XAXIS_STEPS_PER_MM;
     Printer::axisStepsPerMM[Y_AXIS] = YAXIS_STEPS_PER_MM;
@@ -388,31 +318,6 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 #endif
 
 }
-//Davinci Specific
-#if DAVINCI == 4
-float EEPROM::rotate_speed = TURNTABLE_DEFAULT_SPEED;
-#endif
-bool EEPROM::buselight = false;
-bool EEPROM::busebadgelight = false;
-bool EEPROM::busesensor = false;
-bool EEPROM::btopsensor = false;
-bool EEPROM::bkeeplighton = true;
-float EEPROM::ftemp_ext0 = EXT0_PREHEAT_TEMP;
-float EEPROM::ftemp_ext1 = EXT1_PREHEAT_TEMP;
-float EEPROM::ftemp_bed = HEATED_BED_PREHEAT_TEMP;
-//float EEPROM::ftemp_ext_pla = UI_SET_PRESET_EXTRUDER_TEMP_PLA;
-//float EEPROM::ftemp_ext_abs = UI_SET_PRESET_EXTRUDER_TEMP_ABS;
-//float EEPROM::ftemp_bed_pla = UI_SET_PRESET_HEATED_BED_TEMP_PLA;
-//float EEPROM::ftemp_bed_abs = UI_SET_PRESET_HEATED_BED_TEMP_ABS;
-float EEPROM::loading_feed_rate = UI_SET_PRESET_LOADING_FEEDRATE;
-float EEPROM::unloading_feed_rate = UI_SET_PRESET_UNLOADING_FEEDRATE;
-float EEPROM::unloading_loading_distance = UI_SET_PRESET_UNLOAD_LOAD_DISTANCE;
-
-#if UI_AUTOLIGHTOFF_AFTER != 0
-millis_t EEPROM::timepowersaving = 1000 * 60 * 30; //30 min
-#else
-millis_t EEPROM::timepowersaving = 0; 
-#endif
 
 void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
 {
@@ -478,50 +383,6 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
 #if NONLINEAR_SYSTEM
     HAL::eprSetFloat(EPR_DELTA_HORIZONTAL_RADIUS, Printer::radius0);
 #endif
-
-//Davinci Specific
-#if CASE_LIGHTS_PIN > 0
-    HAL::eprSetByte(EPR_LIGHT_ON,EEPROM::buselight);
-    HAL::eprSetByte(EPR_KEEP_LIGHT_ON,EEPROM::bkeeplighton);
-#endif
-#if BADGE_LIGHT_PIN > -1
-    HAL::eprSetByte(EPR_BADGE_LIGHT_ON,EEPROM::busebadgelight);
-#endif
-    
-    HAL::eprSetByte(EPR_DISPLAY_MODE,UIDisplay::display_mode);
-#if defined(FIL_SENSOR1_PIN)
-	 HAL::eprSetByte(EPR_FIL_SENSOR_ON,EEPROM::busesensor);
-#endif
-#if defined(TOP_SENSOR_PIN)
-	 HAL::eprSetByte(EPR_TOP_SENSOR_ON,EEPROM::btopsensor);
-#endif
-#if ENABLE_WIFI
-	 HAL::eprSetByte(EPR_WIFI_ON,HAL::bwifion);
-#endif
-#if FEATURE_BEEPER
-	HAL::eprSetByte(EPR_SOUND_ON,HAL::enablesound);
-#endif
-#if UI_AUTOLIGHTOFF_AFTER != 0
-	HAL::eprSetInt32(EPR_POWERSAVE_AFTER_TIME,EEPROM::timepowersaving);
-#endif
-    HAL::eprSetFloat(EPR_MANUAL_LEVEL_X1, MANUAL_LEVEL_X1);
-    HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y1, MANUAL_LEVEL_Y1);
-    HAL::eprSetFloat(EPR_MANUAL_LEVEL_X2, MANUAL_LEVEL_X2);
-    HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y2, MANUAL_LEVEL_Y2);
-    HAL::eprSetFloat(EPR_MANUAL_LEVEL_X3, MANUAL_LEVEL_X3);
-    HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y3, MANUAL_LEVEL_Y3);
-    HAL::eprSetFloat(EPR_MANUAL_LEVEL_X4, MANUAL_LEVEL_X4);
-    HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y4, MANUAL_LEVEL_Y4);
-    HAL::eprSetFloat(EPR_TEMP_BED, EEPROM::ftemp_bed);
-    HAL::eprSetFloat(EPR_TEMP_EXT0, EEPROM::ftemp_ext0);
-    HAL::eprSetFloat(EPR_TEMP_EXT1, EEPROM::ftemp_ext1);
-//    HAL::eprSetFloat(EPR_TEMP_BED, EEPROM::ftemp_bed_pla);
-//    HAL::eprSetFloat(EPR_TEMP_BED, EEPROM::ftemp_bed_abs);
-//    HAL::eprSetFloat(EPR_TEMP_EXT, EEPROM::ftemp_ext_pla);
-//    HAL::eprSetFloat(EPR_TEMP_EXT, EEPROM::ftemp_ext_abs);
-    HAL::eprSetFloat(EPR_LOAD_FEED_RATE, EEPROM::loading_feed_rate);
-    HAL::eprSetFloat(EPR_UNLOAD_FEED_RATE, EEPROM::unloading_feed_rate);
-    HAL::eprSetFloat(EPR_UNLOAD_LOAD_DISTANCE, EEPROM::unloading_loading_distance);
 #if ENABLE_BACKLASH_COMPENSATION
     HAL::eprSetFloat(EPR_BACKLASH_X,Printer::backlashX);
     HAL::eprSetFloat(EPR_BACKLASH_Y,Printer::backlashY);
@@ -612,25 +473,6 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_Z_PROBE_Y2,Z_PROBE_Y2);
     HAL::eprSetFloat(EPR_Z_PROBE_X3,Z_PROBE_X3);
     HAL::eprSetFloat(EPR_Z_PROBE_Y3,Z_PROBE_Y3);
-    //Davinci Specific
-    HAL::eprSetFloat(EPR_MANUAL_LEVEL_X1, MANUAL_LEVEL_X1);
-    HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y1, MANUAL_LEVEL_Y1);
-    HAL::eprSetFloat(EPR_MANUAL_LEVEL_X2, MANUAL_LEVEL_X2);
-    HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y2, MANUAL_LEVEL_Y2);
-    HAL::eprSetFloat(EPR_MANUAL_LEVEL_X3, MANUAL_LEVEL_X3);
-    HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y3, MANUAL_LEVEL_Y3);
-    HAL::eprSetFloat(EPR_MANUAL_LEVEL_X4, MANUAL_LEVEL_X4);
-    HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y4, MANUAL_LEVEL_Y4);
-    HAL::eprSetFloat(EPR_TEMP_BED, EEPROM::ftemp_bed);
-    HAL::eprSetFloat(EPR_TEMP_EXT0, EEPROM::ftemp_ext0);
-    HAL::eprSetFloat(EPR_TEMP_EXT1, EEPROM::ftemp_ext1);
-    //HAL::eprSetFloat(EPR_TEMP_BED, EEPROM::ftemp_bed_pla);
-    //HAL::eprSetFloat(EPR_TEMP_BED, EEPROM::ftemp_bed_abs);
-    //HAL::eprSetFloat(EPR_TEMP_EXT, EEPROM::ftemp_ext_pla);
-    //HAL::eprSetFloat(EPR_TEMP_EXT, EEPROM::ftemp_ext_abs);
-    HAL::eprSetFloat(EPR_LOAD_FEED_RATE, EEPROM::loading_feed_rate);
-    HAL::eprSetFloat(EPR_UNLOAD_FEED_RATE, EEPROM::unloading_feed_rate);
-    HAL::eprSetFloat(EPR_UNLOAD_LOAD_DISTANCE, EEPROM::unloading_loading_distance);
     HAL::eprSetFloat(EPR_AXISCOMP_TANXY,AXISCOMP_TANXY);
     HAL::eprSetFloat(EPR_AXISCOMP_TANYZ,AXISCOMP_TANYZ);
     HAL::eprSetFloat(EPR_AXISCOMP_TANXZ,AXISCOMP_TANXZ);
@@ -731,56 +573,6 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
 #if NONLINEAR_SYSTEM
     Printer::radius0 = HAL::eprGetFloat(EPR_DELTA_HORIZONTAL_RADIUS);
 #endif
-//Davinci Specific
-#if CASE_LIGHTS_PIN > 0
-    EEPROM::buselight = HAL::eprGetByte(EPR_LIGHT_ON);
-    EEPROM::bkeeplighton = HAL::eprGetByte(EPR_KEEP_LIGHT_ON);
-#endif
-#if BADGE_LIGHT_PIN > -1
-    EEPROM::busebadgelight = HAL::eprGetByte(EPR_BADGE_LIGHT_ON);
-#endif
-    UIDisplay::display_mode = HAL::eprGetByte(EPR_DISPLAY_MODE);
-    //need to be sure a valid value is set
-    if(!((UIDisplay::display_mode == ADVANCED_MODE)||(UIDisplay::display_mode == EASY_MODE)))UIDisplay::display_mode = ADVANCED_MODE;
-#if CASE_LIGHTS_PIN >= 0
-    WRITE(CASE_LIGHTS_PIN, byte(EEPROM::buselight));
-#endif // CASE_LIGHTS_PIN
-#if BADGE_LIGHT_PIN >= 0
-    WRITE(BADGE_LIGHT_PIN, byte(EEPROM::busebadgelight & EEPROM::buselight));
-#endif // BADGE_LIGHT_PIN
-#if defined(FIL_SENSOR1_PIN)
-    EEPROM::busesensor = HAL::eprGetByte(EPR_FIL_SENSOR_ON);
-#endif
-#if defined(TOP_SENSOR_PIN)
-    EEPROM::btopsensor = HAL::eprGetByte(EPR_TOP_SENSOR_ON);
-#endif
-#if ENABLE_WIFI
-    HAL::bwifion = HAL::eprGetByte(EPR_WIFI_ON);
-    if (HAL::bwifion) {
-            GCodeSource::registerSource(&serial1Source);
-            }
-        else {
-            GCodeSource::removeSource(&serial1Source);
-            }
-#endif
-#if FEATURE_BEEPER
-    HAL::enablesound = HAL::eprGetByte(EPR_SOUND_ON);
-#endif
-#if UI_AUTOLIGHTOFF_AFTER >0
-    EEPROM::timepowersaving = HAL::eprGetInt32(EPR_POWERSAVE_AFTER_TIME);
-    //new value do reset time
-    UIDisplay::ui_autolightoff_time = HAL::timeInMilliseconds() + EEPROM::timepowersaving;
-#endif	
-    EEPROM::ftemp_ext0 = HAL::eprGetFloat(EPR_TEMP_EXT0);
-    EEPROM::ftemp_ext1 = HAL::eprGetFloat(EPR_TEMP_EXT1);
-    EEPROM::ftemp_bed = HAL::eprGetFloat(EPR_TEMP_BED);
-    //EEPROM::ftemp_ext_pla = HAL::eprGetFloat(EPR_TEMP_EXT);
-    //EEPROM::ftemp_ext_abs = HAL::eprGetFloat(EPR_TEMP_EXT);
-    //EEPROM::ftemp_bed_pla = HAL::eprGetFloat(EPR_TEMP_BED);
-    //EEPROM::ftemp_bed_abs = HAL::eprGetFloat(EPR_TEMP_BED);
-    EEPROM::loading_feed_rate = HAL::eprGetFloat(EPR_LOAD_FEED_RATE);
-    EEPROM::unloading_feed_rate = HAL::eprGetFloat(EPR_UNLOAD_FEED_RATE);
-    EEPROM::unloading_loading_distance = HAL::eprGetFloat(EPR_UNLOAD_LOAD_DISTANCE);
 #if ENABLE_BACKLASH_COMPENSATION
     Printer::backlashX = HAL::eprGetFloat(EPR_BACKLASH_X);
     Printer::backlashY = HAL::eprGetFloat(EPR_BACKLASH_Y);
@@ -807,9 +599,7 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
         if(sum < 2.7 || sum > 3.3)
             Printer::resetTransformationMatrix(false);
         Printer::setAutolevelActive(HAL::eprGetByte(EPR_AUTOLEVEL_ACTIVE));
-        //Davinci Specific
-        //remove garbage output
-        //Com::printArrayFLN(Com::tTransformationMatrix,Printer::autolevelTransformation, 9, 6);
+        Com::printArrayFLN(Com::tTransformationMatrix,Printer::autolevelTransformation, 9, 6);
     }
 #endif
     if(includeExtruder)
@@ -875,15 +665,6 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
             HAL::eprSetFloat(EPR_Z_PROBE_Y2,Z_PROBE_Y2);
             HAL::eprSetFloat(EPR_Z_PROBE_X3,Z_PROBE_X3);
             HAL::eprSetFloat(EPR_Z_PROBE_Y3,Z_PROBE_Y3);
-            //Davinci Specific
-            HAL::eprSetFloat(EPR_MANUAL_LEVEL_X1, MANUAL_LEVEL_X1);
-            HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y1, MANUAL_LEVEL_Y1);
-            HAL::eprSetFloat(EPR_MANUAL_LEVEL_X2, MANUAL_LEVEL_X2);
-            HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y2, MANUAL_LEVEL_Y2);
-            HAL::eprSetFloat(EPR_MANUAL_LEVEL_X3, MANUAL_LEVEL_X3);
-            HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y3, MANUAL_LEVEL_Y3);
-            HAL::eprSetFloat(EPR_MANUAL_LEVEL_X4, MANUAL_LEVEL_X4);
-            HAL::eprSetFloat(EPR_MANUAL_LEVEL_Y4, MANUAL_LEVEL_Y4);
         }
         if(version < 4)
         {
@@ -1100,45 +881,12 @@ void EEPROM::writeSettings()
 #if EEPROM_MODE != 0
     writeByte(EPR_SELECTED_LANGUAGE,Com::tLanguage);
     writeLong(EPR_BAUDRATE, Com::tEPRBaudrate);
-//Davinci Specific
-    writeByte(EPR_DISPLAY_MODE, Com::tDisplayMode);
-#if CASE_LIGHTS_PIN > 0 
-    writeByte(EPR_LIGHT_ON,Com::tLightOn);
-    writeByte(EPR_KEEP_LIGHT_ON,Com::tKeepLightOn);
-#endif
-#if BADGE_LIGHT_PIN > -1
-    writeByte(EPR_BADGE_LIGHT_ON,Com::tBadgeLightOn);
-#endif
-#if defined(FIL_SENSOR1_PIN)
-    writeByte(EPR_FIL_SENSOR_ON,Com::tSensorOn);
-#endif
-#if defined(TOP_SENSOR_PIN)
-    writeByte(EPR_TOP_SENSOR_ON,Com::tTopsensorOn);
-#endif
-#if FEATURE_BEEPER
-    writeByte(EPR_SOUND_ON,Com::tSoundOn);
-#endif
-#if ENABLE_WIFI
-    writeByte(EPR_WIFI_ON,Com::tWifiOn);
-#endif
+#if NUM_EXTRUDER > 0
     writeFloat(EPR_PRINTING_DISTANCE, Com::tEPRFilamentPrinted);
+#endif
     writeLong(EPR_PRINTING_TIME, Com::tEPRPrinterActive);
     writeLong(EPR_MAX_INACTIVE_TIME, Com::tEPRMaxInactiveTime);
     writeLong(EPR_STEPPER_INACTIVE_TIME, Com::tEPRStopAfterInactivty);
-//Davinci Specific
-#if UI_AUTOLIGHTOFF_AFTER != 0
-    writeLong(EPR_POWERSAVE_AFTER_TIME,Com::tPowerSave);
-#endif
-    writeFloat(EPR_TEMP_EXT0,Com::tTempExt0);
-    writeFloat(EPR_TEMP_EXT1,Com::tTempExt1);
-    writeFloat(EPR_TEMP_BED,Com::tTempBed);
-    //writeFloat(EPR_TEMP_EXT,Com::tTempExtPLA);
-    //writeFloat(EPR_TEMP_EXT,Com::tTempExtABS);
-    //writeFloat(EPR_TEMP_BED,Com::tTempBedPLA);
-    //writeFloat(EPR_TEMP_BED,Com::tTempBedABS);
-    writeFloat(EPR_LOAD_FEED_RATE,Com::tLoadFeedRate);
-    writeFloat(EPR_UNLOAD_FEED_RATE,Com::tUnloadFeedRate);
-    writeFloat(EPR_UNLOAD_LOAD_DISTANCE,Com::tUnloadLoadDistance);
 //#define EPR_ACCELERATION_TYPE 1
 #if DRIVE_SYSTEM != DELTA
     writeFloat(EPR_XAXIS_STEPS_PER_MM, Com::tEPRXStepsPerMM, 4);
@@ -1218,15 +966,6 @@ writeFloat(EPR_X2AXIS_STEPS_PER_MM, Com::tEPRX2StepsPerMM, 4);
 #endif
 #endif
     writeFloat(EPR_Z_PROBE_Z_OFFSET, Com::tZProbeOffsetZ);
-    //Davinci Specific
-    writeFloat(EPR_MANUAL_LEVEL_X1, Com::tManualProbeX1);
-    writeFloat(EPR_MANUAL_LEVEL_Y1, Com::tManualProbeY1);
-    writeFloat(EPR_MANUAL_LEVEL_X2, Com::tManualProbeX2);
-    writeFloat(EPR_MANUAL_LEVEL_Y2, Com::tManualProbeY2);
-    writeFloat(EPR_MANUAL_LEVEL_X3, Com::tManualProbeX3);
-    writeFloat(EPR_MANUAL_LEVEL_Y3, Com::tManualProbeY3);
-    writeFloat(EPR_MANUAL_LEVEL_X4, Com::tManualProbeX4);
-    writeFloat(EPR_MANUAL_LEVEL_Y4, Com::tManualProbeY4);
 #if FEATURE_Z_PROBE
     writeFloat(EPR_Z_PROBE_HEIGHT, Com::tZProbeHeight);
     writeFloat(EPR_Z_PROBE_BED_DISTANCE, Com::tZProbeBedDitance);

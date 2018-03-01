@@ -53,17 +53,8 @@ void commandG201(GCode &code)
         id = code.P;
     if(id < 0) id = 0;
     if(id >= NUM_MOTOR_DRIVERS) id = 0;
-    //Davinci Specific
-    //allow to change speed
-    if(code.hasF())
-		{
-		if (TURNTABLE_MAX_SPEED > code.F) motorDrivers[id]->setdelayUS( 500000 / (code.F * motorDrivers[id]->getstepsPerMM()));
-		else motorDrivers[id]->setdelayUS( 500000 / (TURNTABLE_MAX_SPEED * motorDrivers[id]->getstepsPerMM()));
-		}
-	//allow to use mm (X) or degres (E)
-	if(!code.hasX() && !code.hasE()) return;
-	if (code.hasX())motorDrivers[id]->gotoPosition(code.X); //move in mm
-	else motorDrivers[id]->gotoPosition(TURNTABLE_MM_PER_DEG * code.E); //move in degres
+    if(!code.hasX()) return;
+    motorDrivers[id]->gotoPosition(code.X);
 }
 
 //G202 P<motorId> X<setpos>  - Mark current position as X

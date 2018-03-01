@@ -69,26 +69,6 @@ class GCodeSource {
 class Com
 {
     public:
-//Davinci Specific
-FSTRINGVAR(tReadInput)
-FSTRINGVAR(tReset)
-//FSTRINGVAR(tTempExtABS)
-FSTRINGVAR(tTempExt0)
-FSTRINGVAR(tTempExt1)
-//FSTRINGVAR(tTempBedABS)
-FSTRINGVAR(tTempBed)
-FSTRINGVAR(tLoadFeedRate)
-FSTRINGVAR(tUnloadFeedRate)
-FSTRINGVAR(tUnloadLoadDistance)
-FSTRINGVAR(tKeepLightOn)
-FSTRINGVAR(tSensorOn)
-FSTRINGVAR(tTopsensorOn)
-FSTRINGVAR(tLightOn)
-FSTRINGVAR(tBadgeLightOn)
-FSTRINGVAR(tSoundOn)
-FSTRINGVAR(tWifiOn)
-FSTRINGVAR(tPowerSave)
-FSTRINGVAR(tDisplayMode)
 FSTRINGVAR(tDebug)
 FSTRINGVAR(tFirmware)
 FSTRINGVAR(tOk)
@@ -97,8 +77,6 @@ FSTRINGVAR(tNAN)
 FSTRINGVAR(tINF)
 FSTRINGVAR(tError)
 FSTRINGVAR(tInfo)
-//ESP8266 Specific
-FSTRINGVAR(tStatus)
 FSTRINGVAR(tWarning)
 FSTRINGVAR(tResend)
 FSTRINGVAR(tEcho)
@@ -255,6 +233,7 @@ FSTRINGVAR(tAPIDClassic)
 FSTRINGVAR(tAPIDSome)
 FSTRINGVAR(tAPIDNone)
 FSTRINGVAR(tAPIDPessen)
+FSTRINGVAR(tAPIDTyreusLyben)
 FSTRINGVAR(tAPIDKp)
 FSTRINGVAR(tAPIDKi)
 FSTRINGVAR(tAPIDKd)
@@ -346,15 +325,6 @@ FSTRINGVAR(zZProbeBendingCorA)
 FSTRINGVAR(zZProbeBendingCorB)
 FSTRINGVAR(zZProbeBendingCorC)
 #endif
-//Davinci Specific, manual leveling
-FSTRINGVAR(tManualProbeX1)
-FSTRINGVAR(tManualProbeY1)
-FSTRINGVAR(tManualProbeX2)
-FSTRINGVAR(tManualProbeY2)
-FSTRINGVAR(tManualProbeX3)
-FSTRINGVAR(tManualProbeY3)
-FSTRINGVAR(tManualProbeX4)
-FSTRINGVAR(tManualProbeY4)
 #if FEATURE_AUTOLEVEL
 FSTRINGVAR(tAutolevelActive)
 #endif
@@ -506,6 +476,10 @@ FSTRINGVAR(tStartupGCode)
 #if NONLINEAR_SYSTEM
 FSTRINGVAR(tEPRSegmentsPerSecondPrint)
 FSTRINGVAR(tEPRSegmentsPerSecondTravel)
+#endif
+#ifdef DRV_TMC2130
+FSTRINGVAR(tTrinamicMotorCurrent)
+FSTRINGVAR(tTrinamicMicrostepMode)
 #endif
 
 static void cap(FSTRINGPARAM(text));
