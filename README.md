@@ -1,9 +1,9 @@
-##Da Vinci Firmware based on Repetier (0.92.10) Beta   
+## Da Vinci Firmware based on Repetier (0.92.10) Beta   
 ============================
 
 [![Join the chat at https://gitter.im/luc-github/Repetier-Firmware-0.92](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/luc-github/Repetier-Firmware-0.92?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)    
 
-Build Status: [![Build Status](https://travis-ci.org/luc-github/Repetier-Firmware-0.92.svg?branch=master)](https://travis-ci.org/luc-github/Repetier-Firmware-0.92)    
+Build Status: [![Build Status](https://travis-ci.org/luc-github/Repetier-Firmware-4-Davinci.svg?branch=master)](https://travis-ci.org/luc-github/RRepetier-Firmware-4-Davinci)    
     
       
 
@@ -31,11 +31,11 @@ Sources are [here](https://github.com/luc-github/Repetier-Firmware-0.92)
 The previous version (based on repetier v0.91) can be found [here](https://github.com/luc-github/Repetier-Firmware)   
 
 ***
-##Current Status
-####Beta - so far so good
+## Current Status
+#### Beta - so far so good
 
 ***
-##Installation
+## Installation
 1. With the machine off remove the back panel and short the jumper JP1 or J37 depending on model.  Some Boards do not have jumper pins exposed but can still be shorted with a conductive wire.
 2. Turn the machine on and wait a few seconds then turn it off again.  The machine will have been flashed removing the current stock firmware and allowing it to be detected as a normal arduino DUE. NOTE: Windows users may need to install drivers to detect the board.  Consult the Voltivo forums.   
 Note : points 1 and 2 are only needed to wipe the stock fw or a corrupted fw, for update they are not necessary.
@@ -78,7 +78,7 @@ Or a great video done by Daniel Gonos: https://www.youtube.com/watch?v=rjuCvlnpB
 Any installation issue ? check the <H3>[Frequent Asked Questions](https://github.com/luc-github/Repetier-Firmware-0.92/issues?utf8=%E2%9C%93&q=is%3Aclosed+label%3AFAQ+)</H3> the answer is in there.
 
 ***
-##TODO or Questions ?
+## TODO or Questions ?
 * [Check issue list](https://github.com/luc-github/Repetier-Firmware-0.92/issues)   
 Do not ask help on repetier github they do not support this FW / printer - please use this [github for issues](https://github.com/luc-github/Repetier-Firmware-0.92/issues)
 
@@ -87,7 +87,7 @@ Do not ask help on repetier github they do not support this FW / printer - pleas
 * [Documentation](https://github.com/luc-github/Repetier-Firmware-0.92/wiki) TBD - feel free to help 
 
 ***
-##Implemented
+## Implemented
 * 0.92.10 [Repetier](https://github.com/repetier/Repetier-Firmware) based   
 * Standard GCODE commands   
 * Single/Dual extruders support DaVinci 1.0/A, 2.0/A all generations, AiO but no scanner support because no application
@@ -115,7 +115,7 @@ Do not ask help on repetier github they do not support this FW / printer - pleas
 * More to come ....
 
 ***
-##How to test Watchdog ?
+## How to test Watchdog ?
 * Connect repetier host and send M281 command.    
 This will generate a timeout  after showing "Triggering watchdog. If activated, the printer will reset." in serial terminal.    
 If watchdog is enabled properly and working the printer will reset and restart.    
@@ -123,10 +123,10 @@ If not, you should have "Watchdog feature was not compiled into this version!" i
 
 
 ***
-##Current menu (not up to date):
+## Current menu (not up to date):
 Easy: <img src='https://cloud.githubusercontent.com/assets/8822552/4748170/bfa0b7e8-5a69-11e4-80b7-02b9c99fe122.png'>   
 Advanced :  <img src='https://cloud.githubusercontent.com/assets/8822552/4748932/bebab9e2-5a7c-11e4-8fea-cdbe3d70820c.png'>   
 
-##Donation:
+## Donation:
 Every support is welcome: [<img src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG_global.gif" border="0" alt="PayPal – The safer, easier way to pay online.">](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VT5LV38N4U3VQ)    
 Especially if need to buy new printer to add FW support.
