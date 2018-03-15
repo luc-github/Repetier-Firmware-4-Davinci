@@ -106,5 +106,5 @@ deploy:
   skip_cleanup: true
   file: $TRAVIS_BUILD_DIR/Davinci-$TRAVIS_TAG.zip
   on:
-    repo: luc-github/Repetier-Firmware-0.92
+    repo: luc-github/Repetier-Firmware-4-Davinci
     tags: true
