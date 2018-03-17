@@ -3,7 +3,7 @@
 
 [![Join the chat at https://gitter.im/luc-github/Repetier-Firmware-0.92](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/luc-github/Repetier-Firmware-0.92?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)    
 
-Build Status: [![Build Status](https://travis-ci.org/luc-github/Repetier-Firmware-4-Davinci.svg?branch=master)](https://travis-ci.org/luc-github/RRepetier-Firmware-4-Davinci)    
+Build Status: [![Build Status](https://travis-ci.org/luc-github/Repetier-Firmware-4-Davinci.svg?branch=master)](https://travis-ci.org/luc-github/Repetier-Firmware-4-Davinci)    
     
       
 
