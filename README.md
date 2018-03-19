@@ -20,8 +20,8 @@ The board can be easily exposed by removing the back panel of the printer secure
 
 Here are just a few of the benefits of using this firmware:
 
-* It works with host software such as [repetier host](http://repetier.com) and [OctoPrint](http://octoprint.org/) giving you full control of your hardware.
-* It works stand alone if you use a WIFI SD Card. 
+* It works with host software such as [repetier host](http://repetier.com) and [OctoPrint](http://octoprint.org/), cura, Simplify3D, etc... giving you full control of your hardware.
+* It works stand alone (not connected to PC) if you use a WIFI SD Card or SD card extender. 
 * It allows the use of clear ABS (by disabling optical sensors), as well as other arbitrary filament brands/types as temperatures can be controlled freely and there is no requirement for chiped cartridges. 
 
 You can find more info on the [Voltivo forum](http://voltivo.com/forum/davinci-firmware).  
