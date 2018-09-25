@@ -46,13 +46,14 @@ NOTE: You do not need to compile arduino from source these files are in the ardu
 5. Open the project file named repetier.ino located in src\ArduinoDUE\Repetier directory in the arduino IDE. 
 6. Modify the DAVINCI define in Configuration.h file to match your targeted Da Vinci.  See below.
 7. Under the tools menu select the board type as Arduino DUE (Native USB Port) and the proper port you have connected to the printer.  NOTE: You can usually find this out by looking at the tools -> port menu both before and after plugging in the printer to your computer's USB.
-8. Press the usual arduino compile and upload button.
+8. Press the usual arduino compile and upload button.    
 If done correctly you will see the arduino sketch compile successfully and output in the log showing the upload status.
-9. Once flash is done : restart printer   
-<H3> If you have black bars and printer is not detected properly, it means you did not do the point 4 properly [check: FAQ#172](https://github.com/luc-github/Repetier-Firmware-0.92/issues/172)</H3> so go back to point 4.
-10. After printer restarted <B>do not forget to send G-Code M502 then M500 </B>from repetier's Print Panel tab <B>or from the printer menu "Settings/Load Fail-Safe"</B> and accept to save the new eeprom settings. 
-11. When update is complete <B>you must calibrate your bed height!</B>Use manual bed leveling in menu
-12. Next you can calibrate your filament as usual, and second extruder offset if you have.
+9. Once flash is done : restart printer         
+<H3> If you have black bars and printer is not detected properly, it means you did not do the point 4 properly [check: FAQ#172](https://github.com/luc-github/Repetier-Firmware-0.92/issues/172)</H3> so go back to point 4.     
+
+10. After printer restarted <B>do not forget to send G-Code M502 then M500 </B>from repetier's Print Panel tab <B>or from the printer menu "Settings/Load Fail-Safe"</B> and accept to save the new eeprom settings.    
+11. When update is complete <B>you must calibrate your bed height!</B>Use manual bed leveling in menu   
+12. Next you can calibrate your filament as usual, and second extruder offset if you have.   
 
 For information on upgrading from or reverting to stock FW and other procedures please check [Da Vinci Voltivo forum](http://voltivo.com/forum/davinci).    
 <h4>:warning:There is no known way to revert to stock FW on 1.0A/2.0A/AiO until today.</h4>     
