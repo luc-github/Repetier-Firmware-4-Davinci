@@ -1141,6 +1141,11 @@ void PWM_TIMER_VECTOR ()
         if(pwm_pos_set[PWM_FAN1] == pwm_count_cooler && pwm_pos_set[PWM_FAN1] != COOLER_PWM_MASK) WRITE(FAN_PIN,0);
 #endif
     }
+    else
+    {
+    	// Explicitly set fan max speed while in kickstart interval.
+    	WRITE(FAN_PIN, 1);
+    }
 #endif
 #if FAN2_PIN > -1 && FEATURE_FAN2_CONTROL
 if(fan2Kickstart == 0)
