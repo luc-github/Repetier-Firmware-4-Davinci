@@ -6683,6 +6683,7 @@ case UI_ACTION_LOAD_FAILSAFE:
         case UI_ACTION_LANGUAGE_PL:
         case UI_ACTION_LANGUAGE_TR:
         case UI_ACTION_LANGUAGE_FI:
+        case UI_ACTION_LANGUAGE_JP:
             Com::selectLanguage(action - UI_ACTION_LANGUAGE_EN);
 #if EEPROM_MODE != 0
             EEPROM::storeDataIntoEEPROM(0); // remember for next start
