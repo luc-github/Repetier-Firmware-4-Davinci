@@ -6538,7 +6538,6 @@
 #define UI_TEXT_DBG_INFO_JP                   "Info:       %di"
 #define UI_TEXT_DBG_ERROR_JP                  "Errors:     %de"
 #define UI_TEXT_DBG_DRYRUN_JP                 "Dry run:    %dd"
-#define UI_TEXT_DBG_ENDSTOP_JP                "EndStop:%dp"
 #define UI_TEXT_OPS_OFF_JP                    "%O0 OPS Off"
 #define UI_TEXT_OPS_CLASSIC_JP                "%O1 OPS Classic"
 #define UI_TEXT_OPS_FAST_JP                   "%O2 OPS Fast"
@@ -6945,6 +6944,7 @@
 #define UI_TEXT_P1_L3_EASY_JP                 "Buffer:%oB"
 #endif
 #endif
+#define UI_TEXT_DBG_ENDSTOP_JP                "EndStop:%dp"
 #define UI_TEXT_MENU_SCANNER_JP               "½·¬Å°" // "Scanner"
 #define UI_TEXT_PREPARE_SCANNER_JP            "½·¬Å° ¼Þ­ÝËÞ" // "Prepare scan"
 #define UI_TEXT_LASER1_ONOFF_JP               "Laser Ð·Þ  :%PA" // "Right laser:%PA"
