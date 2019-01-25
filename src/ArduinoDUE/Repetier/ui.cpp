@@ -6726,6 +6726,8 @@ case UI_ACTION_LOAD_FAILSAFE:
 			break;
 			case 11:
 			UI_STATUS_UPD("\176Suomi");
+			case 12:
+			UI_STATUS_UPD("\176Japanese");
 			break;
 			}
             break;
