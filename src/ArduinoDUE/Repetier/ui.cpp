@@ -1783,6 +1783,8 @@ void UIDisplay::parse(const char *txt,bool ram)
              else if ((c2 == 'a') && (Com::selectedLanguage ==10) )addStringP("\003");
              //Finnish selected
              else if ((c2 == 'b') && (Com::selectedLanguage ==11) )addStringP("\003");
+             //Japanese selected
+             else if ((c2 == 'c') && (Com::selectedLanguage ==12) )addStringP("\003");
          break;
         case 'l':
             if(c2 == 'a') addInt(lastAction,4);
