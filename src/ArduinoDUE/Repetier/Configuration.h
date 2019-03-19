@@ -726,9 +726,12 @@ If you have a PTC thermistor instead of a NTC thermistor, keep the adc values in
 #define NUM_TEMPS_USERTHERMISTOR1 19
 #define USER_THERMISTORTABLE1 {{628,1280},{859,1200},{1113,1120},{1382,1040},{1660,960},{1938,880},{2211,800},{2473,720},{2718,640},{2945,560},{3148,480},{3328,400},{3482,320},{3613,240},{3722,160},{3815,80},{3895,0},{3972,-80},{4055,-160}}
 
-/** Number of entries in the user thermistor table 2. Set to 0 to disable it. */
-#define NUM_TEMPS_USERTHERMISTOR2 0
-#define USER_THERMISTORTABLE2  {}
+// Custom table for DaVinci 1.0 with ATC semitec 104GT-2 thermistor and parallel R1=10kohm,
+// series R2=4.7kohm with resistor values taken from http://www.atcsemitec.co.uk/gt-2-glass-thermistors.html.
+// Table is computed with included Dv10-E3Dv6-ThermistorTable.py.
+// Turn on by setting EXT0_TEMPSENSOR_TYPE to 7 above. 
+#define NUM_TEMPS_USERTHERMISTOR2 33
+#define USER_THERMISTORTABLE2 {{69,2400},{79,2320},{91,2240},{105,2160},{123,2080},{144,2000},{169,1920},{200,1840},{237,1760},{282,1680},{337,1600},{403,1520},{484,1440},{581,1360},{696,1280},{832,1200},{989,1120},{1165,1040},{1359,960},{1563,880},{1769,800},{1968,720},{2150,640},{2308,560},{2440,480},{2544,400},{2622,320},{2678,240},{2718,160},{2744,80},{2761,0},{2772,-80},{2779,-160}}
 
 #else
 #define NUM_TEMPS_USERTHERMISTOR0 28
