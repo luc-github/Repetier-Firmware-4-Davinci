@@ -1783,6 +1783,8 @@ void UIDisplay::parse(const char *txt,bool ram)
              else if ((c2 == 'a') && (Com::selectedLanguage ==10) )addStringP("\003");
              //Finnish selected
              else if ((c2 == 'b') && (Com::selectedLanguage ==11) )addStringP("\003");
+             //Japanese selected
+             else if ((c2 == 'c') && (Com::selectedLanguage ==12) )addStringP("\003");
          break;
         case 'l':
             if(c2 == 'a') addInt(lastAction,4);
@@ -6683,6 +6685,7 @@ case UI_ACTION_LOAD_FAILSAFE:
         case UI_ACTION_LANGUAGE_PL:
         case UI_ACTION_LANGUAGE_TR:
         case UI_ACTION_LANGUAGE_FI:
+        case UI_ACTION_LANGUAGE_JP:
             Com::selectLanguage(action - UI_ACTION_LANGUAGE_EN);
 #if EEPROM_MODE != 0
             EEPROM::storeDataIntoEEPROM(0); // remember for next start
@@ -6725,6 +6728,8 @@ case UI_ACTION_LOAD_FAILSAFE:
 			break;
 			case 11:
 			UI_STATUS_UPD("\176Suomi");
+			case 12:
+			UI_STATUS_UPD("\176Japanese");
 			break;
 			}
             break;

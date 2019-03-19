@@ -1963,6 +1963,7 @@ the language can be switched any time. */
 #define LANGUAGE_CZ_ACTIVE 0 // Czech
 #define LANGUAGE_PL_ACTIVE 0 // Polish
 #define LANGUAGE_TR_ACTIVE 0 // Turkish
+#define LANGUAGE_JP_ACTIVE 1 // Japanese
 
 /* Some displays loose their settings from time to time. Try uncommenting the 
 auto-repair function if this is the case. It is not supported for all display

@@ -325,6 +325,7 @@
 #define UI_ACTION_LANGUAGE_PL           1709
 #define UI_ACTION_LANGUAGE_TR           1710
 #define UI_ACTION_LANGUAGE_FI           1711
+#define UI_ACTION_LANGUAGE_JP           1712
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
