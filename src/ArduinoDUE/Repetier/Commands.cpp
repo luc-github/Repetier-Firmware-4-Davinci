@@ -2054,7 +2054,7 @@ void Commands::processMCode(GCode *com) {
             break;
         case 118: // M118 message to host
             if(com->hasString()) {
-                Com::printF(com->text);
+                Com::printFLN(com->text);
             }
             break;
         case 119: // M119
