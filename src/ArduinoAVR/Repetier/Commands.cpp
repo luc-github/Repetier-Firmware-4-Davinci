@@ -1311,7 +1311,7 @@ void Commands::processMCode(GCode *com)
     case 118: // M118 message to host
         if(com->hasString())
         {
-            UI_STATUS_UPD_RAM(com->text);
+             Com::printFLN(com->text);
         }
         break;
     case 119: // M119
