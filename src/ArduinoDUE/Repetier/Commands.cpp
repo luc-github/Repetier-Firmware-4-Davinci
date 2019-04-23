@@ -2052,6 +2052,11 @@ void Commands::processMCode(GCode *com) {
                 UI_STATUS_UPD_RAM(com->text);
             }
             break;
+        case 118: // M118 message to host
+            if(com->hasString()) {
+                Com::printF(com->text);
+            }
+            break;
         case 119: // M119
             Commands::waitUntilEndOfAllMoves();
             Endstops::update();
