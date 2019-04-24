@@ -683,8 +683,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
                 text = pos;
                 while (*pos)
                 {
-                    if((M != 117 && *pos==' ') || *pos=='*') break;
-                    if((M != 118 && *pos==' ') || *pos=='*') break;
+					if((M != 117 && M != 20 && M != 118 && *pos==' ') || *pos=='*') break;
                     pos++; // find a space as file name end
                 }
                 *pos = 0; // truncate filename by erasing space with nul, also skips checksum
