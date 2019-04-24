@@ -1308,6 +1308,12 @@ void Commands::processMCode(GCode *com)
             UI_STATUS_UPD_RAM(com->text);
         }
         break;
+    case 118: // M118 message to host
+        if(com->hasString())
+        {
+             Com::printFLN(com->text);
+        }
+        break;
     case 119: // M119
         Commands::waitUntilEndOfAllMoves();
 #if (X_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_X
