@@ -8,6 +8,7 @@ Build Status: [![Build Status](https://travis-ci.org/luc-github/Repetier-Firmwar
       
 
 This firmware is based on the popular repetier firmware for Da Vinci 1.0/A, 2.0 single fan, 2.0/A dual fans and also AiO (NB:scanner function is not supported so AiO will work like an 1.0A)   
+## do not use it on PRO or Jr or any Mini   
 If you change the board, currently DUE based are supported with RADDS, as well as Graphical screen and LCD with encoder, there are some sample configuration files provided for RADDS/DUE/GLCD using 1/128 step drivers.
 
 YOU MIGHT DAMAGE YOUR PRINTER OR VOID YOUR WARRANTY, DO IT ON YOUR OWN RISK. When it is possible on 1.0/2.0, currently on 1.0A/2.0A and AiO there is no way to revert to stock fw so be sure of what you are doing.
