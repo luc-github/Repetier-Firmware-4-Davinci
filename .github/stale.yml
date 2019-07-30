@@ -5,6 +5,7 @@ daysUntilClose: 2
 # Issues with these labels will never be considered stale
 exemptLabels:
   - Waiting to be processed
+  - Planned
 # Label to use when marking an issue as stale
 staleLabel: stale 
 # Comment to post when marking an issue as stale. Set to `false` to disable
