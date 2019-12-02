@@ -9,7 +9,7 @@ Build Status: [![Build Status](https://travis-ci.org/luc-github/Repetier-Firmwar
 
 This firmware is based on the popular repetier firmware for Da Vinci <B>1.0/A, 2.0 single fan, 2.0/A dual fans and also AiO</B> (NB:scanner function is not supported so AiO will work like an 1.0A)   
 ## Do not use it on PRO or Jr or Mini    
-Be noted original Repetier FW is not compatible wih Davinci board   
+Be noted original Repetier FW is not compatible wih Davinci boards   
  
 If you change the board, currently DUE based are supported with RADDS, as well as Graphical screen and LCD with encoder, there are some sample configuration files provided for RADDS/DUE/GLCD using 1/128 step drivers.
 
