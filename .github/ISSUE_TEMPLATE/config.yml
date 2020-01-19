@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: F.A.Q. (Frequent asked questions)
+    url: https://github.com/luc-github/Repetier-Firmware-4-Davinci/issues?utf8=%E2%9C%93&q=is%3Aclosed+label%3AFAQ+
+    about: The usual questions / problems meet and their solution  
+  - name: Gitter chat
+    url: https://gitter.im/luc-github/Repetier-Firmware-0.92
+    about: Join the gitter for support and discussion.
