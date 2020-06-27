@@ -31,44 +31,44 @@ extern bool benable_autoreturn;
 #if DAVINCI == 4
 //to avoid conflict between AiO home turn table sensor and Z-probe sensor
 void Check_turntable(){
-	
-	if (digitalRead(TABLE_HOME_PIN) == 0) {
-		getMotorDriver(0)->disable();
-		getMotorDriver(0)->setCurrentAs(0);
-		int32_t tmpspeed = getMotorDriver(0)->getdelayUS();
-		int32_t homespeed = 500000 / (TURNTABLE_HOME_SPEED * getMotorDriver(0)->getstepsPerMM());
-		getMotorDriver(0)->setdelayUS(homespeed);
-		getMotorDriver(0)->gotoPosition(10);
-		getMotorDriver(0)->setdelayUS(tmpspeed);
-	}
-	getMotorDriver(0)->enable();
+    
+    if (digitalRead(TABLE_HOME_PIN) == 0) {
+        getMotorDriver(0)->disable();
+        getMotorDriver(0)->setCurrentAs(0);
+        int32_t tmpspeed = getMotorDriver(0)->getdelayUS();
+        int32_t homespeed = 500000 / (TURNTABLE_HOME_SPEED * getMotorDriver(0)->getstepsPerMM());
+        getMotorDriver(0)->setdelayUS(homespeed);
+        getMotorDriver(0)->gotoPosition(10);
+        getMotorDriver(0)->setdelayUS(tmpspeed);
+    }
+    getMotorDriver(0)->enable();
 }
 //generic function to home a motor using max speed / max length and sensor pin
 bool Home_motor(int id, float speed, int sensorpin, float maxlength) {
-	//check if need to move
-	bool result = false; 
-	getMotorDriver(id)->enable();
-	if (digitalRead(sensorpin) == 0) return true;
-	//save current speed
-	int32_t tmpspeed = getMotorDriver(id)->getdelayUS();
-	int32_t homespeed = 500000 / (speed * getMotorDriver(id)->getstepsPerMM());
-	getMotorDriver(id)->disable();
-	getMotorDriver(id)->setCurrentAs(0);
-	getMotorDriver(id)->setdelayUS(homespeed);
-	//precision is 0.5 mm should be ok 
-	for (float pos = 0.5; pos < maxlength;pos=pos+0.5)
-		{
-		getMotorDriver(id)->gotoPosition(pos);
-		if (digitalRead(sensorpin) == 0) { //here we go so exit
-			result = true;
-			break;
-		   }
-		}
-	//lock motor and reverse speed to original and send status
-	getMotorDriver(id)->enable();
-	getMotorDriver(id)->setdelayUS(tmpspeed);
-	getMotorDriver(id)->setCurrentAs(0);
-	return result;
+    //check if need to move
+    bool result = false; 
+    getMotorDriver(id)->enable();
+    if (digitalRead(sensorpin) == 0) return true;
+    //save current speed
+    int32_t tmpspeed = getMotorDriver(id)->getdelayUS();
+    int32_t homespeed = 500000 / (speed * getMotorDriver(id)->getstepsPerMM());
+    getMotorDriver(id)->disable();
+    getMotorDriver(id)->setCurrentAs(0);
+    getMotorDriver(id)->setdelayUS(homespeed);
+    //precision is 0.5 mm should be ok 
+    for (float pos = 0.5; pos < maxlength;pos=pos+0.5)
+        {
+        getMotorDriver(id)->gotoPosition(pos);
+        if (digitalRead(sensorpin) == 0) { //here we go so exit
+            result = true;
+            break;
+           }
+        }
+    //lock motor and reverse speed to original and send status
+    getMotorDriver(id)->enable();
+    getMotorDriver(id)->setdelayUS(tmpspeed);
+    getMotorDriver(id)->setCurrentAs(0);
+    return result;
 }
 #endif
 
@@ -103,7 +103,7 @@ void Commands::commandLoop() {
                 code->popCurrentCommand();
             }
         } else {
-			GCode::keepAlive(Paused);
+            GCode::keepAlive(Paused);
             UI_MEDIUM;
         }
         Printer::defaultLoopActions();
@@ -220,7 +220,7 @@ void Commands::waitUntilEndOfAllMoves() {
     while(PrintLine::hasLines()) {
         GCode::readFromSerial();
         checkForPeriodicalActions(false);
-		GCode::keepAlive(Processing);
+        GCode::keepAlive(Processing);
         UI_MEDIUM;
     }
 }
@@ -277,7 +277,7 @@ void Commands::printCurrentPosition() {
 }
 
 void Commands::printTemperatures(bool showRaw) {
-	int error;
+    int error;
 #if NUM_EXTRUDER > 0
     float temp = Extruder::current->tempControl.currentTemperatureC;
 #if HEATED_BED_SENSOR_TYPE == 0
@@ -289,9 +289,9 @@ void Commands::printTemperatures(bool showRaw) {
 #if HAVE_HEATED_BED
     Com::printF(Com::tSpaceBColon,Extruder::getHeatedBedTemperature());
     Com::printF(Com::tSpaceSlash,heatedBedController.targetTemperatureC,0);
-	if((error = heatedBedController.errorState()) > 0) {
-		Com::printF(PSTR(" DB:"),error);
-	}
+    if((error = heatedBedController.errorState()) > 0) {
+        Com::printF(PSTR(" DB:"),error);
+    }
     if(showRaw) {
         Com::printF(Com::tSpaceRaw,(int)NUM_EXTRUDER);
         Com::printF(Com::tColon,(1023 << (2 - ANALOG_REDUCE_BITS)) - heatedBedController.currentTemperature);
@@ -311,19 +311,19 @@ void Commands::printTemperatures(bool showRaw) {
         Com::printF(Com::tSpaceAt,(int)i);
         Com::printF(Com::tColon,(pwm_pos[extruder[i].tempControl.pwmIndex])); // Show output of autotune when tuning!
 #endif
-		if((error = extruder[i].tempControl.errorState()) > 0) {
-			Com::printF(PSTR(" D"),(int)i);
-			Com::printF(Com::tColon,error);
-		}
+        if((error = extruder[i].tempControl.errorState()) > 0) {
+            Com::printF(PSTR(" D"),(int)i);
+            Com::printF(Com::tColon,error);
+        }
         if(showRaw) {
             Com::printF(Com::tSpaceRaw,(int)i);
             Com::printF(Com::tColon,(1023 << (2 - ANALOG_REDUCE_BITS)) - extruder[i].tempControl.currentTemperature);
         }
     }
 #elif NUM_EXTRUDER == 1
-	if((error = extruder[0].tempControl.errorState()) > 0) {
-		Com::printF(PSTR(" D0:"),error);
-	}
+    if((error = extruder[0].tempControl.errorState()) > 0) {
+        Com::printF(PSTR(" D0:"),error);
+    }
     if(showRaw) {
         Com::printF(Com::tSpaceRaw,(int)0);
         Com::printF(Com::tColon,(1023 << (2 - ANALOG_REDUCE_BITS)) - extruder[0].tempControl.currentTemperature);
@@ -1089,7 +1089,7 @@ void Commands::processGCode(GCode *com) {
         case 21: // G21 Units to mm
             Printer::unitIsInches = 0;
             break;
-        case 28: { //G28 Home all Axis one at a time		
+        case 28: { //G28 Home all Axis one at a time        
                 uint8_t homeAllAxis = (com->hasNoXYZ() && !com->hasE());
                 if(com->hasE())
                     Printer::currentPositionSteps[E_AXIS] = 0;
@@ -1103,7 +1103,7 @@ void Commands::processGCode(GCode *com) {
                 float actTemp[NUM_EXTRUDER];
                 for(int i = 0; i < NUM_EXTRUDER; i++)
                     actTemp[i] = extruder[i].tempControl.targetTemperatureC;
-	            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::max(EEPROM::zProbeHeight(),static_cast<float>(ZHOME_HEAT_HEIGHT)),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+                Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::max(EEPROM::zProbeHeight(),static_cast<float>(ZHOME_HEAT_HEIGHT)),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
                 Commands::waitUntilEndOfAllMoves();
 #if ZHOME_HEAT_ALL
                 for(int i = 0; i < NUM_EXTRUDER; i++) {
@@ -1121,9 +1121,9 @@ void Commands::processGCode(GCode *com) {
                 bool ok = true;
                 
 #if FEATURE_Z_PROBE
-				//Davinci Specific
+                //Davinci Specific
 #if DAVINCI == 4
-				Check_turntable();
+                Check_turntable();
 #endif
                 Printer::zprobe_ok = true;
                 Printer::startProbing(true);
@@ -1134,34 +1134,34 @@ void Commands::processGCode(GCode *com) {
                 Printer::moveTo(EEPROM::zProbeX1(), EEPROM::zProbeY1(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
                 sum = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
                 if(sum == ILLEGAL_Z_PROBE){
-					ok = false;
-					//Davinci Specific
-					Printer::Z_probe[0]=-2000;
-					}
-				else Printer::Z_probe[0]=sum;	
-				uid.refreshPage();
+                    ok = false;
+                    //Davinci Specific
+                    Printer::Z_probe[0]=-2000;
+                    }
+                else Printer::Z_probe[0]=sum;   
+                uid.refreshPage();
                 if(ok) {
                     Printer::moveTo(EEPROM::zProbeX2(), EEPROM::zProbeY2(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
                     last = Printer::runZProbe(false,false);
                     if(last == ILLEGAL_Z_PROBE) {
-						ok = false;
-						//Davinci Specific
-						Printer::Z_probe[1]=-2000;
-					}
-					else Printer::Z_probe[1]=last;
-					uid.refreshPage();
+                        ok = false;
+                        //Davinci Specific
+                        Printer::Z_probe[1]=-2000;
+                    }
+                    else Printer::Z_probe[1]=last;
+                    uid.refreshPage();
                     sum+= last;
                 }
                 if(ok) {
                     Printer::moveTo(EEPROM::zProbeX3(), EEPROM::zProbeY3(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
                     last = Printer::runZProbe(false,true);
                     if(last == ILLEGAL_Z_PROBE) {
-						ok = false;
-						//Davinci Specific
-						Printer::Z_probe[2]=-2000;
-					}
-					else Printer::Z_probe[2]=last;
-					uid.refreshPage();
+                        ok = false;
+                        //Davinci Specific
+                        Printer::Z_probe[2]=-2000;
+                    }
+                    else Printer::Z_probe[2]=last;
+                    uid.refreshPage();
                     sum += last;
                 }
                 if(ok) {
@@ -1178,7 +1178,7 @@ void Commands::processGCode(GCode *com) {
                         Printer::currentPositionSteps[Z_AXIS] = sum * Printer::axisStepsPerMM[Z_AXIS];
                         float zup = Printer::runZMaxProbe();
                         if(zup == ILLEGAL_Z_PROBE) {
-							ok = false;
+                            ok = false;
                         } else
                         Printer::zLength = zup + sum - ENDSTOP_Z_BACK_ON_HOME;
 #endif // DELTA
@@ -1198,14 +1198,14 @@ void Commands::processGCode(GCode *com) {
                 printCurrentPosition();
                 Printer::finishProbing();
                 Printer::feedrate = oldFeedrate;
-				if(!ok) {
-					//Davinci Specific
-					if (!(com->hasI()))GCode::fatalError(PSTR("G29 leveling failed!"));
-					else PrintLine::moveRelativeDistanceInSteps(0,0,10*Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[0],true,false);
-					Printer::zprobe_ok = false;
-					Printer::homeAxis(true, true, true);
-					break;
-				}
+                if(!ok) {
+                    //Davinci Specific
+                    if (!(com->hasI()))GCode::fatalError(PSTR("G29 leveling failed!"));
+                    else PrintLine::moveRelativeDistanceInSteps(0,0,10*Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[0],true,false);
+                    Printer::zprobe_ok = false;
+                    Printer::homeAxis(true, true, true);
+                    break;
+                }
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
 #if ZHOME_HEAT_ALL
                 for(int i = 0; i < NUM_EXTRUDER; i++) {
@@ -1223,18 +1223,18 @@ void Commands::processGCode(GCode *com) {
             }
             break;
         case 30: 
-			{ // G30 single probe set Z0
+            { // G30 single probe set Z0
 #if DAVINCI == 4
-				Check_turntable();
+                Check_turntable();
 #endif
                 uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
                 if(Printer::runZProbe(p & 1,p & 2) == ILLEGAL_Z_PROBE) {
-					GCode::fatalError(PSTR("G30 probing failed!"));
-					//Davinci Specific
-					Printer::zprobe_ok = false;
-					Printer::homeAxis(true, true, true);
-					break;
-				}
+                    GCode::fatalError(PSTR("G30 probing failed!"));
+                    //Davinci Specific
+                    Printer::zprobe_ok = false;
+                    Printer::homeAxis(true, true, true);
+                    break;
+                }
                 Printer::updateCurrentPosition(p & 1);
             }
             break;
@@ -1247,7 +1247,7 @@ void Commands::processGCode(GCode *com) {
             break;
 #if FEATURE_AUTOLEVEL
         case 32: // G32 Auto-Bed leveling
-		{
+        {
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
             float actTemp[NUM_EXTRUDER];
             for(int i = 0; i < NUM_EXTRUDER; i++)
@@ -1268,16 +1268,16 @@ void Commands::processGCode(GCode *com) {
 #endif
 #endif
 #if DAVINCI == 4
-				Check_turntable();
+                Check_turntable();
 #endif
             if(!runBedLeveling(com)) {
-				//Davinci Specific
-				if (!(com->hasI()))GCode::fatalError(PSTR("G32 leveling failed!"));
-				else PrintLine::moveRelativeDistanceInSteps(0,0,10*Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[0],true,false);
-				Printer::zprobe_ok = false;
-				Printer::homeAxis(true, true, true);
-				break;
-			}
+                //Davinci Specific
+                if (!(com->hasI()))GCode::fatalError(PSTR("G32 leveling failed!"));
+                else PrintLine::moveRelativeDistanceInSteps(0,0,10*Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[0],true,false);
+                Printer::zprobe_ok = false;
+                Printer::homeAxis(true, true, true);
+                break;
+            }
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
 #if ZHOME_HEAT_ALL
             for(int i = 0; i < NUM_EXTRUDER; i++) {
@@ -1312,7 +1312,7 @@ void Commands::processGCode(GCode *com) {
                     float actTemp[NUM_EXTRUDER];
                     for(int i = 0; i < NUM_EXTRUDER; i++)
                         actTemp[i] = extruder[i].tempControl.targetTemperatureC;
-		            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::max(EEPROM::zProbeHeight(),static_cast<float>(ZHOME_HEAT_HEIGHT)),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+                    Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::max(EEPROM::zProbeHeight(),static_cast<float>(ZHOME_HEAT_HEIGHT)),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
                     Commands::waitUntilEndOfAllMoves();
 #if ZHOME_HEAT_ALL
                     for(int i = 0; i < NUM_EXTRUDER; i++) {
@@ -1329,9 +1329,9 @@ void Commands::processGCode(GCode *com) {
 #endif
                     float oldFeedrate = Printer::feedrate;
                     if(!Printer::measureDistortion()) {
-						GCode::fatalError(PSTR("G33 failed!"));
-						break;
-					}
+                        GCode::fatalError(PSTR("G33 failed!"));
+                        break;
+                    }
                     Printer::feedrate = oldFeedrate;
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
 #if ZHOME_HEAT_ALL
@@ -1350,9 +1350,9 @@ void Commands::processGCode(GCode *com) {
 #endif
 //Davinci AiO specific
 #if DAVINCI == 4
-	case 50: //G50     : reset origin position
-		getMotorDriver(0)->setCurrentAs(0);
-		break;
+    case 50: //G50     : reset origin position
+        getMotorDriver(0)->setCurrentAs(0);
+        break;
 #endif
         case 90: // G90
             Printer::relativeCoordinateMode = false;
@@ -1543,16 +1543,16 @@ void Commands::processGCode(GCode *com) {
 #endif // DRIVE_SYSTEM
 #if FEATURE_Z_PROBE && NUM_EXTRUDER > 1
         case 134: 
-			{ // - G134 Px Sx Zx - Calibrate nozzle height difference (need z probe in nozzle!) Px = reference extruder, Sx = only measure extrude x against reference, Zx = add to measured z distance for Sx for correction.
+            { // - G134 Px Sx Zx - Calibrate nozzle height difference (need z probe in nozzle!) Px = reference extruder, Sx = only measure extrude x against reference, Zx = add to measured z distance for Sx for correction.
                 float z = com->hasZ() ? com->Z : 0;
                 int p = com->hasP() ? com->P : 0;
                 int s = com->hasS() ? com->S : -1;
-				int startExtruder = Extruder::current->id;
+                int startExtruder = Extruder::current->id;
                 extruder[p].zOffset = 0;
                 float mins[NUM_EXTRUDER],maxs[NUM_EXTRUDER],avg[NUM_EXTRUDER];
-				for(int i = 0; i < NUM_EXTRUDER; i++) { // silence unnecessary compiler warning
-				      avg[i] = 0;
-				}
+                for(int i = 0; i < NUM_EXTRUDER; i++) { // silence unnecessary compiler warning
+                      avg[i] = 0;
+                }
                 bool bigError = false;
 
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE
@@ -1586,7 +1586,7 @@ void Commands::processGCode(GCode *com) {
                     Extruder::selectExtruderById(p);
                     float refHeight = Printer::runZProbe(false,false);
                     if(refHeight == ILLEGAL_Z_PROBE) {
-						bigError = true;
+                        bigError = true;
                         break;
                     }
                     for(int i = 0; i < NUM_EXTRUDER && !bigError; i++) {
@@ -1615,15 +1615,15 @@ void Commands::processGCode(GCode *com) {
                     }
                 }
                 if(!bigError) {
-		            for(int i = 0; i < NUM_EXTRUDER; i++) {
-			            if(s >= 0 && i != s) continue;
-				        extruder[i].zOffset = avg[i] * Printer::axisStepsPerMM[Z_AXIS] / G134_REPETITIONS;
-					}
+                    for(int i = 0; i < NUM_EXTRUDER; i++) {
+                        if(s >= 0 && i != s) continue;
+                        extruder[i].zOffset = avg[i] * Printer::axisStepsPerMM[Z_AXIS] / G134_REPETITIONS;
+                    }
 #if EEPROM_MODE != 0
-	                EEPROM::storeDataIntoEEPROM(0);
+                    EEPROM::storeDataIntoEEPROM(0);
 #endif
-				}
-				Extruder::selectExtruderById(startExtruder);
+                }
+                Extruder::selectExtruderById(startExtruder);
                 Printer::finishProbing();
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE
 #if ZHOME_HEAT_ALL
@@ -1802,39 +1802,39 @@ void Commands::processMCode(GCode *com) {
             uid.executeAction(UI_ACTION_SD_STOP,true);
             break;
 #if DAVINCI == 4
-	   case 17:
-			getMotorDriver(0)->disable();
-			break;
-	   case 18:
-			getMotorDriver(0)->enable();
-			break;
-	   case 19: //M19 home motor
-			if (Home_motor(0, TURNTABLE_HOME_SPEED, TABLE_HOME_PIN, TURNTABLE_PERIMETER+1) ) Com::printFLN("Success Home motor ",0);
-			else Com::printFLN("Failed Home motor ",0);
-			break;
+       case 17:
+            getMotorDriver(0)->disable();
+            break;
+       case 18:
+            getMotorDriver(0)->enable();
+            break;
+       case 19: //M19 home motor
+            if (Home_motor(0, TURNTABLE_HOME_SPEED, TABLE_HOME_PIN, TURNTABLE_PERIMETER+1) ) Com::printFLN("Success Home motor ",0);
+            else Com::printFLN("Failed Home motor ",0);
+            break;
 //Davinci AiO Specific
 #if DAVINCI == 4 
-		case 60:
-		//M60 Tn is reading ldr as no ldr - just return fake value, hope 500 is ok
-			Com::printFLN("",500);
-			break;
+        case 60:
+        //M60 Tn is reading ldr as no ldr - just return fake value, hope 500 is ok
+            Com::printFLN("",500);
+            break;
 #endif
-		case 70:
-			if (com->hasT() && com->T == 1) WRITE(LASER2_PIN, LOW);
-			else WRITE(LASER1_PIN, LOW);
-			break;
-		case 71:
-			if (com->hasT() && com->T == 1) WRITE(LASER2_PIN, HIGH);
-			else WRITE(LASER1_PIN, HIGH);
-			break;
-		case 72:
-			if (com->hasT() && com->T == 1) WRITE(LED_LASER2_PIN, LOW);
-			else WRITE(LED_LASER1_PIN, LOW);
-			break;
-		case 73:
-			if (com->hasT() && com->T == 1) WRITE(LED_LASER2_PIN, HIGH);
-			else WRITE(LED_LASER1_PIN, HIGH);
-			break;
+        case 70:
+            if (com->hasT() && com->T == 1) WRITE(LASER2_PIN, LOW);
+            else WRITE(LASER1_PIN, LOW);
+            break;
+        case 71:
+            if (com->hasT() && com->T == 1) WRITE(LASER2_PIN, HIGH);
+            else WRITE(LASER1_PIN, HIGH);
+            break;
+        case 72:
+            if (com->hasT() && com->T == 1) WRITE(LED_LASER2_PIN, LOW);
+            else WRITE(LED_LASER1_PIN, LOW);
+            break;
+        case 73:
+            if (com->hasT() && com->T == 1) WRITE(LED_LASER2_PIN, HIGH);
+            else WRITE(LED_LASER1_PIN, HIGH);
+            break;
 #endif
         case 80: // M80 - ATX Power On
 #if PS_ON_PIN>-1
@@ -2041,11 +2041,11 @@ void Commands::processMCode(GCode *com) {
             break;
         case 114: // M114
             printCurrentPosition();
-			if(com->hasS() && com->S) {
-				Com::printF(PSTR("XS:"),Printer::currentPositionSteps[X_AXIS]);
-				Com::printF(PSTR(" YS:"),Printer::currentPositionSteps[Y_AXIS]);
-				Com::printFLN(PSTR(" ZS:"),Printer::currentPositionSteps[Z_AXIS]);
-			}
+            if(com->hasS() && com->S) {
+                Com::printF(PSTR("XS:"),Printer::currentPositionSteps[X_AXIS]);
+                Com::printF(PSTR(" YS:"),Printer::currentPositionSteps[Y_AXIS]);
+                Com::printFLN(PSTR(" ZS:"),Printer::currentPositionSteps[Z_AXIS]);
+            }
             break;
         case 117: // M117 message to lcd
             if(com->hasString()) {
@@ -2191,10 +2191,10 @@ void Commands::processMCode(GCode *com) {
                 Printer::setAutoretract(com->S != 0);
             break;
         case 220: // M220 S<Feedrate multiplier in percent>
-            changeFeedrateMultiply(com->getS(100));
+            changeFeedrateMultiply(com->getS(Printer::feedrateMultiply));
             break;
         case 221: // M221 S<Extrusion flow multiplier in percent>
-            changeFlowrateMultiply(com->getS(100));
+            changeFlowrateMultiply(com->getS(Printer::extrudeMultiply));
             break;
         case 226: // M226 P<pin> S<state 0/1> - Wait for pin getting state S
             if(!com->hasS() || !com->hasP())
@@ -2209,7 +2209,7 @@ void Commands::processMCode(GCode *com) {
                 }
                 do {
                     Commands::checkForPeriodicalActions(true);
-					GCode::keepAlive(WaitHeater);
+                    GCode::keepAlive(WaitHeater);
                 } while(HAL::digitalRead(com->P) != comp);
             }
             break;
@@ -2267,33 +2267,33 @@ void Commands::processMCode(GCode *com) {
 #if FEATURE_DITTO_PRINTING
         case 280: // M280
 #if DUAL_X_AXIS
-			Extruder::dittoMode = 0;
-			if(Extruder::current->id != 0)
-				Extruder::selectExtruderById(0);
-			Printer::homeXAxis();
-			if(com->hasS() && com->S > 0) {
-				Extruder::current = &extruder[1];
-				PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset + static_cast<int32_t>(Printer::xLength*0.5*Printer::axisStepsPerMM[X_AXIS]), 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, true);
-				Printer::currentPositionSteps[X_AXIS] = Printer::xMinSteps;
-				Extruder::current = &extruder[0];
-				Extruder::dittoMode = 1;
-			}
-			Printer::updateCurrentPosition(true);
-#else		
+            Extruder::dittoMode = 0;
+            if(Extruder::current->id != 0)
+                Extruder::selectExtruderById(0);
+            Printer::homeXAxis();
+            if(com->hasS() && com->S > 0) {
+                Extruder::current = &extruder[1];
+                PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset + static_cast<int32_t>(Printer::xLength*0.5*Printer::axisStepsPerMM[X_AXIS]), 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, true);
+                Printer::currentPositionSteps[X_AXIS] = Printer::xMinSteps;
+                Extruder::current = &extruder[0];
+                Extruder::dittoMode = 1;
+            }
+            Printer::updateCurrentPosition(true);
+#else       
             if(com->hasS()) { // Set ditto mode S: 0 = off, 1 = 1 extra extruder, 2 = 2 extra extruder, 3 = 3 extra extruders
                 Extruder::dittoMode = com->S;
             }
-#endif			
+#endif          
             break;
 #endif
         case 281: // Trigger watchdog
 #if FEATURE_WATCHDOG
             {
-				if(com->hasX()) {
-					HAL::stopWatchdog();
-					Com::printFLN(PSTR("Watchdog disabled"));
-					break;
-				}
+                if(com->hasX()) {
+                    HAL::stopWatchdog();
+                    Com::printFLN(PSTR("Watchdog disabled"));
+                    break;
+                }
                 Com::printInfoFLN(PSTR("Triggering watchdog. If activated, the printer will reset."));
                 Printer::kill(false);
                 HAL::delayMilliseconds(200); // write output, make sure heaters are off for safety
@@ -2331,7 +2331,7 @@ void Commands::processMCode(GCode *com) {
                 if(com->hasP()) cont = com->P;
                 if(com->hasR()) cycles = static_cast<int>(com->R);
                 if(cont >= HEATED_BED_INDEX) cont = HEATED_BED_INDEX;
-				if(cont < 0) cont = 0;
+                if(cont < 0) cont = 0;
                 tempController[cont]->autotunePID(temp,cont,cycles,com->hasX());
 #endif
             }
@@ -2563,22 +2563,22 @@ void Commands::processMCode(GCode *com) {
         case 603:
             Printer::setInterruptEvent(PRINTER_INTERRUPT_EVENT_JAM_DETECTED, true);
             break;
-		case 604:
-			{
-				uint8_t extId = Extruder::current->id;
-				if(com->hasT()) extId = com->T;
-				if(extId >= NUM_EXTRUDER)
-					break;
-				Extruder &ext = extruder[extId];
-				if(com->hasX())
-					ext.jamSlowdownSteps = static_cast<int16_t>(com->X);
-				if(com->hasY())
-					ext.jamErrorSteps = static_cast<int16_t>(com->Y);
-				if(com->hasZ())
-					ext.jamSlowdownTo = static_cast<uint8_t>(com->Z);
-			}
-			break;
-#endif			
+        case 604:
+            {
+                uint8_t extId = Extruder::current->id;
+                if(com->hasT()) extId = com->T;
+                if(extId >= NUM_EXTRUDER)
+                    break;
+                Extruder &ext = extruder[extId];
+                if(com->hasX())
+                    ext.jamSlowdownSteps = static_cast<int16_t>(com->X);
+                if(com->hasY())
+                    ext.jamErrorSteps = static_cast<int16_t>(com->Y);
+                if(com->hasZ())
+                    ext.jamSlowdownTo = static_cast<uint8_t>(com->Z);
+            }
+            break;
+#endif          
         case 907: { // M907 Set digital trimpot/DAC motor current using axis codes.
 #if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
                 // If "S" is specified, use that as initial default value, then update each axis w/ specific values as found later.
@@ -2630,22 +2630,22 @@ void Commands::processMCode(GCode *com) {
             break;
 #endif
 #if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
-		case 890: {
-			if(com->hasX() && com->hasY()) {
-				float c = Printer::bendingCorrectionAt(com->X,com->Y);
-				Com::printF(PSTR("Bending at ("),com->X);
-				Com::printF(PSTR(","),com->Y);
-				Com::printFLN(PSTR(") = "),c);
-			}
-		}
+        case 890: {
+            if(com->hasX() && com->hasY()) {
+                float c = Printer::bendingCorrectionAt(com->X,com->Y);
+                Com::printF(PSTR("Bending at ("),com->X);
+                Com::printF(PSTR(","),com->Y);
+                Com::printFLN(PSTR(") = "),c);
+            }
+        }
 break;
 #endif
-		case 999: // Stop fatal error take down
-			if(com->hasS())
-				GCode::fatalError(PSTR("Testing fatal error"));
-			else				
-				GCode::resetFatalError();
-			break;
+        case 999: // Stop fatal error take down
+            if(com->hasS())
+                GCode::fatalError(PSTR("Testing fatal error"));
+            else                
+                GCode::resetFatalError();
+            break;
         default:
             if(!EVENT_UNHANDLED_M_CODE(com) && Printer::debugErrors()) {
                 Com::printF(Com::tUnknownCommand);

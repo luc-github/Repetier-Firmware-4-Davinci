@@ -30,9 +30,9 @@
 
 //Version
 #define VERSION_MAJOR "1"
-#define VERSION_MINOR_YEAR "17"
-#define VERSION_MINOR_MONTH "08"
-#define VERSION_MINOR_DAY "01"
+#define VERSION_MINOR_YEAR "20"
+#define VERSION_MINOR_MONTH "06"
+#define VERSION_MINOR_DAY "27"
 #define VERSION_BUILD "1"
 
 //Davinci screen is not standard reprap it is WINSTAR 16x4
@@ -51,7 +51,7 @@
 #define UI_AUTOLIGHTOFF_AFTER 1
 #define ENABLE_CLEAN_DRIPBOX 1
 #define ENABLE_CLEAN_NOZZLE 1
-#define FEATURE_ENCODER	0
+#define FEATURE_ENCODER 0
 //ensure of some define if AiO
 #if DAVINCI==4
 //no drip box
@@ -451,11 +451,11 @@ cog. Direct drive extruder need 0. */
 #define EXT0_ADVANCE_BACKLASH_STEPS 0
 /** \brief Temperature to retract filament when extruder is heating up. Overridden if EEPROM activated.
 */
-#define EXT0_WAIT_RETRACT_TEMP 		150
+#define EXT0_WAIT_RETRACT_TEMP      150
 /** \brief Units (mm/inches) to retract filament when extruder is heating up. Overridden if EEPROM activated. Set
 to 0 to disable.
 */
-#define EXT0_WAIT_RETRACT_UNITS 	0
+#define EXT0_WAIT_RETRACT_UNITS     0
 
 /** You can run any GCODE command on extruder deselect/select. Separate multiple commands with a new line \n.
 That way you can execute some mechanical components needed for extruder selection or retract filament or whatever you need.
@@ -582,8 +582,8 @@ needed to move the motor cog in reverse direction until it hits the driving
 cog. Direct drive extruder need 0. */
 #define EXT1_ADVANCE_BACKLASH_STEPS 0
 
-#define EXT1_WAIT_RETRACT_TEMP 	150
-#define EXT1_WAIT_RETRACT_UNITS	0
+#define EXT1_WAIT_RETRACT_TEMP  150
+#define EXT1_WAIT_RETRACT_UNITS 0
 #define EXT1_SELECT_COMMANDS "M117 Extruder 2"
 #define EXT1_DESELECT_COMMANDS ""
 /** The extruder cooler is a fan to cool the extruder when it is heating. If you turn the extruder on, the fan goes on. */
