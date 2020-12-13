@@ -86,7 +86,7 @@ Any installation issue ? check the <H3>[Frequent Asked Questions](https://github
 * [Check issue list](https://github.com/luc-github/Repetier-Firmware-0.92/issues)   
 Do not ask help on repetier github they do not support this FW / printer - please use this [github for issues](https://github.com/luc-github/Repetier-Firmware-0.92/issues)
 
-* [FAQ](https://github.com/luc-github/Repetier-Firmware-0.92/issues?utf8=%E2%9C%93&q=is%3Aclosed+label%3AFAQ+)    
+* [FAQ](https://github.com/luc-github/Repetier-Firmware-4-Davinci/discussions?discussions_q=category%3AF.A.Q)    
 
 * [Documentation](https://github.com/luc-github/Repetier-Firmware-0.92/wiki) TBD - feel free to help 
 
