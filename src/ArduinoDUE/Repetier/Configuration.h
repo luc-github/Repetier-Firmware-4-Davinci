@@ -120,6 +120,7 @@
 #define MOTOR_DRIVER_1(var) StepperDriver<TURNTABLE_STEP_PIN,TURNTABLE_DIR_PIN,TURNTABLE_ENABLE_PIN,TURNTABLE_INVERT_DIR,TURNTABLE_INVERT_ENABLE> var(TURNTABLE_STEP_PER_MM,TURNTABLE_DEFAULT_SPEED)
 #endif
 
+
 /* Some words on units:
 
 From 0.80 onwards the units used are unified for easier configuration, watch out when transferring from older configs!
@@ -1119,6 +1120,46 @@ on this endstop.
 #define Y_MIN_POS 0
 #define Z_MIN_POS 0
 #endif
+
+//Unload Position
+#if DAVINCI==0 
+#define UNLOAD_POS_E0_X 0
+#define UNLOAD_POS_E0_Y 0
+#define UNLOAD_POS_E1_X 0
+#define UNLOAD_POS_E1_Y 0
+#endif
+#if DAVINCI==1 //cleaner of Davinci 1.0 is not in same position of 2.0 neither AiO
+#if MODEL == 0
+    #define UNLOAD_POS_E0_X X_MIN_POS
+    #define UNLOAD_POS_E0_Y Y_MIN_POS
+    #define UNLOAD_POS_E1_X X_MIN_POS
+    #define UNLOAD_POS_E1_Y Y_MIN_POS
+#else
+    #define UNLOAD_POS_E0_X X_MIN_POS
+    #define UNLOAD_POS_E0_Y Y_MIN_POS
+    #define UNLOAD_POS_E1_X X_MIN_POS
+    #define UNLOAD_POS_E1_Y Y_MIN_POS
+#endif
+#endif
+#if DAVINCI==2 || DAVINCI==3
+#if MODEL == 0
+    #define UNLOAD_POS_E0_X 199
+    #define UNLOAD_POS_E0_Y Y_MIN_POS
+    #define UNLOAD_POS_E1_X X_MIN_POS
+    #define UNLOAD_POS_E1_Y Y_MIN_POS
+#else
+    #define UNLOAD_POS_E0_X 195
+    #define UNLOAD_POS_E0_Y Y_MIN_POS+30
+    #define UNLOAD_POS_E1_X X_MIN_POS
+    #define UNLOAD_POS_E1_Y Y_MIN_POS+30
+#endif
+#endif
+#if DAVINCI==4
+#define UNLOAD_POS_E0_X 0
+#define UNLOAD_POS_E0_Y 0
+#endif
+
+
 
 // ##########################################################################################
 // ##                           Movement settings                                          ##
